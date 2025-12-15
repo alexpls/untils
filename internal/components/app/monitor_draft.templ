@@ -1,0 +1,147 @@
+package app
+
+import (
+	"github.com/alexpls/untils_go/internal/components"
+	"github.com/alexpls/untils_go/internal/db/sqlc"
+	"github.com/alexpls/untils_go/internal/monitor"
+	"github.com/alexpls/untils_go/internal/validation"
+	"fmt"
+)
+
+type MonitorDraftData struct {
+	Monitor          *sqlc.Monitor
+	ResultPreviews   []*sqlc.MonitorResult
+	ValidationErrors validation.ValidationErrors
+	Values           monitor.UpdateMonitorDraftParams
+}
+
+func (m MonitorDraftData) GetValidationErrors() validation.ValidationErrors {
+	return m.ValidationErrors
+}
+
+func monitorLoading(mon *sqlc.Monitor) bool {
+	return mon.Status == sqlc.MonitorStatusPreviewing || mon.Status == sqlc.MonitorStatusValidating
+}
+
+templ MonitorDraftPage(data MonitorDraftData) {
+	@appLayout() {
+		<div class="py-2 px-4 breadcrumbs text-sm border-b border-base-content/10">
+			<ul>
+				<li>
+					<a href="/app" class="link link-hover">Monitors</a>
+				</li>
+				<li>New</li>
+			</ul>
+		</div>
+
+		<div
+			class="container mx-auto"
+			id="monitor-draft"
+			if monitorLoading(data.Monitor) {
+				hx-get={fmt.Sprintf("/app/monitors/%d", data.Monitor.ID)}
+				hx-select="#monitor-draft"
+				hx-swap="outerHTML"
+				hx-trigger="every 1s"
+			}
+		>
+			@header("New monitor", nil) {}
+
+			<div class="m-4">
+				<form method="post" action={fmt.Sprintf("/app/monitors/%d", data.Monitor.ID)}>
+					<fieldset class="fieldset">
+						<legend class="fieldset-legend">
+							What would you like to monitor?
+						</legend>
+						<input
+							class={ "input", templ.KV("input-error", components.ValidationError(data, "Subject") != "") }
+							type="text"
+							placeholder="Type here"
+							name="Subject"
+							value={ data.Values.Subject }
+							if monitorLoading(data.Monitor) {
+								disabled
+							}
+						/>
+						if err := components.ValidationError(data, "Subject"); err != "" {
+							<p class="label text-error">{ err }</p>
+						} else {
+							<p class="label text-error">&nbsp;</p>
+						}
+					</fieldset>
+					<fieldset class="fieldset">
+						<legend class="fieldset-legend">Any instructions?</legend>
+						<textarea
+							class={ "textarea", templ.KV("textarea-error", components.ValidationError(data, "Instructions") != "") }
+							type="text"
+							placeholder="Type here"
+							name="Instructions"
+							if monitorLoading(data.Monitor) {
+								disabled
+							}
+						>{ data.Values.Instructions }</textarea>
+						if err := components.ValidationError(data, "Instructions"); err != "" {
+							<p class="label text-error">{ err }</p>
+						} else {
+							<p class="label text-error">&nbsp;</p>
+						}
+					</fieldset>
+					<button
+						class="btn btn-primary"
+						type="submit"
+						if monitorLoading(data.Monitor) {
+							disabled
+						}
+					>
+						Update
+					</button>
+				</form>
+
+				if data.Monitor.Status == sqlc.MonitorStatusRejected {
+					<div class="mt-4 p-4 bg-error/10 rounded border border-error/20">
+						<p class="text-error">
+							<span class="font-semibold">Rejected:</span>
+							if data.Monitor.RejectedReason.Valid {
+								{ data.Monitor.RejectedReason.String }
+							} else {
+								No reason provided
+							}
+						</p>
+					</div>
+				}
+			</div>
+
+			if data.Monitor.Status == sqlc.MonitorStatusReady {
+				<div class="m-4 p-4 bg-base-100 rounded border border-base-content/10">
+					<h3 class="font-semibold mb-3">Select a result to monitor</h3>
+					<ul class="list">
+						for _, preview := range data.ResultPreviews {
+							<li class="list-row flex items-center gap-4">
+								<div>
+									<button
+										hx-post={ fmt.Sprintf("/app/monitors/%d/activate", data.Monitor.ID) }
+										hx-swap="unset"
+										hx-select="unset"
+										hx-target="body"
+										hx-push-url="true"
+										class="btn btn-sm"
+									>
+										Pick
+									</button>
+								</div>
+								<div class="flex-1">
+									<div class="font-semibold">{ preview.Result }</div>
+									if preview.Date != nil && preview.DatePastTenseVerb.Valid {
+										<div class="text-sm text-base-content/60">
+											{ preview.DatePastTenseVerb.String }
+											{ components.FormatDate(ctx, *preview.Date) }
+										</div>
+									}
+								</div>
+							</li>
+						}
+					</ul>
+				</div>
+			}
+		</div>
+	}
+}

@@ -1,0 +1,41 @@
+package components
+
+templ Layout() {
+	<html>
+		<head>
+			<title>untils</title>
+			<link
+				rel="stylesheet"
+				type="text/css"
+				href={ AssetURL("css/output.css") }
+			/>
+			<script type="text/javascript" src={ AssetURL("js/app.js") }></script>
+		</head>
+
+		<body class="bg-base-300">
+			{ children... }
+		</body>
+	</html>
+}
+
+templ Page() {
+	@Layout() {
+		<header class="grid grid-cols-3 p-4">
+			<div class="text-start"></div>
+			<div class="text-center">
+				<a href="/" class="font-stretch-expanded">untils</a>
+			</div>
+			<div class="text-end text-sm">
+				if IsSignedIn(ctx) {
+					<a href="/app" class="link link-hover mr-2">Go to app</a>
+					<a href="/sign_out" class="link link-hover">Sign out</a>
+				} else {
+					<a href="/sign_in" class="link">Sign in</a>
+				}
+			</div>
+		</header>
+		<main>
+			{ children... }
+		</main>
+	}
+}

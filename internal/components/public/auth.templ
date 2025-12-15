@@ -1,0 +1,52 @@
+package public
+
+import "github.com/alexpls/untils_go/internal/components"
+
+type SignInData struct {
+	Failed bool
+	Email  string
+	Return string
+}
+
+templ SignInPage(data SignInData) {
+	@components.Page() {
+		<div class="mx-auto w-100 px-4">
+			if data.Failed {
+				<div class="alert alert-error mb-8">
+					Couldn't sign you in. Please check your email and password, then try again.
+				</div>
+			}
+			if data.Return != "" {
+				<div class="alert alert-error mb-8">Sign in to access that page.</div>
+			}
+			<form action="/sign_in" method="post" class="flex flex-col gap-y-4">
+				<input type="hidden" name="return" value={ data.Return }/>
+				<label class="floating-label">
+					<span>Email</span>
+					<input
+						class="input w-full"
+						id="email"
+						name="email"
+						type="email"
+						autocomplete="email"
+						value={ data.Email }
+						required
+					/>
+				</label>
+				<label class="floating-label">
+					<span>Password</span>
+					<input
+						class="input w-full"
+						id="password"
+						name="password"
+						type="password"
+						required
+					/>
+				</label>
+				<div>
+					<button class="btn" type="submit">Sign in</button>
+				</div>
+			</form>
+		</div>
+	}
+}

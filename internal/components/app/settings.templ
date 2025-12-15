@@ -1,0 +1,111 @@
+package app
+
+import "github.com/alexpls/untils_go/internal/validation"
+import "github.com/alexpls/untils_go/internal/pushover"
+import "github.com/alexpls/untils_go/internal/db/sqlc"
+import "github.com/alexpls/untils_go/internal/components"
+
+type SettingsViewModel struct {
+	ActiveIntegrations *sqlc.ActiveUserIntegrationsRow
+}
+
+templ Settings(data *SettingsViewModel) {
+	@appLayout() {
+		@header("Settings", nil)
+
+		<div class="container max-w-160 p-4 space-y-4">
+			<div class="bg-base-100 border rounded border-base-content/10">
+				<h2 class="text-xl font-semibold p-4 border-b border-base-content/10">Account</h2>
+
+				<div class="p-4">
+					Working on it...
+				</div>
+			</div>
+
+			<div class="bg-base-100 border rounded border-base-content/10">
+				<h2 class="text-xl font-semibold p-4 border-b border-base-content/10">Integrations</h2>
+
+				<ul class="list">
+					<li class="list-row justify-between flex items-center">
+						<div class="text-base flex items-center space-x-2">
+							<div>Pushover</div>
+
+							if data.ActiveIntegrations.PushoverActive {
+								<div class="badge badge-sm badge-outline badge-success">Active</div>
+							}
+						</div>
+						<div>
+							<a href="/app/settings/pushover" class="btn btn-sm btn-primary">Configure</a>
+						</div>
+					</li>
+				</ul>
+			</div>
+		</div>
+	}
+}
+
+type PushoverSettingsViewModel struct {
+	Token *sqlc.PushoverUserToken
+
+	Values pushover.CreateOrUpdateTokenParams
+	ValidationErrors validation.ValidationErrors
+}
+
+func (m PushoverSettingsViewModel) GetValidationErrors() validation.ValidationErrors {
+	return m.ValidationErrors
+}
+
+templ PushoverSettings(data *PushoverSettingsViewModel) {
+	@appLayout() {
+		<div class="py-2 px-4 breadcrumbs text-sm border-b border-base-content/10">
+			<ul>
+				<li>
+					<a href="/app/settings" class="link link-hover">Settings</a>
+				</li>
+				<li>Pushover</li>
+			</ul>
+		</div>
+
+		@header("Configure Pushover", nil)
+
+		<div class="container max-w-160 p-4 space-y-4">
+			if data.Token != nil {
+				<div role="alert" class="alert alert-info">
+					<span>
+						Your Pushover integration is configured with
+						token: {components.MaskSecret(data.Token.Token)}.
+					</span>
+				</div>
+
+				<button
+					class="btn btn-error"
+					hx-delete="/app/settings/pushover"
+					hx-target="body"
+				>
+					Reset token
+				</button>
+			} else {
+				<form method="post" action="/app/settings/pushover">
+					<fieldset class="fieldset">
+						<legend class="fieldset-legend">Pushover token</legend>
+						<input
+							class={"input", templ.KV("input-error", components.ValidationError(data, "Token") != "") }
+							type="text"
+							autocomplete="off"
+							placeholder="Enter token here"
+							name="Token"
+							value={data.Values.Token}
+						/>
+						if err := components.ValidationError(data, "Token"); err != "" {
+							<p class="label text-error">{ err }</p>
+						} else {
+							<p class="label text-error">&nbsp;</p>
+						}
+					</fieldset>
+
+					<button class="btn btn-primary" type="submit">Set token</button>
+				</form>
+			}
+		</div>
+	}
+}

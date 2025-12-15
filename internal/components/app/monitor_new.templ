@@ -1,0 +1,54 @@
+package app
+
+import (
+	"github.com/alexpls/untils_go/internal/components"
+	"github.com/alexpls/untils_go/internal/monitor"
+	"github.com/alexpls/untils_go/internal/validation"
+)
+
+type MonitorNewData struct {
+	ValidationErrors validation.ValidationErrors
+	Values           monitor.CreateMonitorParams
+}
+
+func (m MonitorNewData) GetValidationErrors() validation.ValidationErrors {
+	return m.ValidationErrors
+}
+
+templ MonitorNewPage(data MonitorNewData) {
+	@appLayout() {
+		<div class="py-2 px-4 breadcrumbs text-sm border-b border-base-content/10">
+			<ul>
+				<li>
+					<a href="/app" class="link link-hover">Monitors</a>
+				</li>
+				<li>New</li>
+			</ul>
+		</div>
+
+		<div class="container mx-auto">
+			@header("New monitor", nil) {}
+
+			<div class="m-4">
+				<form method="post" action="/app/monitors/new">
+					<fieldset class="fieldset">
+						<legend class="fieldset-legend">What would you like to monitor?</legend>
+						<input
+							class={ "input", templ.KV("input-error", components.ValidationError(data, "Subject") != "") }
+							type="text"
+							placeholder="Type here"
+							name="Subject"
+							value={ data.Values.Subject }
+						/>
+						if err := components.ValidationError(data, "Subject"); err != "" {
+							<p class="label text-error">{ err }</p>
+						} else {
+							<p class="label text-error">&nbsp;</p>
+						}
+					</fieldset>
+					<button class="btn btn-primary" type="submit">Create</button>
+				</form>
+			</div>
+		</div>
+	}
+}

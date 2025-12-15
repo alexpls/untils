@@ -1,0 +1,65 @@
+package main
+
+import (
+	"context"
+	"fmt"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+)
+
+func main() {
+	switch subcommand() {
+	case "serve":
+		globalCfg, c := parseServe()
+		a, appCloser := createApp(globalCfg)
+		defer appCloser()
+
+		addr := fmt.Sprintf(":%d", c.port)
+		srv := &http.Server{
+			Addr:    addr,
+			Handler: a.routes(),
+		}
+		srvErrs := make(chan error, 1)
+
+		go func() {
+			a.logger.Info("starting http server", "port", c.port)
+			srvErrs <- srv.ListenAndServe()
+		}()
+
+		shutdown := make(chan os.Signal, 1)
+		signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
+
+		select {
+		case err := <-srvErrs:
+			a.logger.Error("http server error", "error", err)
+			return
+		case sig := <-shutdown:
+			a.logger.Info("http server received shutdown signal", "signal", sig)
+
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+
+			if err := srv.Shutdown(ctx); err != nil {
+				a.logger.Error("graceful http shutdown failed", "error", err)
+				if err := srv.Close(); err != nil {
+					a.logger.Error("forcing http server close failed", "error", err)
+				}
+			}
+
+			a.logger.Info("http server stopped")
+		}
+	case "seed":
+		globalCfg := parseSeed()
+
+		a, appCloser := createApp(globalCfg)
+		defer appCloser()
+
+		a.seed()
+
+	default:
+		panic("unhandled subcommand")
+	}
+}

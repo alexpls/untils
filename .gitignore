@@ -1,0 +1,7 @@
+public/css/output.css
+public/js/*
+node_modules
+.DS_Store
+.env.dev
+/server
+dev.log

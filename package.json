@@ -1,0 +1,21 @@
+{
+  "name": "untils",
+  "private": "true",
+  "dependencies": {
+    "@tailwindcss/cli": "^4.1.16",
+    "daisyui": "^5.5.5",
+    "htmx.org": "^2.0.0",
+    "tailwindcss": "^4.1.16"
+  },
+  "devDependencies": {
+    "esbuild": "^0.27.0",
+    "prettier": "^3.7.4"
+  },
+  "scripts": {
+    "format": "prettier . --write",
+    "build-css": "tailwindcss -i ./assets/css/index.css -o ./public/css/output.css",
+    "watch-css": "tailwindcss -i ./assets/css/index.css -o ./public/css/output.css --watch",
+    "build-js": "esbuild assets/js/index.js --bundle --minify --outfile=public/js/app.js",
+    "watch-js": "esbuild assets/js/index.js --bundle --watch --outfile=public/js/app.js"
+  }
+}

@@ -1,0 +1,32 @@
+version: "2"
+sql:
+  - engine: "postgresql"
+    queries: "."
+    schema: "schema.sql"
+    gen:
+      go:
+        package: "sqlc"
+        out: "."
+        sql_package: "pgx/v5"
+        emit_result_struct_pointers: true
+        emit_params_struct_pointers: true
+        emit_methods_with_db_argument: true
+
+        overrides:
+          - db_type: "pg_catalog.timestamptz"
+            go_type: "time.Time"
+
+          - db_type: "pg_catalog.timestamptz"
+            go_type:
+              type: "time.Time"
+              pointer: true
+            nullable: true
+
+          - db_type: "public.citext"
+            go_type: "string"
+
+          - column: "monitor_results.citations"
+            go_type:
+              import: "github.com/alexpls/untils_go/internal/llm"
+              type: "Citations"
+              pointer: true

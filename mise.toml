@@ -1,0 +1,94 @@
+[tools]
+node = "latest"
+go = "latest"
+
+[settings]
+env_file = '.env.dev'
+
+[tasks.format]
+run = "go fmt ./... && npm run format"
+
+[tasks.dev-deps]
+run = '''
+go install -tags 'pgx5' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
+go install github.com/riverqueue/river/cmd/river@latest
+go install github.com/a-h/templ/cmd/templ@latest
+go install golang.org/x/tools/gopls@latest
+'''
+
+[tasks.dev-server]
+run = """
+templ generate --watch --proxy="http://localhost:4200" --cmd "go run ./cmd/server serve -env $ENV -db $PG_URL -xai-key $XAI_KEY -openai-key $OPENAI_KEY -pushover-key $PUSHOVER_KEY" | tee dev.log
+"""
+
+[tasks.dev-css]
+run = "npm run watch-css"
+
+[tasks.dev-js]
+run = "npm run watch-js"
+
+[tasks.dev]
+run = [
+	{ tasks = ["dev-server", "dev-css", "dev-js"] }
+]
+
+[tasks.db-reset]
+run = [
+    { task = "db-drop" },
+    { task = "db-create" },
+    { task = "db-migrate-up" },
+    { task = "db-seed" },
+    { task = "sqlc-generate" },
+]
+
+[tasks.db-create]
+run = '''
+psql "${PG_URL%/untils_dev}" -c "create database untils_dev;" || true
+psql "${PG_TEST_URL%/untils_test}" -c "create database untils_test;" || true
+'''
+
+[tasks.db-drop]
+run = '''
+psql "${PG_URL%/untils_dev}" -c "drop database untils_dev;" || true
+psql "${PG_TEST_URL%/untils_test}" -c "drop database untils_test;" || true
+'''
+
+[tasks.db-seed]
+run = 'go run ./cmd/server seed -env dev -db $PG_URL'
+
+[tasks.db-migrate-create]
+usage = '''
+arg "<name>" help="migration name"
+'''
+run = '''
+migrate create -ext sql -dir internal/db/migrations "${usage_name?}"
+'''
+
+[tasks.db-migrate-up]
+run = '''
+migrate -database ${PG_URL/postgresql/pgx5} -path internal/db/migrations up
+migrate -database ${PG_TEST_URL/postgresql/pgx5} -path internal/db/migrations up
+river migrate-up --database-url "${PG_URL}"
+river migrate-up --database-url "${PG_TEST_URL}"
+'''
+
+[tasks.db-migrate-down]
+run = '''
+migrate -database ${PG_URL/postgresql/pgx5} -path internal/db/migrations down
+migrate -database ${PG_TEST_URL/postgresql/pgx5} -path internal/db/migrations down
+river migrate-down --database-url "${PG_URL}"
+river migrate-down --database-url "${PG_TEST_URL}"
+'''
+
+[tasks.db-dump-schema]
+run = '''
+# stripping restrict tags because sqlc balks when processing them. remove once: https://github.com/sqlc-dev/sqlc/issues/4065 is fixed
+pg_dump "$PG_URL" --schema-only --no-owner --no-privileges --restrict-key stable \
+    | sed '/^\\restrict /d;/^\\unrestrict /d' \
+    > internal/db/sqlc/schema.sql
+'''
+
+[tasks.sqlc-generate]
+depends = ["db-dump-schema"]
+run = "cd internal/db/sqlc && sqlc generate"

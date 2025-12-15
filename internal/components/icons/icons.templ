@@ -1,0 +1,30 @@
+package icons
+
+// https://lucide.dev/icons/
+
+type IconParams struct {
+	Size int
+}
+
+func attrs(params IconParams) templ.Attributes {
+	if params.Size == 0 {
+		params.Size = 24
+	}
+
+	return templ.Attributes{
+		"width": params.Size,
+		"height": params.Size,
+	}
+}
+
+templ CircleCheck(params IconParams) {
+	<svg xmlns="http://www.w3.org/2000/svg" {attrs(params)...} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-icon lucide-circle-check"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+}
+
+templ Cog(params IconParams) {
+	<svg xmlns="http://www.w3.org/2000/svg" {attrs(params)...} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-cog-icon lucide-cog"><path d="M11 10.27 7 3.34"/><path d="m11 13.73-4 6.93"/><path d="M12 22v-2"/><path d="M12 2v2"/><path d="M14 12h8"/><path d="m17 20.66-1-1.73"/><path d="m17 3.34-1 1.73"/><path d="M2 12h2"/><path d="m20.66 17-1.73-1"/><path d="m20.66 7-1.73 1"/><path d="m3.34 17 1.73-1"/><path d="m3.34 7 1.73 1"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="12" r="8"/></svg>
+}
+
+templ LogOut(params IconParams) {
+	<svg xmlns="http://www.w3.org/2000/svg" {attrs(params)...} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out-icon lucide-log-out"><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>
+}
