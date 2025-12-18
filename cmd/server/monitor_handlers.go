@@ -243,11 +243,6 @@ func (a *app) monitorNotifierPost(w http.ResponseWriter, r *http.Request, u *sql
 	}
 
 	notifierType := sqlc.Notifier(r.FormValue("Type"))
-	if notifierType != sqlc.NotifierPushover {
-		a.badRequest(fmt.Errorf("invalid notifier type: %s", notifierType), w)
-		return
-	}
-
 	_, err := a.monitor.CreateMonitorNotifier(r.Context(), mon, notifierType)
 	if a.internalServerError(err, w) {
 		a.logger.Error("error creating monitor notifier", "error", err)
@@ -264,11 +259,6 @@ func (a *app) monitorNotifierDelete(w http.ResponseWriter, r *http.Request, u *s
 	}
 
 	notifierType := sqlc.Notifier(r.PathValue("type"))
-	if notifierType != sqlc.NotifierPushover {
-		a.badRequest(fmt.Errorf("invalid notifier type: %s", notifierType), w)
-		return
-	}
-
 	err := a.monitor.DeleteMonitorNotifier(r.Context(), mon, notifierType)
 	if a.internalServerError(err, w) {
 		a.logger.Error("error deleting monitor notifier", "error", err)

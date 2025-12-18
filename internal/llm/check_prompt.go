@@ -46,7 +46,7 @@ func (s *Service) CheckPrompt(ctx context.Context, input CheckPromptParams) (*Ch
 
 	in := responseInput(
 		fmt.Sprintf(checkPromptInstructions, input.PreviousResult),
-		fmt.Sprintf("Subject to check now: %s\bUser specified instructions: %s", input.Subject, input.Instructions),
+		fmt.Sprintf("Subject to check: %s\bUser specified instructions: %s", input.Subject, input.Instructions),
 	)
 
 	resp, err := s.client.Responses.New(ctx, responses.ResponseNewParams{

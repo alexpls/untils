@@ -104,3 +104,12 @@ func (a *app) pushoverSettingsDelete(w http.ResponseWriter, r *http.Request, use
 
 	http.Redirect(w, r, "/app/settings/pushover", http.StatusSeeOther)
 }
+
+func (a *app) emailSettingsGet(w http.ResponseWriter, r *http.Request, user *sqlc.User) {
+	data := appcomponents.EmailSettingsViewModel{
+		Email: user.Email,
+	}
+
+	appcomponents.EmailSettings(&data).Render(r.Context(), w)
+}
+

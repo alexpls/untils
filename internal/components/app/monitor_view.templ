@@ -12,7 +12,16 @@ type MonitorViewData struct {
 	Results            []*sqlc.MonitorResult
 	NextScheduledCheck *sqlc.MonitorCheck
 	Notifiers          []*sqlc.MonitorNotifier
-	ActiveIntegrations *sqlc.ActiveUserIntegrationsRow
+	ActiveIntegrations []*sqlc.ActiveUserIntegrationsRow
+}
+
+func (data MonitorViewData) integrationEnabled(name sqlc.Notifier) bool {
+	for _, notifier := range data.Notifiers {
+		if notifier.Type == name {
+			return true
+		}
+	}
+	return false
 }
 
 templ MonitorViewPage(data MonitorViewData) {
@@ -141,38 +150,31 @@ templ MonitorViewPage(data MonitorViewData) {
 	}
 }
 
-func hasPushoverNotifier(notifiers []*sqlc.MonitorNotifier) bool {
-	for _, n := range notifiers {
-		if n.Type == sqlc.NotifierPushover {
-			return true
-		}
-	}
-	return false
-}
-
 templ monitorNotifiers(data MonitorViewData) {
-	if hasPushoverNotifier(data.Notifiers) {
-		<div class="flex items-center justify-between">
-			<div class="flex items-center gap-x-2">
-				<div class="badge badge-sm badge-outline badge-success">Pushover</div>
-			</div>
-			<button
-				hx-target="body"
-				hx-delete={ fmt.Sprintf("/app/monitors/%d/notifiers/pushover", data.Monitor.ID) }
-				class="btn btn-xs btn-ghost text-error">
-				Remove
-			</button>
-		</div>
-	} else if data.ActiveIntegrations.PushoverActive {
-		<form hx-post={ fmt.Sprintf("/app/monitors/%d/notifiers", data.Monitor.ID) } hx-target="body">
-			<input type="hidden" name="Type" value="pushover"/>
-			<button type="submit" class="btn btn-xs btn-outline">
-				Add Pushover
-			</button>
-		</form>
-	} else {
-		<div class="text-sm text-base-content/60">
-			<a href="/app/settings/pushover" class="link">Configure Pushover</a> to enable notifications
-		</div>
-	}
+	<div>
+		for _, integration := range data.ActiveIntegrations {
+			if integration.Active {
+				if data.integrationEnabled(integration.Name) {
+					<div class="flex items-center justify-between">
+						<div class="flex items-center gap-x-2">
+							<div class="badge badge-sm badge-outline badge-success">{integration.DisplayName()}</div>
+						</div>
+						<button
+							hx-target="body"
+							hx-delete={ fmt.Sprintf("/app/monitors/%d/notifiers/%s", data.Monitor.ID, integration.Name) }
+							class="btn btn-xs btn-ghost text-error">
+							Remove
+						</button>
+					</div>
+				} else {
+					<form hx-post={ fmt.Sprintf("/app/monitors/%d/notifiers", data.Monitor.ID) } hx-target="body">
+						<input type="hidden" name="Type" value={integration.Name}/>
+						<button type="submit" class="btn btn-xs btn-outline">
+							Add {integration.Name}
+						</button>
+					</form>
+				}
+			}
+		}
+	</div>
 }

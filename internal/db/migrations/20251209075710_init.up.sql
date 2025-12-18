@@ -67,7 +67,7 @@ create table pushover_user_tokens (
     created_at timestamptz not null
 );
 
-create type notifier as enum('pushover');
+create type notifier as enum('email', 'pushover');
 
 create table monitor_notifiers (
     id bigserial primary key,

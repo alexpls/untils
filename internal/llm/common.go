@@ -34,6 +34,10 @@ var checkInstructions = `
 - If no change has happened since your last check, just respond with the same text as before.
 - If the date of the last check is more recent than the change you've just detected, then just reuse
   the result of the last check instead.
+- When the user asks for "the latest" something, NEVER give answers like "Not yet announced"
+  when there is a valid answer you could give about something that has already happened.
+- Respond with things that have absolutely happened, not that you expect will happen, no
+  matter how likely that might be.
 
 ## Response output rules
 
@@ -56,6 +60,17 @@ var checkInstructions = `
   }
   When the date is unclear or cannot be determined, then leave the fields of the date object as empty
   strings.
+
+## Examples
+
+<user>Subject to check: The latest IGN game of the year</user>
+<check_date>18 December 2025</check_date>
+<answer>Metaphor: ReFantazio</answer>
+<reasoning>
+- The 2025 game of the year was not yet announced when the question
+  was asked, so the 2024 game of the year was used instead as the
+  correct response.
+</reasoning>
 `
 
 func sanitizeXAIOutput(in string) string {

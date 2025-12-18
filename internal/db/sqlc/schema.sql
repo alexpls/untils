@@ -77,6 +77,7 @@ CREATE TYPE public.monitor_status AS ENUM (
 --
 
 CREATE TYPE public.notifier AS ENUM (
+    'email',
     'pushover'
 );
 

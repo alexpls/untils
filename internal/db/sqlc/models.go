@@ -106,6 +106,7 @@ func (ns NullMonitorStatus) Value() (driver.Value, error) {
 type Notifier string
 
 const (
+	NotifierEmail    Notifier = "email"
 	NotifierPushover Notifier = "pushover"
 )
 

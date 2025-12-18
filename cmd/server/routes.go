@@ -41,6 +41,7 @@ func (a *app) routes() http.Handler {
 	mux.HandleFunc("GET /app/settings/pushover", a.requireAuth(a.pushoverSettingsGet))
 	mux.HandleFunc("POST /app/settings/pushover", a.requireAuth(a.pushoverSettingsPost))
 	mux.HandleFunc("DELETE /app/settings/pushover", a.requireAuth(a.pushoverSettingsDelete))
+	mux.HandleFunc("GET /app/settings/email", a.requireAuth(a.emailSettingsGet))
 
 	// middleware
 	csrf := http.NewCrossOriginProtection()

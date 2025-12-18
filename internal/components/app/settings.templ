@@ -4,9 +4,10 @@ import "github.com/alexpls/untils_go/internal/validation"
 import "github.com/alexpls/untils_go/internal/pushover"
 import "github.com/alexpls/untils_go/internal/db/sqlc"
 import "github.com/alexpls/untils_go/internal/components"
+import "fmt"
 
 type SettingsViewModel struct {
-	ActiveIntegrations *sqlc.ActiveUserIntegrationsRow
+	ActiveIntegrations []*sqlc.ActiveUserIntegrationsRow
 }
 
 templ Settings(data *SettingsViewModel) {
@@ -26,18 +27,20 @@ templ Settings(data *SettingsViewModel) {
 				<h2 class="text-xl font-semibold p-4 border-b border-base-content/10">Integrations</h2>
 
 				<ul class="list">
-					<li class="list-row justify-between flex items-center">
-						<div class="text-base flex items-center space-x-2">
-							<div>Pushover</div>
+					for _, integration := range data.ActiveIntegrations {
+						<li class="list-row justify-between flex items-center">
+							<div class="text-base flex items-center space-x-2">
+								<div>{integration.DisplayName()}</div>
 
-							if data.ActiveIntegrations.PushoverActive {
-								<div class="badge badge-sm badge-outline badge-success">Active</div>
-							}
-						</div>
-						<div>
-							<a href="/app/settings/pushover" class="btn btn-sm btn-primary">Configure</a>
-						</div>
-					</li>
+								if integration.Active {
+									<div class="badge badge-sm badge-outline badge-success">Active</div>
+								}
+							</div>
+							<div>
+								<a href={fmt.Sprintf("/app/settings/%s", integration.Name)} class="btn btn-sm btn-primary">Configure</a>
+							</div>
+						</li>
+					}
 				</ul>
 			</div>
 		</div>
@@ -109,3 +112,28 @@ templ PushoverSettings(data *PushoverSettingsViewModel) {
 		</div>
 	}
 }
+
+type EmailSettingsViewModel struct {
+	Email string
+}
+
+templ EmailSettings(data *EmailSettingsViewModel) {
+	@appLayout() {
+		<div class="py-2 px-4 breadcrumbs text-sm border-b border-base-content/10">
+			<ul>
+				<li>
+					<a href="/app/settings" class="link link-hover">Settings</a>
+				</li>
+				<li>Email</li>
+			</ul>
+		</div>
+
+		@header("Configure Email", nil)
+
+		<div class="container max-w-160 p-4 space-y-4">
+			Nothing to configure. Emails will be sent to your account
+			email address: <strong>{data.Email}</strong>.
+		</div>
+	}
+}
+

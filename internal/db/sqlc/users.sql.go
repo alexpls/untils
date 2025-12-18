@@ -10,27 +10,42 @@ import (
 	"time"
 )
 
-const activeUserIntegrations = `-- name: ActiveUserIntegrations :one
+const activeUserIntegrations = `-- name: ActiveUserIntegrations :many
 select
+    'pushover'::notifier as name,
     exists(
         select 1 from pushover_user_tokens
         where user_id = $1
-    ) as pushover_active,
-     -- hack to make sqlc generate a struct for this instead of returning single value.
-     -- remove after adding a second value.
-    false as placeholder
+    ) as active
+union
+select
+    'email'::notifier as name,
+    true as active
 `
 
 type ActiveUserIntegrationsRow struct {
-	PushoverActive bool
-	Placeholder    bool
+	Name   Notifier
+	Active bool
 }
 
-func (q *Queries) ActiveUserIntegrations(ctx context.Context, db DBTX, userID int64) (*ActiveUserIntegrationsRow, error) {
-	row := db.QueryRow(ctx, activeUserIntegrations, userID)
-	var i ActiveUserIntegrationsRow
-	err := row.Scan(&i.PushoverActive, &i.Placeholder)
-	return &i, err
+func (q *Queries) ActiveUserIntegrations(ctx context.Context, db DBTX, userID int64) ([]*ActiveUserIntegrationsRow, error) {
+	rows, err := db.Query(ctx, activeUserIntegrations, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []*ActiveUserIntegrationsRow
+	for rows.Next() {
+		var i ActiveUserIntegrationsRow
+		if err := rows.Scan(&i.Name, &i.Active); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const createUser = `-- name: CreateUser :one
