@@ -6,8 +6,10 @@ import (
 	"fmt"
 
 	"github.com/alexpls/untils_go/internal/db/sqlc"
+	"github.com/alexpls/untils_go/internal/email"
 	"github.com/alexpls/untils_go/internal/pushover"
 	"github.com/jackc/pgx/v5"
+	"golang.org/x/sync/errgroup"
 )
 
 func (s *Service) ListMonitorNotifiers(ctx context.Context, mon *sqlc.Monitor) ([]*sqlc.MonitorNotifier, error) {
@@ -62,16 +64,46 @@ func (s *Service) SendNotifications(ctx context.Context, params SendNotification
 		return fmt.Errorf("listing monitor notifiers: %w", err)
 	}
 
+	g, ctx := errgroup.WithContext(ctx)
+
 	for _, notifier := range notifiers {
+		// TODO: remove repetitive code in favor of interface abstraction
 		switch notifier.Type {
+		case sqlc.NotifierEmail:
+			g.Go(func() error {
+				if err := s.sendEmailNotification(ctx, params); err != nil {
+					return fmt.Errorf("sending email notification: %w", err)
+				}
+				return nil
+			})
 		case sqlc.NotifierPushover:
-			if err := s.sendPushoverNotification(ctx, params); err != nil {
-				return fmt.Errorf("sending pushover notification: %w", err)
-			}
+			g.Go(func() error {
+				if err := s.sendPushoverNotification(ctx, params); err != nil {
+					return fmt.Errorf("sending pushover notification: %w", err)
+				}
+				return nil
+			})
 		}
 	}
 
+	if err := g.Wait(); err != nil {
+		return err
+	}
+
 	return nil
+}
+
+func (s *Service) sendEmailNotification(ctx context.Context, params SendNotificationsParams) error {
+	u, err := s.queries.GetUser(ctx, s.pool, params.Monitor.UserID)
+	if err != nil {
+		return fmt.Errorf("getting user: %w", err)
+	}
+
+	return s.emailService.Send(ctx, &email.SendParams{
+		Recipient: u.Email,
+		Subject: fmt.Sprintf("Changed monitor: %s", params.Monitor.Subject.String),
+		Body: params.Message,
+	})
 }
 
 func (s *Service) sendPushoverNotification(ctx context.Context, params SendNotificationsParams) error {

@@ -4,6 +4,7 @@ import (
 	"log/slog"
 
 	"github.com/alexpls/untils_go/internal/db/sqlc"
+	"github.com/alexpls/untils_go/internal/email"
 	"github.com/alexpls/untils_go/internal/llm"
 	"github.com/alexpls/untils_go/internal/pushover"
 	"github.com/go-playground/validator/v10"
@@ -19,6 +20,7 @@ type Service struct {
 	river          *river.Client[pgx.Tx]
 	logger         *slog.Logger
 	pushoverClient *pushover.Client // TODO: temporary, this should not be talking directly to pushover but rather a more generic notification service
+	emailService *email.Service // TODO: ditto above TODO, but this time for email
 	validate       *validator.Validate
 }
 

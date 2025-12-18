@@ -9,6 +9,7 @@ import (
 	"github.com/alexpls/untils_go/internal/auth"
 	"github.com/alexpls/untils_go/internal/db"
 	"github.com/alexpls/untils_go/internal/db/sqlc"
+	"github.com/alexpls/untils_go/internal/email"
 	"github.com/alexpls/untils_go/internal/llm"
 	"github.com/alexpls/untils_go/internal/monitor"
 	"github.com/alexpls/untils_go/internal/must"
@@ -38,6 +39,7 @@ type app struct {
 	river          *river.Client[pgx.Tx]
 	pushoverClient *pushover.Client
 	pushoverStore  *pushover.Store
+	emailService *email.Service
 	validate       *validator.Validate
 	userSettings   *usersettings.Service
 }
@@ -104,6 +106,8 @@ func createApp(c *config) (*app, func()) {
 
 	a.pushoverStore = pushover.NewStore(a.db, a.queries, a.validate)
 	a.pushoverClient = pushover.NewPushoverClient(c.pushoverKey, a.logger.With("source", "pushover"), a.pushoverStore)
+
+	a.emailService = email.NewService()
 
 	a.monitor = monitor.NewService(a.db, a.queries, a.llm, a.river, a.logger.With("source", "monitor"), a.pushoverClient, a.validate)
 
