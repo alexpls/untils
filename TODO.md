@@ -1,7 +1,6 @@
 ## To do
 
 - [ ] Feature: Allow switching API providers between x.ai and OpenAI on startup
-- [ ] Feature: User settings (timezone, notification integrations config)
 - [ ] Feature: User signup
 - [ ] Feature: Monitors list page pagination
 - [ ] Improvement: Feed back more of the different checks to the LLM, to help give a better answer
@@ -20,6 +19,7 @@
 
 ## Done
 
+- [x] Feature: User settings (timezone, notification integrations config)
 - [x] Improvement: Figure out html template formatting
 - [x] Feature: URL for result is cited and clickable
 - [x] Feature: Delete monitor

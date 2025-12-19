@@ -39,7 +39,7 @@ type app struct {
 	river          *river.Client[pgx.Tx]
 	pushoverClient *pushover.Client
 	pushoverStore  *pushover.Store
-	emailService *email.Service
+	emailService   *email.Service
 	validate       *validator.Validate
 	userSettings   *usersettings.Service
 }
@@ -99,7 +99,7 @@ func createApp(c *config) (*app, func()) {
 	)
 	a.llm = llm.NewService(&llmClient, a.logger.With("source", "llm"))
 
-	a.auth = auth.NewAuth(a.logger.With("source", "auth"), a.db, a.queries)
+	a.auth = auth.NewAuth(a.logger.With("source", "auth"), a.db, a.queries, a.validate)
 
 	a.sessionManager = session.NewManager(a.db, a.queries, a.logger.With("source", "session"))
 	a.sessionManager.StartTrim()

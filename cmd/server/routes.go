@@ -38,6 +38,7 @@ func (a *app) routes() http.Handler {
 
 	// settings
 	mux.HandleFunc("GET /app/settings", a.requireAuth(a.settingsGet))
+	mux.HandleFunc("POST /app/settings/timezone", a.requireAuth(a.updateTimezonePost))
 	mux.HandleFunc("GET /app/settings/pushover", a.requireAuth(a.pushoverSettingsGet))
 	mux.HandleFunc("POST /app/settings/pushover", a.requireAuth(a.pushoverSettingsPost))
 	mux.HandleFunc("DELETE /app/settings/pushover", a.requireAuth(a.pushoverSettingsDelete))
@@ -46,7 +47,11 @@ func (a *app) routes() http.Handler {
 	// middleware
 	csrf := http.NewCrossOriginProtection()
 	sess := a.sessionManager
-	return csrf.Handler(a.logRequests(sess.Handler(a.setUserContext(mux))))
+
+	return applyMiddleware(mux,
+		csrf.Handler, a.logRequests, a.setTimezoneContext,
+		sess.Handler, a.setUserContext,
+	)
 }
 
 func (a *app) appHandler(w http.ResponseWriter, r *http.Request, _ *sqlc.User) {

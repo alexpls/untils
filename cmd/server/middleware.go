@@ -46,6 +46,24 @@ func (a *app) setUserContext(next http.Handler) http.Handler {
 	})
 }
 
+func (a *app) setTimezoneContext(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var tz string
+
+		if cookie, err := r.Cookie("tz"); err == nil && cookie.Value != "" {
+			if val, err := url.QueryUnescape(cookie.Value); err == nil {
+				if loc, err := time.LoadLocation(val); err == nil {
+					tz = loc.String()
+				} else {
+					a.logger.Warn("invalid timezone in cookie", "tz", val)
+				}
+			}
+		}
+
+		next.ServeHTTP(w, r.WithContext(reqcontext.ContextWithTimezone(r.Context(), tz)))
+	})
+}
+
 func (a *app) logRequests(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
@@ -76,4 +94,11 @@ type statusRecorder struct {
 func (sr *statusRecorder) WriteHeader(code int) {
 	sr.status = code
 	sr.ResponseWriter.WriteHeader(code)
+}
+
+func applyMiddleware(h http.Handler, handlers ...func(http.Handler) http.Handler) http.Handler {
+	for i := len(handlers) - 1; i >= 0; i-- {
+		h = handlers[i](h)
+	}
+	return h
 }

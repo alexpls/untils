@@ -117,3 +117,29 @@ func (q *Queries) GetUserByEmail(ctx context.Context, db DBTX, email string) (*U
 	)
 	return &i, err
 }
+
+const updateUserTimezone = `-- name: UpdateUserTimezone :one
+update users
+set timezone = $1, updated_at = now()
+where id = $2
+returning id, email, password_hash, timezone, created_at, updated_at
+`
+
+type UpdateUserTimezoneParams struct {
+	Timezone string
+	UserID   int64
+}
+
+func (q *Queries) UpdateUserTimezone(ctx context.Context, db DBTX, arg *UpdateUserTimezoneParams) (*User, error) {
+	row := db.QueryRow(ctx, updateUserTimezone, arg.Timezone, arg.UserID)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.PasswordHash,
+		&i.Timezone,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return &i, err
+}

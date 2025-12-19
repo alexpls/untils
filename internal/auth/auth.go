@@ -9,22 +9,25 @@ import (
 
 	"github.com/alexedwards/argon2id"
 	"github.com/alexpls/untils_go/internal/db/sqlc"
+	"github.com/go-playground/validator/v10"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
 type Auth struct {
-	logger  *slog.Logger
-	db      sqlc.DBTX
-	queries *sqlc.Queries
+	logger   *slog.Logger
+	db       sqlc.DBTX
+	queries  *sqlc.Queries
+	validate *validator.Validate
 }
 
-func NewAuth(logger *slog.Logger, db sqlc.DBTX, queries *sqlc.Queries) *Auth {
+func NewAuth(logger *slog.Logger, db sqlc.DBTX, queries *sqlc.Queries, validate *validator.Validate) *Auth {
 	return &Auth{
-		logger:  logger,
-		db:      db,
-		queries: queries,
+		logger:   logger,
+		db:       db,
+		queries:  queries,
+		validate: validate,
 	}
 }
 
@@ -87,4 +90,23 @@ func (a *Auth) GetUser(ctx context.Context, id int64) (*sqlc.User, error) {
 		return nil, fmt.Errorf("finding user by id: %w", err)
 	}
 	return user, nil
+}
+
+type UpdateUserTimezoneParams struct {
+	Timezone string `validate:"required,timezone"`
+}
+
+func (a *Auth) UpdateUserTimezone(ctx context.Context, id int64, params UpdateUserTimezoneParams) error {
+	if err := a.validate.Struct(params); err != nil {
+		return err
+	}
+
+	_, err := a.queries.UpdateUserTimezone(ctx, a.db, &sqlc.UpdateUserTimezoneParams{
+		UserID:   id,
+		Timezone: params.Timezone,
+	})
+	if err != nil {
+		return fmt.Errorf("updating user timezone: %w", err)
+	}
+	return nil
 }

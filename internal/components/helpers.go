@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/alexpls/untils_go/internal/db/sqlc"
 	"github.com/alexpls/untils_go/internal/reqcontext"
 	"github.com/alexpls/untils_go/internal/validation"
 	"github.com/alexpls/untils_go/public"
@@ -13,6 +14,16 @@ import (
 func IsSignedIn(ctx context.Context) bool {
 	_, ok := reqcontext.UserFromContext(ctx)
 	return ok
+}
+
+func CurrentUser(ctx context.Context) *sqlc.User {
+	u, _ := reqcontext.UserFromContext(ctx)
+	return u
+}
+
+func TimezoneFromCookie(ctx context.Context) string {
+	tz, _ := reqcontext.TimezoneFromContext(ctx)
+	return tz
 }
 
 func AssetURL(path string) string {

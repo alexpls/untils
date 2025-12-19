@@ -5,6 +5,12 @@ import "github.com/alexpls/untils_go/internal/components/icons"
 
 templ appLayout() {
 	@components.Layout() {
+	if components.CurrentUser(ctx).Timezone != components.TimezoneFromCookie(ctx) {
+		<form hx-post="/app/settings/timezone" hx-trigger="load" hx-swap="none">
+			<input type="hidden" name="Timezone" value={components.TimezoneFromCookie(ctx)} />
+		</form>
+	}
+
 	<div class="drawer drawer-open">
 		<input type="hidden" class="drawer-toggle" />
 

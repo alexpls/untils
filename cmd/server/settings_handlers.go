@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/alexpls/untils_go/internal/auth"
 	appcomponents "github.com/alexpls/untils_go/internal/components/app"
 	"github.com/alexpls/untils_go/internal/db/sqlc"
 	"github.com/alexpls/untils_go/internal/pushover"
@@ -113,3 +114,21 @@ func (a *app) emailSettingsGet(w http.ResponseWriter, r *http.Request, user *sql
 	appcomponents.EmailSettings(&data).Render(r.Context(), w)
 }
 
+func (a *app) updateTimezonePost(w http.ResponseWriter, r *http.Request, user *sqlc.User) {
+	if a.internalServerError(r.ParseForm(), w) {
+		a.logger.Error("failed to parse form")
+		return
+	}
+
+	tz := r.FormValue("Timezone")
+
+	err := a.auth.UpdateUserTimezone(r.Context(), user.ID, auth.UpdateUserTimezoneParams{
+		Timezone: tz,
+	})
+	if a.internalServerError(err, w) {
+		a.logger.Error("error updating user timezone", "error", err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}

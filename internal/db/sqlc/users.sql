@@ -21,3 +21,8 @@ select
     'email'::notifier as name,
     true as active;
 
+-- name: UpdateUserTimezone :one
+update users
+set timezone = @timezone, updated_at = now()
+where id = @user_id
+returning *;

@@ -18,9 +18,27 @@ templ Settings(data *SettingsViewModel) {
 			<div class="bg-base-100 border rounded border-base-content/10">
 				<h2 class="text-xl font-semibold p-4 border-b border-base-content/10">Account</h2>
 
-				<div class="p-4">
-					Working on it...
-				</div>
+				<ul class="list">
+					<li class="text-base list-row justify-between flex items-center">
+						<div>Email address</div>
+						<div>
+							<div>{components.CurrentUser(ctx).Email}</div>
+						</div>
+					</li>
+					<li class="text-base list-row justify-between flex items-center">
+						<div>
+							<div>Timezone</div>
+							<small>(Set based on your browser settings)</small>
+						</div>
+						<div>
+							<div
+								x-data={fmt.Sprintf("timezone(%q)", components.CurrentUser(ctx).Timezone)}
+								x-text="tz"
+							>
+							</div>
+						</div>
+					</li>
+				</ul>
 			</div>
 
 			<div class="bg-base-100 border rounded border-base-content/10">
@@ -136,4 +154,3 @@ templ EmailSettings(data *EmailSettingsViewModel) {
 		</div>
 	}
 }
-
