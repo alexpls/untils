@@ -1,6 +1,6 @@
 [tools]
-node = "latest"
-go = "latest"
+node = "25.2.1"
+go = "1.25.5"
 
 [settings]
 env_file = '.env.dev'
