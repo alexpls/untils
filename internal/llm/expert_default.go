@@ -21,11 +21,11 @@ func NewExpertDefault(service *Service) Expert {
 var expertDefaultPrompt string
 
 func (e *ExpertDefault) PerformCheck(ctx context.Context, params *CheckParams) (*CheckResponse, error) {
-	messages := responseInput(
-		expertDefaultPrompt,
-		"Subject: "+params.Subject+
+	messages := inputItems(
+		systemMessage(expertDefaultPrompt),
+		userMessage("Subject: "+params.Subject+
 			"\n\nInstructions: "+params.Instructions+
-			"\n\nPrevious result: "+params.PreviousResult,
+			"\n\nPrevious result: "+params.PreviousResult),
 	)
 
 	resp, err := e.service.response(ctx, responses.ResponseNewParams{

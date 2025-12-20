@@ -24,9 +24,9 @@ func TestExpertDefaultPerformCheck(t *testing.T) {
 	svc := llm.NewService(&oai, slog.Default())
 	expert := llm.NewExpertDefault(svc)
 	res, err := expert.PerformCheck(ctx, &llm.CheckParams{
-		Subject:        "Who is the president of the USA?",
-		Instructions:   "First name only",
-		PreviousResult: "Donald",
+		Subject:        "What's the latest IGN game of the year?",
+		Instructions:   "",
+		PreviousResult: "",
 	})
 	require.NoError(t, err)
 

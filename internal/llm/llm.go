@@ -31,19 +31,21 @@ func (s *Service) response(ctx context.Context, params responses.ResponseNewPara
 
 	resp, err := s.client.Responses.New(ctx, params)
 
+	s.logger.Info("generated response",
+		"model", model,
+		"duration_ms", time.Since(start).Milliseconds(),
+		"success", err == nil)
+
 	if err != nil {
 		return nil, fmt.Errorf("fetching llm response: %w", err)
 	}
 
-	s.logger.Info("generated response",
-		"model", model,
-		"duration_ms", time.Since(start).Milliseconds(),
-		"usage_json", resp.Usage.RawJSON(),
-		"success", err == nil)
-
-	s.logger.Debug("llm response details",
-		"usage_json", resp.Usage.RawJSON(),
-		"raw_response", resp.OutputText())
+	cost, err := calculateCost(model, resp)
+	if err != nil {
+		s.logger.Error("failed to calculate cost", "error", err)
+	} else {
+		s.logger.Info("calculated cost", "cost_usd", cost)
+	}
 
 	return resp, nil
 }
@@ -70,12 +72,9 @@ func systemMessage(content string) responses.ResponseInputItemUnionParam {
 	}
 }
 
-func responseInput(system, user string) responses.ResponseNewParamsInputUnion {
+func inputItems(messages ...responses.ResponseInputItemUnionParam) responses.ResponseNewParamsInputUnion {
 	return responses.ResponseNewParamsInputUnion{
-		OfInputItemList: responses.ResponseInputParam{
-			systemMessage(system),
-			userMessage(user),
-		},
+		OfInputItemList: responses.ResponseInputParam(messages),
 	}
 }
 

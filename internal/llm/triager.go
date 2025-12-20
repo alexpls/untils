@@ -34,9 +34,9 @@ type TriagerResponse struct {
 }
 
 func (p *Triager) Run(ctx context.Context, params *TriageParams) (*TriagerResponse, error) {
-	messages := responseInput(
-		triagerPrompt+expertsMarkdown,
-		params.Subject,
+	messages := inputItems(
+		systemMessage(triagerPrompt+expertsMarkdown),
+		userMessage(params.Subject),
 	)
 
 	var resp *responses.Response
