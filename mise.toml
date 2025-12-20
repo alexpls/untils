@@ -5,6 +5,9 @@ go = "1.25.5"
 [settings]
 env_file = '.env.dev'
 
+[tasks.build-x86]
+run = "GOOS=linux GOARCH=amd64 go build -o untils_amd64 ./cmd/server"
+
 [tasks.format]
 run = "go fmt ./... && npm run format"
 
