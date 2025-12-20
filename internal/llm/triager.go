@@ -53,7 +53,7 @@ func (p *Triager) Run(ctx context.Context, params *TriageParams) (*TriagerRespon
 		resp, err = p.service.response(ctx, responses.ResponseNewParams{
 			Model: model,
 			Input: messages,
-			Text:  jsonSchemaResponse("triage_prompt_response", TriagerResponse{}),
+			Text:  jsonSchemaResponse(TriagerResponse{}),
 		})
 
 		if err != nil {

@@ -16,7 +16,8 @@ func jsonSchema(s any) map[string]any {
 	return typeToSchema(structType, structValue)
 }
 
-func jsonSchemaResponse(name string, s any) responses.ResponseTextConfigParam {
+func jsonSchemaResponse(s any) responses.ResponseTextConfigParam {
+	name := reflect.TypeOf(s).Name()
 	return responses.ResponseTextConfigParam{
 		Format: responses.ResponseFormatTextConfigUnionParam{
 			OfJSONSchema: &responses.ResponseFormatTextJSONSchemaConfigParam{

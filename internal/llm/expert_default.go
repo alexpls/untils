@@ -31,7 +31,7 @@ func (e *ExpertDefault) PerformCheck(ctx context.Context, params *CheckParams) (
 	resp, err := e.service.response(ctx, responses.ResponseNewParams{
 		Model: model,
 		Input: messages,
-		Text:  jsonSchemaResponse("expert_default_check_response", CheckResponse{}),
+		Text:  jsonSchemaResponse(CheckResponse{}),
 		Tools: webSearchTool(),
 	})
 	if err != nil {
