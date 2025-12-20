@@ -13,7 +13,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-var monitorCheckFrequency = 30 * time.Minute
+var monitorCheckFrequency = 6 * time.Hour
 
 func (s *Service) ListMonitors(ctx context.Context, userID int64) ([]*sqlc.Monitor, error) {
 	return s.queries.ListMonitors(ctx, s.pool, userID)
