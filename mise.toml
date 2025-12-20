@@ -6,7 +6,7 @@ go = "1.25.5"
 env_file = '.env.dev'
 
 [tasks.build-x86]
-run = "GOOS=linux GOARCH=amd64 go build -o untils_amd64 ./cmd/server"
+run = "GOOS=linux GOARCH=amd64 go build -o untils_linux_amd64 ./cmd"
 
 [tasks.format]
 run = "go fmt ./... && npm run format"
@@ -22,7 +22,7 @@ go install golang.org/x/tools/gopls@latest
 
 [tasks.dev-server]
 run = """
-templ generate --watch --proxy="http://localhost:4200" --cmd "go run ./cmd/server serve -env $ENV -db $PG_URL -xai-key $XAI_KEY -openai-key $OPENAI_KEY -pushover-key $PUSHOVER_KEY" | tee dev.log
+templ generate --watch --proxy="http://localhost:4200" --cmd "go run ./cmd serve -env $ENV -db $PG_URL -xai-key $XAI_KEY -openai-key $OPENAI_KEY -pushover-key $PUSHOVER_KEY" | tee dev.log
 """
 
 [tasks.dev-css]
@@ -58,7 +58,7 @@ psql "${PG_TEST_URL%/untils_test}" -c "drop database untils_test;" || true
 '''
 
 [tasks.db-seed]
-run = 'go run ./cmd/server seed -env dev -db $PG_URL'
+run = 'go run ./cmd seed -env dev -db $PG_URL'
 
 [tasks.db-migrate-create]
 usage = '''

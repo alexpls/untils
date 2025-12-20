@@ -3,6 +3,6 @@ public/js/*
 node_modules
 .DS_Store
 .env.dev
-/server
-/untils_amd64
+/cmd
+/untils_linux_amd64
 dev.log
