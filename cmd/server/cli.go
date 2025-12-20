@@ -9,7 +9,7 @@ import (
 	"github.com/alexpls/untils_go/internal/must"
 )
 
-var validSubcommands = []string{"serve", "seed"}
+var validSubcommands = []string{"serve", "seed", "migrate"}
 
 func subcommand() string {
 	if len(os.Args) < 2 || !slices.Contains(validSubcommands, os.Args[1]) {
@@ -79,4 +79,25 @@ func validateGlobalConfig(c *config) {
 
 func validateServeConfig(c *serveConfig) {
 	// no validations yet
+}
+
+type migrateConfig struct {
+	dbUrl string
+}
+
+func parseMigrate() *migrateConfig {
+	must.True(os.Args[1] == "migrate")
+
+	f := flag.NewFlagSet("migrate", flag.ExitOnError)
+
+	mc := migrateConfig{}
+	f.StringVar(&mc.dbUrl, "db", "", "postgresql connection url")
+
+	f.Parse(os.Args[2:])
+
+	if mc.dbUrl == "" {
+		panic("db url is required")
+	}
+
+	return &mc
 }

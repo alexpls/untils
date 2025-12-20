@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -58,6 +59,19 @@ func main() {
 		defer appCloser()
 
 		a.seed()
+
+	case "migrate":
+		c := parseMigrate()
+
+		logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+			Level: slog.LevelInfo,
+		}))
+		logger.Info("starting database migration")
+
+		if err := runMigrations(logger, c.dbUrl); err != nil {
+			logger.Error("migration failed", "error", err)
+			os.Exit(1)
+		}
 
 	default:
 		panic("unhandled subcommand")
