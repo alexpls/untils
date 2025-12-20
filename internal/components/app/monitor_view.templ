@@ -54,50 +54,7 @@ templ MonitorViewPage(data MonitorViewData) {
 					<div class="m-4 p-4 bg-base-100 rounded border border-base-content/10">
 						<ul>
 							for _, result := range data.Results {
-								<li>
-									<div>
-										<div class="text-lg font-semibold">
-											{result.Result}
-										</div>
-
-										if result.Date != nil && result.DatePastTenseVerb.Valid {
-											<div class="text-sm">
-												{ result.DatePastTenseVerb.String }
-												{ components.FormatDate(ctx, *result.Date) }
-											</div>
-										}
-									</div>
-
-									<div class="pt-2 text-sm text-base-content/60 flex space-x-4">
-										<div>
-											<div class="font-semibold uppercase text-xs">
-												Latest check
-											</div>
-											<div>
-												{components.FormatDateTime(ctx, result.LatestConfirmationAt)}
-											</div>
-										</div>
-
-										<div>
-											<div class="font-semibold uppercase text-xs">
-												Sources
-											</div>
-											<div>
-												if result.Citations != nil && len(*result.Citations) > 0 {
-													<div class="flex space-x-1">
-													for _, citation := range *result.Citations {
-														<div>
-															<a href={citation.URL} target="_blank" rel="noref noopener">{citation.WebsiteTitle}</a>
-														</div>
-													}
-													</div>
-												} else {
-													<div>(none)</div>
-												}
-											</div>
-										</div>
-									</div>
-								</li>
+								@monitorResultTimelineItem(result)
 							}
 						</ul>
 					</div>
@@ -176,5 +133,52 @@ templ monitorNotifiers(data MonitorViewData) {
 				}
 			}
 		}
+	</div>
+}
+
+templ monitorResultTimelineItem(result *sqlc.MonitorResult) {
+	@components.TimelineItem(monitorResultHeading(result)) {
+		if result.Date != nil && result.DatePastTenseVerb.Valid {
+			<div class="text-sm">
+				{ result.DatePastTenseVerb.String }
+				{ components.FormatDate(ctx, *result.Date) }
+			</div>
+		}
+
+		<div class="pt-2 text-sm text-base-content/60 flex space-x-4">
+			<div>
+				<div class="font-semibold uppercase text-xs">
+					Latest check
+				</div>
+				<div>
+					{components.FormatDateTime(ctx, result.LatestConfirmationAt)}
+				</div>
+			</div>
+
+			<div>
+				<div class="font-semibold uppercase text-xs">
+					Sources
+				</div>
+				<div>
+					if result.Citations != nil && len(*result.Citations) > 0 {
+						<div class="flex space-x-1">
+						for _, citation := range *result.Citations {
+							<div>
+								<a href={citation.URL} target="_blank" rel="noref noopener">{citation.WebsiteTitle}</a>
+							</div>
+						}
+						</div>
+					} else {
+						<div>(none)</div>
+					}
+				</div>
+			</div>
+		</div>
+	}
+}
+
+templ monitorResultHeading(result *sqlc.MonitorResult) {
+	<div class="text-lg font-semibold">
+		{result.Result}
 	</div>
 }

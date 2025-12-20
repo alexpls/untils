@@ -1,0 +1,21 @@
+package components
+
+templ TimelineItem(heading templ.Component) {
+	<li class={
+		"relative", "py-2", "before:content-['']", "before:absolute",
+		"before:bg-base-content/10", "before:top-0", "before:bottom-0",
+		"before:left-0", "before:w-0.5"
+	}>
+		<div class="flex items-center">
+			<div class={
+				"relative", "w-4", "h-4", "mr-2", "ml-[calc((var(--spacing)*4)/-2+1px)]",
+				"border-2", "border-base-100", "bg-primary", "z-10", "rounded-full"
+			}>
+			</div>
+			@heading
+		</div>
+		<div class="pl-4.5">
+			{children...}
+		</div>
+	</li>
+}
