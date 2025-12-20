@@ -29,6 +29,12 @@ set status = @status, updated_at = now()
 where user_id = @user_id and id = @id
 returning *;
 
+-- name: UpdateMonitorExpert :one
+update monitors
+set expert = @expert
+where user_id = @user_id and id = @monitor_id
+returning *;
+
 -- name: UpdateMonitorDraft :one
 update monitors
 set subject = @subject, instructions = @instructions, updated_at = now()

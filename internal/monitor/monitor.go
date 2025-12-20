@@ -99,7 +99,8 @@ func (s *Service) ValidateMonitor(ctx context.Context, monitor *sqlc.Monitor) er
 		return err
 	}
 
-	res, err := s.llm.ValidateMonitorPrompt(ctx, llm.ValidateMonitorPromptInput{
+	triager := llm.NewTriager(s.llm)
+	res, err := triager.Run(ctx, &llm.TriageParams{
 		Subject: monitor.Subject.String,
 	})
 	if err != nil {
@@ -110,6 +111,14 @@ func (s *Service) ValidateMonitor(ctx context.Context, monitor *sqlc.Monitor) er
 		if err := s.validateMonitorsSameVersion(ctx, tx, monitor); err != nil {
 			s.logger.Warn("skipping validation due to monitor version mismatch", "details", err)
 			return nil
+		}
+
+		if monitor, err = s.queries.UpdateMonitorExpert(ctx, tx, &sqlc.UpdateMonitorExpertParams{
+			UserID:    monitor.UserID,
+			MonitorID: monitor.ID,
+			Expert:    pgtype.Text{String: res.ChosenExpert, Valid: true},
+		}); err != nil {
+			return fmt.Errorf("updating monitor expert: %w", err)
 		}
 
 		if !res.Approved {
@@ -134,7 +143,7 @@ func (s *Service) ValidateMonitor(ctx context.Context, monitor *sqlc.Monitor) er
 	})
 }
 
-func checkPromptResponseToCreateMonitorResultParams(monitorID, checkID int64, res *llm.CheckPromptResponse) *sqlc.CreateMonitorResultParams {
+func checkResponseToCreateMonitorResultParams(monitorID, checkID int64, res *llm.CheckResponse) *sqlc.CreateMonitorResultParams {
 	resultDate := pgtype.Timestamptz{Time: time.Time{}, Valid: false}
 	resultDatePastTenseVerb := pgtype.Text{String: "", Valid: false}
 
@@ -167,7 +176,8 @@ func (s *Service) PreviewMonitor(ctx context.Context, monitor *sqlc.Monitor) err
 		return err
 	}
 
-	res, err := s.llm.CheckPrompt(ctx, llm.CheckPromptParams{
+	expert := llm.BuildExpert(monitor.Expert.String, s.llm)
+	res, err := expert.PerformCheck(ctx, &llm.CheckParams{
 		Subject:        monitor.Subject.String,
 		Instructions:   monitor.Instructions.String,
 		PreviousResult: "(none, this is the first check)",
@@ -196,7 +206,7 @@ func (s *Service) PreviewMonitor(ctx context.Context, monitor *sqlc.Monitor) err
 			return fmt.Errorf("updating monitor check preview result: %w", err)
 		}
 
-		params := checkPromptResponseToCreateMonitorResultParams(check.MonitorID, check.ID, res)
+		params := checkResponseToCreateMonitorResultParams(check.MonitorID, check.ID, res)
 		if _, err = s.queries.CreateMonitorResult(ctx, tx, params); err != nil {
 			return fmt.Errorf("creating check result: %w", err)
 		}

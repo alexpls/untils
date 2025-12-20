@@ -3,6 +3,7 @@
 package llm_test
 
 import (
+	"context"
 	"log/slog"
 	"os"
 	"testing"
@@ -13,14 +14,17 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestCheckPrompt(t *testing.T) {
+func TestTriager(t *testing.T) {
 	oai := openai.NewClient(
 		option.WithAPIKey(os.Getenv("XAI_KEY")),
 		option.WithBaseURL("https://api.x.ai/v1"),
 	)
-	s := llm.NewService(&oai, slog.Default())
-	res, err := s.CheckPrompt(t.Context(), llm.CheckPromptParams{
-		Subject: "Latest documentary by Adam Curtis",
+
+	ctx := context.Background()
+	svc := llm.NewService(&oai, slog.Default())
+	prompt := llm.NewTriager(svc)
+	res, err := prompt.Run(ctx, &llm.TriageParams{
+		Subject: "Who is a good boy?",
 	})
 	require.NoError(t, err)
 

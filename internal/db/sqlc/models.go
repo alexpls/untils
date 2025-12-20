@@ -202,6 +202,7 @@ type Monitor struct {
 	RejectedReason pgtype.Text
 	UpdatedAt      time.Time
 	CreatedAt      time.Time
+	Expert         pgtype.Text
 }
 
 type MonitorCheck struct {

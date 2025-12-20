@@ -235,7 +235,8 @@ CREATE TABLE public.monitors (
     instructions text,
     rejected_reason text,
     updated_at timestamp with time zone NOT NULL,
-    created_at timestamp with time zone NOT NULL
+    created_at timestamp with time zone NOT NULL,
+    expert text
 );
 
 

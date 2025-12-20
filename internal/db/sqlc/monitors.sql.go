@@ -42,7 +42,7 @@ func (q *Queries) BumpMonitorVersion(ctx context.Context, db DBTX, monitorID int
 const createMonitor = `-- name: CreateMonitor :one
 insert into monitors (user_id, subject, instructions, status, updated_at, created_at)
 values ($1, $2, $3, 'validating', now(), now())
-returning id, user_id, status, subject, instructions, rejected_reason, updated_at, created_at
+returning id, user_id, status, subject, instructions, rejected_reason, updated_at, created_at, expert
 `
 
 type CreateMonitorParams struct {
@@ -63,6 +63,7 @@ func (q *Queries) CreateMonitor(ctx context.Context, db DBTX, arg *CreateMonitor
 		&i.RejectedReason,
 		&i.UpdatedAt,
 		&i.CreatedAt,
+		&i.Expert,
 	)
 	return &i, err
 }
@@ -246,7 +247,7 @@ func (q *Queries) GetLatestMonitorResult(ctx context.Context, db DBTX, monitorID
 }
 
 const getMonitor = `-- name: GetMonitor :one
-select id, user_id, status, subject, instructions, rejected_reason, updated_at, created_at from monitors
+select id, user_id, status, subject, instructions, rejected_reason, updated_at, created_at, expert from monitors
 where user_id = $1 and id = $2
 `
 
@@ -267,6 +268,7 @@ func (q *Queries) GetMonitor(ctx context.Context, db DBTX, arg *GetMonitorParams
 		&i.RejectedReason,
 		&i.UpdatedAt,
 		&i.CreatedAt,
+		&i.Expert,
 	)
 	return &i, err
 }
@@ -380,7 +382,7 @@ func (q *Queries) ListMonitorResults(ctx context.Context, db DBTX, monitorID int
 }
 
 const listMonitors = `-- name: ListMonitors :many
-select id, user_id, status, subject, instructions, rejected_reason, updated_at, created_at from monitors
+select id, user_id, status, subject, instructions, rejected_reason, updated_at, created_at, expert from monitors
 where user_id = $1 and status = 'active'
 order by created_at desc
 `
@@ -403,6 +405,7 @@ func (q *Queries) ListMonitors(ctx context.Context, db DBTX, userID int64) ([]*M
 			&i.RejectedReason,
 			&i.UpdatedAt,
 			&i.CreatedAt,
+			&i.Expert,
 		); err != nil {
 			return nil, err
 		}
@@ -487,7 +490,7 @@ const updateMonitorDraft = `-- name: UpdateMonitorDraft :one
 update monitors
 set subject = $1, instructions = $2, updated_at = now()
 where user_id = $3 and id = $4 and status != 'active'
-returning id, user_id, status, subject, instructions, rejected_reason, updated_at, created_at
+returning id, user_id, status, subject, instructions, rejected_reason, updated_at, created_at, expert
 `
 
 type UpdateMonitorDraftParams struct {
@@ -514,6 +517,37 @@ func (q *Queries) UpdateMonitorDraft(ctx context.Context, db DBTX, arg *UpdateMo
 		&i.RejectedReason,
 		&i.UpdatedAt,
 		&i.CreatedAt,
+		&i.Expert,
+	)
+	return &i, err
+}
+
+const updateMonitorExpert = `-- name: UpdateMonitorExpert :one
+update monitors
+set expert = $1
+where user_id = $2 and id = $3
+returning id, user_id, status, subject, instructions, rejected_reason, updated_at, created_at, expert
+`
+
+type UpdateMonitorExpertParams struct {
+	Expert    pgtype.Text
+	UserID    int64
+	MonitorID int64
+}
+
+func (q *Queries) UpdateMonitorExpert(ctx context.Context, db DBTX, arg *UpdateMonitorExpertParams) (*Monitor, error) {
+	row := db.QueryRow(ctx, updateMonitorExpert, arg.Expert, arg.UserID, arg.MonitorID)
+	var i Monitor
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Status,
+		&i.Subject,
+		&i.Instructions,
+		&i.RejectedReason,
+		&i.UpdatedAt,
+		&i.CreatedAt,
+		&i.Expert,
 	)
 	return &i, err
 }
@@ -522,7 +556,7 @@ const updateMonitorStatus = `-- name: UpdateMonitorStatus :one
 update monitors
 set status = $1, updated_at = now()
 where user_id = $2 and id = $3
-returning id, user_id, status, subject, instructions, rejected_reason, updated_at, created_at
+returning id, user_id, status, subject, instructions, rejected_reason, updated_at, created_at, expert
 `
 
 type UpdateMonitorStatusParams struct {
@@ -543,6 +577,7 @@ func (q *Queries) UpdateMonitorStatus(ctx context.Context, db DBTX, arg *UpdateM
 		&i.RejectedReason,
 		&i.UpdatedAt,
 		&i.CreatedAt,
+		&i.Expert,
 	)
 	return &i, err
 }

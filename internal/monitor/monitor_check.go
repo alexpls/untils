@@ -118,7 +118,8 @@ func (s *Service) PerformMonitorCheck(ctx context.Context, userID int64, check *
 		prevResult = latest.Result
 	}
 
-	result, err := s.llm.CheckPrompt(ctx, llm.CheckPromptParams{
+	expert := llm.BuildExpert(monitor.Expert.String, s.llm)
+	result, err := expert.PerformCheck(ctx, &llm.CheckParams{
 		Subject:        monitor.Subject.String,
 		PreviousResult: prevResult,
 		Instructions:   monitor.Instructions.String,
@@ -147,7 +148,7 @@ func (s *Service) PerformMonitorCheck(ctx context.Context, userID int64, check *
 		}
 
 		if result.DifferentToPrevious || latest == nil {
-			params := checkPromptResponseToCreateMonitorResultParams(check.MonitorID, check.ID, result)
+			params := checkResponseToCreateMonitorResultParams(check.MonitorID, check.ID, result)
 			if _, err := s.queries.CreateMonitorResult(ctx, tx, params); err != nil {
 				return fmt.Errorf("creating check result: %w", err)
 			}

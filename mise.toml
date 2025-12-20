@@ -78,10 +78,8 @@ river migrate-up --database-url "${PG_TEST_URL}"
 
 [tasks.db-migrate-down]
 run = '''
-migrate -database ${PG_URL/postgresql/pgx5} -path internal/db/migrations down
-migrate -database ${PG_TEST_URL/postgresql/pgx5} -path internal/db/migrations down
-river migrate-down --database-url "${PG_URL}"
-river migrate-down --database-url "${PG_TEST_URL}"
+migrate -database ${PG_URL/postgresql/pgx5} -path internal/db/migrations down 1
+migrate -database ${PG_TEST_URL/postgresql/pgx5} -path internal/db/migrations down 1
 '''
 
 [tasks.db-dump-schema]
