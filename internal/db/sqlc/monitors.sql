@@ -29,9 +29,9 @@ set status = @status, updated_at = now()
 where user_id = @user_id and id = @id
 returning *;
 
--- name: UpdateMonitorExpert :one
+-- name: UpdateMonitorToReady :one
 update monitors
-set expert = @expert
+set expert = @expert, status = 'ready', updated_at = now()
 where user_id = @user_id and id = @monitor_id
 returning *;
 
@@ -59,8 +59,8 @@ where monitor_id = @monitor_id
 and status in ('scheduled', 'checking');
 
 -- name: CreateMonitorCheck :one
-insert into monitor_checks (monitor_id, status, scheduled_for)
-values (@monitor_id, @status, @scheduled_for)
+insert into monitor_checks (monitor_id, status, scheduled_for, done_at)
+values (@monitor_id, @status, @scheduled_for, @done_at)
 returning *;
 
 -- name: UpdateMonitorCheckChecking :exec

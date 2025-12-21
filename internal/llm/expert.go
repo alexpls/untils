@@ -26,7 +26,7 @@ func (e ErrUnsupportedExpert) Error() string {
 
 var ErrUnkonwnExpert = errors.New("unknown expert")
 
-func BuildExpert(name string, service *Service) Expert {
+func NewExpert(name string, service *Service) Expert {
 	ex, ok := experts[name]
 	if !ok {
 		panic("invalid expert: " + name)

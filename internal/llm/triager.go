@@ -20,7 +20,8 @@ func NewTriager(service *Service) *Triager {
 }
 
 type TriageParams struct {
-	Subject string
+	Subject      string
+	Instructions string
 }
 
 //go:embed triager_prompt.md

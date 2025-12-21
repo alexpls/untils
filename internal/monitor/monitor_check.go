@@ -118,7 +118,7 @@ func (s *Service) PerformMonitorCheck(ctx context.Context, userID int64, check *
 		prevResult = latest.Result
 	}
 
-	expert := llm.BuildExpert(monitor.Expert.String, s.llm)
+	expert := llm.NewExpert(monitor.Expert.String, s.llm)
 	result, err := expert.PerformCheck(ctx, &llm.CheckParams{
 		Subject:        monitor.Subject.String,
 		PreviousResult: prevResult,

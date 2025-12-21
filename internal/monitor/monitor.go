@@ -81,30 +81,25 @@ func (s *Service) DeleteMonitor(ctx context.Context, userID, monitorID int64) er
 	return nil
 }
 
+// TODO: the "validate" name should be more like triage now to align with package llm
 func (s *Service) ValidateMonitor(ctx context.Context, monitor *sqlc.Monitor) error {
 	if monitor.Status != sqlc.MonitorStatusValidating {
 		return fmt.Errorf("monitor: must be in 'validating' status, got: %s", monitor.Status)
 	}
 
-	err := db.WithTx(s.pool, ctx, func(tx pgx.Tx) error {
-		if err := s.queries.DeleteMonitorChecks(ctx, tx, monitor.ID); err != nil {
-			return fmt.Errorf("deleting monitor checks: %w", err)
-		}
-		if err := s.queries.DeleteMonitorResults(ctx, tx, monitor.ID); err != nil {
-			return fmt.Errorf("deleting monitor results: %w", err)
-		}
-		return nil
-	})
-	if err != nil {
+	if err := db.WithTx(s.pool, ctx, func(tx pgx.Tx) error {
+		return s.deleteMonitorRelations(ctx, tx, monitor.ID)
+	}); err != nil {
 		return err
 	}
 
-	triager := llm.NewTriager(s.llm)
-	res, err := triager.Run(ctx, &llm.TriageParams{
-		Subject: monitor.Subject.String,
+	triageW := llm.NewTriageWorkflow(s.llm)
+	res, err := triageW.Run(ctx, &llm.TriageParams{
+		Subject:      monitor.Subject.String,
+		Instructions: monitor.Instructions.String,
 	})
 	if err != nil {
-		return fmt.Errorf("validating monitor prompt with llm: %w", err)
+		return fmt.Errorf("triage workflow: %w", err)
 	}
 
 	return db.WithTx(s.pool, ctx, func(tx pgx.Tx) error {
@@ -113,30 +108,39 @@ func (s *Service) ValidateMonitor(ctx context.Context, monitor *sqlc.Monitor) er
 			return nil
 		}
 
-		if monitor, err = s.queries.UpdateMonitorExpert(ctx, tx, &sqlc.UpdateMonitorExpertParams{
-			UserID:    monitor.UserID,
-			MonitorID: monitor.ID,
-			Expert:    pgtype.Text{String: res.ChosenExpert, Valid: true},
-		}); err != nil {
-			return fmt.Errorf("updating monitor expert: %w", err)
-		}
-
-		if !res.Approved {
+		if !res.Triager.Approved {
 			if err = s.queries.RejectMonitor(ctx, tx, &sqlc.RejectMonitorParams{
 				ID:             monitor.ID,
 				UserID:         monitor.UserID,
-				RejectedReason: pgtype.Text{String: res.RejectedReason, Valid: true},
+				RejectedReason: pgtype.Text{String: res.Triager.RejectedReason, Valid: true},
 			}); err != nil {
 				return fmt.Errorf("rejecting monitor: %w", err)
 			}
 			return nil
-		}
+		} else {
+			if monitor, err = s.queries.UpdateMonitorToReady(ctx, tx, &sqlc.UpdateMonitorToReadyParams{
+				UserID:    monitor.UserID,
+				MonitorID: monitor.ID,
+				Expert:    pgtype.Text{String: res.Triager.ChosenExpert, Valid: true},
+			}); err != nil {
+				return fmt.Errorf("updating monitor expert: %w", err)
+			}
 
-		if _, err = s.river.InsertTx(ctx, tx, PreviewMonitorArgs{
-			UserID:    monitor.UserID,
-			MonitorID: monitor.ID,
-		}, nil); err != nil {
-			return fmt.Errorf("enqueuing preview draft job: %w", err)
+			now := time.Now()
+			check, err := s.queries.CreateMonitorCheck(ctx, tx, &sqlc.CreateMonitorCheckParams{
+				MonitorID:    monitor.ID,
+				Status:       sqlc.MonitorCheckStatusSuccess,
+				ScheduledFor: now,
+				DoneAt:       &now,
+			})
+			if err != nil {
+				return fmt.Errorf("creating monitor check: %w", err)
+			}
+
+			params := checkResponseToCreateMonitorResultParams(check.MonitorID, check.ID, res.Check)
+			if _, err = s.queries.CreateMonitorResult(ctx, tx, params); err != nil {
+				return fmt.Errorf("creating check result: %w", err)
+			}
 		}
 
 		return nil
@@ -168,55 +172,6 @@ func checkResponseToCreateMonitorResultParams(monitorID, checkID int64, res *llm
 		Date:               &resultDate.Time,
 		DatePastTenseVerb:  resultDatePastTenseVerb,
 	}
-}
-
-func (s *Service) PreviewMonitor(ctx context.Context, monitor *sqlc.Monitor) error {
-	monitor, err := s.updateMonitorStatus(ctx, s.pool, monitor, sqlc.MonitorStatusPreviewing)
-	if err != nil {
-		return err
-	}
-
-	expert := llm.BuildExpert(monitor.Expert.String, s.llm)
-	res, err := expert.PerformCheck(ctx, &llm.CheckParams{
-		Subject:        monitor.Subject.String,
-		Instructions:   monitor.Instructions.String,
-		PreviousResult: "(none, this is the first check)",
-	})
-	if err != nil {
-		// TODO: Handle the LLM error, set status to rejected?
-		return fmt.Errorf("previewing monitor with llm: %w", err)
-	}
-
-	return db.WithTx(s.pool, ctx, func(tx pgx.Tx) error {
-		if err := s.validateMonitorsSameVersion(ctx, tx, monitor); err != nil {
-			s.logger.Warn("skipping previewing due to monitor version mismatch", "details", err)
-			return nil
-		}
-
-		check, err := s.queries.CreateMonitorCheck(ctx, tx, &sqlc.CreateMonitorCheckParams{
-			MonitorID:    monitor.ID,
-			Status:       sqlc.MonitorCheckStatusSuccess,
-			ScheduledFor: time.Now(),
-		})
-		if err != nil {
-			return fmt.Errorf("creating monitor check for preview: %w", err)
-		}
-
-		if err = s.queries.UpdateMonitorCheckSuccess(ctx, tx, check.ID); err != nil {
-			return fmt.Errorf("updating monitor check preview result: %w", err)
-		}
-
-		params := checkResponseToCreateMonitorResultParams(check.MonitorID, check.ID, res)
-		if _, err = s.queries.CreateMonitorResult(ctx, tx, params); err != nil {
-			return fmt.Errorf("creating check result: %w", err)
-		}
-
-		if _, err := s.updateMonitorStatus(ctx, tx, monitor, sqlc.MonitorStatusReady); err != nil {
-			return err
-		}
-
-		return nil
-	})
 }
 
 func (s *Service) ActivateMonitorFromPreview(ctx context.Context, userID, monitorID int64) (*sqlc.Monitor, error) {
@@ -310,4 +265,14 @@ func (s *Service) UpdateMonitorDraft(ctx context.Context, userID, monitorID int6
 	}
 
 	return mon, nil
+}
+
+func (s *Service) deleteMonitorRelations(ctx context.Context, tx sqlc.DBTX, monitorID int64) error {
+	if err := s.queries.DeleteMonitorChecks(ctx, tx, monitorID); err != nil {
+		return fmt.Errorf("deleting monitor checks: %w", err)
+	}
+	if err := s.queries.DeleteMonitorResults(ctx, tx, monitorID); err != nil {
+		return fmt.Errorf("deleting monitor results: %w", err)
+	}
+	return nil
 }
