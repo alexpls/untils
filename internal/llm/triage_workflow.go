@@ -1,6 +1,9 @@
 package llm
 
-import "context"
+import (
+	"context"
+	"fmt"
+)
 
 type TriageWorkflow struct {
 	service *Service
@@ -16,24 +19,58 @@ type TriageWorkflowReponse struct {
 }
 
 func (w *TriageWorkflow) Run(ctx context.Context, params *TriageParams) (*TriageWorkflowReponse, error) {
-	triager := NewTriager(w.service)
-	triageResp, err := triager.Run(ctx, params)
-	if err != nil {
-		return nil, err
-	}
+	maxTurns := 3
+	turn := 0
 
-	expert := NewExpert(triageResp.ChosenExpert, w.service)
-	checkResp, err := expert.PerformCheck(ctx, &CheckParams{
-		Subject:        params.Subject,
-		Instructions:   "", // TODO include from monitor
-		PreviousResult: "",
-	})
-	if err != nil {
-		return nil, err
-	}
+	var err error
+	var triageResp *TriagerResponse
+	var checkResp *CheckResponse
+	triager := NewTriager(w.service, params)
 
-	return &TriageWorkflowReponse{
-		Triager: triageResp,
-		Check:   checkResp,
-	}, nil
+	for {
+		if turn >= maxTurns {
+			return nil, fmt.Errorf("max turns reached in triage workflow: %w", err)
+		}
+		turn++
+
+		triageResp, err = triager.Run(ctx)
+		if err != nil {
+			return nil, err
+		}
+		if !triageResp.Approved {
+			return &TriageWorkflowReponse{
+				Triager: triageResp,
+				Check:   checkResp,
+			}, nil
+		}
+
+		subject := triageResp.RephrasedSubject
+		if subject == "" {
+			subject = params.Subject
+		}
+
+		expert := NewExpert(triageResp.ChosenExpert, w.service)
+		checkResp, err = expert.PerformCheck(ctx, &CheckParams{
+			Subject:        subject,
+			Instructions:   params.Instructions,
+			PreviousResult: "", // first check, so no prev result
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		if !checkResp.Answered {
+			feedback := "The expert couldn't answer. Try picking another expert or rephrasing the subject."
+			if checkResp.RejectionReason != "" {
+				feedback += fmt.Sprintf(" Rejection reason: %s", checkResp.RejectionReason)
+			}
+			triager.addMessage(systemMessage(feedback))
+			continue
+		}
+
+		return &TriageWorkflowReponse{
+			Triager: triageResp,
+			Check:   checkResp,
+		}, nil
+	}
 }

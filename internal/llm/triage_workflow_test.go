@@ -14,7 +14,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestTriager(t *testing.T) {
+func TestTriageWorkflow(t *testing.T) {
 	oai := openai.NewClient(
 		option.WithAPIKey(os.Getenv("XAI_KEY")),
 		option.WithBaseURL("https://api.x.ai/v1"),
@@ -22,11 +22,12 @@ func TestTriager(t *testing.T) {
 
 	ctx := context.Background()
 	svc := llm.NewService(&oai, slog.Default())
-	prompt := llm.NewTriager(svc, &llm.TriageParams{
-		Subject: "Who is a good boy?",
+	triage := llm.NewTriageWorkflow(svc)
+	res, err := triage.Run(ctx, &llm.TriageParams{
+		Subject: "Who is the president of the United States?",
 	})
-	res, err := prompt.Run(ctx)
 	require.NoError(t, err)
 
-	t.Logf("output: %+v", res)
+	t.Logf("Check: %+v", res.Check)
+	t.Logf("Triager: %+v", res.Triager)
 }

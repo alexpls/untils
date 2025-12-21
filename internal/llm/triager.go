@@ -12,11 +12,17 @@ import (
 )
 
 type Triager struct {
-	service *Service
+	service  *Service
+	messages responses.ResponseNewParamsInputUnion
 }
 
-func NewTriager(service *Service) *Triager {
-	return &Triager{service: service}
+func NewTriager(service *Service, params *TriageParams) *Triager {
+	messages := inputItems(
+		systemMessage(triagerPrompt+expertsMarkdown),
+		userMessage(params.Subject),
+	)
+
+	return &Triager{service: service, messages: messages}
 }
 
 type TriageParams struct {
@@ -34,14 +40,10 @@ type TriagerResponse struct {
 	RejectedReason   string `json:"rejected_reason"`
 }
 
-func (p *Triager) Run(ctx context.Context, params *TriageParams) (*TriagerResponse, error) {
-	messages := inputItems(
-		systemMessage(triagerPrompt+expertsMarkdown),
-		userMessage(params.Subject),
-	)
-
+func (p *Triager) Run(ctx context.Context) (*TriagerResponse, error) {
 	var resp *responses.Response
 	var err error
+
 	try := 0
 	maxTries := 3
 
@@ -53,7 +55,7 @@ func (p *Triager) Run(ctx context.Context, params *TriageParams) (*TriagerRespon
 
 		resp, err = p.service.response(ctx, responses.ResponseNewParams{
 			Model: model,
-			Input: messages,
+			Input: p.messages,
 			Text:  jsonSchemaResponse(TriagerResponse{}),
 		})
 
@@ -65,7 +67,7 @@ func (p *Triager) Run(ctx context.Context, params *TriageParams) (*TriagerRespon
 		sanitized := sanitizeXAIOutput(resp.OutputText())
 		res := TriagerResponse{}
 		if err = json.Unmarshal([]byte(sanitized), &res); err != nil {
-			messages.OfInputItemList = append(messages.OfInputItemList, systemMessage(fmt.Sprintf(
+			p.addMessage(systemMessage(fmt.Sprintf(
 				"The output was not valid JSON: %s. Ensure your response follows the correct JSON schema.",
 				err.Error(),
 			)))
@@ -74,7 +76,7 @@ func (p *Triager) Run(ctx context.Context, params *TriageParams) (*TriagerRespon
 
 		if !slices.Contains(expertNames, res.ChosenExpert) {
 			err = fmt.Errorf("invalid expert chosen: %s", res.ChosenExpert)
-			messages.OfInputItemList = append(messages.OfInputItemList, systemMessage(fmt.Sprintf(
+			p.addMessage(systemMessage(fmt.Sprintf(
 				"The chosen expert '%s' is not valid. Valid experts are: %v. Choose a valid expert.",
 				res.ChosenExpert, experts,
 			)))
@@ -83,4 +85,8 @@ func (p *Triager) Run(ctx context.Context, params *TriageParams) (*TriagerRespon
 
 		return &res, nil
 	}
+}
+
+func (p *Triager) addMessage(message responses.ResponseInputItemUnionParam) {
+	p.messages.OfInputItemList = append(p.messages.OfInputItemList, message)
 }
