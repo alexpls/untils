@@ -14,11 +14,11 @@
 - [ ] Feature: Checks should be able to have multiple results
 - [ ] Refactor: Forms should have some helpers extracted
 - [ ] Improvement: Pushover form should show a spinner while we're validating the token
-- [ ] Refactor: make monitor notifiers more generic (e.g. for email later)
 - [ ] Refactor: Breadcrumbs and page titles should be coupled somehow so they don't need to be redeclared everywhere
 
 ## Done
 
+- [x] Refactor: make monitor notifiers more generic (e.g. for email later)
 - [x] Feature: User settings (timezone, notification integrations config)
 - [x] Improvement: Figure out html template formatting
 - [x] Feature: URL for result is cited and clickable
