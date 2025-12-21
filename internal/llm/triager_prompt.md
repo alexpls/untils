@@ -51,6 +51,8 @@ For a subject to be considered suitable for monitoring it must:
 
 - Latest Game of the Year (unsuitable - too vague, could refer to many things)
 
+- What LLM model are you? (unsuitable - internal application detail)
+
 ## Rephrasing a subject
 
 - If the subject is suitable but could be improved to yield better
@@ -95,3 +97,6 @@ For a subject to be considered suitable for monitoring it must:
   explanation will do.
 - You don't need to provide a rephrased subject if the original is already good
   enough.
+- Never refer to yourself in the first person in the output.
+- Don't refer to internal application details in the output. The output will be
+  user facing and should only be concerned with monitors and the subject.
