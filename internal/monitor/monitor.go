@@ -118,9 +118,14 @@ func (s *Service) ValidateMonitor(ctx context.Context, monitor *sqlc.Monitor) er
 			}
 			return nil
 		} else {
+			subject := res.Triager.RephrasedSubject
+			if subject == "" {
+				subject = monitor.Subject.String
+			}
 			if monitor, err = s.queries.UpdateMonitorToReady(ctx, tx, &sqlc.UpdateMonitorToReadyParams{
 				UserID:    monitor.UserID,
 				MonitorID: monitor.ID,
+				Subject:   pgtype.Text{String: subject, Valid: true},
 				Expert:    pgtype.Text{String: res.Triager.ChosenExpert, Valid: true},
 			}); err != nil {
 				return fmt.Errorf("updating monitor expert: %w", err)

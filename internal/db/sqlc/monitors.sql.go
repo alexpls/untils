@@ -560,19 +560,25 @@ func (q *Queries) UpdateMonitorStatus(ctx context.Context, db DBTX, arg *UpdateM
 
 const updateMonitorToReady = `-- name: UpdateMonitorToReady :one
 update monitors
-set expert = $1, status = 'ready', updated_at = now()
-where user_id = $2 and id = $3
+set expert = $1, status = 'ready', subject = $2, updated_at = now()
+where user_id = $3 and id = $4
 returning id, user_id, status, subject, instructions, rejected_reason, updated_at, created_at, expert
 `
 
 type UpdateMonitorToReadyParams struct {
 	Expert    pgtype.Text
+	Subject   pgtype.Text
 	UserID    int64
 	MonitorID int64
 }
 
 func (q *Queries) UpdateMonitorToReady(ctx context.Context, db DBTX, arg *UpdateMonitorToReadyParams) (*Monitor, error) {
-	row := db.QueryRow(ctx, updateMonitorToReady, arg.Expert, arg.UserID, arg.MonitorID)
+	row := db.QueryRow(ctx, updateMonitorToReady,
+		arg.Expert,
+		arg.Subject,
+		arg.UserID,
+		arg.MonitorID,
+	)
 	var i Monitor
 	err := row.Scan(
 		&i.ID,

@@ -31,7 +31,7 @@ returning *;
 
 -- name: UpdateMonitorToReady :one
 update monitors
-set expert = @expert, status = 'ready', updated_at = now()
+set expert = @expert, status = 'ready', subject = @subject, updated_at = now()
 where user_id = @user_id and id = @monitor_id
 returning *;
 
