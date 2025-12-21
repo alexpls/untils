@@ -107,7 +107,12 @@ func createApp(c *config) (*app, func()) {
 	a.pushoverStore = pushover.NewStore(a.db, a.queries, a.validate)
 	a.pushoverClient = pushover.NewPushoverClient(c.pushoverKey, a.logger.With("source", "pushover"), a.pushoverStore)
 
-	a.emailService = email.NewService()
+	a.emailService = email.NewService(email.SMTPConfig{
+		Username: c.smtp.username,
+		Password: c.smtp.password,
+		Host:     c.smtp.host,
+		Port:     c.smtp.port,
+	})
 
 	a.monitor = monitor.NewService(a.db, a.queries, a.llm, a.river, a.logger.With("source", "monitor"), a.pushoverClient, a.validate)
 

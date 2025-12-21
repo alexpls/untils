@@ -65,6 +65,10 @@ func globalFlags(c *config, f *flag.FlagSet) {
 	f.StringVar(&c.xAIKey, "xai-key", "", "x.ai API key")
 	f.StringVar(&c.openAIKey, "openai-key", "", "OpenAI API key")
 	f.StringVar(&c.pushoverKey, "pushover-key", "", "Pushover API key")
+	f.StringVar(&c.smtp.username, "smtp-username", "", "smtp username")
+	f.StringVar(&c.smtp.password, "smtp-password", "", "smtp password")
+	f.StringVar(&c.smtp.host, "smtp-host", "127.0.0.1", "smtp host")
+	f.IntVar(&c.smtp.port, "smtp-port", 1025, "smtp port")
 }
 
 func serveFlags(c *serveConfig, f *flag.FlagSet) {

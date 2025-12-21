@@ -2,25 +2,38 @@ package email
 
 import (
 	"context"
+	"fmt"
 	"net/smtp"
 )
 
-type Service struct {
-	auth smtp.Auth
+type SMTPConfig struct {
+	Username string
+	Password string
+	Host     string
+	Port     int
 }
 
-func NewService() *Service {
-	// TODO: implement auth...
-	auth := smtp.PlainAuth("", "", "", "")
+type Service struct {
+	auth   smtp.Auth
+	config SMTPConfig
+}
+
+func NewService(config SMTPConfig) *Service {
+	auth := smtp.PlainAuth("",
+		config.Username,
+		config.Password,
+		config.Host,
+	)
 	return &Service{
-		auth: auth,
+		auth:   auth,
+		config: config,
 	}
 }
 
 type SendParams struct {
 	Recipient string
-	Subject string
-	Body string
+	Subject   string
+	Body      string
 }
 
 func (s *Service) Send(ctx context.Context, params *SendParams) error {
@@ -29,9 +42,14 @@ func (s *Service) Send(ctx context.Context, params *SendParams) error {
 		"\r\n" +
 		params.Body + "\r\n")
 
+	auth := s.auth
+	if s.config.Username == "" {
+		auth = nil
+	}
+
 	if err := smtp.SendMail(
-		"127.0.0.1:1025",
-		nil, // TODO: implement auth
+		fmt.Sprintf("%s:%d", s.config.Host, s.config.Port),
+		auth,
 		"notifications@untils.com",
 		[]string{params.Recipient},
 		msg,

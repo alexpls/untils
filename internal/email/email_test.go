@@ -8,11 +8,14 @@ import (
 )
 
 func TestSend(t *testing.T) {
-	s := NewService()
+	s := NewService(SMTPConfig{
+		Host: "127.0.0.1",
+		Port: 1025,
+	})
 	err := s.Send(context.Background(), &SendParams{
 		Recipient: "alexpls@fastmail.com",
-		Subject: "A humble test",
-		Body: "it works?",
+		Subject:   "A humble test",
+		Body:      "it works?",
 	})
 	require.NoError(t, err)
 }

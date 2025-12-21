@@ -6,6 +6,12 @@ type config struct {
 	xAIKey      string
 	openAIKey   string
 	pushoverKey string
+	smtp        struct {
+		username string
+		password string
+		host     string
+		port     int
+	}
 }
 
 type serveConfig struct {
