@@ -1,0 +1,345 @@
+id:2 RootWebArea Energex Emergency Outages
+  id:7 generic
+    id:265 generic
+      id:266 heading Angular 20 Test - Step 2
+        id:62 StaticText Angular 20 Test - Step 2
+      id:267 paragraph
+        id:63 StaticText Testing with minimal dashboard component...
+      id:269 generic
+        id:271 generic
+          id:272 generic
+            id:273 generic
+            id:275 generic
+              id:276 generic
+              id:279 list
+                id:280 listitem
+                  id:64 StaticText Emergency
+                  id:65 StaticText Outages
+                id:282 listitem
+                  id:283 link Home
+                    id:59 StaticText Home
+                id:286 listitem
+                  id:287 link Contact Us
+                    id:60 StaticText Contact Us
+            id:291 generic
+              id:292 main
+                id:298 generic
+                  id:299 generic
+                    id:300 generic
+                      id:301 generic
+                        id:66 StaticText Customers affected
+                        id:304 generic
+                          id:67 StaticText 498
+                        id:68 StaticText in South East Queensland
+                    id:306 generic
+                      id:307 generic
+                        id:69 StaticText Last updated
+                        id:309 generic
+                          id:126 StaticText 7:45 
+                          id:127 StaticText pm
+                        id:128 StaticText 23 Dec 2025
+                id:43 button Manually refresh outage data
+                  id:312 generic
+                    id:71 StaticText outages updated every 15 
+                    id:72 StaticText minutes
+                    id:44 button refresh outages
+                id:342 generic
+                  id:243 LabelText
+                    id:130 StaticText I want to search for an outage
+                  id:345 generic
+                    id:116 combobox Enter street, suburb or postcode
+                      id:347 generic
+                    id:120 button Search
+                id:351 generic
+                  id:354 generic
+                    id:355 tablist
+                      id:357 tab by Suburb
+                        id:359 generic
+                        id:133 StaticText by 
+                        id:134 StaticText Suburb
+                      id:367 tab by Council
+                        id:369 generic
+                        id:135 StaticText by 
+                        id:136 StaticText Council
+                        id:375 button
+                id:384 generic
+                  id:124 tabpanel by Suburb
+                    id:386 generic
+                      id:387 generic
+                        id:390 button View outages for BELLI PARK
+                          id:392 heading Belli Park
+                            id:137 StaticText Belli Park
+                          id:393 generic
+                            id:138 StaticText 1 outage
+                          id:139 StaticText 143
+                          id:140 LineBreak 
+
+                            id:-1000000025 InlineTextBox 
+
+                          id:396 generic
+                            id:141 StaticText Customers affected
+                          id:397 generic
+                        id:399 generic
+                      id:400 generic
+                        id:403 button View outages for BIRKDALE
+                          id:405 heading Birkdale
+                            id:143 StaticText Birkdale
+                          id:406 generic
+                            id:144 StaticText 1 outage
+                          id:145 StaticText 64
+                          id:146 LineBreak 
+
+                            id:-1000000030 InlineTextBox 
+
+                          id:409 generic
+                            id:147 StaticText Customers affected
+                          id:410 generic
+                        id:412 generic
+                      id:413 generic
+                        id:416 button View outages for CHANDLER
+                          id:418 heading Chandler
+                            id:149 StaticText Chandler
+                          id:419 generic
+                            id:150 StaticText 1 outage
+                          id:151 StaticText 4
+                          id:152 LineBreak 
+
+                            id:-1000000035 InlineTextBox 
+
+                          id:422 generic
+                            id:153 StaticText Customers affected
+                          id:423 generic
+                        id:425 generic
+                      id:426 generic
+                        id:429 button View outages for COOLOOLABIN
+                          id:431 heading Cooloolabin
+                            id:155 StaticText Cooloolabin
+                          id:432 generic
+                            id:156 StaticText 1 outage
+                          id:157 StaticText 2
+                          id:158 LineBreak 
+
+                            id:-1000000040 InlineTextBox 
+
+                          id:435 generic
+                            id:159 StaticText Customers affected
+                          id:436 generic
+                        id:438 generic
+                      id:439 generic
+                        id:442 button View outages for COOROY
+                          id:444 heading Cooroy
+                            id:161 StaticText Cooroy
+                          id:445 generic
+                            id:162 StaticText 1 outage
+                          id:163 StaticText 2
+                          id:164 LineBreak 
+
+                            id:-1000000045 InlineTextBox 
+
+                          id:448 generic
+                            id:165 StaticText Customers affected
+                          id:449 generic
+                        id:451 generic
+                      id:452 generic
+                        id:455 button View outages for EERWAH VALE
+                          id:457 heading Eerwah Vale
+                            id:167 StaticText Eerwah Vale
+                          id:458 generic
+                            id:168 StaticText 1 outage
+                          id:169 StaticText 107
+                          id:170 LineBreak 
+
+                            id:-1000000050 InlineTextBox 
+
+                          id:461 generic
+                            id:171 StaticText Customers affected
+                          id:462 generic
+                        id:464 generic
+                      id:465 generic
+                        id:468 button View outages for GILLDORA
+                          id:470 heading Gilldora
+                            id:173 StaticText Gilldora
+                          id:471 generic
+                            id:174 StaticText 1 outage
+                          id:175 StaticText 20
+                          id:176 LineBreak 
+
+                            id:-1000000055 InlineTextBox 
+
+                          id:474 generic
+                            id:177 StaticText Customers affected
+                          id:475 generic
+                        id:477 generic
+                      id:478 generic
+                        id:481 button View outages for KYBONG
+                          id:483 heading Kybong
+                            id:179 StaticText Kybong
+                          id:484 generic
+                            id:180 StaticText 1 outage
+                          id:181 StaticText 8
+                          id:182 LineBreak 
+
+                            id:-1000000060 InlineTextBox 
+
+                          id:487 generic
+                            id:183 StaticText Customers affected
+                          id:488 generic
+                        id:490 generic
+                      id:491 generic
+                        id:494 button View outages for LAGOON POCKET
+                          id:496 heading Lagoon Pocket
+                            id:185 StaticText Lagoon Pocket
+                          id:497 generic
+                            id:186 StaticText 1 outage
+                          id:187 StaticText 51
+                          id:188 LineBreak 
+
+                            id:-1000000065 InlineTextBox 
+
+                          id:500 generic
+                            id:189 StaticText Customers affected
+                          id:501 generic
+                        id:503 generic
+                      id:504 generic
+                        id:507 button View outages for MOORE
+                          id:509 heading Moore
+                            id:191 StaticText Moore
+                          id:510 generic
+                            id:192 StaticText 1 outage
+                          id:193 StaticText 6
+                          id:194 LineBreak 
+
+                            id:-1000000070 InlineTextBox 
+
+                          id:513 generic
+                            id:195 StaticText Customers affected
+                          id:514 generic
+                        id:516 generic
+                      id:517 generic
+                        id:520 button View outages for NAMBOUR
+                          id:522 heading Nambour
+                            id:197 StaticText Nambour
+                          id:523 generic
+                            id:198 StaticText 1 outage
+                          id:199 StaticText 41
+                          id:200 LineBreak 
+
+                            id:-1000000075 InlineTextBox 
+
+                          id:526 generic
+                            id:201 StaticText Customers affected
+                          id:527 generic
+                        id:529 generic
+                      id:530 generic
+                        id:533 button View outages for OBI OBI
+                          id:535 heading Obi Obi
+                            id:203 StaticText Obi Obi
+                          id:536 generic
+                            id:204 StaticText 1 outage
+                          id:205 StaticText 5
+                          id:206 LineBreak 
+
+                            id:-1000000080 InlineTextBox 
+
+                          id:539 generic
+                            id:207 StaticText Customers affected
+                          id:540 generic
+                        id:542 generic
+                      id:543 generic
+                        id:546 button View outages for PEACHESTER
+                          id:548 heading Peachester
+                            id:209 StaticText Peachester
+                          id:549 generic
+                            id:210 StaticText 1 outage
+                          id:211 StaticText 16
+                          id:212 LineBreak 
+
+                            id:-1000000085 InlineTextBox 
+
+                          id:552 generic
+                            id:213 StaticText Customers affected
+                          id:553 generic
+                        id:555 generic
+                      id:556 generic
+                        id:559 button View outages for POMONA
+                          id:561 heading Pomona
+                            id:215 StaticText Pomona
+                          id:562 generic
+                            id:216 StaticText 1 outage
+                          id:217 StaticText 6
+                          id:218 LineBreak 
+
+                            id:-1000000090 InlineTextBox 
+
+                          id:565 generic
+                            id:219 StaticText Customers affected
+                          id:566 generic
+                        id:568 generic
+                      id:569 generic
+                        id:572 button View outages for RIDGEWOOD
+                          id:574 heading Ridgewood
+                            id:221 StaticText Ridgewood
+                          id:575 generic
+                            id:222 StaticText 1 outage
+                          id:223 StaticText 1
+                          id:224 LineBreak 
+
+                            id:-1000000095 InlineTextBox 
+
+                          id:578 generic
+                            id:225 StaticText Customers affected
+                          id:579 generic
+                        id:581 generic
+                      id:582 generic
+                        id:585 button View outages for TRAVESTON
+                          id:587 heading Traveston
+                            id:227 StaticText Traveston
+                          id:588 generic
+                            id:228 StaticText 1 outage
+                          id:229 StaticText 5
+                          id:230 LineBreak 
+
+                            id:-1000000100 InlineTextBox 
+
+                          id:591 generic
+                            id:231 StaticText Customers affected
+                          id:592 generic
+                        id:594 generic
+                      id:595 generic
+                        id:598 button View outages for VALDORA
+                          id:600 heading Valdora
+                            id:233 StaticText Valdora
+                          id:601 generic
+                            id:234 StaticText 1 outage
+                          id:235 StaticText 17
+                          id:236 LineBreak 
+
+                            id:-1000000105 InlineTextBox 
+
+                          id:604 generic
+                            id:237 StaticText Customers affected
+                          id:605 generic
+                        id:607 generic
+            id:637 sectionfooter
+              id:642 generic
+                id:643 link Facebook
+                id:645 link Youtube
+                id:647 link LinkedIn
+              id:649 generic
+                id:650 list
+                  id:651 listitem
+                    id:652 link Right to information
+                      id:80 StaticText Right to information
+                  id:653 listitem
+                    id:654 link Terms of use
+                      id:81 StaticText Terms of use
+                  id:655 listitem
+                    id:656 link Privacy policy
+                      id:82 StaticText Privacy policy
+                  id:657 listitem
+                    id:658 link Sitemap
+                      id:83 StaticText Sitemap
+                  id:659 listitem
+                    id:84 StaticText © 2025 Energex
+              id:660 generic
+                id:85 StaticText 1766483107
