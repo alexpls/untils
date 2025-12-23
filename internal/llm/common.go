@@ -23,7 +23,8 @@ type CheckParams struct {
 
 type CheckResponse struct {
 	Answered            bool      `json:"answered"`
-	RejectionReason     string    `json:"rejection_reason"`
+	Explanation         string    `json:"explanation"`
+	DetectedSPA         bool      `json:"detected_spa"`
 	DifferentToPrevious bool      `json:"different_to_previous"`
 	ResponsePlaintext   string    `json:"response_plaintext"`
 	Date                Date      `json:"date"`

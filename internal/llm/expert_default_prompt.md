@@ -17,13 +17,18 @@ whether it's changed since you last checked it.
 - DO NOT use more than 2 web_search tool calls per check. Multiple searches
   for the same subject do not yield better results. Think carefully about
   crafting a search query that will give you the best possible answer in one go.
+- Some webpages require Javascript in order to load their content (SPAs). When you come
+  across these wait one second for the UI to settle before checking the results.
+- If you see a page that's unusually blank, it's probably a SPA. Treat it as such.
+- If you see text that says there is no content, or something similar, then it's probably
+  loading state for an SPA. Treat it as such.
 
 ## Finding the current value of a subject
 
 - DO NOT return values about things that have not happened yet, no matter how likely
   they might be to happen.
 - DO NOT make up answers. If you cannot find the answer to the subject
-  using web searches, set `unable_to_answer` to true in your final response.
+  using web searches, set `answered` to false in your final response.
 - When a subject is for the "latest" something, NEVER give answers like "Not yet announced"
   when there is a valid answer you could give about something that has already happened.
 
@@ -53,6 +58,12 @@ whether it's changed since you last checked it.
 - Never respond along the lines of "no change since the previous answer". Instead,
   just reuse the same response as last time.
 - The result text should not embelish the answer with any unnecessary details.
+- Use the `explanation` field to provide any necessary context or reasoning for your
+  answer. This will not be user facing, but will be used for auditing and debugging
+  purposes. Include citations here for the sources you used to determine your answer,
+  specifically quote the relevant parts of the source that support your answer.
+- If you think you've detected a SPA (Single Page App), set the `detected_spa` output
+  to true.
 
 ### The `date` object
 

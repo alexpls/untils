@@ -8,11 +8,9 @@ import (
 
 	"github.com/openai/openai-go/v3"
 	"github.com/openai/openai-go/v3/responses"
-	"github.com/openai/openai-go/v3/shared"
 )
 
 var model = "grok-4-1-fast-non-reasoning"
-var reasoning = shared.ReasoningParam{}
 
 type Service struct {
 	client *openai.Client

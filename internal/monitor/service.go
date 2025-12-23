@@ -20,11 +20,11 @@ type Service struct {
 	river          *river.Client[pgx.Tx]
 	logger         *slog.Logger
 	pushoverClient *pushover.Client // TODO: temporary, this should not be talking directly to pushover but rather a more generic notification service
-	emailService *email.Service // TODO: ditto above TODO, but this time for email
+	emailService   *email.Service   // TODO: ditto above TODO, but this time for email
 	validate       *validator.Validate
 }
 
-func NewService(pool *pgxpool.Pool, queries *sqlc.Queries, llm *llm.Service, river *river.Client[pgx.Tx], logger *slog.Logger, pushoverClient *pushover.Client, validate *validator.Validate) *Service {
+func NewService(pool *pgxpool.Pool, queries *sqlc.Queries, llm *llm.Service, river *river.Client[pgx.Tx], logger *slog.Logger, pushoverClient *pushover.Client, emailService *email.Service, validate *validator.Validate) *Service {
 	return &Service{
 		pool:           pool,
 		queries:        queries,
@@ -33,5 +33,6 @@ func NewService(pool *pgxpool.Pool, queries *sqlc.Queries, llm *llm.Service, riv
 		logger:         logger,
 		pushoverClient: pushoverClient,
 		validate:       validate,
+		emailService:   emailService,
 	}
 }

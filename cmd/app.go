@@ -114,7 +114,7 @@ func createApp(c *config) (*app, func()) {
 		Port:     c.smtp.port,
 	})
 
-	a.monitor = monitor.NewService(a.db, a.queries, a.llm, a.river, a.logger.With("source", "monitor"), a.pushoverClient, a.validate)
+	a.monitor = monitor.NewService(a.db, a.queries, a.llm, a.river, a.logger.With("source", "monitor"), a.pushoverClient, a.emailService, a.validate)
 
 	a.userSettings = usersettings.NewService(a.db, a.queries)
 

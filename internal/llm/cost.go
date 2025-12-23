@@ -11,8 +11,7 @@ func calculateCost(model string, response *responses.Response) (float64, error) 
 	cost := 0.0
 
 	switch model {
-	case "grok-4-1-fast-reasoning":
-	case "grok-4-1-fast-non-reasoning":
+	case "grok-4-1-fast-non-reasoning", "grok-4-1-fast-reasoning":
 		// https://docs.x.ai/docs/models
 		per1MInputToken, per1MOutputToken := 0.2, 0.5
 		per1KSearchCalls, per1KXSearchCalls := 5.0, 5.0

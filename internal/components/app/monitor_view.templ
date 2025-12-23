@@ -5,6 +5,7 @@ import (
 
 	"github.com/alexpls/untils_go/internal/components"
 	"github.com/alexpls/untils_go/internal/db/sqlc"
+	"net/url"
 )
 
 type MonitorViewData struct {
@@ -56,6 +57,9 @@ templ MonitorViewPage(data MonitorViewData) {
 							for _, result := range data.Results {
 								@monitorResultTimelineItem(result)
 							}
+							<li>
+								@components.TimelineItem(monitorCreatedTimelineHeading(data.Monitor))
+							</li>
 						</ul>
 					</div>
 				</div>
@@ -163,9 +167,26 @@ templ monitorResultTimelineItem(result *sqlc.MonitorResult) {
 					if result.Citations != nil && len(*result.Citations) > 0 {
 						<div class="flex space-x-1">
 						for _, citation := range *result.Citations {
-							<div>
-								<a href={citation.URL} target="_blank" rel="noref noopener">{citation.WebsiteTitle}</a>
-							</div>
+							<a
+								href={citation.URL}
+								title={citation.WebsiteTitle + " | " + citation.PageTitle}
+								target="_blank"
+								rel="noref noopener"
+								x-data="{imgLoaded: false}"
+								class="relative w-5 h-5 rounded bg-base-content/10 border border-base-content/40 overflow-hidden flex items-center justify-center"
+							>
+								<span
+									x-text={fmt.Sprintf("imgLoaded ? '' : '%s'", citation.WebsiteTitle[0:1])}
+									class="absolute text-xs font-semibold"
+								></span>
+								<img
+									x-show="imgLoaded"
+									x-init="$el.complete ? imgLoaded = true : null"
+									x-on:load="imgLoaded = true"
+									class="w-full h-full z-10"
+									src={fmt.Sprintf("/app/favicon?path=%s", urlHost(citation.URL))}
+								/>
+							</a>
 						}
 						</div>
 					} else {
@@ -181,4 +202,18 @@ templ monitorResultHeading(result *sqlc.MonitorResult) {
 	<div class="text-lg font-semibold">
 		{result.Result}
 	</div>
+}
+
+templ monitorCreatedTimelineHeading(mon *sqlc.Monitor) {
+	<div class="text-base-content/60">
+		Created {components.FormatDate(ctx, mon.CreatedAt)}
+	</div>
+}
+
+func urlHost(path string) string {
+	u, err := url.Parse(path)
+	if err != nil {
+		return path
+	}
+	return fmt.Sprintf("%s://%s", u.Scheme, u.Host)
 }

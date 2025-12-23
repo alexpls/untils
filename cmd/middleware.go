@@ -13,6 +13,7 @@ import (
 
 type HandlerFuncWithUser func(http.ResponseWriter, *http.Request, *sqlc.User)
 
+// TODO: dump this in favor of more conventional http.Handler args
 func (a *app) requireAuth(next HandlerFuncWithUser) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		sess := session.FromRequest(r)
@@ -28,6 +29,12 @@ func (a *app) requireAuth(next HandlerFuncWithUser) http.HandlerFunc {
 			http.Redirect(w, r, "/sign_in?return="+ret, http.StatusSeeOther)
 		}
 	}
+}
+
+func (a *app) requireAuth2(next http.Handler) http.HandlerFunc {
+	return a.requireAuth(func(w http.ResponseWriter, r *http.Request, _ *sqlc.User) {
+		next.ServeHTTP(w, r)
+	})
 }
 
 func (a *app) setUserContext(next http.Handler) http.Handler {

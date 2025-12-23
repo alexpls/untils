@@ -42,9 +42,9 @@ func (s *Service) Send(ctx context.Context, params *SendParams) error {
 		"\r\n" +
 		params.Body + "\r\n")
 
-	auth := s.auth
-	if s.config.Username == "" {
-		auth = nil
+	var auth smtp.Auth = nil
+	if s.auth != nil && s.config.Username != "" {
+		auth = s.auth
 	}
 
 	if err := smtp.SendMail(

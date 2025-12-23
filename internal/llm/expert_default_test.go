@@ -24,7 +24,7 @@ func TestExpertDefaultPerformCheck(t *testing.T) {
 	svc := llm.NewService(&oai, slog.Default())
 	expert := llm.NewExpertDefault(svc)
 	res, err := expert.PerformCheck(ctx, &llm.CheckParams{
-		Subject:        "What's the latest IGN game of the year?",
+		Subject:        "Current power outages in Birkdale, Queensland",
 		Instructions:   "",
 		PreviousResult: "",
 	})

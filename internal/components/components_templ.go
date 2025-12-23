@@ -31,7 +31,7 @@ func TimelineItem(heading templ.Component) templ.Component {
 		ctx = templ.ClearChildren(ctx)
 		var templ_7745c5c3_Var2 = []any{"relative", "py-2", "before:content-['']", "before:absolute",
 			"before:bg-base-content/10", "before:top-0", "before:bottom-0",
-			"before:left-0", "before:w-0.5"}
+			"before:left-0", "before:w-0.5", "first:before:top-4", "last:before:bottom-4"}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
