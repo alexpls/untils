@@ -76,7 +76,7 @@ func inputItems(messages ...responses.ResponseInputItemUnionParam) responses.Res
 	}
 }
 
-func webSearchTool() []responses.ToolUnionParam {
+func webSearchTools() []responses.ToolUnionParam {
 	return []responses.ToolUnionParam{
 		responses.ToolParamOfWebSearch("web_search"),
 		responses.ToolParamOfWebSearch("x_search"),

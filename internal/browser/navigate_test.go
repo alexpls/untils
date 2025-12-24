@@ -12,11 +12,11 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestGoTo(t *testing.T) {
+func TestNavigate(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	result, err := browser.GoTo(ctx, "https://example.org")
+	result, err := browser.Navigate(ctx, "https://example.org")
 	require.NoError(t, err)
 
 	assert.Equal(t, "Example Domain", result.Page.Title)

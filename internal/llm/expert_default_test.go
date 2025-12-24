@@ -14,7 +14,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestExpertDefaultPerformCheck(t *testing.T) {
+func TestExpertDefaultUseBrowserNavigateTool(t *testing.T) {
 	oai := openai.NewClient(
 		option.WithAPIKey(os.Getenv("XAI_KEY")),
 		option.WithBaseURL("https://api.x.ai/v1"),
@@ -24,8 +24,8 @@ func TestExpertDefaultPerformCheck(t *testing.T) {
 	svc := llm.NewService(&oai, slog.Default())
 	expert := llm.NewExpertDefault(svc)
 	res, err := expert.PerformCheck(ctx, &llm.CheckParams{
-		Subject:        "Current power outages in Birkdale, Queensland",
-		Instructions:   "",
+		Subject:        "Current power outages in QLD",
+		Instructions:   "You must check this URL by navigating to the page: https://www.energex.com.au/outages/outage-finder/emergency-outages-text-view/?council=Brisbane%20City&startSuburb=all&suburb=",
 		PreviousResult: "",
 	})
 	require.NoError(t, err)

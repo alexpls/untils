@@ -23,6 +23,13 @@ whether it's changed since you last checked it.
 - If you see text that says there is no content, or something similar, then it's probably
   loading state for an SPA. Treat it as such.
 
+## Using the web browser tools
+
+- When you want a second opinion about a web page, use the `browser_navigate` tool. Do this
+  especially when you have detected a SPA site and the web page seems blank or has an empty
+  state. This can happen because your `web_search` tool doesn't actually display contents of
+  SPA sites properly. So fall back to `browser_navigate` in cases like these.
+
 ## Finding the current value of a subject
 
 - DO NOT return values about things that have not happened yet, no matter how likely

@@ -15,11 +15,11 @@ type Page struct {
 	Contents string
 }
 
-type GoToResult struct {
+type NavigateResult struct {
 	Page Page
 }
 
-func GoTo(ctx context.Context, path string) (*GoToResult, error) {
+func Navigate(ctx context.Context, path string) (*NavigateResult, error) {
 	browserCtx, browserCancel := chromedp.NewContext(ctx)
 	defer browserCancel()
 
@@ -41,7 +41,7 @@ func GoTo(ctx context.Context, path string) (*GoToResult, error) {
 
 	pageContents := tree.String()
 
-	return &GoToResult{
+	return &NavigateResult{
 		Page: Page{
 			Title:    title,
 			Contents: pageContents,
