@@ -84,6 +84,12 @@ where monitor_id = @monitor_id
 order by created_at desc
 limit 1;
 
+-- name: GetLatestMonitorResults :many
+select * from monitor_results
+where monitor_id = @monitor_id
+order by created_at desc
+limit 10;
+
 -- name: ListMonitorResults :many
 select * from monitor_results
 where monitor_id = @monitor_id

@@ -88,8 +88,8 @@ func (s *Service) PerformMonitorCheck(ctx context.Context, userID int64, check *
 		return fmt.Errorf("getting monitor: %w", err)
 	}
 
-	latest, err := db.WithTxV(s.pool, ctx, func(tx pgx.Tx) (*sqlc.MonitorResult, error) {
-		latest, err := s.queries.GetLatestMonitorResult(ctx, tx, monitor.ID)
+	latest, err := db.WithTxV(s.pool, ctx, func(tx pgx.Tx) ([]*sqlc.MonitorResult, error) {
+		latest, err := s.queries.GetLatestMonitorResults(ctx, tx, monitor.ID)
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
 				latest = nil
@@ -113,16 +113,19 @@ func (s *Service) PerformMonitorCheck(ctx context.Context, userID int64, check *
 		return err
 	}
 
-	prevResult := "None (this is the first check)"
-	if latest != nil {
-		prevResult = latest.Result
+	prevResults := make([]llm.PreviousResult, len(latest))
+	for i, r := range latest {
+		prevResults[i] = llm.PreviousResult{
+			DateChecked:       r.CreatedAt,
+			ResponsePlaintext: r.Result,
+		}
 	}
 
 	expert := llm.NewExpert(monitor.Expert.String, s.llm)
 	result, err := expert.PerformCheck(ctx, &llm.CheckParams{
-		Subject:        monitor.Subject.String,
-		PreviousResult: prevResult,
-		Instructions:   monitor.Instructions.String,
+		Subject:         monitor.Subject.String,
+		PreviousResults: prevResults,
+		Instructions:    monitor.Instructions.String,
 	})
 	if err != nil {
 		if cerr := s.queries.UpdateMonitorCheckFailed(ctx, s.pool, &sqlc.UpdateMonitorCheckFailedParams{
@@ -147,14 +150,14 @@ func (s *Service) PerformMonitorCheck(ctx context.Context, userID int64, check *
 			return fmt.Errorf("updating monitor check to success status: %w", err)
 		}
 
-		if result.DifferentToPrevious || latest == nil {
+		if result.DifferentToPrevious || len(latest) == 0 {
 			params := checkResponseToCreateMonitorResultParams(check.MonitorID, check.ID, result)
 			if _, err := s.queries.CreateMonitorResult(ctx, tx, params); err != nil {
 				return fmt.Errorf("creating check result: %w", err)
 			}
 		} else {
 			if err := s.queries.AppendConfirmingCheckIDToResult(ctx, tx, &sqlc.AppendConfirmingCheckIDToResultParams{
-				MonitorResultID:           latest.ID,
+				MonitorResultID:           latest[0].ID,
 				ConfirmingCheckIDToAppend: check.ID,
 			}); err != nil {
 				return fmt.Errorf("appending confirming check id to result: %w", err)
@@ -168,7 +171,12 @@ func (s *Service) PerformMonitorCheck(ctx context.Context, userID int64, check *
 	}
 
 	if result.DifferentToPrevious {
-		notifMessage := fmt.Sprintf("Change detected: %s (was %s)", result.ResponsePlaintext, prevResult)
+		lastResult := "(none)"
+		if len(latest) > 0 {
+			lastResult = latest[0].Result
+		}
+
+		notifMessage := fmt.Sprintf("Change detected: %s (was %s)", result.ResponsePlaintext, lastResult)
 		if err = s.SendNotifications(ctx, SendNotificationsParams{
 			Monitor: monitor,
 			Message: notifMessage,

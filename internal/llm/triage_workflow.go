@@ -18,7 +18,9 @@ type TriageWorkflowReponse struct {
 	Check   *CheckResponse
 }
 
-func (w *TriageWorkflow) Run(ctx context.Context, params *TriageParams) (*TriageWorkflowReponse, error) {
+func (w *TriageWorkflow) Run(parentCtx context.Context, params *TriageParams) (*TriageWorkflowReponse, error) {
+	ctx, _ := withStatsContext(parentCtx)
+
 	maxTurns := 3
 	turn := 0
 
@@ -51,9 +53,8 @@ func (w *TriageWorkflow) Run(ctx context.Context, params *TriageParams) (*Triage
 
 		expert := NewExpert(triageResp.ChosenExpert, w.service)
 		checkResp, err = expert.PerformCheck(ctx, &CheckParams{
-			Subject:        subject,
-			Instructions:   params.Instructions,
-			PreviousResult: "", // first check, so no prev result
+			Subject:      subject,
+			Instructions: params.Instructions,
 		})
 		if err != nil {
 			return nil, err

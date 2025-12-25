@@ -24,9 +24,8 @@ func TestExpertDefaultUseBrowserNavigateTool(t *testing.T) {
 	svc := llm.NewService(&oai, slog.Default())
 	expert := llm.NewExpertDefault(svc)
 	res, err := expert.PerformCheck(ctx, &llm.CheckParams{
-		Subject:        "Current power outages in QLD",
-		Instructions:   "You must check this URL by navigating to the page: https://www.energex.com.au/outages/outage-finder/emergency-outages-text-view/?council=Brisbane%20City&startSuburb=all&suburb=",
-		PreviousResult: "",
+		Subject:      "Current power outages in QLD",
+		Instructions: "You must check this URL by navigating to the page: https://www.energex.com.au/outages/outage-finder/emergency-outages-text-view/?council=Brisbane%20City&startSuburb=all&suburb=",
 	})
 	require.NoError(t, err)
 

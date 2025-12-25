@@ -113,6 +113,9 @@ func statsFromContext(ctx context.Context) *stats {
 }
 
 func withStatsContext(ctx context.Context) (context.Context, *stats) {
+	if existing, ok := ctx.Value(contextKey).(*stats); ok {
+		return ctx, existing
+	}
 	s := &stats{}
 	return context.WithValue(ctx, contextKey, s), s
 }

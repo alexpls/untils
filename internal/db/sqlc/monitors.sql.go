@@ -252,6 +252,43 @@ func (q *Queries) GetLatestMonitorResult(ctx context.Context, db DBTX, monitorID
 	return &i, err
 }
 
+const getLatestMonitorResults = `-- name: GetLatestMonitorResults :many
+select id, monitor_id, confirming_check_ids, result, date, date_past_tense_verb, citations, latest_confirmation_at, created_at from monitor_results
+where monitor_id = $1
+order by created_at desc
+limit 10
+`
+
+func (q *Queries) GetLatestMonitorResults(ctx context.Context, db DBTX, monitorID int64) ([]*MonitorResult, error) {
+	rows, err := db.Query(ctx, getLatestMonitorResults, monitorID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []*MonitorResult
+	for rows.Next() {
+		var i MonitorResult
+		if err := rows.Scan(
+			&i.ID,
+			&i.MonitorID,
+			&i.ConfirmingCheckIds,
+			&i.Result,
+			&i.Date,
+			&i.DatePastTenseVerb,
+			&i.Citations,
+			&i.LatestConfirmationAt,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getMonitor = `-- name: GetMonitor :one
 select id, user_id, status, subject, instructions, rejected_reason, updated_at, created_at, expert from monitors
 where user_id = $1 and id = $2

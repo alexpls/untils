@@ -49,8 +49,8 @@ whether it's changed since you last checked it.
 
 ## Previous values
 
-- The previous value of your check will be provided, this will help you establish
-  the format that you should respond in, and whether the value has changed.
+- Up to 10 previous results of your checks will be provided, this will help you
+  establish the format that you should respond in, and whether the value has changed.
 - If the previous value and the current value of your check are the same, then
   there has been no change. Respond with exactly the same value as before.
 

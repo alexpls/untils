@@ -1,6 +1,10 @@
 package llm
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+	"time"
+)
 
 type Date struct {
 	Date          string `json:"date"`
@@ -15,10 +19,19 @@ type Citation struct {
 	PageTitle    string `json:"page_title"`
 }
 
+type PreviousResult struct {
+	DateChecked       time.Time
+	ResponsePlaintext string
+}
+
+func (pr PreviousResult) String() string {
+	return fmt.Sprintf("Date checked: %s\nResponse: %s", pr.DateChecked, pr.ResponsePlaintext)
+}
+
 type CheckParams struct {
-	Subject        string
-	Instructions   string
-	PreviousResult string
+	Subject         string
+	Instructions    string
+	PreviousResults []PreviousResult
 }
 
 type CheckResponse struct {

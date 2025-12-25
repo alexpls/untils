@@ -5,6 +5,7 @@ import (
 	_ "embed"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/openai/openai-go/v3"
 	"github.com/openai/openai-go/v3/responses"
@@ -25,11 +26,17 @@ func (e *ExpertDefault) PerformCheck(parentCtx context.Context, params *CheckPar
 	ctx, stats := withStatsContext(parentCtx)
 	defer stats.log(e.service.logger)
 
+	var previousResults strings.Builder
+	for _, pr := range params.PreviousResults {
+		previousResults.WriteString(pr.String())
+		previousResults.WriteString("\n\n")
+	}
+
 	messages := []responses.ResponseInputItemUnionParam{
 		systemMessage(expertDefaultPrompt),
 		userMessage("Subject: " + params.Subject +
 			"\n\nInstructions: " + params.Instructions +
-			"\n\nPrevious result: " + params.PreviousResult),
+			"\n\nPrevious result: \n" + previousResults.String()),
 	}
 
 	for {
