@@ -121,11 +121,15 @@ func (s *Service) PerformMonitorCheck(ctx context.Context, userID int64, check *
 		}
 	}
 
-	expert := llm.NewExpert(monitor.Expert.String, s.llm)
-	result, err := expert.PerformCheck(ctx, &llm.CheckParams{
-		Subject:         monitor.Subject.String,
-		PreviousResults: prevResults,
-		Instructions:    monitor.Instructions.String,
+	checker := llm.NewCheckWorkflow(s.llm)
+
+	result, err := checker.Run(ctx, &llm.CheckWorkflowParams{
+		ExpertName: monitor.Expert.String,
+		CheckParams: &llm.CheckParams{
+			Subject:         monitor.Subject.String,
+			PreviousResults: prevResults,
+			Instructions:    monitor.Instructions.String,
+		},
 	})
 	if err != nil {
 		if cerr := s.queries.UpdateMonitorCheckFailed(ctx, s.pool, &sqlc.UpdateMonitorCheckFailedParams{

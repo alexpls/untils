@@ -1,6 +1,6 @@
 //go:build integration
 
-package llm_test
+package llm
 
 import (
 	"context"
@@ -8,7 +8,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/alexpls/untils_go/internal/llm"
 	"github.com/openai/openai-go/v3"
 	"github.com/openai/openai-go/v3/option"
 	"github.com/stretchr/testify/require"
@@ -21,9 +20,9 @@ func TestExpertDefaultUseBrowserNavigateTool(t *testing.T) {
 	)
 
 	ctx := context.Background()
-	svc := llm.NewService(&oai, slog.Default())
-	expert := llm.NewExpertDefault(svc)
-	res, err := expert.PerformCheck(ctx, &llm.CheckParams{
+	svc := NewService(&oai, slog.Default())
+	expert := newExpertDefault(svc)
+	res, err := expert.performCheck(ctx, &CheckParams{
 		Subject:      "Current power outages in QLD",
 		Instructions: "You must check this URL by navigating to the page: https://www.energex.com.au/outages/outage-finder/emergency-outages-text-view/?council=Brisbane%20City&startSuburb=all&suburb=",
 	})

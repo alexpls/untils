@@ -11,7 +11,7 @@ var experts = map[string]expertDefinition{
 	"default": {
 		description: "A generic expert capable of handling a wide range of subjects. " +
 			"Fallback option when no specialized expert is suitable.",
-		builder: NewExpertDefault,
+		builder: newExpertDefault,
 	},
 }
 var expertNames = slices.Collect(maps.Keys(experts))
@@ -26,7 +26,7 @@ func (e ErrUnsupportedExpert) Error() string {
 
 var ErrUnkonwnExpert = errors.New("unknown expert")
 
-func NewExpert(name string, service *Service) Expert {
+func newExpert(name string, service *Service) expert {
 	ex, ok := experts[name]
 	if !ok {
 		panic("invalid expert: " + name)
@@ -34,13 +34,13 @@ func NewExpert(name string, service *Service) Expert {
 	return ex.builder(service)
 }
 
-type Expert interface {
-	PerformCheck(ctx context.Context, params *CheckParams) (*CheckResponse, error)
+type expert interface {
+	performCheck(ctx context.Context, params *CheckParams) (*CheckResponse, error)
 }
 
 type expertDefinition struct {
 	description string
-	builder     func(service *Service) Expert
+	builder     func(service *Service) expert
 }
 
 var expertsMarkdown string

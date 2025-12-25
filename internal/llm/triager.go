@@ -41,8 +41,6 @@ type TriagerResponse struct {
 }
 
 func (p *Triager) Run(ctx context.Context) (*TriagerResponse, error) {
-	ctx, _ = withStatsContext(ctx)
-
 	var resp *responseResult
 	var err error
 

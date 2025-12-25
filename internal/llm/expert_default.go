@@ -11,21 +11,18 @@ import (
 	"github.com/openai/openai-go/v3/responses"
 )
 
-type ExpertDefault struct {
+type expertDefault struct {
 	service *Service
 }
 
-func NewExpertDefault(service *Service) Expert {
-	return &ExpertDefault{service: service}
+func newExpertDefault(service *Service) expert {
+	return &expertDefault{service: service}
 }
 
 //go:embed expert_default_prompt.md
 var expertDefaultPrompt string
 
-func (e *ExpertDefault) PerformCheck(parentCtx context.Context, params *CheckParams) (*CheckResponse, error) {
-	ctx, stats := withStatsContext(parentCtx)
-	defer stats.log(e.service.logger)
-
+func (e *expertDefault) performCheck(ctx context.Context, params *CheckParams) (*CheckResponse, error) {
 	var previousResults strings.Builder
 	for _, pr := range params.PreviousResults {
 		previousResults.WriteString(pr.String())

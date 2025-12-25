@@ -51,8 +51,8 @@ func (w *TriageWorkflow) Run(parentCtx context.Context, params *TriageParams) (*
 			subject = params.Subject
 		}
 
-		expert := NewExpert(triageResp.ChosenExpert, w.service)
-		checkResp, err = expert.PerformCheck(ctx, &CheckParams{
+		expert := newExpert(triageResp.ChosenExpert, w.service)
+		checkResp, err = expert.performCheck(ctx, &CheckParams{
 			Subject:      subject,
 			Instructions: params.Instructions,
 		})
