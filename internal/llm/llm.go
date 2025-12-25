@@ -24,17 +24,27 @@ func NewService(client *openai.Client, logger *slog.Logger) *Service {
 	}
 }
 
-func (s *Service) response(ctx context.Context, params responses.ResponseNewParams) (*responses.Response, error) {
-	start := time.Now()
+type responseResult struct {
+	*responses.Response
+	toolCalls []responses.ResponseFunctionToolCall
+}
+
+func (s *Service) response(ctx context.Context, params responses.ResponseNewParams) (*responseResult, error) {
+	stats := statsFromContext(ctx)
+	turn := stats.newTurn()
 
 	resp, err := s.client.Responses.New(ctx, params)
 
-	s.logger.Info("generated response",
+	turn.end = time.Now()
+
+	s.logger.Debug("generated response",
 		"model", model,
-		"duration_ms", time.Since(start).Milliseconds(),
+		"turn_duration_ms", turn.duration().Milliseconds(),
+		"turn_num", len(stats.turns),
 		"success", err == nil)
 
 	if err != nil {
+		turn.err = err
 		return nil, fmt.Errorf("fetching llm response: %w", err)
 	}
 
@@ -42,10 +52,19 @@ func (s *Service) response(ctx context.Context, params responses.ResponseNewPara
 	if err != nil {
 		s.logger.Error("failed to calculate cost", "error", err)
 	} else {
-		s.logger.Info("calculated cost", "cost_usd", cost)
+		turn.cost = cost
+		s.logger.Debug("calculated cost", "cost_usd", cost, "total_cost", stats.totalCost())
 	}
 
-	return resp, nil
+	toolCalls := extractToolCalls(resp.Output)
+	for _, item := range toolCalls {
+		turn.incrToolCall(item.Name)
+	}
+
+	return &responseResult{
+		toolCalls: toolCalls,
+		Response:  resp,
+	}, nil
 }
 
 func userMessage(content string) responses.ResponseInputItemUnionParam {
@@ -81,4 +100,15 @@ func webSearchTools() []responses.ToolUnionParam {
 		responses.ToolParamOfWebSearch("web_search"),
 		responses.ToolParamOfWebSearch("x_search"),
 	}
+}
+
+func extractToolCalls(outputs []responses.ResponseOutputItemUnion) (out []responses.ResponseFunctionToolCall) {
+	for _, item := range outputs {
+		switch item.AsAny().(type) {
+		case responses.ResponseFunctionToolCall:
+			item := item.AsFunctionCall()
+			out = append(out, item)
+		}
+	}
+	return out
 }

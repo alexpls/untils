@@ -21,7 +21,10 @@ func NewExpertDefault(service *Service) Expert {
 //go:embed expert_default_prompt.md
 var expertDefaultPrompt string
 
-func (e *ExpertDefault) PerformCheck(ctx context.Context, params *CheckParams) (*CheckResponse, error) {
+func (e *ExpertDefault) PerformCheck(parentCtx context.Context, params *CheckParams) (*CheckResponse, error) {
+	ctx, stats := withStatsContext(parentCtx)
+	defer stats.log(e.service.logger)
+
 	messages := []responses.ResponseInputItemUnionParam{
 		systemMessage(expertDefaultPrompt),
 		userMessage("Subject: " + params.Subject +
@@ -40,13 +43,8 @@ func (e *ExpertDefault) PerformCheck(ctx context.Context, params *CheckParams) (
 			return nil, err
 		}
 
-		calledTools := false
-
-		for _, item := range resp.Output {
-			switch item.AsAny().(type) {
-			case responses.ResponseFunctionToolCall:
-				calledTools = true
-				item := item.AsFunctionCall()
+		if len(resp.toolCalls) > 0 {
+			for _, item := range resp.toolCalls {
 				res, err := handleToolCall(ctx, item.Name, item.Arguments)
 				if err != nil {
 					e.service.logger.Error("error handling tool call", "error", err)
@@ -60,10 +58,8 @@ func (e *ExpertDefault) PerformCheck(ctx context.Context, params *CheckParams) (
 					},
 				})
 			}
-		}
 
-		if calledTools {
-			continue // go again
+			continue
 		}
 
 		sanitized := sanitizeXAIOutput(resp.OutputText())
