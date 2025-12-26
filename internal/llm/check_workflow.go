@@ -1,6 +1,9 @@
 package llm
 
-import "context"
+import (
+	"context"
+	"fmt"
+)
 
 type CheckWorkflow struct {
 	service *Service
@@ -16,8 +19,17 @@ type CheckWorkflowParams struct {
 }
 
 func (w *CheckWorkflow) Run(parentCtx context.Context, params *CheckWorkflowParams) (*CheckResult, error) {
-	expert := newExpert(params.ExpertName, w.service)
 	ctx, stats := withStatsContext(parentCtx)
 	defer stats.log(w.service.logger)
+
+	sourceFinder := newSourceFinder(w.service)
+	sourcesResp, err := sourceFinder.Run(ctx, params.CheckParams)
+	if err != nil {
+		return nil, fmt.Errorf("finding sources: %w", err)
+	}
+
+	params.Sources = sourcesResp.Sources
+
+	expert := newExpert(params.ExpertName, w.service)
 	return expert.performCheck(ctx, params.CheckParams)
 }

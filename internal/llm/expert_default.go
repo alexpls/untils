@@ -23,13 +23,25 @@ func newExpertDefault(service *Service) expert {
 var expertDefaultPrompt string
 
 func (e *expertDefault) performCheck(ctx context.Context, params *CheckParams) (*CheckResult, error) {
-	var previousResponses strings.Builder
+	var prevs strings.Builder
 	for _, pr := range params.PreviousResults {
 		d, err := json.Marshal(pr)
 		if err != nil {
-			e.service.logger.Error("error unmarshaling previous response", "error", err)
+			return nil, fmt.Errorf("marshaling previous result: %w", err)
 		} else {
-			previousResponses.Write(d)
+			prevs.Write(d)
+			prevs.WriteString("\n")
+		}
+	}
+
+	var sources strings.Builder
+	for _, src := range params.Sources {
+		s, err := json.Marshal(src)
+		if err != nil {
+			return nil, fmt.Errorf("marshaling source: %w", err)
+		} else {
+			sources.Write(s)
+			sources.WriteString("\n")
 		}
 	}
 
@@ -37,7 +49,8 @@ func (e *expertDefault) performCheck(ctx context.Context, params *CheckParams) (
 		systemMessage(expertDefaultPrompt),
 		userMessage("Subject: " + params.Subject +
 			"\n\nInstructions: " + params.Instructions +
-			"\n\nPrevious result: \n" + previousResponses.String()),
+			"\n\nPrevious results: \n" + prevs.String() +
+			"\n\nSources: \n" + sources.String()),
 	}
 
 	for {
@@ -45,7 +58,7 @@ func (e *expertDefault) performCheck(ctx context.Context, params *CheckParams) (
 			Model: model,
 			Input: inputItems(messages...),
 			Text:  jsonSchemaResponse(CheckResult{}),
-			Tools: append(webSearchTools(), browserTools()...),
+			Tools: browserTools(),
 		})
 		if err != nil {
 			return nil, err

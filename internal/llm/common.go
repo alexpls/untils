@@ -20,16 +20,17 @@ type Citation struct {
 type CheckParams struct {
 	Subject         string
 	Instructions    string
+	Sources         []Source
 	PreviousResults []CheckResult
 }
 
 type CheckResult struct {
-	Answered            bool      `json:"answered"`
-	Explanation         string    `json:"explanation"`
+	Success             bool      `json:"success"`
+	Reason              string    `json:"reason"`
 	DifferentToPrevious bool      `json:"different_to_previous"`
 	ResultPlaintext     string    `json:"result_plaintext"`
 	Date                Date      `json:"date"`
-	Citations           Citations `json:"citations"`
+	Citations           Citations `json:"citations"` // TODO: change to Sources
 }
 
 func sanitizeXAIOutput(in string) string {

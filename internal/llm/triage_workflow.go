@@ -61,10 +61,10 @@ func (w *TriageWorkflow) Run(parentCtx context.Context, params *TriageParams) (*
 			return nil, err
 		}
 
-		if !checkResp.Answered {
+		if !checkResp.Success {
 			feedback := "The expert couldn't answer. Try picking another expert or rephrasing the subject."
-			if checkResp.Explanation != "" {
-				feedback += fmt.Sprintf(" Rejection reason: %s", checkResp.Explanation)
+			if checkResp.Reason != "" {
+				feedback += fmt.Sprintf(" Rejection reason: %s", checkResp.Reason)
 			}
 			triager.addMessage(systemMessage(feedback))
 			continue

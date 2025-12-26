@@ -33,27 +33,42 @@ func (s *Service) response(ctx context.Context, params responses.ResponseNewPara
 	stats := statsFromContext(ctx)
 	turn := stats.newTurn()
 
+	var logAttrs []any
+
+	defer func() {
+		logAttrs = append(logAttrs,
+			slog.String("model", model),
+			slog.Int("turn_num", len(stats.turns)),
+		)
+		s.logger.Debug("turn complete", logAttrs...)
+	}()
+
 	resp, err := s.client.Responses.New(ctx, params)
 
 	turn.end = time.Now()
 
-	s.logger.Debug("generated response",
-		"model", model,
-		"turn_duration_ms", turn.duration().Milliseconds(),
-		"turn_num", len(stats.turns),
-		"success", err == nil)
+	logAttrs = append(logAttrs,
+		slog.Duration("duration", turn.duration()),
+		slog.Bool("success", err == nil),
+	)
 
 	if err != nil {
 		turn.err = err
 		return nil, fmt.Errorf("fetching llm response: %w", err)
 	}
 
+	logAttrs = append(logAttrs, slog.String("response", resp.OutputText()))
+
 	cost, err := calculateCost(model, resp)
 	if err != nil {
 		s.logger.Error("failed to calculate cost", "error", err)
 	} else {
 		turn.cost = cost
-		s.logger.Debug("calculated cost", "cost_usd", cost, "total_cost", stats.totalCost())
+		logAttrs = append(logAttrs,
+			slog.Float64("cost_usd", cost),
+			slog.Int64("input_tokens", resp.Usage.InputTokens),
+			slog.Int64("output_tokens", resp.Usage.OutputTokens),
+		)
 	}
 
 	toolCalls := extractToolCalls(resp.Output)
@@ -98,7 +113,6 @@ func inputItems(messages ...responses.ResponseInputItemUnionParam) responses.Res
 func webSearchTools() []responses.ToolUnionParam {
 	return []responses.ToolUnionParam{
 		responses.ToolParamOfWebSearch("web_search"),
-		responses.ToolParamOfWebSearch("x_search"),
 	}
 }
 
