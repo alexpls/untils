@@ -5,6 +5,7 @@ import (
 	_ "embed"
 	"encoding/json"
 	"fmt"
+	"slices"
 
 	"github.com/openai/openai-go/v3/responses"
 )
@@ -22,8 +23,9 @@ func newSourceFinder(service *Service) *sourceFinder {
 }
 
 type Source struct {
-	URL         string `json:"url"`
-	Monitorable bool   `json:"monitorable"`
+	URL            string `json:"url"`
+	Monitorable    bool   `json:"monitorable"`
+	RelevanceScore int    `json:"relevance_score"`
 }
 
 type sourceFinderResponse struct {
@@ -78,6 +80,33 @@ func (p *sourceFinder) Run(ctx context.Context, params *CheckParams) (*sourceFin
 			continue
 		}
 
+		if !uniqueScores(result.Sources) {
+			p.messages = append(p.messages, systemMessage(
+				"Error: duplicate relevance scores found. Ensure each source has a unique relevance score",
+			))
+			continue
+		}
+
+		result.Sources = sortSourcesByRelevance(result.Sources)
+
 		return &result, nil
 	}
+}
+
+func uniqueScores(sources []Source) bool {
+	seen := make(map[int]struct{})
+	for _, src := range sources {
+		if _, exists := seen[src.RelevanceScore]; exists {
+			return false
+		}
+		seen[src.RelevanceScore] = struct{}{}
+	}
+	return true
+}
+
+func sortSourcesByRelevance(sources []Source) []Source {
+	slices.SortFunc(sources, func(a Source, b Source) int {
+		return a.RelevanceScore - b.RelevanceScore
+	})
+	return sources
 }

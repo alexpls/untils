@@ -39,6 +39,10 @@ func typeToSchema(t reflect.Type, v reflect.Value) map[string]any {
 		return map[string]any{
 			"type": "string",
 		}
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Float32, reflect.Float64:
+		return map[string]any{
+			"type": "number",
+		}
 	case reflect.Struct:
 		numFields := t.NumField()
 		props := make(map[string]any)

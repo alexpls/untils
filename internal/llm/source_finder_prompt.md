@@ -30,6 +30,10 @@ then be read by another agent and checked for relevancy.
   `is_monitorable` field to true.
 - If you can't find any sources, set the `sources` field to an empty list, `success` to false,
   and provide a short `failure_reason`. It is better to return no sources than irrelevant sources.
+- Don't include sources that are likely to yield duplicate information. The goal is to aim for
+  relevancy, not breadth.
+- Rank each source with a relevance score, with 1 being the most relevant. Each source must have
+  a unique relevance score.
 
 ## User provided instructions
 
