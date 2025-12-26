@@ -1,6 +1,6 @@
 //go:build integration
 
-package llm_test
+package llm
 
 import (
 	"context"
@@ -8,7 +8,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/alexpls/untils_go/internal/llm"
 	"github.com/openai/openai-go/v3"
 	"github.com/openai/openai-go/v3/option"
 	"github.com/stretchr/testify/require"
@@ -21,9 +20,9 @@ func TestTriageWorkflow(t *testing.T) {
 	)
 
 	ctx := context.Background()
-	svc := llm.NewService(&oai, slog.Default())
-	triage := llm.NewTriageWorkflow(svc)
-	res, err := triage.Run(ctx, &llm.TriageParams{
+	svc := NewService(&oai, slog.Default())
+	triage := NewTriageWorkflow(svc)
+	res, err := triage.Run(ctx, &TriageParams{
 		Subject: "Who is the president of the United States?",
 	})
 	require.NoError(t, err)

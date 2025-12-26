@@ -15,18 +15,19 @@ func NewTriageWorkflow(service *Service) *TriageWorkflow {
 
 type TriageWorkflowReponse struct {
 	Triager *TriagerResponse
-	Check   *CheckResponse
+	Check   *CheckResult
 }
 
 func (w *TriageWorkflow) Run(parentCtx context.Context, params *TriageParams) (*TriageWorkflowReponse, error) {
-	ctx, _ := withStatsContext(parentCtx)
+	ctx, stats := withStatsContext(parentCtx)
+	defer stats.log(w.service.logger)
 
 	maxTurns := 3
 	turn := 0
 
 	var err error
 	var triageResp *TriagerResponse
-	var checkResp *CheckResponse
+	var checkResp *CheckResult
 	triager := NewTriager(w.service, params)
 
 	for {

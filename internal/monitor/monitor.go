@@ -137,12 +137,13 @@ func (s *Service) ValidateMonitor(ctx context.Context, monitor *sqlc.Monitor) er
 				Status:       sqlc.MonitorCheckStatusSuccess,
 				ScheduledFor: now,
 				DoneAt:       &now,
+				Result:       res.Check,
 			})
 			if err != nil {
 				return fmt.Errorf("creating monitor check: %w", err)
 			}
 
-			params := checkResponseToCreateMonitorResultParams(check.MonitorID, check.ID, res.Check)
+			params := CheckResultToCreateMonitorResultParams(check.MonitorID, check.ID, res.Check)
 			if _, err = s.queries.CreateMonitorResult(ctx, tx, params); err != nil {
 				return fmt.Errorf("creating check result: %w", err)
 			}
@@ -152,7 +153,7 @@ func (s *Service) ValidateMonitor(ctx context.Context, monitor *sqlc.Monitor) er
 	})
 }
 
-func checkResponseToCreateMonitorResultParams(monitorID, checkID int64, res *llm.CheckResponse) *sqlc.CreateMonitorResultParams {
+func CheckResultToCreateMonitorResultParams(monitorID, checkID int64, res *llm.CheckResult) *sqlc.CreateMonitorResultParams {
 	resultDate := pgtype.Timestamptz{Time: time.Time{}, Valid: false}
 	resultDatePastTenseVerb := pgtype.Text{String: "", Valid: false}
 
@@ -172,7 +173,7 @@ func checkResponseToCreateMonitorResultParams(monitorID, checkID int64, res *llm
 	return &sqlc.CreateMonitorResultParams{
 		MonitorID:          monitorID,
 		ConfirmingCheckIds: []int64{checkID},
-		Result:             res.ResponsePlaintext,
+		Result:             res.ResultPlaintext,
 		Citations:          &res.Citations,
 		Date:               &resultDate.Time,
 		DatePastTenseVerb:  resultDatePastTenseVerb,

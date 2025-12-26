@@ -1,9 +1,7 @@
 package llm
 
 import (
-	"fmt"
 	"strings"
-	"time"
 )
 
 type Date struct {
@@ -19,27 +17,17 @@ type Citation struct {
 	PageTitle    string `json:"page_title"`
 }
 
-type PreviousResult struct {
-	DateChecked       time.Time
-	ResponsePlaintext string
-}
-
-func (pr PreviousResult) String() string {
-	return fmt.Sprintf("Date checked: %s\nResponse: %s", pr.DateChecked, pr.ResponsePlaintext)
-}
-
 type CheckParams struct {
 	Subject         string
 	Instructions    string
-	PreviousResults []PreviousResult
+	PreviousResults []CheckResult
 }
 
-type CheckResponse struct {
+type CheckResult struct {
 	Answered            bool      `json:"answered"`
 	Explanation         string    `json:"explanation"`
-	DetectedSPA         bool      `json:"detected_spa"`
 	DifferentToPrevious bool      `json:"different_to_previous"`
-	ResponsePlaintext   string    `json:"response_plaintext"`
+	ResultPlaintext     string    `json:"result_plaintext"`
 	Date                Date      `json:"date"`
 	Citations           Citations `json:"citations"`
 }

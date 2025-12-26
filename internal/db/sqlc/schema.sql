@@ -133,7 +133,8 @@ CREATE TABLE public.monitor_checks (
     status public.monitor_check_status NOT NULL,
     scheduled_for timestamp with time zone NOT NULL,
     failure_reason text,
-    done_at timestamp with time zone
+    done_at timestamp with time zone,
+    result jsonb
 );
 
 

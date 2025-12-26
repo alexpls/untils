@@ -30,3 +30,9 @@ sql:
               import: "github.com/alexpls/untils_go/internal/llm"
               type: "Citations"
               pointer: true
+
+          - column: "monitor_checks.result"
+            go_type:
+              import: "github.com/alexpls/untils_go/internal/llm"
+              type: "CheckResult"
+              pointer: true

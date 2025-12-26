@@ -35,7 +35,7 @@ func newExpert(name string, service *Service) expert {
 }
 
 type expert interface {
-	performCheck(ctx context.Context, params *CheckParams) (*CheckResponse, error)
+	performCheck(ctx context.Context, params *CheckParams) (*CheckResult, error)
 }
 
 type expertDefinition struct {

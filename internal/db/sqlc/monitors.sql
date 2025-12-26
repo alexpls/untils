@@ -59,8 +59,8 @@ where monitor_id = @monitor_id
 and status in ('scheduled', 'checking');
 
 -- name: CreateMonitorCheck :one
-insert into monitor_checks (monitor_id, status, scheduled_for, done_at)
-values (@monitor_id, @status, @scheduled_for, @done_at)
+insert into monitor_checks (monitor_id, status, scheduled_for, done_at, result)
+values (@monitor_id, @status, @scheduled_for, @done_at, @result)
 returning *;
 
 -- name: UpdateMonitorCheckChecking :exec
@@ -75,7 +75,7 @@ where id = @id;
 
 -- name: UpdateMonitorCheckSuccess :exec
 update monitor_checks
-set status = 'success', done_at = now()
+set status = 'success', result = @result, done_at = now()
 where id = @id;
 
 -- name: GetLatestMonitorResult :one
@@ -84,10 +84,12 @@ where monitor_id = @monitor_id
 order by created_at desc
 limit 1;
 
--- name: GetLatestMonitorResults :many
-select * from monitor_results
-where monitor_id = @monitor_id
-order by created_at desc
+-- name: GetPreviousResultsWithCheck :many
+select sqlc.embed(mr), sqlc.embed(mc)
+from monitor_results mr
+left join monitor_checks mc on mc.id = mr.confirming_check_ids[array_length(mr.confirming_check_ids, 1)]
+where mr.monitor_id = @monitor_id
+order by mr.created_at desc
 limit 10;
 
 -- name: ListMonitorResults :many

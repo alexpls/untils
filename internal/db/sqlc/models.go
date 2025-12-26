@@ -212,6 +212,7 @@ type MonitorCheck struct {
 	ScheduledFor  time.Time
 	FailureReason pgtype.Text
 	DoneAt        *time.Time
+	Result        *llm.CheckResult
 }
 
 type MonitorNotifier struct {

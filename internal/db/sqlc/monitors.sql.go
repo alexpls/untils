@@ -69,9 +69,9 @@ func (q *Queries) CreateMonitor(ctx context.Context, db DBTX, arg *CreateMonitor
 }
 
 const createMonitorCheck = `-- name: CreateMonitorCheck :one
-insert into monitor_checks (monitor_id, status, scheduled_for, done_at)
-values ($1, $2, $3, $4)
-returning id, monitor_id, status, scheduled_for, failure_reason, done_at
+insert into monitor_checks (monitor_id, status, scheduled_for, done_at, result)
+values ($1, $2, $3, $4, $5)
+returning id, monitor_id, status, scheduled_for, failure_reason, done_at, result
 `
 
 type CreateMonitorCheckParams struct {
@@ -79,6 +79,7 @@ type CreateMonitorCheckParams struct {
 	Status       MonitorCheckStatus
 	ScheduledFor time.Time
 	DoneAt       *time.Time
+	Result       *llm.CheckResult
 }
 
 func (q *Queries) CreateMonitorCheck(ctx context.Context, db DBTX, arg *CreateMonitorCheckParams) (*MonitorCheck, error) {
@@ -87,6 +88,7 @@ func (q *Queries) CreateMonitorCheck(ctx context.Context, db DBTX, arg *CreateMo
 		arg.Status,
 		arg.ScheduledFor,
 		arg.DoneAt,
+		arg.Result,
 	)
 	var i MonitorCheck
 	err := row.Scan(
@@ -96,6 +98,7 @@ func (q *Queries) CreateMonitorCheck(ctx context.Context, db DBTX, arg *CreateMo
 		&i.ScheduledFor,
 		&i.FailureReason,
 		&i.DoneAt,
+		&i.Result,
 	)
 	return &i, err
 }
@@ -252,43 +255,6 @@ func (q *Queries) GetLatestMonitorResult(ctx context.Context, db DBTX, monitorID
 	return &i, err
 }
 
-const getLatestMonitorResults = `-- name: GetLatestMonitorResults :many
-select id, monitor_id, confirming_check_ids, result, date, date_past_tense_verb, citations, latest_confirmation_at, created_at from monitor_results
-where monitor_id = $1
-order by created_at desc
-limit 10
-`
-
-func (q *Queries) GetLatestMonitorResults(ctx context.Context, db DBTX, monitorID int64) ([]*MonitorResult, error) {
-	rows, err := db.Query(ctx, getLatestMonitorResults, monitorID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []*MonitorResult
-	for rows.Next() {
-		var i MonitorResult
-		if err := rows.Scan(
-			&i.ID,
-			&i.MonitorID,
-			&i.ConfirmingCheckIds,
-			&i.Result,
-			&i.Date,
-			&i.DatePastTenseVerb,
-			&i.Citations,
-			&i.LatestConfirmationAt,
-			&i.CreatedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, &i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const getMonitor = `-- name: GetMonitor :one
 select id, user_id, status, subject, instructions, rejected_reason, updated_at, created_at, expert from monitors
 where user_id = $1 and id = $2
@@ -317,7 +283,7 @@ func (q *Queries) GetMonitor(ctx context.Context, db DBTX, arg *GetMonitorParams
 }
 
 const getMonitorCheck = `-- name: GetMonitorCheck :one
-select id, monitor_id, status, scheduled_for, failure_reason, done_at from monitor_checks
+select id, monitor_id, status, scheduled_for, failure_reason, done_at, result from monitor_checks
 where id = $1
 `
 
@@ -331,12 +297,13 @@ func (q *Queries) GetMonitorCheck(ctx context.Context, db DBTX, id int64) (*Moni
 		&i.ScheduledFor,
 		&i.FailureReason,
 		&i.DoneAt,
+		&i.Result,
 	)
 	return &i, err
 }
 
 const getNextMonitorCheck = `-- name: GetNextMonitorCheck :one
-select id, monitor_id, status, scheduled_for, failure_reason, done_at from monitor_checks
+select id, monitor_id, status, scheduled_for, failure_reason, done_at, result from monitor_checks
 where monitor_id = $1
 and (status = 'scheduled' or status = 'checking')
 order by scheduled_for desc
@@ -353,8 +320,60 @@ func (q *Queries) GetNextMonitorCheck(ctx context.Context, db DBTX, monitorID in
 		&i.ScheduledFor,
 		&i.FailureReason,
 		&i.DoneAt,
+		&i.Result,
 	)
 	return &i, err
+}
+
+const getPreviousResultsWithCheck = `-- name: GetPreviousResultsWithCheck :many
+select mr.id, mr.monitor_id, mr.confirming_check_ids, mr.result, mr.date, mr.date_past_tense_verb, mr.citations, mr.latest_confirmation_at, mr.created_at, mc.id, mc.monitor_id, mc.status, mc.scheduled_for, mc.failure_reason, mc.done_at, mc.result
+from monitor_results mr
+left join monitor_checks mc on mc.id = mr.confirming_check_ids[array_length(mr.confirming_check_ids, 1)]
+where mr.monitor_id = $1
+order by mr.created_at desc
+limit 10
+`
+
+type GetPreviousResultsWithCheckRow struct {
+	MonitorResult MonitorResult
+	MonitorCheck  MonitorCheck
+}
+
+func (q *Queries) GetPreviousResultsWithCheck(ctx context.Context, db DBTX, monitorID int64) ([]*GetPreviousResultsWithCheckRow, error) {
+	rows, err := db.Query(ctx, getPreviousResultsWithCheck, monitorID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []*GetPreviousResultsWithCheckRow
+	for rows.Next() {
+		var i GetPreviousResultsWithCheckRow
+		if err := rows.Scan(
+			&i.MonitorResult.ID,
+			&i.MonitorResult.MonitorID,
+			&i.MonitorResult.ConfirmingCheckIds,
+			&i.MonitorResult.Result,
+			&i.MonitorResult.Date,
+			&i.MonitorResult.DatePastTenseVerb,
+			&i.MonitorResult.Citations,
+			&i.MonitorResult.LatestConfirmationAt,
+			&i.MonitorResult.CreatedAt,
+			&i.MonitorCheck.ID,
+			&i.MonitorCheck.MonitorID,
+			&i.MonitorCheck.Status,
+			&i.MonitorCheck.ScheduledFor,
+			&i.MonitorCheck.FailureReason,
+			&i.MonitorCheck.DoneAt,
+			&i.MonitorCheck.Result,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const listMonitorNotifiers = `-- name: ListMonitorNotifiers :many
@@ -520,12 +539,17 @@ func (q *Queries) UpdateMonitorCheckFailed(ctx context.Context, db DBTX, arg *Up
 
 const updateMonitorCheckSuccess = `-- name: UpdateMonitorCheckSuccess :exec
 update monitor_checks
-set status = 'success', done_at = now()
-where id = $1
+set status = 'success', result = $1, done_at = now()
+where id = $2
 `
 
-func (q *Queries) UpdateMonitorCheckSuccess(ctx context.Context, db DBTX, id int64) error {
-	_, err := db.Exec(ctx, updateMonitorCheckSuccess, id)
+type UpdateMonitorCheckSuccessParams struct {
+	Result *llm.CheckResult
+	ID     int64
+}
+
+func (q *Queries) UpdateMonitorCheckSuccess(ctx context.Context, db DBTX, arg *UpdateMonitorCheckSuccessParams) error {
+	_, err := db.Exec(ctx, updateMonitorCheckSuccess, arg.Result, arg.ID)
 	return err
 }
 

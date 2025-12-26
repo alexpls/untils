@@ -3,11 +3,10 @@
 package llm
 
 import (
-	"context"
-	"log/slog"
 	"os"
 	"testing"
 
+	"github.com/alexpls/untils_go/internal/testhelper"
 	"github.com/openai/openai-go/v3"
 	"github.com/openai/openai-go/v3/option"
 	"github.com/stretchr/testify/require"
@@ -19,8 +18,12 @@ func TestExpertDefaultUseBrowserNavigateTool(t *testing.T) {
 		option.WithBaseURL("https://api.x.ai/v1"),
 	)
 
-	ctx := context.Background()
-	svc := NewService(&oai, slog.Default())
+	tl := testhelper.TestLogger(t)
+
+	ctx, stats := withStatsContext(t.Context())
+	defer stats.log(tl)
+
+	svc := NewService(&oai, tl)
 	expert := newExpertDefault(svc)
 	res, err := expert.performCheck(ctx, &CheckParams{
 		Subject:      "Current power outages in QLD",

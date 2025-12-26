@@ -15,7 +15,7 @@ type CheckWorkflowParams struct {
 	ExpertName string
 }
 
-func (w *CheckWorkflow) Run(parentCtx context.Context, params *CheckWorkflowParams) (*CheckResponse, error) {
+func (w *CheckWorkflow) Run(parentCtx context.Context, params *CheckWorkflowParams) (*CheckResult, error) {
 	expert := newExpert(params.ExpertName, w.service)
 	ctx, stats := withStatsContext(parentCtx)
 	defer stats.log(w.service.logger)
