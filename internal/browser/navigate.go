@@ -3,6 +3,7 @@ package browser
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"time"
 
 	"github.com/chromedp/cdproto/accessibility"
@@ -20,6 +21,11 @@ type NavigateResult struct {
 }
 
 func Navigate(ctx context.Context, path string) (*NavigateResult, error) {
+	u, err := url.Parse(path)
+	if err != nil {
+		return nil, fmt.Errorf("parsing url: %w", err)
+	}
+
 	browserCtx, browserCancel := chromedp.NewContext(ctx)
 	defer browserCancel()
 
@@ -31,8 +37,9 @@ func Navigate(ctx context.Context, path string) (*NavigateResult, error) {
 
 	if err := chromedp.Run(timeoutCtx,
 		accessibility.Enable(),
-		chromedp.Navigate(path),
+		chromedp.Navigate(u.String()),
 		waitForNetworkIdle(),
+		tidyHTML(u),
 		chromedp.Title(&title),
 		accessibilityTree(&tree),
 	); err != nil {

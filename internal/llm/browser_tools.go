@@ -30,6 +30,8 @@ func browserTools() []responses.ToolUnionParam {
 }
 
 func handleToolCall(ctx context.Context, name string, args string) (string, error) {
+	stats := statsFromContext(ctx)
+
 	switch name {
 	case browserNavigateToolName:
 		var params browserNavigateToolParams
@@ -41,6 +43,8 @@ func handleToolCall(ctx context.Context, name string, args string) (string, erro
 			return "error: no URLs provided", fmt.Errorf("no URLs provided")
 		}
 
+		stats.sitesVisited = append(stats.sitesVisited, params.URLs...)
+
 		var sb strings.Builder
 		for _, url := range params.URLs {
 			sb.WriteString("# " + url + "\n\n")
@@ -50,7 +54,7 @@ func handleToolCall(ctx context.Context, name string, args string) (string, erro
 				continue
 			}
 
-			writeBrowserNavigateResult(&sb, res, url)
+			writeBrowserNavigateResult(&sb, res)
 			sb.WriteString("\n\n")
 		}
 
@@ -60,7 +64,7 @@ func handleToolCall(ctx context.Context, name string, args string) (string, erro
 	}
 }
 
-func writeBrowserNavigateResult(sb *strings.Builder, res *browser.NavigateResult, url string) {
+func writeBrowserNavigateResult(sb *strings.Builder, res *browser.NavigateResult) {
 	sb.WriteString(`## Page title
 		` + res.Page.Title + `
 

@@ -26,8 +26,6 @@ then be read by another agent and checked for relevancy.
   but also will be useful for monitoring future changes as well. As an example, if the
   subject is "Taylor Swift's latest album" - then a good link would be the wikipedia page
   of her discography as opposed to the wikipedia page for just that album.
-- When you have found a source that can be monitored for changes over time, set the
-  `is_monitorable` field to true.
 - If you can't find any sources, set the `sources` field to an empty list, `success` to false,
   and provide a short `failure_reason`. It is better to return no sources than irrelevant sources.
 - Don't include sources that are likely to yield duplicate information. The goal is to aim for

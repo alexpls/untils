@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log/slog"
+	"strings"
 	"time"
 )
 
@@ -28,7 +29,8 @@ func (t *turn) incrToolCall(name string) {
 }
 
 type stats struct {
-	turns []*turn
+	turns        []*turn
+	sitesVisited []string
 }
 
 func (s *stats) newTurn() *turn {
@@ -98,6 +100,7 @@ func (s *stats) log(logger *slog.Logger) {
 		slog.Int("num_turns", len(s.turns)),
 		slog.Float64("total_cost_usd", s.totalCost()),
 		slog.Duration("total_duration", s.totalDuration()),
+		slog.String("sites_visited", strings.Join(s.sitesVisited, ", ")),
 		slog.Group("tool_calls", toolCallAttrs...),
 	)
 }

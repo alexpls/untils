@@ -27,7 +27,7 @@ func TestCheckWorkflow(t *testing.T) {
 	res, err := checker.Run(ctx, &CheckWorkflowParams{
 		ExpertName: "default",
 		CheckParams: &CheckParams{
-			Subject: "Latest album by Taylor Swfit",
+			Subject: "Latest power outages in Brisbane, QLD",
 		},
 	})
 	require.NoError(t, err)

@@ -23,8 +23,8 @@ func newSourceFinder(service *Service) *sourceFinder {
 }
 
 type Source struct {
+	Title          string `json:"title"`
 	URL            string `json:"url"`
-	Monitorable    bool   `json:"monitorable"`
 	RelevanceScore int    `json:"relevance_score"`
 }
 
