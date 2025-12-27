@@ -118,14 +118,13 @@ func (n *axTreeNode) format(sb *strings.Builder, depth int) {
 // Subset of accessibility.Node which intentionally skips ignoredReasons
 // due to incompatibilities with cdproto.
 type axNode struct {
-	NodeID      accessibility.NodeID   `json:"nodeId"`
-	ParentID    accessibility.NodeID   `json:"parentId,omitempty,omitzero"`
-	ChildIDs    []accessibility.NodeID `json:"childIds,omitempty,omitzero"`
-	Ignored     bool                   `json:"ignored"`
-	Name        *accessibility.Value   `json:"name,omitempty,omitzero"`
-	Role        *accessibility.Value   `json:"role,omitempty,omitzero"`
-	Description *accessibility.Value   `json:"description,omitempty,omitzero"`
-	Value       *accessibility.Value   `json:"value,omitempty,omitzero"`
+	NodeID   accessibility.NodeID   `json:"nodeId"`
+	ParentID accessibility.NodeID   `json:"parentId,omitempty,omitzero"`
+	ChildIDs []accessibility.NodeID `json:"childIds,omitempty,omitzero"`
+	Ignored  bool                   `json:"ignored"`
+	Name     *accessibility.Value   `json:"name,omitempty,omitzero"`
+	Role     *accessibility.Value   `json:"role,omitempty,omitzero"`
+	Value    *accessibility.Value   `json:"value,omitempty,omitzero"`
 }
 
 func (n *axNode) attributes() []string {
@@ -143,10 +142,6 @@ func (n *axNode) attributes() []string {
 
 	if name := valueString(n.Name); name != "" {
 		attributes = append(attributes, name)
-	}
-
-	if description := valueString(n.Description); description != "" {
-		attributes = append(attributes, description)
 	}
 
 	if value := valueString(n.Value); value != "" {
