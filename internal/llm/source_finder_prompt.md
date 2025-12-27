@@ -30,6 +30,9 @@ then be read by another agent and checked for relevancy.
   and provide a short `failure_reason`. It is better to return no sources than irrelevant sources.
 - Don't include sources that are likely to yield duplicate information. The goal is to aim for
   relevancy, not breadth.
+- Don't include sources that require high interactivity to get the information, for example a
+  map where you have to zoom in and out to find the relevant data is not appropriate. The sources
+  should yield straightforward text based information.
 - Rank each source with a relevance score, with 1 being the most relevant. Each source must have
   a unique relevance score.
 

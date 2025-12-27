@@ -1,4498 +1,751 @@
 {
-  "nodes": [
-    {
-      "nodeId": "2",
-      "childIds": [
-        "4"
+  "root_id": "2",
+  "nodes": {
+    "112": {
+      "node_id": "112",
+      "parent_id": "227",
+      "ignored": false,
+      "name": "Enter street, suburb or postcode",
+      "role": "combobox"
+    },
+    "116": {
+      "node_id": "116",
+      "parent_id": "227",
+      "ignored": false,
+      "name": "Search",
+      "role": "button"
+    },
+    "120": {
+      "node_id": "120",
+      "parent_id": "227",
+      "child_ids": [
+        "349",
+        "362",
+        "336",
+        "388",
+        "323",
+        "375"
       ],
       "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "Energex Emergency Outages",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": true,
-            "invalid": false
-          },
-          {
-            "type": "relatedElement",
-            "value": {
-              "type": "computedString",
-              "value": "Energex Emergency Outages"
-            },
-            "superseded": false,
-            "nativeSource": "title",
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "RootWebArea"
-      }
+      "name": "by Suburb",
+      "role": "tabpanel"
     },
-    {
-      "nodeId": "4",
-      "parentId": "2",
-      "childIds": [
-        "7"
-      ],
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
+    "122": {
+      "node_id": "122",
+      "parent_id": "227",
+      "ignored": false,
+      "name": "2:15 ",
+      "role": "StaticText"
     },
-    {
-      "nodeId": "7",
-      "parentId": "4",
-      "childIds": [
-        "169"
+    "123": {
+      "node_id": "123",
+      "parent_id": "227",
+      "ignored": false,
+      "name": "pm",
+      "role": "StaticText"
+    },
+    "124": {
+      "node_id": "124",
+      "parent_id": "227",
+      "ignored": false,
+      "name": "27 Dec 2025",
+      "role": "StaticText"
+    },
+    "126": {
+      "node_id": "126",
+      "parent_id": "173",
+      "ignored": false,
+      "name": "I want to search for an outage",
+      "role": "StaticText"
+    },
+    "129": {
+      "node_id": "129",
+      "parent_id": "290",
+      "ignored": false,
+      "name": "by ",
+      "role": "StaticText"
+    },
+    "130": {
+      "node_id": "130",
+      "parent_id": "290",
+      "ignored": false,
+      "name": "Suburb",
+      "role": "StaticText"
+    },
+    "131": {
+      "node_id": "131",
+      "parent_id": "300",
+      "ignored": false,
+      "name": "by ",
+      "role": "StaticText"
+    },
+    "132": {
+      "node_id": "132",
+      "parent_id": "300",
+      "ignored": false,
+      "name": "Council",
+      "role": "StaticText"
+    },
+    "134": {
+      "node_id": "134",
+      "parent_id": "323",
+      "ignored": false,
+      "name": "1 outage",
+      "role": "StaticText"
+    },
+    "135": {
+      "node_id": "135",
+      "parent_id": "323",
+      "ignored": false,
+      "name": "26",
+      "role": "StaticText"
+    },
+    "136": {
+      "node_id": "136",
+      "parent_id": "323",
+      "ignored": false,
+      "name": "\n",
+      "role": "LineBreak"
+    },
+    "137": {
+      "node_id": "137",
+      "parent_id": "323",
+      "ignored": false,
+      "name": "Customers affected",
+      "role": "StaticText"
+    },
+    "140": {
+      "node_id": "140",
+      "parent_id": "336",
+      "ignored": false,
+      "name": "1 outage",
+      "role": "StaticText"
+    },
+    "141": {
+      "node_id": "141",
+      "parent_id": "336",
+      "ignored": false,
+      "name": "152",
+      "role": "StaticText"
+    },
+    "142": {
+      "node_id": "142",
+      "parent_id": "336",
+      "ignored": false,
+      "name": "\n",
+      "role": "LineBreak"
+    },
+    "143": {
+      "node_id": "143",
+      "parent_id": "336",
+      "ignored": false,
+      "name": "Customers affected",
+      "role": "StaticText"
+    },
+    "146": {
+      "node_id": "146",
+      "parent_id": "349",
+      "ignored": false,
+      "name": "1 outage",
+      "role": "StaticText"
+    },
+    "147": {
+      "node_id": "147",
+      "parent_id": "349",
+      "ignored": false,
+      "name": "4",
+      "role": "StaticText"
+    },
+    "148": {
+      "node_id": "148",
+      "parent_id": "349",
+      "ignored": false,
+      "name": "\n",
+      "role": "LineBreak"
+    },
+    "149": {
+      "node_id": "149",
+      "parent_id": "349",
+      "ignored": false,
+      "name": "Customers affected",
+      "role": "StaticText"
+    },
+    "152": {
+      "node_id": "152",
+      "parent_id": "362",
+      "ignored": false,
+      "name": "1 outage",
+      "role": "StaticText"
+    },
+    "153": {
+      "node_id": "153",
+      "parent_id": "362",
+      "ignored": false,
+      "name": "1",
+      "role": "StaticText"
+    },
+    "154": {
+      "node_id": "154",
+      "parent_id": "362",
+      "ignored": false,
+      "name": "\n",
+      "role": "LineBreak"
+    },
+    "155": {
+      "node_id": "155",
+      "parent_id": "362",
+      "ignored": false,
+      "name": "Customers affected",
+      "role": "StaticText"
+    },
+    "158": {
+      "node_id": "158",
+      "parent_id": "375",
+      "ignored": false,
+      "name": "1 outage",
+      "role": "StaticText"
+    },
+    "159": {
+      "node_id": "159",
+      "parent_id": "375",
+      "ignored": false,
+      "name": "8",
+      "role": "StaticText"
+    },
+    "160": {
+      "node_id": "160",
+      "parent_id": "375",
+      "ignored": false,
+      "name": "\n",
+      "role": "LineBreak"
+    },
+    "161": {
+      "node_id": "161",
+      "parent_id": "375",
+      "ignored": false,
+      "name": "Customers affected",
+      "role": "StaticText"
+    },
+    "164": {
+      "node_id": "164",
+      "parent_id": "388",
+      "ignored": false,
+      "name": "1 outage",
+      "role": "StaticText"
+    },
+    "165": {
+      "node_id": "165",
+      "parent_id": "388",
+      "ignored": false,
+      "name": "8",
+      "role": "StaticText"
+    },
+    "166": {
+      "node_id": "166",
+      "parent_id": "388",
+      "ignored": false,
+      "name": "\n",
+      "role": "LineBreak"
+    },
+    "167": {
+      "node_id": "167",
+      "parent_id": "388",
+      "ignored": false,
+      "name": "Customers affected",
+      "role": "StaticText"
+    },
+    "173": {
+      "node_id": "173",
+      "parent_id": "227",
+      "child_ids": [
+        "126"
       ],
       "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "generic"
-      }
+      "role": "LabelText"
     },
-    {
-      "nodeId": "169",
-      "parentId": "7",
-      "childIds": [
-        "170",
-        "171",
-        "173"
+    "2": {
+      "node_id": "2",
+      "child_ids": [
+        "201",
+        "202",
+        "227",
+        "214",
+        "427"
       ],
       "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "generic"
-      }
+      "name": "Energex Emergency Outages",
+      "role": "RootWebArea"
     },
-    {
-      "nodeId": "170",
-      "parentId": "169",
-      "childIds": [
-        "62"
-      ],
+    "201": {
+      "node_id": "201",
+      "parent_id": "2",
       "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "Angular 20 Test - Step 2",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "contents",
-            "value": {
-              "type": "computedString",
-              "value": "Angular 20 Test - Step 2"
-            },
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": true,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "heading"
-      }
+      "name": "Angular 20 Test - Step 2",
+      "role": "heading"
     },
-    {
-      "nodeId": "171",
-      "parentId": "169",
-      "childIds": [
+    "202": {
+      "node_id": "202",
+      "parent_id": "2",
+      "child_ids": [
         "63"
       ],
       "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "paragraph"
-      }
+      "role": "paragraph"
     },
-    {
-      "nodeId": "173",
-      "parentId": "169",
-      "childIds": [
-        "175"
+    "214": {
+      "node_id": "214",
+      "parent_id": "2",
+      "child_ids": [
+        "215",
+        "217",
+        "221"
       ],
       "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "generic"
-      }
+      "role": "list"
     },
-    {
-      "nodeId": "62",
-      "parentId": "170",
-      "childIds": [
-        "-1000000055"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "Angular 20 Test - Step 2",
-        "sources": [
-          {
-            "type": "contents",
-            "value": {
-              "type": "computedString",
-              "value": "Angular 20 Test - Step 2"
-            },
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "StaticText"
-      }
-    },
-    {
-      "nodeId": "63",
-      "parentId": "171",
-      "childIds": [
-        "-1000000056"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "Testing with minimal dashboard component...",
-        "sources": [
-          {
-            "type": "contents",
-            "value": {
-              "type": "computedString",
-              "value": "Testing with minimal dashboard component..."
-            },
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "StaticText"
-      }
-    },
-    {
-      "nodeId": "175",
-      "parentId": "173",
-      "childIds": [
-        "176"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "generic"
-      }
-    },
-    {
-      "nodeId": "-1000000055",
-      "parentId": "62",
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "Angular 20 Test - Step 2"
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "InlineTextBox"
-      }
-    },
-    {
-      "nodeId": "-1000000056",
-      "parentId": "63",
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "Testing with minimal dashboard component..."
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "InlineTextBox"
-      }
-    },
-    {
-      "nodeId": "176",
-      "parentId": "175",
-      "childIds": [
-        "177",
-        "179",
-        "195",
-        "332"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "generic"
-      }
-    },
-    {
-      "nodeId": "177",
-      "parentId": "176",
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "generic"
-      }
-    },
-    {
-      "nodeId": "179",
-      "parentId": "176",
-      "childIds": [
-        "180",
-        "181"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "generic"
-      }
-    },
-    {
-      "nodeId": "195",
-      "parentId": "176",
-      "childIds": [
-        "196"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "generic"
-      }
-    },
-    {
-      "nodeId": "332",
-      "parentId": "176",
-      "childIds": [
-        "333"
-      ],
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "333",
-      "parentId": "332",
-      "childIds": [
-        "334"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "sectionfooter"
-      }
-    },
-    {
-      "nodeId": "180",
-      "parentId": "179",
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "generic"
-      }
-    },
-    {
-      "nodeId": "181",
-      "parentId": "179",
-      "childIds": [
-        "182"
-      ],
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "182",
-      "parentId": "181",
-      "childIds": [
-        "183"
-      ],
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "183",
-      "parentId": "182",
-      "childIds": [
-        "184",
-        "186",
-        "190"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "list"
-      }
-    },
-    {
-      "nodeId": "196",
-      "parentId": "195",
-      "childIds": [
-        "198",
-        "246",
-        "254"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "main"
-      }
-    },
-    {
-      "nodeId": "334",
-      "parentId": "333",
-      "childIds": [
-        "335",
-        "356"
-      ],
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "335",
-      "parentId": "334",
-      "childIds": [
-        "336",
-        "345"
-      ],
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "336",
-      "parentId": "335",
-      "childIds": [
-        "337"
-      ],
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "337",
-      "parentId": "336",
-      "childIds": [
-        "338"
-      ],
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "338",
-      "parentId": "337",
-      "childIds": [
-        "339",
-        "341",
-        "343"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "generic"
-      }
-    },
-    {
-      "nodeId": "345",
-      "parentId": "335",
-      "childIds": [
-        "346"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "generic"
-      }
-    },
-    {
-      "nodeId": "356",
-      "parentId": "334",
-      "childIds": [
-        "85"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "generic"
-      }
-    },
-    {
-      "nodeId": "184",
-      "parentId": "183",
-      "childIds": [
-        "185",
-        "65"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "listitem"
-      }
-    },
-    {
-      "nodeId": "186",
-      "parentId": "183",
-      "childIds": [
-        "187"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "listitem"
-      }
-    },
-    {
-      "nodeId": "190",
-      "parentId": "183",
-      "childIds": [
-        "191"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "listitem"
-      }
-    },
-    {
-      "nodeId": "198",
-      "parentId": "196",
-      "childIds": [
-        "199",
-        "202",
-        "43"
-      ],
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "199",
-      "parentId": "198",
-      "childIds": [
-        "200"
-      ],
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "200",
-      "parentId": "199",
-      "childIds": [
-        "201"
-      ],
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "201",
-      "parentId": "200",
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "202",
-      "parentId": "198",
-      "childIds": [
-        "203"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "generic"
-      }
-    },
-    {
-      "nodeId": "43",
-      "parentId": "198",
-      "childIds": [
-        "216"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "Manually refresh outage data",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "value": {
-              "type": "computedString",
-              "value": "Manually refresh outage data"
-            },
-            "attribute": "aria-label",
-            "attributeValue": {
-              "type": "string",
-              "value": "Manually refresh outage data"
-            },
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "contents",
-            "value": {
-              "type": "computedString",
-              "value": "outages updated every 15 minutes refresh outages"
-            },
-            "superseded": true,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": true,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "button"
-      }
-    },
-    {
-      "nodeId": "246",
-      "parentId": "196",
-      "childIds": [
-        "147",
-        "249"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "generic"
-      }
-    },
-    {
-      "nodeId": "254",
-      "parentId": "196",
-      "childIds": [
-        "255",
-        "288"
-      ],
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "255",
-      "parentId": "254",
-      "childIds": [
-        "258"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "generic"
-      }
-    },
-    {
-      "nodeId": "288",
-      "parentId": "254",
-      "childIds": [
-        "124"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "generic"
-      }
-    },
-    {
-      "nodeId": "339",
-      "parentId": "338",
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "Facebook",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "value": {
-              "type": "computedString",
-              "value": "Facebook"
-            },
-            "attribute": "aria-label",
-            "attributeValue": {
-              "type": "string",
-              "value": "Facebook"
-            },
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "contents",
-            "superseded": true,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": true,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "link"
-      }
-    },
-    {
-      "nodeId": "341",
-      "parentId": "338",
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "Youtube",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "value": {
-              "type": "computedString",
-              "value": "Youtube"
-            },
-            "attribute": "aria-label",
-            "attributeValue": {
-              "type": "string",
-              "value": "Youtube"
-            },
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "contents",
-            "superseded": true,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": true,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "link"
-      }
-    },
-    {
-      "nodeId": "343",
-      "parentId": "338",
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "LinkedIn",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "value": {
-              "type": "computedString",
-              "value": "LinkedIn"
-            },
-            "attribute": "aria-label",
-            "attributeValue": {
-              "type": "string",
-              "value": "LinkedIn"
-            },
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "contents",
-            "superseded": true,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": true,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "link"
-      }
-    },
-    {
-      "nodeId": "346",
-      "parentId": "345",
-      "childIds": [
-        "347",
-        "349",
-        "351",
-        "353",
-        "355"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "list"
-      }
-    },
-    {
-      "nodeId": "85",
-      "parentId": "356",
-      "childIds": [
-        "-1000000089"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "1766794504",
-        "sources": [
-          {
-            "type": "contents",
-            "value": {
-              "type": "computedString",
-              "value": "1766794504"
-            },
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "StaticText"
-      }
-    },
-    {
-      "nodeId": "185",
-      "parentId": "184",
-      "childIds": [
+    "215": {
+      "node_id": "215",
+      "parent_id": "214",
+      "child_ids": [
+        "65",
         "64"
       ],
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
+      "ignored": false,
+      "role": "listitem"
     },
-    {
-      "nodeId": "64",
-      "parentId": "185",
-      "childIds": [
-        "-1000000057"
+    "217": {
+      "node_id": "217",
+      "parent_id": "214",
+      "child_ids": [
+        "218"
       ],
       "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "Emergency",
-        "sources": [
-          {
-            "type": "contents",
-            "value": {
-              "type": "computedString",
-              "value": "Emergency"
-            },
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "StaticText"
-      }
+      "role": "listitem"
     },
-    {
-      "nodeId": "65",
-      "parentId": "184",
-      "childIds": [
-        "-1000000058"
+    "218": {
+      "node_id": "218",
+      "parent_id": "217",
+      "ignored": false,
+      "name": "Home",
+      "role": "link"
+    },
+    "221": {
+      "node_id": "221",
+      "parent_id": "214",
+      "child_ids": [
+        "222"
       ],
       "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "Outages",
-        "sources": [
-          {
-            "type": "contents",
-            "value": {
-              "type": "computedString",
-              "value": "Outages"
-            },
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "StaticText"
-      }
+      "role": "listitem"
     },
-    {
-      "nodeId": "187",
-      "parentId": "186",
-      "childIds": [
-        "59"
+    "222": {
+      "node_id": "222",
+      "parent_id": "221",
+      "ignored": false,
+      "name": "Contact Us",
+      "role": "link"
+    },
+    "227": {
+      "node_id": "227",
+      "parent_id": "2",
+      "child_ids": [
+        "288",
+        "173",
+        "112",
+        "116",
+        "120",
+        "43",
+        "69",
+        "124",
+        "122",
+        "123",
+        "66",
+        "68",
+        "67"
       ],
       "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "Home",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "contents",
-            "value": {
-              "type": "computedString",
-              "value": "Home"
-            },
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": true,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "link"
-      }
+      "role": "main"
     },
-    {
-      "nodeId": "191",
-      "parentId": "190",
-      "childIds": [
-        "60"
+    "288": {
+      "node_id": "288",
+      "parent_id": "227",
+      "child_ids": [
+        "290",
+        "300"
       ],
       "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "Contact Us",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "contents",
-            "value": {
-              "type": "computedString",
-              "value": "Contact Us"
-            },
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": true,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "link"
-      }
+      "role": "tablist"
     },
-    {
-      "nodeId": "203",
-      "parentId": "202",
-      "childIds": [
-        "204",
-        "210"
+    "290": {
+      "node_id": "290",
+      "parent_id": "288",
+      "child_ids": [
+        "129",
+        "130"
       ],
       "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "generic"
-      }
+      "name": "by Suburb",
+      "role": "tab"
     },
-    {
-      "nodeId": "216",
-      "parentId": "43",
-      "childIds": [
+    "300": {
+      "node_id": "300",
+      "parent_id": "288",
+      "child_ids": [
+        "131",
+        "132",
+        "308"
+      ],
+      "ignored": false,
+      "name": "by Council",
+      "role": "tab"
+    },
+    "308": {
+      "node_id": "308",
+      "parent_id": "300",
+      "ignored": false,
+      "role": "button"
+    },
+    "323": {
+      "node_id": "323",
+      "parent_id": "120",
+      "child_ids": [
+        "135",
+        "136",
+        "137",
+        "325",
+        "134"
+      ],
+      "ignored": false,
+      "name": "View outages for BANYA",
+      "role": "button"
+    },
+    "325": {
+      "node_id": "325",
+      "parent_id": "323",
+      "ignored": false,
+      "name": "Banya",
+      "role": "heading"
+    },
+    "336": {
+      "node_id": "336",
+      "parent_id": "120",
+      "child_ids": [
+        "141",
+        "142",
+        "338",
+        "143",
+        "140"
+      ],
+      "ignored": false,
+      "name": "View outages for BEECHMONT",
+      "role": "button"
+    },
+    "338": {
+      "node_id": "338",
+      "parent_id": "336",
+      "ignored": false,
+      "name": "Beechmont",
+      "role": "heading"
+    },
+    "349": {
+      "node_id": "349",
+      "parent_id": "120",
+      "child_ids": [
+        "147",
+        "148",
+        "149",
+        "351",
+        "146"
+      ],
+      "ignored": false,
+      "name": "View outages for FERNY GLEN",
+      "role": "button"
+    },
+    "351": {
+      "node_id": "351",
+      "parent_id": "349",
+      "ignored": false,
+      "name": "Ferny Glen",
+      "role": "heading"
+    },
+    "362": {
+      "node_id": "362",
+      "parent_id": "120",
+      "child_ids": [
+        "364",
+        "152",
+        "153",
+        "154",
+        "155"
+      ],
+      "ignored": false,
+      "name": "View outages for FLYING FOX",
+      "role": "button"
+    },
+    "364": {
+      "node_id": "364",
+      "parent_id": "362",
+      "ignored": false,
+      "name": "Flying Fox",
+      "role": "heading"
+    },
+    "375": {
+      "node_id": "375",
+      "parent_id": "120",
+      "child_ids": [
+        "159",
+        "160",
+        "377",
+        "161",
+        "158"
+      ],
+      "ignored": false,
+      "name": "View outages for TALLEBUDGERA VALLEY",
+      "role": "button"
+    },
+    "377": {
+      "node_id": "377",
+      "parent_id": "375",
+      "ignored": false,
+      "name": "Tallebudgera Valley",
+      "role": "heading"
+    },
+    "388": {
+      "node_id": "388",
+      "parent_id": "120",
+      "child_ids": [
+        "165",
+        "166",
+        "390",
+        "167",
+        "164"
+      ],
+      "ignored": false,
+      "name": "View outages for WITHEREN",
+      "role": "button"
+    },
+    "390": {
+      "node_id": "390",
+      "parent_id": "388",
+      "ignored": false,
+      "name": "Witheren",
+      "role": "heading"
+    },
+    "427": {
+      "node_id": "427",
+      "parent_id": "2",
+      "child_ids": [
+        "85",
+        "433",
+        "435",
+        "437",
+        "440"
+      ],
+      "ignored": false,
+      "role": "sectionfooter"
+    },
+    "43": {
+      "node_id": "43",
+      "parent_id": "227",
+      "child_ids": [
         "71",
         "72",
         "44"
       ],
       "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "generic"
-      }
+      "name": "Manually refresh outage data",
+      "role": "button"
     },
-    {
-      "nodeId": "147",
-      "parentId": "246",
-      "childIds": [
-        "130",
-        "248"
+    "433": {
+      "node_id": "433",
+      "parent_id": "427",
+      "ignored": false,
+      "name": "Facebook",
+      "role": "link"
+    },
+    "435": {
+      "node_id": "435",
+      "parent_id": "427",
+      "ignored": false,
+      "name": "Youtube",
+      "role": "link"
+    },
+    "437": {
+      "node_id": "437",
+      "parent_id": "427",
+      "ignored": false,
+      "name": "LinkedIn",
+      "role": "link"
+    },
+    "44": {
+      "node_id": "44",
+      "parent_id": "43",
+      "ignored": false,
+      "name": "refresh outages",
+      "role": "button"
+    },
+    "440": {
+      "node_id": "440",
+      "parent_id": "427",
+      "child_ids": [
+        "441",
+        "443",
+        "445",
+        "447",
+        "449"
       ],
       "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "LabelText"
-      }
+      "role": "list"
     },
-    {
-      "nodeId": "249",
-      "parentId": "246",
-      "childIds": [
-        "116",
-        "120"
+    "441": {
+      "node_id": "441",
+      "parent_id": "440",
+      "child_ids": [
+        "442"
       ],
       "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "generic"
-      }
+      "role": "listitem"
     },
-    {
-      "nodeId": "258",
-      "parentId": "255",
-      "childIds": [
-        "259"
+    "442": {
+      "node_id": "442",
+      "parent_id": "441",
+      "ignored": false,
+      "name": "Right to information",
+      "role": "link"
+    },
+    "443": {
+      "node_id": "443",
+      "parent_id": "440",
+      "child_ids": [
+        "444"
       ],
       "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "generic"
-      }
+      "role": "listitem"
     },
-    {
-      "nodeId": "124",
-      "parentId": "288",
-      "childIds": [
-        "289"
+    "444": {
+      "node_id": "444",
+      "parent_id": "443",
+      "ignored": false,
+      "name": "Terms of use",
+      "role": "link"
+    },
+    "445": {
+      "node_id": "445",
+      "parent_id": "440",
+      "child_ids": [
+        "446"
       ],
       "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "by Suburb",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "value": {
-              "type": "computedString",
-              "value": "by Suburb"
-            },
-            "attribute": "aria-labelledby",
-            "attributeValue": {
-              "type": "idrefList",
-              "value": "mat-tab-group-0-label-0",
-              "relatedNodes": [
-                {
-                  "backendDOMNodeId": 261,
-                  "idref": "mat-tab-group-0-label-0",
-                  "text": "by Suburb"
-                }
-              ]
-            },
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": true,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": true,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "tabpanel"
-      }
+      "role": "listitem"
     },
-    {
-      "nodeId": "347",
-      "parentId": "346",
-      "childIds": [
-        "348"
+    "446": {
+      "node_id": "446",
+      "parent_id": "445",
+      "ignored": false,
+      "name": "Privacy policy",
+      "role": "link"
+    },
+    "447": {
+      "node_id": "447",
+      "parent_id": "440",
+      "child_ids": [
+        "448"
       ],
       "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "listitem"
-      }
+      "role": "listitem"
     },
-    {
-      "nodeId": "349",
-      "parentId": "346",
-      "childIds": [
-        "350"
-      ],
+    "448": {
+      "node_id": "448",
+      "parent_id": "447",
       "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "listitem"
-      }
+      "name": "Sitemap",
+      "role": "link"
     },
-    {
-      "nodeId": "351",
-      "parentId": "346",
-      "childIds": [
-        "352"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "listitem"
-      }
-    },
-    {
-      "nodeId": "353",
-      "parentId": "346",
-      "childIds": [
-        "354"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "listitem"
-      }
-    },
-    {
-      "nodeId": "355",
-      "parentId": "346",
-      "childIds": [
+    "449": {
+      "node_id": "449",
+      "parent_id": "440",
+      "child_ids": [
         "84"
       ],
       "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "listitem"
-      }
+      "role": "listitem"
     },
-    {
-      "nodeId": "-1000000089",
-      "parentId": "85",
+    "63": {
+      "node_id": "63",
+      "parent_id": "202",
       "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "1766794504"
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "InlineTextBox"
-      }
+      "name": "Testing with minimal dashboard component...",
+      "role": "StaticText"
     },
-    {
-      "nodeId": "-1000000057",
-      "parentId": "64",
+    "64": {
+      "node_id": "64",
+      "parent_id": "215",
       "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "Emergency"
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "InlineTextBox"
-      }
+      "name": "Emergency",
+      "role": "StaticText"
     },
-    {
-      "nodeId": "-1000000058",
-      "parentId": "65",
+    "65": {
+      "node_id": "65",
+      "parent_id": "215",
       "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "Outages"
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "InlineTextBox"
-      }
+      "name": "Outages",
+      "role": "StaticText"
     },
-    {
-      "nodeId": "59",
-      "parentId": "187",
-      "childIds": [
-        "-1000000059"
-      ],
+    "66": {
+      "node_id": "66",
+      "parent_id": "227",
       "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "Home",
-        "sources": [
-          {
-            "type": "contents",
-            "value": {
-              "type": "computedString",
-              "value": "Home"
-            },
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "StaticText"
-      }
+      "name": "Customers affected",
+      "role": "StaticText"
     },
-    {
-      "nodeId": "60",
-      "parentId": "191",
-      "childIds": [
-        "-1000000060"
-      ],
+    "67": {
+      "node_id": "67",
+      "parent_id": "227",
       "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "Contact Us",
-        "sources": [
-          {
-            "type": "contents",
-            "value": {
-              "type": "computedString",
-              "value": "Contact Us"
-            },
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "StaticText"
-      }
+      "name": "199",
+      "role": "StaticText"
     },
-    {
-      "nodeId": "204",
-      "parentId": "203",
-      "childIds": [
-        "205"
-      ],
+    "68": {
+      "node_id": "68",
+      "parent_id": "227",
       "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "generic"
-      }
+      "name": "in South East Queensland",
+      "role": "StaticText"
     },
-    {
-      "nodeId": "210",
-      "parentId": "203",
-      "childIds": [
-        "211"
-      ],
+    "69": {
+      "node_id": "69",
+      "parent_id": "227",
       "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "generic"
-      }
+      "name": "Last updated",
+      "role": "StaticText"
     },
-    {
-      "nodeId": "71",
-      "parentId": "216",
-      "childIds": [
-        "-1000000065"
-      ],
+    "71": {
+      "node_id": "71",
+      "parent_id": "43",
       "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "outages updated every 15 ",
-        "sources": [
-          {
-            "type": "contents",
-            "value": {
-              "type": "computedString",
-              "value": "outages updated every 15 "
-            },
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "StaticText"
-      }
+      "name": "outages updated every 15 ",
+      "role": "StaticText"
     },
-    {
-      "nodeId": "72",
-      "parentId": "216",
-      "childIds": [
-        "-1000000066"
-      ],
+    "72": {
+      "node_id": "72",
+      "parent_id": "43",
       "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "minutes",
-        "sources": [
-          {
-            "type": "contents",
-            "value": {
-              "type": "computedString",
-              "value": "minutes"
-            },
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "StaticText"
-      }
+      "name": "minutes",
+      "role": "StaticText"
     },
-    {
-      "nodeId": "44",
-      "parentId": "216",
-      "childIds": [
-        "220",
-        "222",
-        "223",
-        "224"
-      ],
+    "84": {
+      "node_id": "84",
+      "parent_id": "449",
       "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "refresh outages",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "value": {
-              "type": "computedString",
-              "value": "refresh outages"
-            },
-            "attribute": "aria-label",
-            "attributeValue": {
-              "type": "string",
-              "value": "refresh outages"
-            },
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "relatedElement",
-            "superseded": true,
-            "nativeSource": "label",
-            "invalid": false
-          },
-          {
-            "type": "contents",
-            "superseded": true,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": true,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "button"
-      }
+      "name": "© 2025 Energex",
+      "role": "StaticText"
     },
-    {
-      "nodeId": "130",
-      "parentId": "147",
-      "childIds": [
-        "-1000000080"
-      ],
+    "85": {
+      "node_id": "85",
+      "parent_id": "427",
       "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "I want to search for an outage",
-        "sources": [
-          {
-            "type": "contents",
-            "value": {
-              "type": "computedString",
-              "value": "I want to search for an outage"
-            },
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "StaticText"
-      }
-    },
-    {
-      "nodeId": "248",
-      "parentId": "147",
-      "childIds": [
-        "129"
-      ],
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "129",
-      "parentId": "248",
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "116",
-      "parentId": "249",
-      "childIds": [
-        "250",
-        "251"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "Enter street, suburb or postcode",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "relatedElement",
-            "superseded": false,
-            "nativeSource": "label",
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "placeholder",
-            "value": {
-              "type": "computedString",
-              "value": "Enter street, suburb or postcode"
-            },
-            "attribute": "placeholder",
-            "attributeValue": {
-              "type": "string",
-              "value": "Enter street, suburb or postcode"
-            },
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "placeholder",
-            "attribute": "aria-placeholder",
-            "superseded": true,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": true,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "combobox"
-      }
-    },
-    {
-      "nodeId": "120",
-      "parentId": "249",
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "Search",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "value": {
-              "type": "computedString",
-              "value": "Search"
-            },
-            "attribute": "aria-label",
-            "attributeValue": {
-              "type": "string",
-              "value": "Search"
-            },
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "contents",
-            "superseded": true,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": true,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "button"
-      }
-    },
-    {
-      "nodeId": "259",
-      "parentId": "258",
-      "childIds": [
-        "260"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "tablist"
-      }
-    },
-    {
-      "nodeId": "289",
-      "parentId": "124",
-      "childIds": [
-        "290"
-      ],
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "290",
-      "parentId": "289",
-      "childIds": [
-        "291"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "generic"
-      }
-    },
-    {
-      "nodeId": "348",
-      "parentId": "347",
-      "childIds": [
-        "80"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "Right to information",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "contents",
-            "value": {
-              "type": "computedString",
-              "value": "Right to information"
-            },
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": true,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "link"
-      }
-    },
-    {
-      "nodeId": "350",
-      "parentId": "349",
-      "childIds": [
-        "81"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "Terms of use",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "contents",
-            "value": {
-              "type": "computedString",
-              "value": "Terms of use"
-            },
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": true,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "link"
-      }
-    },
-    {
-      "nodeId": "352",
-      "parentId": "351",
-      "childIds": [
-        "82"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "Privacy policy",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "contents",
-            "value": {
-              "type": "computedString",
-              "value": "Privacy policy"
-            },
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": true,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "link"
-      }
-    },
-    {
-      "nodeId": "354",
-      "parentId": "353",
-      "childIds": [
-        "83"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "Sitemap",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "contents",
-            "value": {
-              "type": "computedString",
-              "value": "Sitemap"
-            },
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": true,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "link"
-      }
-    },
-    {
-      "nodeId": "84",
-      "parentId": "355",
-      "childIds": [
-        "-1000000071"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "\u00a9 2025 Energex",
-        "sources": [
-          {
-            "type": "contents",
-            "value": {
-              "type": "computedString",
-              "value": "\u00a9 2025 Energex"
-            },
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "StaticText"
-      }
-    },
-    {
-      "nodeId": "-1000000059",
-      "parentId": "59",
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "Home"
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "InlineTextBox"
-      }
-    },
-    {
-      "nodeId": "-1000000060",
-      "parentId": "60",
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "Contact Us"
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "InlineTextBox"
-      }
-    },
-    {
-      "nodeId": "205",
-      "parentId": "204",
-      "childIds": [
-        "206"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "generic"
-      }
-    },
-    {
-      "nodeId": "211",
-      "parentId": "210",
-      "childIds": [
-        "146"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "generic"
-      }
-    },
-    {
-      "nodeId": "-1000000065",
-      "parentId": "71",
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "outages updated every 15 "
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "InlineTextBox"
-      }
-    },
-    {
-      "nodeId": "-1000000066",
-      "parentId": "72",
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "minutes"
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "InlineTextBox"
-      }
-    },
-    {
-      "nodeId": "220",
-      "parentId": "44",
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "222",
-      "parentId": "44",
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "223",
-      "parentId": "44",
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "224",
-      "parentId": "44",
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "-1000000080",
-      "parentId": "130",
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "I want to search for an outage"
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "InlineTextBox"
-      }
-    },
-    {
-      "nodeId": "250",
-      "parentId": "116",
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "251",
-      "parentId": "116",
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "generic"
-      }
-    },
-    {
-      "nodeId": "260",
-      "parentId": "259",
-      "childIds": [
-        "261",
-        "271"
-      ],
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "261",
-      "parentId": "260",
-      "childIds": [
-        "262",
-        "263",
-        "264",
-        "269"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "by Suburb",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "contents",
-            "value": {
-              "type": "computedString",
-              "value": "by Suburb"
-            },
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": true,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "tab"
-      }
-    },
-    {
-      "nodeId": "271",
-      "parentId": "260",
-      "childIds": [
-        "272",
-        "273",
-        "274",
-        "284"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "by Council",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "contents",
-            "value": {
-              "type": "computedString",
-              "value": "by Council"
-            },
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": true,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "tab"
-      }
-    },
-    {
-      "nodeId": "291",
-      "parentId": "290",
-      "childIds": [
-        "292",
-        "303"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "generic"
-      }
-    },
-    {
-      "nodeId": "80",
-      "parentId": "348",
-      "childIds": [
-        "-1000000067"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "Right to information",
-        "sources": [
-          {
-            "type": "contents",
-            "value": {
-              "type": "computedString",
-              "value": "Right to information"
-            },
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "StaticText"
-      }
-    },
-    {
-      "nodeId": "81",
-      "parentId": "350",
-      "childIds": [
-        "-1000000068"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "Terms of use",
-        "sources": [
-          {
-            "type": "contents",
-            "value": {
-              "type": "computedString",
-              "value": "Terms of use"
-            },
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "StaticText"
-      }
-    },
-    {
-      "nodeId": "82",
-      "parentId": "352",
-      "childIds": [
-        "-1000000069"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "Privacy policy",
-        "sources": [
-          {
-            "type": "contents",
-            "value": {
-              "type": "computedString",
-              "value": "Privacy policy"
-            },
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "StaticText"
-      }
-    },
-    {
-      "nodeId": "83",
-      "parentId": "354",
-      "childIds": [
-        "-1000000070"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "Sitemap",
-        "sources": [
-          {
-            "type": "contents",
-            "value": {
-              "type": "computedString",
-              "value": "Sitemap"
-            },
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "StaticText"
-      }
-    },
-    {
-      "nodeId": "-1000000071",
-      "parentId": "84",
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "\u00a9 2025 Energex"
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "InlineTextBox"
-      }
-    },
-    {
-      "nodeId": "206",
-      "parentId": "205",
-      "childIds": [
-        "66",
-        "208",
-        "68"
-      ],
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "66",
-      "parentId": "206",
-      "childIds": [
-        "-1000000061"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "Customers affected",
-        "sources": [
-          {
-            "type": "contents",
-            "value": {
-              "type": "computedString",
-              "value": "Customers affected"
-            },
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "StaticText"
-      }
-    },
-    {
-      "nodeId": "208",
-      "parentId": "206",
-      "childIds": [
-        "67"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "generic"
-      }
-    },
-    {
-      "nodeId": "68",
-      "parentId": "206",
-      "childIds": [
-        "-1000000063"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "in South East Queensland",
-        "sources": [
-          {
-            "type": "contents",
-            "value": {
-              "type": "computedString",
-              "value": "in South East Queensland"
-            },
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "StaticText"
-      }
-    },
-    {
-      "nodeId": "146",
-      "parentId": "211",
-      "childIds": [
-        "69",
-        "213",
-        "128"
-      ],
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "69",
-      "parentId": "146",
-      "childIds": [
-        "-1000000076"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "Last updated",
-        "sources": [
-          {
-            "type": "contents",
-            "value": {
-              "type": "computedString",
-              "value": "Last updated"
-            },
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "StaticText"
-      }
-    },
-    {
-      "nodeId": "213",
-      "parentId": "146",
-      "childIds": [
-        "126",
-        "127"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "generic"
-      }
-    },
-    {
-      "nodeId": "128",
-      "parentId": "146",
-      "childIds": [
-        "-1000000079"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "27 Dec 2025",
-        "sources": [
-          {
-            "type": "contents",
-            "value": {
-              "type": "computedString",
-              "value": "27 Dec 2025"
-            },
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "StaticText"
-      }
-    },
-    {
-      "nodeId": "262",
-      "parentId": "261",
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "263",
-      "parentId": "261",
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "generic"
-      }
-    },
-    {
-      "nodeId": "264",
-      "parentId": "261",
-      "childIds": [
-        "265"
-      ],
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "265",
-      "parentId": "264",
-      "childIds": [
-        "266"
-      ],
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "266",
-      "parentId": "265",
-      "childIds": [
-        "267",
-        "133",
-        "134"
-      ],
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "267",
-      "parentId": "266",
-      "childIds": [
-        "381"
-      ],
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "381",
-      "parentId": "267",
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "133",
-      "parentId": "266",
-      "childIds": [
-        "-1000000081"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "by ",
-        "sources": [
-          {
-            "type": "contents",
-            "value": {
-              "type": "computedString",
-              "value": "by "
-            },
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "StaticText"
-      }
-    },
-    {
-      "nodeId": "134",
-      "parentId": "266",
-      "childIds": [
-        "-1000000082"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "Suburb",
-        "sources": [
-          {
-            "type": "contents",
-            "value": {
-              "type": "computedString",
-              "value": "Suburb"
-            },
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "StaticText"
-      }
-    },
-    {
-      "nodeId": "269",
-      "parentId": "261",
-      "childIds": [
-        "270"
-      ],
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "270",
-      "parentId": "269",
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "272",
-      "parentId": "271",
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "273",
-      "parentId": "271",
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "generic"
-      }
-    },
-    {
-      "nodeId": "274",
-      "parentId": "271",
-      "childIds": [
-        "275"
-      ],
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "275",
-      "parentId": "274",
-      "childIds": [
-        "276"
-      ],
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "276",
-      "parentId": "275",
-      "childIds": [
-        "277",
-        "135",
-        "136",
-        "279"
-      ],
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "277",
-      "parentId": "276",
-      "childIds": [
-        "382"
-      ],
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "382",
-      "parentId": "277",
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "135",
-      "parentId": "276",
-      "childIds": [
-        "-1000000090"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "by ",
-        "sources": [
-          {
-            "type": "contents",
-            "value": {
-              "type": "computedString",
-              "value": "by "
-            },
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "StaticText"
-      }
-    },
-    {
-      "nodeId": "136",
-      "parentId": "276",
-      "childIds": [
-        "-1000000091"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "Council",
-        "sources": [
-          {
-            "type": "contents",
-            "value": {
-              "type": "computedString",
-              "value": "Council"
-            },
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "StaticText"
-      }
-    },
-    {
-      "nodeId": "279",
-      "parentId": "276",
-      "childIds": [
-        "280",
-        "281",
-        "282",
-        "283"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "relatedElement",
-            "superseded": false,
-            "nativeSource": "label",
-            "invalid": false
-          },
-          {
-            "type": "contents",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "button"
-      }
-    },
-    {
-      "nodeId": "284",
-      "parentId": "271",
-      "childIds": [
-        "285"
-      ],
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "285",
-      "parentId": "284",
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "292",
-      "parentId": "291",
-      "childIds": [
-        "293"
-      ],
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "293",
-      "parentId": "292",
-      "childIds": [
-        "294"
-      ],
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "294",
-      "parentId": "293",
-      "childIds": [
-        "295",
-        "298",
-        "301"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "View outages for FERNVALE",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "value": {
-              "type": "computedString",
-              "value": "View outages for FERNVALE"
-            },
-            "attribute": "aria-label",
-            "attributeValue": {
-              "type": "string",
-              "value": "View outages for FERNVALE"
-            },
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "contents",
-            "value": {
-              "type": "computedString",
-              "value": "Fernvale 1 outage 3\nCustomers affected"
-            },
-            "superseded": true,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": true,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "button"
-      }
-    },
-    {
-      "nodeId": "303",
-      "parentId": "291",
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "generic"
-      }
-    },
-    {
-      "nodeId": "-1000000067",
-      "parentId": "80",
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "Right to information"
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "InlineTextBox"
-      }
-    },
-    {
-      "nodeId": "-1000000068",
-      "parentId": "81",
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "Terms of use"
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "InlineTextBox"
-      }
-    },
-    {
-      "nodeId": "-1000000069",
-      "parentId": "82",
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "Privacy policy"
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "InlineTextBox"
-      }
-    },
-    {
-      "nodeId": "-1000000070",
-      "parentId": "83",
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "Sitemap"
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "InlineTextBox"
-      }
-    },
-    {
-      "nodeId": "-1000000061",
-      "parentId": "66",
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "Customers affected"
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "InlineTextBox"
-      }
-    },
-    {
-      "nodeId": "67",
-      "parentId": "208",
-      "childIds": [
-        "-1000000075"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "3",
-        "sources": [
-          {
-            "type": "contents",
-            "value": {
-              "type": "computedString",
-              "value": "3"
-            },
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "StaticText"
-      }
-    },
-    {
-      "nodeId": "-1000000063",
-      "parentId": "68",
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "in South East Queensland"
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "InlineTextBox"
-      }
-    },
-    {
-      "nodeId": "-1000000076",
-      "parentId": "69",
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "Last updated"
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "InlineTextBox"
-      }
-    },
-    {
-      "nodeId": "126",
-      "parentId": "213",
-      "childIds": [
-        "-1000000077"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "10:15 ",
-        "sources": [
-          {
-            "type": "contents",
-            "value": {
-              "type": "computedString",
-              "value": "10:15 "
-            },
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "StaticText"
-      }
-    },
-    {
-      "nodeId": "127",
-      "parentId": "213",
-      "childIds": [
-        "-1000000078"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "am",
-        "sources": [
-          {
-            "type": "contents",
-            "value": {
-              "type": "computedString",
-              "value": "am"
-            },
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "StaticText"
-      }
-    },
-    {
-      "nodeId": "-1000000079",
-      "parentId": "128",
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "27 Dec 2025"
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "InlineTextBox"
-      }
-    },
-    {
-      "nodeId": "-1000000081",
-      "parentId": "133",
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "by "
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "InlineTextBox"
-      }
-    },
-    {
-      "nodeId": "-1000000082",
-      "parentId": "134",
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "Suburb"
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "InlineTextBox"
-      }
-    },
-    {
-      "nodeId": "-1000000090",
-      "parentId": "135",
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "by "
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "InlineTextBox"
-      }
-    },
-    {
-      "nodeId": "-1000000091",
-      "parentId": "136",
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "Council"
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "InlineTextBox"
-      }
-    },
-    {
-      "nodeId": "280",
-      "parentId": "279",
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "281",
-      "parentId": "279",
-      "childIds": [
-        "143"
-      ],
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "143",
-      "parentId": "281",
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "282",
-      "parentId": "279",
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "283",
-      "parentId": "279",
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "295",
-      "parentId": "294",
-      "childIds": [
-        "296",
-        "297"
-      ],
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "296",
-      "parentId": "295",
-      "childIds": [
-        "137"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "Fernvale",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "contents",
-            "value": {
-              "type": "computedString",
-              "value": "Fernvale"
-            },
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "title",
-            "superseded": true,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "heading"
-      }
-    },
-    {
-      "nodeId": "297",
-      "parentId": "295",
-      "childIds": [
-        "138"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "generic"
-      }
-    },
-    {
-      "nodeId": "298",
-      "parentId": "294",
-      "childIds": [
-        "139",
-        "140",
-        "300"
-      ],
-      "ignored": true,
-      "role": {
-        "type": "role",
-        "value": "none"
-      }
-    },
-    {
-      "nodeId": "139",
-      "parentId": "298",
-      "childIds": [
-        "-1000000087"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "3",
-        "sources": [
-          {
-            "type": "contents",
-            "value": {
-              "type": "computedString",
-              "value": "3"
-            },
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "StaticText"
-      }
-    },
-    {
-      "nodeId": "140",
-      "parentId": "298",
-      "childIds": [
-        "-1000000025"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "\n",
-        "sources": [
-          {
-            "type": "contents",
-            "value": {
-              "type": "computedString",
-              "value": "\n"
-            },
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "LineBreak"
-      }
-    },
-    {
-      "nodeId": "300",
-      "parentId": "298",
-      "childIds": [
-        "141"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "generic"
-      }
-    },
-    {
-      "nodeId": "301",
-      "parentId": "294",
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "",
-        "sources": [
-          {
-            "type": "relatedElement",
-            "attribute": "aria-labelledby",
-            "superseded": false,
-            "invalid": false
-          },
-          {
-            "type": "attribute",
-            "attribute": "aria-label",
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "role",
-        "value": "generic"
-      }
-    },
-    {
-      "nodeId": "-1000000075",
-      "parentId": "67",
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "3"
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "InlineTextBox"
-      }
-    },
-    {
-      "nodeId": "-1000000077",
-      "parentId": "126",
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "10:15 "
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "InlineTextBox"
-      }
-    },
-    {
-      "nodeId": "-1000000078",
-      "parentId": "127",
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "am"
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "InlineTextBox"
-      }
-    },
-    {
-      "nodeId": "137",
-      "parentId": "296",
-      "childIds": [
-        "-1000000085"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "Fernvale",
-        "sources": [
-          {
-            "type": "contents",
-            "value": {
-              "type": "computedString",
-              "value": "Fernvale"
-            },
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "StaticText"
-      }
-    },
-    {
-      "nodeId": "138",
-      "parentId": "297",
-      "childIds": [
-        "-1000000086"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "1 outage",
-        "sources": [
-          {
-            "type": "contents",
-            "value": {
-              "type": "computedString",
-              "value": "1 outage"
-            },
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "StaticText"
-      }
-    },
-    {
-      "nodeId": "-1000000087",
-      "parentId": "139",
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "3"
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "InlineTextBox"
-      }
-    },
-    {
-      "nodeId": "-1000000025",
-      "parentId": "140",
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "\n"
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "InlineTextBox"
-      }
-    },
-    {
-      "nodeId": "141",
-      "parentId": "300",
-      "childIds": [
-        "-1000000088"
-      ],
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "Customers affected",
-        "sources": [
-          {
-            "type": "contents",
-            "value": {
-              "type": "computedString",
-              "value": "Customers affected"
-            },
-            "superseded": false,
-            "invalid": false
-          }
-        ]
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "StaticText"
-      }
-    },
-    {
-      "nodeId": "-1000000085",
-      "parentId": "137",
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "Fernvale"
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "InlineTextBox"
-      }
-    },
-    {
-      "nodeId": "-1000000086",
-      "parentId": "138",
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "1 outage"
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "InlineTextBox"
-      }
-    },
-    {
-      "nodeId": "-1000000088",
-      "parentId": "141",
-      "ignored": false,
-      "name": {
-        "type": "computedString",
-        "value": "Customers affected"
-      },
-      "role": {
-        "type": "internalRole",
-        "value": "InlineTextBox"
-      }
+      "name": "1766808903",
+      "role": "StaticText"
     }
-  ]
+  }
 }
