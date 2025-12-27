@@ -32,6 +32,7 @@ type sourceFinderResponse struct {
 	Success       bool     `json:"success"`
 	FailureReason string   `json:"failure_reason"`
 	Sources       []Source `json:"sources"`
+	Queries       []string `json:"queries"`
 }
 
 func (p *sourceFinder) Run(ctx context.Context, params *CheckParams) (*sourceFinderResponse, error) {

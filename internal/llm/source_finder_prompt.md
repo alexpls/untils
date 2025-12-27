@@ -12,13 +12,17 @@ then be read by another agent and checked for relevancy.
 
 - When you need to find new links, never rely on your training data
   as it's out of date. Use the `web_search` tool to find links instead.
-- Think carefully about the searches you perform. Limit your
-  tool calls to only what is absolutely necessary to determine the current
-  value of the subject.
 - DO NOT use more than 2 tool calls per check. Multiple searches
   for the same or similar queries do not yield better results. Think
   carefully about crafting a search query that will give you the most
   relevant links in one search.
+
+## Querying
+
+- Think carefully about the searches you perform. Limit the queries that yield links.
+- Provide your queries for auditing in the `queries` field of your response.
+- If applicable to the subject, prefer search queries for lists of things (e.g. list of
+  taylor swift albums, or taylor swift discography).
 
 ## Approach
 

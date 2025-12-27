@@ -29,21 +29,29 @@ func browserTools() []responses.ToolUnionParam {
 	}}
 }
 
-func handleToolCall(ctx context.Context, name string, args string) (string, error) {
-	stats := statsFromContext(ctx)
-
+func toolCallParams(name, args string) (any, error) {
 	switch name {
 	case browserNavigateToolName:
 		var params browserNavigateToolParams
 		if err := json.Unmarshal([]byte(args), &params); err != nil {
-			return "error parsing arguments", fmt.Errorf("parsing arguments: %w", err)
+			return nil, fmt.Errorf("unmarshaling tool call params: %w", err)
 		}
+		return params, nil
+	default:
+		return nil, fmt.Errorf("tool does not exist: %s", name)
+	}
+}
 
-		stats.sitesVisited = append(stats.sitesVisited, params.URL)
+func handleToolCall(ctx context.Context, name string, params any) (string, error) {
+	stats := statsFromContext(ctx)
+
+	switch p := params.(type) {
+	case browserNavigateToolParams:
+		stats.sitesVisited = append(stats.sitesVisited, p.URL)
 
 		var sb strings.Builder
-		sb.WriteString("# " + params.URL + "\n\n")
-		res, err := browser.Navigate(ctx, params.URL)
+		sb.WriteString("# " + p.URL + "\n\n")
+		res, err := browser.Navigate(ctx, p.URL)
 		if err != nil {
 			sb.WriteString("error navigating to page: " + err.Error() + "\n\n")
 			return sb.String(), nil

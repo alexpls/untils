@@ -21,6 +21,7 @@ rely on your training data alone, as it is out of date.
 ## Using the `browser_navigate` tool
 
 - Use this tool to visit websites and read their contents.
+- You can only visit the URLs provided in the `sources` list.
 - The response of the tool will be a text representation of the webpage.
 - If you have found enough information to determine the current value of the subject,
   DO NOT keep calling this tool to visit more URLs. It's okay to ignore sources.
@@ -32,6 +33,8 @@ rely on your training data alone, as it is out of date.
 - DO NOT make up answers. If you cannot find the answer to the subject
   set `success` to false in your final response and provide a reason. It's better
   to not find an answer than to make one up.
+- If your sources aren't suitable, set `success` to false in your response and provide
+  a reason. After that, new sources may be provided for you to check.
 - When a subject is for the "latest" something, NEVER give answers like "Not yet announced"
   when there is a valid answer you could give about something that has already happened.
 - Trust canonical sources over unofficial ones. For example, Wikipedia should be considered

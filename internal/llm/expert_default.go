@@ -75,9 +75,28 @@ func (e *expertDefault) performCheck(ctx context.Context, params *CheckParams) (
 		}
 
 		if len(resp.toolCalls) > 0 {
+		toolLoop:
 			for _, item := range resp.toolCalls {
+				toolParams, err := toolCallParams(item.Name, item.Arguments)
+				if err != nil || toolParams == nil {
+					messages = append(messages, systemMessage("error: invalid tool call"))
+					continue toolLoop
+				}
+
+				switch p := toolParams.(type) {
+				case browserNavigateToolParams:
+					for _, source := range params.Sources {
+						if p.URL != source.URL {
+							messages = append(messages,
+								systemMessage(fmt.Sprintf("error: attempted to navigate to URL not listed in sources: %q", p.URL)),
+							)
+							continue toolLoop
+						}
+					}
+				}
+
 				var res string
-				res, err = handleToolCall(ctx, item.Name, item.Arguments)
+				res, err = handleToolCall(ctx, item.Name, toolParams)
 				if err != nil {
 					err = fmt.Errorf("handling tool call %q: %w", item.Name, err)
 					e.service.logger.Error("error handling tool call", "name", item.Name, "error", err)

@@ -25,7 +25,8 @@ func TestTriageWorkflow(t *testing.T) {
 	svc := NewService(&oai, tl)
 	triage := NewTriageWorkflow(svc)
 	res, err := triage.Run(ctx, &TriageParams{
-		Subject: "Latest games that IGN has given a 9/10 or higher rating",
+		Subject:      "Latest game that IGN has given a 10/10 rating",
+		Instructions: "Hardware doesn't count.",
 	})
 	require.NoError(t, err)
 

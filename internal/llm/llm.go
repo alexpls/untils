@@ -58,6 +58,7 @@ func (s *Service) response(ctx context.Context, params responses.ResponseNewPara
 	}
 
 	logAttrs = append(logAttrs, slog.String("response", resp.OutputText()))
+	// logAttrs = append(logAttrs, slog.String("raw_json", resp.RawJSON()))
 
 	cost, err := calculateCost(model, resp)
 	if err != nil {
