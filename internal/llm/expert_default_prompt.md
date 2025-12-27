@@ -20,12 +20,10 @@ rely on your training data alone, as it is out of date.
 
 ## Using the `browser_navigate` tool
 
-- Use this tool to visit the websites of the sources provided to you.
+- Use this tool to visit websites and read their contents.
 - The response of the tool will be a text representation of the webpage.
-- The tool allows you to visit multiple URLs at a time, however limit your use of this
-  feature to only when it's unclear which of the sources will have the information you need.
 - If you have found enough information to determine the current value of the subject,
-  DO NOT visit any more URLs.
+  DO NOT keep calling this tool to visit more URLs. It's okay to ignore sources.
 
 ## Finding the current value of a subject
 

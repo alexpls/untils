@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/chromedp/cdproto/accessibility"
+	"github.com/chromedp/cdproto/emulation"
 	"github.com/chromedp/cdproto/page"
 	"github.com/chromedp/chromedp"
 )
@@ -37,8 +38,9 @@ func Navigate(ctx context.Context, path string) (*NavigateResult, error) {
 
 	if err := chromedp.Run(timeoutCtx,
 		accessibility.Enable(),
+		emulation.SetEmulatedMedia().WithMedia("print"),
 		chromedp.Navigate(u.String()),
-		waitForNetworkIdle(),
+		waitForNetworkIdle(5*time.Second),
 		tidyHTML(u),
 		chromedp.Title(&title),
 		accessibilityTree(&tree),
@@ -57,27 +59,22 @@ func Navigate(ctx context.Context, path string) (*NavigateResult, error) {
 }
 
 // waitForNetworkIdle waits until the event networkIdle is fired or the
-// context timeout.
-func waitForNetworkIdle() chromedp.ActionFunc {
+// timeout is reached
+func waitForNetworkIdle(timeout time.Duration) chromedp.ActionFunc {
 	return func(ctx context.Context) error {
-		ch := make(chan struct{})
-		cctx, cancel := context.WithCancel(ctx)
+		dctx, cancel := context.WithTimeout(ctx, timeout)
+		defer cancel()
 
-		chromedp.ListenTarget(cctx, func(ev any) {
+		chromedp.ListenTarget(dctx, func(ev any) {
 			switch e := ev.(type) {
 			case *page.EventLifecycleEvent:
 				if e.Name == "networkIdle" {
 					cancel()
-					close(ch)
 				}
 			}
 		})
 
-		select {
-		case <-ch:
-			return nil
-		case <-ctx.Done():
-			return fmt.Errorf("wait for event networkIdle: %w", ctx.Err())
-		}
+		<-dctx.Done()
+		return nil
 	}
 }

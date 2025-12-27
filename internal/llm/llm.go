@@ -73,6 +73,7 @@ func (s *Service) response(ctx context.Context, params responses.ResponseNewPara
 
 	toolCalls := extractToolCalls(resp.Output)
 	for _, item := range toolCalls {
+		logAttrs = append(logAttrs, slog.String("tool."+item.Name, item.Arguments))
 		turn.incrToolCall(item.Name)
 	}
 

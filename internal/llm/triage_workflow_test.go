@@ -4,10 +4,10 @@ package llm
 
 import (
 	"context"
-	"log/slog"
 	"os"
 	"testing"
 
+	"github.com/alexpls/untils_go/internal/testhelper"
 	"github.com/openai/openai-go/v3"
 	"github.com/openai/openai-go/v3/option"
 	"github.com/stretchr/testify/require"
@@ -19,11 +19,13 @@ func TestTriageWorkflow(t *testing.T) {
 		option.WithBaseURL("https://api.x.ai/v1"),
 	)
 
+	tl := testhelper.TestLogger(t)
+
 	ctx := context.Background()
-	svc := NewService(&oai, slog.Default())
+	svc := NewService(&oai, tl)
 	triage := NewTriageWorkflow(svc)
 	res, err := triage.Run(ctx, &TriageParams{
-		Subject: "Who is the president of the United States?",
+		Subject: "Latest games that IGN has given a 9/10 or higher rating",
 	})
 	require.NoError(t, err)
 

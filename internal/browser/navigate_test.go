@@ -24,12 +24,10 @@ func TestNavigate(t *testing.T) {
 }
 
 func TestNavigateBigPage(t *testing.T) {
-	t.Skip("just for testing")
-
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	result, err := browser.Navigate(ctx, "https://en.wikipedia.org/wiki/The_Life_of_a_Showgirl")
+	result, err := browser.Navigate(ctx, "https://www.ign.com/reviews/games")
 	require.NoError(t, err)
 
 	t.Log(result)
