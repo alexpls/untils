@@ -13,14 +13,14 @@ import (
 )
 
 func TestFormatEnergexAccessibilityTree(t *testing.T) {
-	var tree axTreeResponse
+	var tree axTree
 	require.NoError(t, json.Unmarshal(energexAxTreeFixture(t), &tree))
 
 	testhelper.SnapshotMatch(t, "accessibility_tree_energex.parsed.txt", tree.String())
 }
 
 func TestFormatWikipediaAccessibilityTree(t *testing.T) {
-	var tree axTreeResponse
+	var tree axTree
 	require.NoError(t, json.Unmarshal(wikipediaAxTreeFixture(t), &tree))
 
 	testhelper.SnapshotMatch(t, "accessibility_tree_wikipedia.parsed.txt", tree.String())
@@ -44,7 +44,7 @@ func axTreeFixture(t *testing.T, name string, path string) []byte {
 		u, err := url.Parse(path)
 		require.NoError(t, err)
 
-		var tree axTreeResponse
+		var tree axTree
 
 		require.NoError(t, chromedp.Run(ctx,
 			accessibility.Enable(),

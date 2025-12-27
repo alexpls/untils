@@ -33,7 +33,7 @@ func Navigate(ctx context.Context, path string) (*NavigateResult, error) {
 	defer timeoutCancel()
 
 	var title string
-	var tree axTreeResponse
+	var tree axTree
 
 	if err := chromedp.Run(timeoutCtx,
 		accessibility.Enable(),
