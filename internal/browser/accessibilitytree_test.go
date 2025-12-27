@@ -3,6 +3,7 @@ package browser
 import (
 	"context"
 	"encoding/json"
+	"net/url"
 	"testing"
 
 	"github.com/alexpls/untils_go/internal/testhelper"
@@ -11,24 +12,45 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestFormatAccessibilityTree(t *testing.T) {
+func TestFormatEnergexAccessibilityTree(t *testing.T) {
 	var tree axTreeResponse
-	require.NoError(t, json.Unmarshal(accessibilityTreeFixture(t), &tree))
+	require.NoError(t, json.Unmarshal(energexAxTreeFixture(t), &tree))
 
 	testhelper.SnapshotMatch(t, "accessibility_tree_energex.parsed.txt", tree.String())
 }
 
-func accessibilityTreeFixture(t *testing.T) []byte {
-	s := testhelper.Snapshot(t, "accessibility_tree_energex.json", func() string {
+func TestFormatWikipediaAccessibilityTree(t *testing.T) {
+	var tree axTreeResponse
+	require.NoError(t, json.Unmarshal(wikipediaAxTreeFixture(t), &tree))
+
+	testhelper.SnapshotMatch(t, "accessibility_tree_wikipedia.parsed.txt", tree.String())
+}
+
+func wikipediaAxTreeFixture(t *testing.T) []byte {
+	return axTreeFixture(t, "accessibility_tree_wikipedia.json", "https://en.wikipedia.org/wiki/Taylor_Swift_albums_discography")
+}
+
+func energexAxTreeFixture(t *testing.T) []byte {
+	return axTreeFixture(t, "accessibility_tree_energex.json", "https://www.energex.com.au/outages/outage-finder/emergency-outages-text-view/")
+}
+
+func axTreeFixture(t *testing.T, name string, path string) []byte {
+	t.Helper()
+
+	s := testhelper.Snapshot(t, name, func() string {
 		ctx, cancel := chromedp.NewContext(context.TODO())
 		defer cancel()
 
-		var tree *axTreeResponse
+		u, err := url.Parse(path)
+		require.NoError(t, err)
+
+		var tree axTreeResponse
 
 		require.NoError(t, chromedp.Run(ctx,
 			accessibility.Enable(),
-			chromedp.Navigate("https://www.energex.com.au/outages/outage-finder/emergency-outages-text-view/"),
-			accessibilityTree(tree),
+			chromedp.Navigate(path),
+			tidyHTML(u),
+			accessibilityTree(&tree),
 		))
 
 		jsonStr, err := json.MarshalIndent(tree, "", "  ")
