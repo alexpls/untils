@@ -2,6 +2,7 @@ package search
 
 import (
 	"encoding/json"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -9,11 +10,13 @@ import (
 
 type BraveClient struct {
 	apiKey string
+	logger *slog.Logger
 }
 
-func NewBraveClient(apiKey string) *BraveClient {
+func NewBraveClient(apiKey string, logger *slog.Logger) *BraveClient {
 	return &BraveClient{
 		apiKey: apiKey,
+		logger: logger,
 	}
 }
 

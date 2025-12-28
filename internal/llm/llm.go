@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/alexpls/untils_go/internal/search"
 	"github.com/openai/openai-go/v3"
 	"github.com/openai/openai-go/v3/responses"
 )
@@ -13,14 +14,16 @@ import (
 var model = "grok-4-1-fast-non-reasoning"
 
 type Service struct {
-	client *openai.Client
-	logger *slog.Logger
+	client      *openai.Client
+	logger      *slog.Logger
+	webSearcher search.WebSearcher
 }
 
-func NewService(client *openai.Client, logger *slog.Logger) *Service {
+func NewService(client *openai.Client, logger *slog.Logger, webSearcher search.WebSearcher) *Service {
 	return &Service{
-		client: client,
-		logger: logger,
+		client:      client,
+		logger:      logger,
+		webSearcher: webSearcher,
 	}
 }
 

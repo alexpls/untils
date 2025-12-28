@@ -14,6 +14,7 @@ import (
 	"github.com/alexpls/untils_go/internal/monitor"
 	"github.com/alexpls/untils_go/internal/must"
 	"github.com/alexpls/untils_go/internal/pushover"
+	"github.com/alexpls/untils_go/internal/search"
 	"github.com/alexpls/untils_go/internal/session"
 	"github.com/alexpls/untils_go/internal/usersettings"
 	"github.com/alexpls/untils_go/public"
@@ -42,6 +43,7 @@ type app struct {
 	emailService   *email.Service
 	validate       *validator.Validate
 	userSettings   *usersettings.Service
+	webSearcher    search.WebSearcher
 }
 
 func createApp(c *config) (*app, func()) {
@@ -93,11 +95,13 @@ func createApp(c *config) (*app, func()) {
 		Workers: workers,
 	}))
 
+	a.webSearcher = search.NewBraveClient(c.braveKey, a.logger.With("source", "search.brave"))
+
 	llmClient := openai.NewClient(
 		option.WithBaseURL("https://api.x.ai/v1"),
 		option.WithAPIKey(c.xAIKey),
 	)
-	a.llm = llm.NewService(&llmClient, a.logger.With("source", "llm"))
+	a.llm = llm.NewService(&llmClient, a.logger.With("source", "llm"), a.webSearcher)
 
 	a.auth = auth.NewAuth(a.logger.With("source", "auth"), a.db, a.queries, a.validate)
 

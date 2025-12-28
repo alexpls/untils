@@ -5,7 +5,6 @@ import (
 	_ "embed"
 	"encoding/json"
 	"fmt"
-	"slices"
 	"time"
 
 	"github.com/openai/openai-go/v3/responses"
@@ -18,7 +17,7 @@ type Triager struct {
 
 func NewTriager(service *Service, params *TriageParams) *Triager {
 	messages := inputItems(
-		systemMessage(triagerPrompt+expertsMarkdown),
+		systemMessage(triagerPrompt),
 		userMessage(params.Subject),
 	)
 
@@ -35,7 +34,6 @@ var triagerPrompt string
 
 type TriagerResponse struct {
 	Approved         bool   `json:"approved"`
-	ChosenExpert     string `json:"chosen_expert"`
 	RephrasedSubject string `json:"rephrased_subject"`
 	RejectedReason   string `json:"rejected_reason"`
 }
@@ -70,15 +68,6 @@ func (p *Triager) Run(ctx context.Context) (*TriagerResponse, error) {
 			p.addMessage(systemMessage(fmt.Sprintf(
 				"The output was not valid JSON: %s. Ensure your response follows the correct JSON schema.",
 				err.Error(),
-			)))
-			continue
-		}
-
-		if !slices.Contains(expertNames, res.ChosenExpert) {
-			err = fmt.Errorf("invalid expert chosen: %s", res.ChosenExpert)
-			p.addMessage(systemMessage(fmt.Sprintf(
-				"The chosen expert '%s' is not valid. Valid experts are: %v. Choose a valid expert.",
-				res.ChosenExpert, experts,
 			)))
 			continue
 		}

@@ -64,21 +64,9 @@ func (w *TriageWorkflow) Run(parentCtx context.Context, params *TriageParams) (*
 			Instructions: params.Instructions,
 		}
 
-		lg.Info("finding sources")
-		sourceFinder := newSourceFinder(w.service)
-		sourcesResp, err := sourceFinder.Run(ctx, checkParams)
-		if err != nil {
-			lg.Error("error finding sources", "error", err)
-			return nil, err
-		}
-
-		lg.Info("sources found", "sources", sourcesResp)
-
-		checkParams.Sources = sourcesResp.Sources
-
 		lg.Info("checking")
-		expert := newExpert(triageResp.ChosenExpert, w.service)
-		checkResp, err = expert.performCheck(ctx, checkParams)
+		checker := newChecker(w.service)
+		checkResp, err = checker.perform(ctx, checkParams)
 		if err != nil {
 			lg.Error("error performing check", "error", err)
 			return nil, err

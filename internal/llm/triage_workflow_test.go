@@ -3,28 +3,15 @@
 package llm
 
 import (
-	"context"
-	"os"
 	"testing"
 
-	"github.com/alexpls/untils_go/internal/testhelper"
-	"github.com/openai/openai-go/v3"
-	"github.com/openai/openai-go/v3/option"
 	"github.com/stretchr/testify/require"
 )
 
 func TestTriageWorkflow(t *testing.T) {
-	oai := openai.NewClient(
-		option.WithAPIKey(os.Getenv("XAI_KEY")),
-		option.WithBaseURL("https://api.x.ai/v1"),
-	)
-
-	tl := testhelper.TestLogger(t)
-
-	ctx := context.Background()
-	svc := NewService(&oai, tl)
+	svc := newServiceForTest(t)
 	triage := NewTriageWorkflow(svc)
-	res, err := triage.Run(ctx, &TriageParams{
+	res, err := triage.Run(t.Context(), &TriageParams{
 		Subject:      "Latest game that IGN has given a 10/10 rating",
 		Instructions: "Hardware doesn't count.",
 	})

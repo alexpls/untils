@@ -126,7 +126,7 @@ func (s *Service) ValidateMonitor(ctx context.Context, monitor *sqlc.Monitor) er
 				UserID:    monitor.UserID,
 				MonitorID: monitor.ID,
 				Subject:   pgtype.Text{String: subject, Valid: true},
-				Expert:    pgtype.Text{String: res.Triager.ChosenExpert, Valid: true},
+				Expert:    pgtype.Text{String: "default", Valid: true}, // TODO: get rid of 'expert' here and in the DB if it's not being used
 			}); err != nil {
 				return fmt.Errorf("updating monitor expert: %w", err)
 			}

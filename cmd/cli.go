@@ -64,6 +64,7 @@ func globalFlags(c *config, f *flag.FlagSet) {
 	f.StringVar(&c.dbUrl, "db", "", "postgresql connection url")
 	f.StringVar(&c.xAIKey, "xai-key", "", "x.ai API key")
 	f.StringVar(&c.openAIKey, "openai-key", "", "OpenAI API key")
+	f.StringVar(&c.braveKey, "brave-key", "", "Brave search API key")
 	f.StringVar(&c.pushoverKey, "pushover-key", "", "Pushover API key")
 	f.StringVar(&c.smtp.username, "smtp-username", "", "smtp username")
 	f.StringVar(&c.smtp.password, "smtp-password", "", "smtp password")

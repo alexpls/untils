@@ -5,6 +5,7 @@ type config struct {
 	dbUrl       string
 	xAIKey      string
 	openAIKey   string
+	braveKey    string
 	pushoverKey string
 	smtp        struct {
 		username string

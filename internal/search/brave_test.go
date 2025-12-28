@@ -7,11 +7,13 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/alexpls/untils_go/internal/testhelper"
 	"github.com/stretchr/testify/require"
 )
 
 func TestBraveSearch(t *testing.T) {
-	c := NewBraveClient(os.Getenv("BRAVE_KEY"))
+	tl := testhelper.TestLogger(t)
+	c := NewBraveClient(os.Getenv("BRAVE_KEY"), tl)
 	res, err := c.Search(NewSearchParams("latest ign game reviews").WithCount(5))
 
 	require.NoError(t, err)
