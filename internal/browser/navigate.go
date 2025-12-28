@@ -3,20 +3,28 @@ package browser
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net/url"
 	"strconv"
 	"time"
 
 	"github.com/chromedp/cdproto/accessibility"
 	"github.com/chromedp/cdproto/cdp"
+	"github.com/chromedp/cdproto/dom"
 	"github.com/chromedp/cdproto/emulation"
 	"github.com/chromedp/cdproto/page"
+	"github.com/chromedp/cdproto/runtime"
 	"github.com/chromedp/chromedp"
 )
 
 type Page struct {
+	URL      string
 	Title    string
 	Contents string
+}
+
+func (p Page) String() string {
+	return fmt.Sprintf("Title: %s\nURL: %s\n\n%s", p.Title, p.URL, p.Contents)
 }
 
 type NavigateResult struct {
@@ -27,52 +35,59 @@ type NavigateResult struct {
 
 type BrowserCtx struct {
 	context.Context
+	ID     string
+	logger *slog.Logger
 }
 
-func NewBrowser(parentCtx context.Context) (BrowserCtx, context.CancelFunc) {
+func NewBrowser(parentCtx context.Context, logger *slog.Logger) (BrowserCtx, context.CancelFunc) {
 	ctx, cancel := chromedp.NewContext(parentCtx)
-	return BrowserCtx{ctx}, cancel
+	return BrowserCtx{Context: ctx, logger: logger}, cancel
 }
 
 func (ctx *BrowserCtx) Click(idStr string) (*Page, error) {
+	ctx.logger.Debug("clicking node", slog.String("id", idStr))
+
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		return nil, fmt.Errorf("parsing node id: %w", err)
 	}
-	nodeID := cdp.NodeID(id)
+	backendNodeID := cdp.BackendNodeID(id)
 
-	timeoutCtx, timeoutCancel := context.WithTimeout(ctx, 30*time.Second)
-	defer timeoutCancel()
-
-	var nodes []*cdp.Node
-
-	if err := chromedp.Run(
-		timeoutCtx,
-		chromedp.Nodes([]cdp.NodeID{nodeID}, &nodes, chromedp.ByNodeID),
+	// Resolve the backend node ID to a JavaScript object and click it.
+	// Other approaches would mean pushing the node into the frontend, which
+	// is more complex.
+	// Still, there must be an easier way?
+	if err := chromedp.Run(ctx,
+		chromedp.ActionFunc(func(ctx context.Context) error {
+			remoteObj, err := dom.ResolveNode().WithBackendNodeID(backendNodeID).Do(ctx)
+			if err != nil {
+				return err
+			}
+			_, _, err = runtime.CallFunctionOn(`function() {
+				this.scrollIntoViewIfNeeded();
+				this.click();
+			}`).WithObjectID(remoteObj.ObjectID).Do(ctx)
+			return err
+		}),
+		waitForNetworkIdle(5*time.Second),
 	); err != nil {
+		return nil, fmt.Errorf("clicking node: %w", err)
+	}
+
+	page, err := pageResult(ctx)
+	if err != nil {
 		return nil, err
 	}
-	if len(nodes) == 0 {
-		return nil, fmt.Errorf("no nodes found for id %d", id)
-	}
-	if len(nodes) > 1 {
-		return nil, fmt.Errorf("more than one node found for id %d", id)
-	}
 
-	if err := chromedp.Run(timeoutCtx,
-		chromedp.MouseClickNode(nodes[0]),
-	); err != nil {
-		return nil, err
-	}
+	ctx.logger.Debug("clicked node", slog.String("id", idStr), slog.String("new_url", page.URL))
 
-	return pageResult(timeoutCtx)
+	return page, nil
 }
 
 func (ctx *BrowserCtx) Navigate(path string) (*Page, error) {
-	timeoutCtx, timeoutCancel := context.WithTimeout(ctx, 30*time.Second)
-	defer timeoutCancel()
+	ctx.logger.Debug("navigating to page", slog.String("url", path))
 
-	if err := chromedp.Run(timeoutCtx,
+	if err := chromedp.Run(ctx,
 		accessibility.Enable(),
 		emulation.SetEmulatedMedia().WithMedia("print"),
 		chromedp.Navigate(path),
@@ -81,7 +96,7 @@ func (ctx *BrowserCtx) Navigate(path string) (*Page, error) {
 		return nil, err
 	}
 
-	return pageResult(timeoutCtx)
+	return pageResult(ctx)
 }
 
 func pageResult(ctx context.Context) (*Page, error) {
@@ -112,6 +127,7 @@ func pageResult(ctx context.Context) (*Page, error) {
 	pageContents := tree.String()
 
 	return &Page{
+		URL:      urlStr,
 		Title:    title,
 		Contents: pageContents,
 	}, nil

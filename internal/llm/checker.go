@@ -14,8 +14,10 @@ import (
 )
 
 type checker struct {
-	service  *Service
-	messages []responses.ResponseInputItemUnionParam
+	service       *Service
+	messages      []responses.ResponseInputItemUnionParam
+	browserCtx    *browser.BrowserCtx
+	browserCancel context.CancelFunc
 }
 
 func newChecker(service *Service) *checker {
@@ -26,6 +28,11 @@ func newChecker(service *Service) *checker {
 var checkerPrompt string
 
 func (c *checker) perform(ctx context.Context, params *CheckParams) (*CheckResult, error) {
+	defer func() {
+		if c.browserCancel != nil {
+			c.browserCancel()
+		}
+	}()
 	var err error
 
 	prevs, err := params.PreviousResultsString()
@@ -51,10 +58,11 @@ func (c *checker) perform(ctx context.Context, params *CheckParams) (*CheckResul
 		turn++
 
 		resp, err = c.service.response(ctx, responses.ResponseNewParams{
-			Model: "grok-4-1-fast-reasoning",
-			Input: inputItems(c.messages...),
-			Text:  jsonSchemaResponse(CheckResult{}),
-			Tools: append(browserTools(), searchTools()...),
+			Model:             "grok-4-1-fast-reasoning",
+			Input:             inputItems(c.messages...),
+			Text:              jsonSchemaResponse(CheckResult{}),
+			Tools:             append(browserTools(), searchTools()...),
+			ParallelToolCalls: openai.Bool(false),
 		})
 
 		if len(resp.toolCalls) > 0 {
@@ -83,9 +91,12 @@ func (c *checker) callTools(ctx context.Context, toolCalls []responses.ResponseF
 
 		result, err := c.callTool(ctx, call.Name, params)
 		if err != nil {
+			c.service.logger.Error("error executing tool call", "tool", call.Name, "error", err)
 			c.messages = append(c.messages, systemMessage("error executing tool call: "+err.Error()))
 			continue
 		}
+
+		c.service.logger.Debug("tool response", "tool", call.Name, "result", result)
 
 		c.messages = append(c.messages, responses.ResponseInputItemUnionParam{
 			OfFunctionCallOutput: &responses.ResponseInputItemFunctionCallOutputParam{
@@ -107,19 +118,25 @@ func (c *checker) callTool(ctx context.Context, name string, params any) (string
 
 		stats.sitesVisited = append(stats.sitesVisited, p.URL)
 
-		var sb strings.Builder
-		sb.WriteString("# " + p.URL + "\n\n")
-		b, cancel := browser.NewBrowser(ctx)
-		defer cancel()
-		res, err := b.Navigate(p.URL)
-		if err != nil {
-			sb.WriteString("error navigating to page: " + err.Error() + "\n\n")
-			return sb.String(), nil
+		if c.browserCtx == nil {
+			bctx, bcancel := browser.NewBrowser(ctx, c.service.logger)
+			c.browserCtx, c.browserCancel = &bctx, bcancel
 		}
 
-		writeBrowserNavigateResult(&sb, res)
+		res, err := c.browserCtx.Navigate(p.URL)
+		if err != nil {
+			return "", err
+		}
+		return res.String(), nil
 
-		return sb.String(), nil
+	case browserClickToolParams:
+		page, err := c.browserCtx.Click(p.NodeID)
+		if err != nil {
+			c.service.logger.Error("error performing click", "node_id", p.NodeID, "error", err)
+			return "", err
+		}
+		return page.String(), nil
+
 	case searchToolParams:
 		res, err := c.service.webSearcher.Search(search.NewSearchParams(p.Query))
 		if err != nil {
@@ -134,14 +151,6 @@ func (c *checker) callTool(ctx context.Context, name string, params any) (string
 
 		return sb.String(), nil
 	default:
-		return "tool does not exist", fmt.Errorf("tool does not exist: %s", name)
+		return "", fmt.Errorf("tool does not exist: %s", name)
 	}
-}
-
-func writeBrowserNavigateResult(sb *strings.Builder, res *browser.Page) {
-	sb.WriteString(`## Page title
-		` + res.Title + `
-
-		## Page body
-		` + res.Contents)
 }

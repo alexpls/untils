@@ -15,6 +15,7 @@ In order to achieve this you will use two tools:
 
 - `search_request` to search the web for relevant sources about the subject
 - `browser_navigate` to visit web pages and read their contents
+- `browser_click` to click on elements on a web page (if necessary)
 
 ## Using the `search_request` tool
 
@@ -26,6 +27,12 @@ In order to achieve this you will use two tools:
 - When applicable to the subject, prefer search queries for lists of things
   (e.g. list of taylor swift albums, or taylor swift discography). This will help find
   URLs that are more evergreen and likely to be useful for future checks as well.
+- If the subject is about something that recurs (e.g. latest movie in a franchise, or
+  latest game to be reviewed at 10/10 by a publisher), then craft your search query to
+  return a list of the relevant things in that series. This will help you monitor it
+  more easily in the future.
+- Including words like "latest" or "most recent" in your search query does not yield
+  better results. We are dealing with a text matching search engine (not a semantic one).
 
 ## Using the `browser_navigate` tool
 
@@ -34,6 +41,16 @@ In order to achieve this you will use two tools:
 - If you have found enough information to determine the current value of the subject,
   DO NOT keep calling this tool to visit more URLs. Once you have your answer it's
   crucial to respond as quickly as possible.
+
+## Using the `browser_click` tool
+
+- You must specify a valid node ID from the most recent `browser_navigate` response.
+  These are in the format: `[Next page](click:123)` - where "123" is the node ID. The text in
+  square brackets is the name of the element you will be clicking on, and the text in parentheses
+  is the node ID prefixed with "click:".
+- Use this to click on elements that you have navigated to. It may be useful for
+  expanding sections of a webpage, paginating through results, or navigating to different
+  parts of a site.
 
 ## Finding the current value of a subject
 
