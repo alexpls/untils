@@ -14,7 +14,8 @@ import (
 
 // Parsing and formatting of Chrome accessibility trees.
 //
-// See:  https://wicg.github.io/aom/explainer.html
+// See: https://wicg.github.io/aom/explainer.html
+// See: https://chromedevtools.github.io/devtools-protocol/tot/Accessibility
 // Approach inspired by: https://github.com/ChromeDevTools/chrome-devtools-mcp/blob/main/src/formatters/snapshotFormatter.ts
 
 func accessibilityTree(response *axTree) chromedp.ActionFunc {
@@ -131,8 +132,13 @@ func (t *axTree) reparentChildren(node *axNode, newParent *axNode) {
 // axNode is a node in our internal accessibility tree representation
 // which has been parsed from a Chrome representation (chromeAxNode).
 type axNode struct {
-	NodeID   string   `json:"node_id"`
-	ParentID string   `json:"parent_id,omitempty,omitzero"`
+	// Identifies the node in the DOM domain
+	BackendNodeID int64 `json:"backend_node_id,omitempty,omitzero"`
+	// Identifies the node in the accessibility domain
+	NodeID string `json:"node_id"`
+	// Identifies the parent node in the accessibility domain
+	ParentID string `json:"parent_id,omitempty,omitzero"`
+	// Identifies the child nodes in the accessibility domain
 	ChildIDs []string `json:"child_ids,omitempty,omitzero"`
 	Ignored  bool     `json:"ignored"`
 	Name     string   `json:"name,omitempty,omitzero"`
@@ -176,11 +182,11 @@ func (n *axNode) format(sb *strings.Builder, t *axTree, depth int, formatStyle i
 
 	switch n.Role {
 	case "link", "button":
-		text = n.formatAsLink()
+		text = n.formatAsClickable()
 	case "StaticText", "superscript":
 		text = n.Name
 	case "table":
-		text = fmt.Sprintf("table(id:%s): %s", n.NodeID, n.Name)
+		text = fmt.Sprintf("table: %s", n.Name)
 	default:
 		attrs := n.attributes()
 		text = strings.Join(attrs, ", ")
@@ -216,8 +222,8 @@ func (n *axNode) isTableCell() bool {
 	return n.Role == "cell" || n.Role == "columnheader" || n.Role == "rowheader"
 }
 
-func (n *axNode) formatAsLink() string {
-	return fmt.Sprintf("[%s](id:%s)", n.Name, n.NodeID)
+func (n *axNode) formatAsClickable() string {
+	return fmt.Sprintf("[%s](click:%d)", n.Name, n.BackendNodeID)
 }
 
 func (n *axNode) formatTableRow(sb *strings.Builder, t *axTree, depth int) {
@@ -262,7 +268,7 @@ func (n *axNode) collectText(t *axTree) string {
 func (n *axNode) collectTextParts(t *axTree, parts *[]string) {
 	switch n.Role {
 	case "link", "button":
-		*parts = append(*parts, n.formatAsLink())
+		*parts = append(*parts, n.formatAsClickable())
 		return
 	case "StaticText":
 		if n.Name != "" {
@@ -284,14 +290,8 @@ func (n *axNode) collectTextParts(t *axTree, parts *[]string) {
 func (n *axNode) attributes() []string {
 	var attributes []string
 
-	attributes = append(attributes, "id:"+n.NodeID)
-
 	if n.Role != "" {
-		if n.Role == "none" {
-			attributes = append(attributes, "ignored")
-		} else {
-			attributes = append(attributes, n.Role)
-		}
+		attributes = append(attributes, n.Role)
 	}
 
 	if n.Name != "" {
@@ -339,19 +339,21 @@ func (t *chromeAxTree) axTree() (axTree, error) {
 // Subset of accessibility.Node which intentionally skips ignoredReasons
 // due to incompatibilities with cdproto.
 type chromeAxNode struct {
-	NodeID   accessibility.NodeID   `json:"nodeId"`
-	ParentID accessibility.NodeID   `json:"parentId,omitempty,omitzero"`
-	ChildIDs []accessibility.NodeID `json:"childIds,omitempty,omitzero"`
-	Ignored  bool                   `json:"ignored"`
-	Name     *accessibility.Value   `json:"name,omitempty,omitzero"`
-	Role     *accessibility.Value   `json:"role,omitempty,omitzero"`
-	Value    *accessibility.Value   `json:"value,omitempty,omitzero"`
+	BackendNodeID cdp.BackendNodeID      `json:"backendDOMNodeId,omitempty,omitzero"`
+	NodeID        accessibility.NodeID   `json:"nodeId"`
+	ParentID      accessibility.NodeID   `json:"parentId,omitempty,omitzero"`
+	ChildIDs      []accessibility.NodeID `json:"childIds,omitempty,omitzero"`
+	Ignored       bool                   `json:"ignored"`
+	Name          *accessibility.Value   `json:"name,omitempty,omitzero"`
+	Role          *accessibility.Value   `json:"role,omitempty,omitzero"`
+	Value         *accessibility.Value   `json:"value,omitempty,omitzero"`
 }
 
 func (n *chromeAxNode) axNode() axNode {
 	return axNode{
-		NodeID:   n.NodeID.String(),
-		ParentID: n.ParentID.String(),
+		BackendNodeID: int64(n.BackendNodeID),
+		NodeID:        n.NodeID.String(),
+		ParentID:      n.ParentID.String(),
 		ChildIDs: func() []string {
 			var ids []string
 			for _, id := range n.ChildIDs {

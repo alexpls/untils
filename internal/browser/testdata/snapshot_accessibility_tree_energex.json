@@ -1,750 +1,442 @@
 {
   "root_id": "2",
   "nodes": {
-    "112": {
-      "node_id": "112",
-      "parent_id": "227",
+    "110": {
+      "backend_node_id": 110,
+      "node_id": "110",
+      "parent_id": "163",
       "ignored": false,
-      "name": "Enter street, suburb or postcode",
-      "role": "combobox"
-    },
-    "116": {
-      "node_id": "116",
-      "parent_id": "227",
-      "ignored": false,
-      "name": "Search",
-      "role": "button"
-    },
-    "120": {
-      "node_id": "120",
-      "parent_id": "227",
-      "child_ids": [
-        "349",
-        "362",
-        "336",
-        "388",
-        "323",
-        "375"
-      ],
-      "ignored": false,
-      "name": "by Suburb",
-      "role": "tabpanel"
-    },
-    "122": {
-      "node_id": "122",
-      "parent_id": "227",
-      "ignored": false,
-      "name": "2:15 ",
+      "name": "1:15 ",
       "role": "StaticText"
     },
-    "123": {
-      "node_id": "123",
-      "parent_id": "227",
+    "111": {
+      "backend_node_id": 111,
+      "node_id": "111",
+      "parent_id": "163",
       "ignored": false,
       "name": "pm",
       "role": "StaticText"
     },
-    "124": {
-      "node_id": "124",
-      "parent_id": "227",
+    "112": {
+      "backend_node_id": 112,
+      "node_id": "112",
+      "parent_id": "163",
       "ignored": false,
-      "name": "27 Dec 2025",
+      "name": "28 Dec 2025",
       "role": "StaticText"
-    },
-    "126": {
-      "node_id": "126",
-      "parent_id": "173",
-      "ignored": false,
-      "name": "I want to search for an outage",
-      "role": "StaticText"
-    },
-    "129": {
-      "node_id": "129",
-      "parent_id": "290",
-      "ignored": false,
-      "name": "by ",
-      "role": "StaticText"
-    },
-    "130": {
-      "node_id": "130",
-      "parent_id": "290",
-      "ignored": false,
-      "name": "Suburb",
-      "role": "StaticText"
-    },
-    "131": {
-      "node_id": "131",
-      "parent_id": "300",
-      "ignored": false,
-      "name": "by ",
-      "role": "StaticText"
-    },
-    "132": {
-      "node_id": "132",
-      "parent_id": "300",
-      "ignored": false,
-      "name": "Council",
-      "role": "StaticText"
-    },
-    "134": {
-      "node_id": "134",
-      "parent_id": "323",
-      "ignored": false,
-      "name": "1 outage",
-      "role": "StaticText"
-    },
-    "135": {
-      "node_id": "135",
-      "parent_id": "323",
-      "ignored": false,
-      "name": "26",
-      "role": "StaticText"
-    },
-    "136": {
-      "node_id": "136",
-      "parent_id": "323",
-      "ignored": false,
-      "name": "\n",
-      "role": "LineBreak"
     },
     "137": {
+      "backend_node_id": 137,
       "node_id": "137",
-      "parent_id": "323",
-      "ignored": false,
-      "name": "Customers affected",
-      "role": "StaticText"
-    },
-    "140": {
-      "node_id": "140",
-      "parent_id": "336",
-      "ignored": false,
-      "name": "1 outage",
-      "role": "StaticText"
-    },
-    "141": {
-      "node_id": "141",
-      "parent_id": "336",
-      "ignored": false,
-      "name": "152",
-      "role": "StaticText"
-    },
-    "142": {
-      "node_id": "142",
-      "parent_id": "336",
-      "ignored": false,
-      "name": "\n",
-      "role": "LineBreak"
-    },
-    "143": {
-      "node_id": "143",
-      "parent_id": "336",
-      "ignored": false,
-      "name": "Customers affected",
-      "role": "StaticText"
-    },
-    "146": {
-      "node_id": "146",
-      "parent_id": "349",
-      "ignored": false,
-      "name": "1 outage",
-      "role": "StaticText"
-    },
-    "147": {
-      "node_id": "147",
-      "parent_id": "349",
-      "ignored": false,
-      "name": "4",
-      "role": "StaticText"
-    },
-    "148": {
-      "node_id": "148",
-      "parent_id": "349",
-      "ignored": false,
-      "name": "\n",
-      "role": "LineBreak"
-    },
-    "149": {
-      "node_id": "149",
-      "parent_id": "349",
-      "ignored": false,
-      "name": "Customers affected",
-      "role": "StaticText"
-    },
-    "152": {
-      "node_id": "152",
-      "parent_id": "362",
-      "ignored": false,
-      "name": "1 outage",
-      "role": "StaticText"
-    },
-    "153": {
-      "node_id": "153",
-      "parent_id": "362",
-      "ignored": false,
-      "name": "1",
-      "role": "StaticText"
-    },
-    "154": {
-      "node_id": "154",
-      "parent_id": "362",
-      "ignored": false,
-      "name": "\n",
-      "role": "LineBreak"
-    },
-    "155": {
-      "node_id": "155",
-      "parent_id": "362",
-      "ignored": false,
-      "name": "Customers affected",
-      "role": "StaticText"
-    },
-    "158": {
-      "node_id": "158",
-      "parent_id": "375",
-      "ignored": false,
-      "name": "1 outage",
-      "role": "StaticText"
-    },
-    "159": {
-      "node_id": "159",
-      "parent_id": "375",
-      "ignored": false,
-      "name": "8",
-      "role": "StaticText"
-    },
-    "160": {
-      "node_id": "160",
-      "parent_id": "375",
-      "ignored": false,
-      "name": "\n",
-      "role": "LineBreak"
-    },
-    "161": {
-      "node_id": "161",
-      "parent_id": "375",
-      "ignored": false,
-      "name": "Customers affected",
-      "role": "StaticText"
-    },
-    "164": {
-      "node_id": "164",
-      "parent_id": "388",
-      "ignored": false,
-      "name": "1 outage",
-      "role": "StaticText"
-    },
-    "165": {
-      "node_id": "165",
-      "parent_id": "388",
-      "ignored": false,
-      "name": "8",
-      "role": "StaticText"
-    },
-    "166": {
-      "node_id": "166",
-      "parent_id": "388",
-      "ignored": false,
-      "name": "\n",
-      "role": "LineBreak"
-    },
-    "167": {
-      "node_id": "167",
-      "parent_id": "388",
-      "ignored": false,
-      "name": "Customers affected",
-      "role": "StaticText"
-    },
-    "173": {
-      "node_id": "173",
-      "parent_id": "227",
-      "child_ids": [
-        "126"
-      ],
-      "ignored": false,
-      "role": "LabelText"
-    },
-    "2": {
-      "node_id": "2",
-      "child_ids": [
-        "201",
-        "202",
-        "227",
-        "214",
-        "427"
-      ],
-      "ignored": false,
-      "name": "Energex Emergency Outages",
-      "role": "RootWebArea"
-    },
-    "201": {
-      "node_id": "201",
       "parent_id": "2",
       "ignored": false,
       "name": "Angular 20 Test - Step 2",
       "role": "heading"
     },
-    "202": {
-      "node_id": "202",
+    "138": {
+      "backend_node_id": 138,
+      "node_id": "138",
       "parent_id": "2",
       "child_ids": [
-        "63"
+        "68"
       ],
       "ignored": false,
       "role": "paragraph"
     },
-    "214": {
-      "node_id": "214",
+    "150": {
+      "backend_node_id": 150,
+      "node_id": "150",
       "parent_id": "2",
       "child_ids": [
-        "215",
-        "217",
-        "221"
+        "151",
+        "153",
+        "157"
       ],
       "ignored": false,
       "role": "list"
     },
-    "215": {
-      "node_id": "215",
-      "parent_id": "214",
+    "151": {
+      "backend_node_id": 151,
+      "node_id": "151",
+      "parent_id": "150",
       "child_ids": [
-        "65",
-        "64"
+        "70",
+        "69"
       ],
       "ignored": false,
       "role": "listitem"
     },
-    "217": {
-      "node_id": "217",
-      "parent_id": "214",
+    "153": {
+      "backend_node_id": 153,
+      "node_id": "153",
+      "parent_id": "150",
       "child_ids": [
-        "218"
+        "154"
       ],
       "ignored": false,
       "role": "listitem"
     },
-    "218": {
-      "node_id": "218",
-      "parent_id": "217",
+    "154": {
+      "backend_node_id": 154,
+      "node_id": "154",
+      "parent_id": "153",
       "ignored": false,
       "name": "Home",
       "role": "link"
     },
-    "221": {
-      "node_id": "221",
-      "parent_id": "214",
+    "157": {
+      "backend_node_id": 157,
+      "node_id": "157",
+      "parent_id": "150",
       "child_ids": [
-        "222"
+        "158"
       ],
       "ignored": false,
       "role": "listitem"
     },
-    "222": {
-      "node_id": "222",
-      "parent_id": "221",
+    "158": {
+      "backend_node_id": 158,
+      "node_id": "158",
+      "parent_id": "157",
       "ignored": false,
       "name": "Contact Us",
       "role": "link"
     },
-    "227": {
-      "node_id": "227",
+    "163": {
+      "backend_node_id": 163,
+      "node_id": "163",
       "parent_id": "2",
       "child_ids": [
-        "288",
-        "173",
+        "48",
+        "71",
+        "73",
+        "72",
+        "78",
+        "79",
+        "80",
+        "215",
+        "82",
+        "216",
+        "84",
+        "74",
         "112",
-        "116",
-        "120",
-        "43",
-        "69",
-        "124",
-        "122",
-        "123",
-        "66",
-        "68",
-        "67"
+        "110",
+        "111"
       ],
       "ignored": false,
       "role": "main"
     },
-    "288": {
-      "node_id": "288",
-      "parent_id": "227",
+    "2": {
+      "backend_node_id": 2,
+      "node_id": "2",
       "child_ids": [
-        "290",
-        "300"
-      ],
-      "ignored": false,
-      "role": "tablist"
-    },
-    "290": {
-      "node_id": "290",
-      "parent_id": "288",
-      "child_ids": [
-        "129",
-        "130"
-      ],
-      "ignored": false,
-      "name": "by Suburb",
-      "role": "tab"
-    },
-    "300": {
-      "node_id": "300",
-      "parent_id": "288",
-      "child_ids": [
-        "131",
-        "132",
-        "308"
-      ],
-      "ignored": false,
-      "name": "by Council",
-      "role": "tab"
-    },
-    "308": {
-      "node_id": "308",
-      "parent_id": "300",
-      "ignored": false,
-      "role": "button"
-    },
-    "323": {
-      "node_id": "323",
-      "parent_id": "120",
-      "child_ids": [
-        "135",
-        "136",
         "137",
-        "325",
-        "134"
+        "138",
+        "246",
+        "163",
+        "150"
       ],
       "ignored": false,
-      "name": "View outages for BANYA",
-      "role": "button"
+      "name": "Energex Emergency Outages",
+      "role": "RootWebArea"
     },
-    "325": {
-      "node_id": "325",
-      "parent_id": "323",
+    "215": {
+      "backend_node_id": 215,
+      "node_id": "215",
+      "parent_id": "163",
       "ignored": false,
-      "name": "Banya",
-      "role": "heading"
+      "name": "planned outages",
+      "role": "link"
     },
-    "336": {
-      "node_id": "336",
-      "parent_id": "120",
-      "child_ids": [
-        "141",
-        "142",
-        "338",
-        "143",
-        "140"
-      ],
+    "216": {
+      "backend_node_id": 216,
+      "node_id": "216",
+      "parent_id": "163",
       "ignored": false,
-      "name": "View outages for BEECHMONT",
-      "role": "button"
+      "name": "13 62 62",
+      "role": "link"
     },
-    "338": {
-      "node_id": "338",
-      "parent_id": "336",
-      "ignored": false,
-      "name": "Beechmont",
-      "role": "heading"
-    },
-    "349": {
-      "node_id": "349",
-      "parent_id": "120",
-      "child_ids": [
-        "147",
-        "148",
-        "149",
-        "351",
-        "146"
-      ],
-      "ignored": false,
-      "name": "View outages for FERNY GLEN",
-      "role": "button"
-    },
-    "351": {
-      "node_id": "351",
-      "parent_id": "349",
-      "ignored": false,
-      "name": "Ferny Glen",
-      "role": "heading"
-    },
-    "362": {
-      "node_id": "362",
-      "parent_id": "120",
-      "child_ids": [
-        "364",
-        "152",
-        "153",
-        "154",
-        "155"
-      ],
-      "ignored": false,
-      "name": "View outages for FLYING FOX",
-      "role": "button"
-    },
-    "364": {
-      "node_id": "364",
-      "parent_id": "362",
-      "ignored": false,
-      "name": "Flying Fox",
-      "role": "heading"
-    },
-    "375": {
-      "node_id": "375",
-      "parent_id": "120",
-      "child_ids": [
-        "159",
-        "160",
-        "377",
-        "161",
-        "158"
-      ],
-      "ignored": false,
-      "name": "View outages for TALLEBUDGERA VALLEY",
-      "role": "button"
-    },
-    "377": {
-      "node_id": "377",
-      "parent_id": "375",
-      "ignored": false,
-      "name": "Tallebudgera Valley",
-      "role": "heading"
-    },
-    "388": {
-      "node_id": "388",
-      "parent_id": "120",
-      "child_ids": [
-        "165",
-        "166",
-        "390",
-        "167",
-        "164"
-      ],
-      "ignored": false,
-      "name": "View outages for WITHEREN",
-      "role": "button"
-    },
-    "390": {
-      "node_id": "390",
-      "parent_id": "388",
-      "ignored": false,
-      "name": "Witheren",
-      "role": "heading"
-    },
-    "427": {
-      "node_id": "427",
+    "246": {
+      "backend_node_id": 246,
+      "node_id": "246",
       "parent_id": "2",
       "child_ids": [
-        "85",
-        "433",
-        "435",
-        "437",
-        "440"
+        "259",
+        "252",
+        "254",
+        "256",
+        "90"
       ],
       "ignored": false,
       "role": "sectionfooter"
     },
-    "43": {
-      "node_id": "43",
-      "parent_id": "227",
+    "252": {
+      "backend_node_id": 252,
+      "node_id": "252",
+      "parent_id": "246",
+      "ignored": false,
+      "name": "Facebook",
+      "role": "link"
+    },
+    "254": {
+      "backend_node_id": 254,
+      "node_id": "254",
+      "parent_id": "246",
+      "ignored": false,
+      "name": "Youtube",
+      "role": "link"
+    },
+    "256": {
+      "backend_node_id": 256,
+      "node_id": "256",
+      "parent_id": "246",
+      "ignored": false,
+      "name": "LinkedIn",
+      "role": "link"
+    },
+    "259": {
+      "backend_node_id": 259,
+      "node_id": "259",
+      "parent_id": "246",
       "child_ids": [
-        "71",
-        "72",
-        "44"
+        "260",
+        "262",
+        "264",
+        "266",
+        "268"
+      ],
+      "ignored": false,
+      "role": "list"
+    },
+    "260": {
+      "backend_node_id": 260,
+      "node_id": "260",
+      "parent_id": "259",
+      "child_ids": [
+        "261"
+      ],
+      "ignored": false,
+      "role": "listitem"
+    },
+    "261": {
+      "backend_node_id": 261,
+      "node_id": "261",
+      "parent_id": "260",
+      "ignored": false,
+      "name": "Right to information",
+      "role": "link"
+    },
+    "262": {
+      "backend_node_id": 262,
+      "node_id": "262",
+      "parent_id": "259",
+      "child_ids": [
+        "263"
+      ],
+      "ignored": false,
+      "role": "listitem"
+    },
+    "263": {
+      "backend_node_id": 263,
+      "node_id": "263",
+      "parent_id": "262",
+      "ignored": false,
+      "name": "Terms of use",
+      "role": "link"
+    },
+    "264": {
+      "backend_node_id": 264,
+      "node_id": "264",
+      "parent_id": "259",
+      "child_ids": [
+        "265"
+      ],
+      "ignored": false,
+      "role": "listitem"
+    },
+    "265": {
+      "backend_node_id": 265,
+      "node_id": "265",
+      "parent_id": "264",
+      "ignored": false,
+      "name": "Privacy policy",
+      "role": "link"
+    },
+    "266": {
+      "backend_node_id": 266,
+      "node_id": "266",
+      "parent_id": "259",
+      "child_ids": [
+        "267"
+      ],
+      "ignored": false,
+      "role": "listitem"
+    },
+    "267": {
+      "backend_node_id": 267,
+      "node_id": "267",
+      "parent_id": "266",
+      "ignored": false,
+      "name": "Sitemap",
+      "role": "link"
+    },
+    "268": {
+      "backend_node_id": 268,
+      "node_id": "268",
+      "parent_id": "259",
+      "child_ids": [
+        "89"
+      ],
+      "ignored": false,
+      "role": "listitem"
+    },
+    "48": {
+      "backend_node_id": 48,
+      "node_id": "48",
+      "parent_id": "163",
+      "child_ids": [
+        "76",
+        "77",
+        "49"
       ],
       "ignored": false,
       "name": "Manually refresh outage data",
       "role": "button"
     },
-    "433": {
-      "node_id": "433",
-      "parent_id": "427",
-      "ignored": false,
-      "name": "Facebook",
-      "role": "link"
-    },
-    "435": {
-      "node_id": "435",
-      "parent_id": "427",
-      "ignored": false,
-      "name": "Youtube",
-      "role": "link"
-    },
-    "437": {
-      "node_id": "437",
-      "parent_id": "427",
-      "ignored": false,
-      "name": "LinkedIn",
-      "role": "link"
-    },
-    "44": {
-      "node_id": "44",
-      "parent_id": "43",
+    "49": {
+      "backend_node_id": 49,
+      "node_id": "49",
+      "parent_id": "48",
       "ignored": false,
       "name": "refresh outages",
       "role": "button"
     },
-    "440": {
-      "node_id": "440",
-      "parent_id": "427",
-      "child_ids": [
-        "441",
-        "443",
-        "445",
-        "447",
-        "449"
-      ],
-      "ignored": false,
-      "role": "list"
-    },
-    "441": {
-      "node_id": "441",
-      "parent_id": "440",
-      "child_ids": [
-        "442"
-      ],
-      "ignored": false,
-      "role": "listitem"
-    },
-    "442": {
-      "node_id": "442",
-      "parent_id": "441",
-      "ignored": false,
-      "name": "Right to information",
-      "role": "link"
-    },
-    "443": {
-      "node_id": "443",
-      "parent_id": "440",
-      "child_ids": [
-        "444"
-      ],
-      "ignored": false,
-      "role": "listitem"
-    },
-    "444": {
-      "node_id": "444",
-      "parent_id": "443",
-      "ignored": false,
-      "name": "Terms of use",
-      "role": "link"
-    },
-    "445": {
-      "node_id": "445",
-      "parent_id": "440",
-      "child_ids": [
-        "446"
-      ],
-      "ignored": false,
-      "role": "listitem"
-    },
-    "446": {
-      "node_id": "446",
-      "parent_id": "445",
-      "ignored": false,
-      "name": "Privacy policy",
-      "role": "link"
-    },
-    "447": {
-      "node_id": "447",
-      "parent_id": "440",
-      "child_ids": [
-        "448"
-      ],
-      "ignored": false,
-      "role": "listitem"
-    },
-    "448": {
-      "node_id": "448",
-      "parent_id": "447",
-      "ignored": false,
-      "name": "Sitemap",
-      "role": "link"
-    },
-    "449": {
-      "node_id": "449",
-      "parent_id": "440",
-      "child_ids": [
-        "84"
-      ],
-      "ignored": false,
-      "role": "listitem"
-    },
-    "63": {
-      "node_id": "63",
-      "parent_id": "202",
+    "68": {
+      "backend_node_id": 68,
+      "node_id": "68",
+      "parent_id": "138",
       "ignored": false,
       "name": "Testing with minimal dashboard component...",
       "role": "StaticText"
     },
-    "64": {
-      "node_id": "64",
-      "parent_id": "215",
+    "69": {
+      "backend_node_id": 69,
+      "node_id": "69",
+      "parent_id": "151",
       "ignored": false,
       "name": "Emergency",
       "role": "StaticText"
     },
-    "65": {
-      "node_id": "65",
-      "parent_id": "215",
+    "70": {
+      "backend_node_id": 70,
+      "node_id": "70",
+      "parent_id": "151",
       "ignored": false,
       "name": "Outages",
       "role": "StaticText"
     },
-    "66": {
-      "node_id": "66",
-      "parent_id": "227",
+    "71": {
+      "backend_node_id": 71,
+      "node_id": "71",
+      "parent_id": "163",
       "ignored": false,
       "name": "Customers affected",
       "role": "StaticText"
     },
-    "67": {
-      "node_id": "67",
-      "parent_id": "227",
+    "72": {
+      "backend_node_id": 72,
+      "node_id": "72",
+      "parent_id": "163",
       "ignored": false,
-      "name": "199",
+      "name": "0",
       "role": "StaticText"
     },
-    "68": {
-      "node_id": "68",
-      "parent_id": "227",
+    "73": {
+      "backend_node_id": 73,
+      "node_id": "73",
+      "parent_id": "163",
       "ignored": false,
       "name": "in South East Queensland",
       "role": "StaticText"
     },
-    "69": {
-      "node_id": "69",
-      "parent_id": "227",
+    "74": {
+      "backend_node_id": 74,
+      "node_id": "74",
+      "parent_id": "163",
       "ignored": false,
       "name": "Last updated",
       "role": "StaticText"
     },
-    "71": {
-      "node_id": "71",
-      "parent_id": "43",
+    "76": {
+      "backend_node_id": 76,
+      "node_id": "76",
+      "parent_id": "48",
       "ignored": false,
       "name": "outages updated every 15 ",
       "role": "StaticText"
     },
-    "72": {
-      "node_id": "72",
-      "parent_id": "43",
+    "77": {
+      "backend_node_id": 77,
+      "node_id": "77",
+      "parent_id": "48",
       "ignored": false,
       "name": "minutes",
       "role": "StaticText"
     },
+    "78": {
+      "backend_node_id": 78,
+      "node_id": "78",
+      "parent_id": "163",
+      "ignored": false,
+      "name": "There are currently no power outages reported for South East Queensland.",
+      "role": "StaticText"
+    },
+    "79": {
+      "backend_node_id": 79,
+      "node_id": "79",
+      "parent_id": "163",
+      "ignored": false,
+      "name": "\n",
+      "role": "LineBreak"
+    },
+    "80": {
+      "backend_node_id": 80,
+      "node_id": "80",
+      "parent_id": "163",
+      "ignored": false,
+      "name": "Check for ",
+      "role": "StaticText"
+    },
+    "82": {
+      "backend_node_id": 82,
+      "node_id": "82",
+      "parent_id": "163",
+      "ignored": false,
+      "name": " or call ",
+      "role": "StaticText"
+    },
     "84": {
+      "backend_node_id": 84,
       "node_id": "84",
-      "parent_id": "449",
+      "parent_id": "163",
+      "ignored": false,
+      "name": " (24/7) to report an outage.",
+      "role": "StaticText"
+    },
+    "89": {
+      "backend_node_id": 89,
+      "node_id": "89",
+      "parent_id": "268",
       "ignored": false,
       "name": "© 2025 Energex",
       "role": "StaticText"
     },
-    "85": {
-      "node_id": "85",
-      "parent_id": "427",
+    "90": {
+      "backend_node_id": 90,
+      "node_id": "90",
+      "parent_id": "246",
       "ignored": false,
-      "name": "1766808903",
+      "name": "1766891703",
       "role": "StaticText"
     }
   }

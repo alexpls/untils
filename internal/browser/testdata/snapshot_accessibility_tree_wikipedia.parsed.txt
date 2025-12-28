@@ -1,157 +1,157 @@
-id:2, RootWebArea, Taylor Swift albums discography - Wikipedia
-  id:5275, main
-    id:5276, sectionheader
-      id:5277, navigation, Contents
-        [Toggle the table of contents](id:5279)
-      id:5285, heading, Taylor Swift albums discography
-      [Go to an article in another language. Available in 7 languages](id:5288)
-    id:5322, navigation, Namespaces
-      - [Article](id:5327)
-      - [Talk](id:5330)
-    id:5486, paragraph
-      The American singer-songwriter [Taylor Swift](id:5487) has released 12 original albums, 4 [re-recorded albums](id:5488), 5 [extended plays (EPs)](id:5489), and 4 [live albums](id:5490). In the United States, as of May 2025, she had sold 116.7 million [album-equivalent units](id:5493), coming from 54 million pure sales and 70.7 billion [streams](id:5494);[[1]](id:5496) the [Recording Industry Association of America](id:5499) (RIAA) as of November 2025[certified](id:5502) 110 million album units, making her the [highest-certified female album artist](id:5503).[[2]](id:5505) On the [Billboard 200](id:5508) chart, she has accumulated 15 albums and 96 total weeks at number one, more than any other solo act.[[3]](id:5511)
-    id:5514, paragraph
-      Swift released six albums with [Big Machine Records](id:5515). Her debut album, [Taylor Swift](id:5516) (2006), spent more weeks on the Billboard 200 than any other album in the 2000s decade,[[4]](id:5520) and her second, [Fearless](id:5524) (2008), was the only album from the 2000s decade to spend one year in the top 10 of the Billboard 200.[[5]](id:5527) Fearless was Swift's first album to top the charts in Australia, Canada, and New Zealand.[[6]](id:5532) Her next albums—[Speak Now](id:5536) (2010), [Red](id:5538) (2012), [1989](id:5540) (2014), and [Reputation](id:5541) (2017)—all reached number one on the Billboard 200, and each of them sold over one million US first-week copies.[[7]](id:5545) All four albums reached number one in Australia, Canada, and New Zealand;[[8]](id:5549)[[9]](id:5553) and the latter three all reached number one in the United Kingdom.[[10]](id:5557)
-    id:5560, paragraph
-      Under a recording contract with [Republic Records](id:5561) signed in 2018,[[11]](id:5563) Swift has released six original albums—[Lover](id:5567) (2019), [Folklore](id:5568) (2020), [Evermore](id:5571) (2020), [Midnights](id:5573) (2022), [The Tortured Poets Department](id:5575) (2024), and [The Life of a Showgirl](id:5577) (2025)—all of them peaked atop the Billboard 200.[[12]](id:5580) Lover was Swift's first to reach number one in Spain and Sweden.[[13]](id:5585)[[14]](id:5589) Midnights, The Tortured Poets Department, and The Life of a Showgirl each sold one million first-week copies in the United States,[[12]](id:5596)[[15]](id:5600) and they reached number one in Australia, Canada,[[8]](id:5604) Denmark,[[16]](id:5608) Ireland,[[17]](id:5612) New Zealand,[[9]](id:5616) Spain,[[13]](id:5620) Norway,[[18]](id:5624) and the United Kingdom.[[9]](id:5628) In the United States, The Tortured Poets Department was Swift's first album to open with two million units first-week,[[15]](id:5633) and The Life of a Showgirl opened with four million units, becoming the [fastest-selling album in American history](id:5637).[[12]](id:5639)
-    id:5642, paragraph
-      Swift's departure from Big Machine resulted in a [dispute over the ownership of her first six albums](id:5643) in 2019, which resulted in her re-recording four albums—[Fearless (Taylor's Version)](id:5645) (2021), [Red (Taylor's Version)](id:5647) (2021), [Speak Now (Taylor's Version)](id:5649) (2023), and [1989 (Taylor's Version)](id:5651) (2023)—all of which reached number one in Australia, Canada,[[8]](id:5653) Ireland,[[17]](id:5657) New Zealand,[[9]](id:5661) the United Kingdom,[[10]](id:5665) and the United States.[[19]](id:5669) Fearless (Taylor's Version) was the first re-recorded album to top the Billboard 200,[[20]](id:5675) and 1989 (Taylor's Version) sold over a million US first-week copies.[[21]](id:5680) Swift holds the record for the [most annual best-selling albums in the United States](id:5683)—eight times: Fearless in 2009, 1989 in 2014, Reputation in 2017, Lover in 2019, Folklore in 2020, Midnights in 2022, 1989 (Taylor's Version) in 2023, and The Tortured Poets Department in 2024.[[22]](id:5693)
-    table(id:5704): List of studio albums, with selected chart positions, sales figures, and certifications
-      id:5705, caption
+RootWebArea, Taylor Swift albums discography - Wikipedia
+  main
+    sectionheader
+      navigation, Contents
+        [Toggle the table of contents](click:5269)
+      heading, Taylor Swift albums discography
+      [Go to an article in another language. Available in 7 languages](click:5278)
+    paragraph
+      The American singer-songwriter [Taylor Swift](click:5478) has released 12 original albums, 4 [re-recorded albums](click:5479), 5 [extended plays (EPs)](click:5480), and 4 [live albums](click:5481). In the United States, as of May 2025, she had sold 116.7 million [album-equivalent units](click:5484), coming from 54 million pure sales and 70.7 billion [streams](click:5485);[[1]](click:5487) the [Recording Industry Association of America](click:5490) (RIAA) as of November 2025[certified](click:5493) 110 million album units, making her the [highest-certified female album artist](click:5494).[[2]](click:5496) On the [Billboard 200](click:5499) chart, she has accumulated 15 albums and 96 total weeks at number one, more than any other solo act.[[3]](click:5502)
+    paragraph
+      Swift released six albums with [Big Machine Records](click:5506). Her debut album, [Taylor Swift](click:5507) (2006), spent more weeks on the Billboard 200 than any other album in the 2000s decade,[[4]](click:5511) and her second, [Fearless](click:5515) (2008), was the only album from the 2000s decade to spend one year in the top 10 of the Billboard 200.[[5]](click:5518) Fearless was Swift's first album to top the charts in Australia, Canada, and New Zealand.[[6]](click:5523) Her next albums—[Speak Now](click:5527) (2010), [Red](click:5529) (2012), [1989](click:5531) (2014), and [Reputation](click:5532) (2017)—all reached number one on the Billboard 200, and each of them sold over one million US first-week copies.[[7]](click:5536) All four albums reached number one in Australia, Canada, and New Zealand;[[8]](click:5540)[[9]](click:5544) and the latter three all reached number one in the United Kingdom.[[10]](click:5548)
+    paragraph
+      Under a recording contract with [Republic Records](click:5552) signed in 2018,[[11]](click:5554) Swift has released six original albums—[Lover](click:5558) (2019), [Folklore](click:5559) (2020), [Evermore](click:5562) (2020), [Midnights](click:5564) (2022), [The Tortured Poets Department](click:5566) (2024), and [The Life of a Showgirl](click:5568) (2025)—all of them peaked atop the Billboard 200.[[12]](click:5571) Lover was Swift's first to reach number one in Spain and Sweden.[[13]](click:5576)[[14]](click:5580) Midnights, The Tortured Poets Department, and The Life of a Showgirl each sold one million first-week copies in the United States,[[12]](click:5587)[[15]](click:5591) and they reached number one in Australia, Canada,[[8]](click:5595) Denmark,[[16]](click:5599) Ireland,[[17]](click:5603) New Zealand,[[9]](click:5607) Spain,[[13]](click:5611) Norway,[[18]](click:5615) and the United Kingdom.[[9]](click:5619) In the United States, The Tortured Poets Department was Swift's first album to open with two million units first-week,[[15]](click:5624) and The Life of a Showgirl opened with four million units, becoming the [fastest-selling album in American history](click:5628).[[12]](click:5630)
+    paragraph
+      Swift's departure from Big Machine resulted in a [dispute over the ownership of her first six albums](click:5634) in 2019, which resulted in her re-recording four albums—[Fearless (Taylor's Version)](click:5636) (2021), [Red (Taylor's Version)](click:5638) (2021), [Speak Now (Taylor's Version)](click:5640) (2023), and [1989 (Taylor's Version)](click:5642) (2023)—all of which reached number one in Australia, Canada,[[8]](click:5644) Ireland,[[17]](click:5648) New Zealand,[[9]](click:5652) the United Kingdom,[[10]](click:5656) and the United States.[[19]](click:5660) Fearless (Taylor's Version) was the first re-recorded album to top the Billboard 200,[[20]](click:5666) and 1989 (Taylor's Version) sold over a million US first-week copies.[[21]](click:5671) Swift holds the record for the [most annual best-selling albums in the United States](click:5674)—eight times: Fearless in 2009, 1989 in 2014, Reputation in 2017, Lover in 2019, Folklore in 2020, Midnights in 2022, 1989 (Taylor's Version) in 2023, and The Tortured Poets Department in 2024.[[22]](click:5684)
+    table: List of studio albums, with selected chart positions, sales figures, and certifications
+      caption
         List of studio albums, with selected chart positions, sales figures, and certifications
-      |  |  |  | [[A]](id:5715) | [Certifications](id:5719) |
-      | [US](id:5722) 
- [[19]](id:5724) | [AUS](id:5728) 
- [[6]](id:5731) | [CAN](id:5735) 
- [[8]](id:5738) | [DEN](id:5742) 
- [[16]](id:5745) | [IRE](id:5749) 
- [[17]](id:5752) | [NZ](id:5756) 
- [[9]](id:5759) | [NOR](id:5763) 
- [[18]](id:5003) | [SPA](id:5769) 
- [[13]](id:5772) | [SWE](id:5776) 
- [[14]](id:5779) | [UK](id:5783) 
- [[10]](id:5785) |
-      | [Taylor Swift](id:5791) | Released: October 24, 2006 Label:  [Big Machine](id:5796) Formats:  [CD](id:5798) ,  [DVD](id:5799) ,  [LP](id:5800) ,  [digital download](id:5801) ,  [streaming](id:5802) |  |  |  |  |  |  |  |  |  |  | US: 5,871,000 [[B]](id:5817) UK: 251,320 [[C]](id:5822) | [RIAA](id:5828) : 8× Platinum [[25]](id:5831) [ARIA](id:5835) : 2× Platinum [[26]](id:5838) [BPI](id:5842) : Platinum [[27]](id:5845) [MC](id:5849) : 5× Platinum [[28]](id:5852) [RMNZ](id:5856) : Platinum [[29]](id:5859) |
-      | [Fearless](id:5865) | Released: November 11, 2008 Label: Big Machine Formats: CD, DVD, LP, digital download, streaming |  |  |  |  |  |  |  |  |  |  | US: 7,286,000 [[D]](id:5885) AUS: 500,000 [[E]](id:5890) UK: 718,518 [[C]](id:5895) | RIAA: 11× Platinum (Diamond) [[32]](id:5902) ARIA: 8× Platinum [[26]](id:5907) BPI: 2× Platinum [[33]](id:5912) [IFPI DEN](id:5916) : Platinum [[34]](id:5919) [IFPI NOR](id:5923) : Gold [[35]](id:5926) [IRMA](id:5930) : 2× Platinum [[36]](id:5933) MC: 4× Platinum [[28]](id:5938) RMNZ: 6× Platinum [[37]](id:5943) |
-      | [Speak Now](id:4997) | Released: October 25, 2010 Label: Big Machine Formats: CD, DVD, LP, digital download, streaming |  |  |  |  |  |  |  |  |  |  | US: 4,817,000 [[B]](id:5968) UK: 416,676 [[C]](id:5973) | RIAA: 6× Platinum [[38]](id:5980) ARIA: 3× Platinum [[26]](id:5985) BPI: Platinum [[39]](id:5990) IFPI NOR: Gold [[35]](id:5995) IRMA: Gold [[40]](id:6000) MC: 3× Platinum [[28]](id:6005) RMNZ: 3× Platinum [[41]](id:6010) |
-      | [Red](id:6016) | Released: October 22, 2012 Label: Big Machine Formats: CD, DVD, LP, digital download, streaming |  |  |  |  |  |  |  |  |  |  | US: 4,582,000 [[B]](id:6036) UK: 874,532 [[C]](id:6041) | RIAA: 8× Platinum [[42]](id:6048) ARIA: 5× Platinum [[43]](id:6053) BPI: 3× Platinum [[44]](id:6058) [GLF](id:6062) : Gold [[45]](id:6065) IFPI DEN: Platinum [[46]](id:6070) IRMA: Platinum [[47]](id:6075) MC: 4× Platinum [[28]](id:6080) RMNZ: 6× Platinum [[48]](id:6085) |
-      | [1989](id:6091) | Released: October 27, 2014 Label: Big Machine Formats: CD, DVD, LP, digital download, streaming |  |  |  |  |  |  |  |  |  |  | US: 6,472,000 [[B]](id:6111) Canada CAN : 542,000 [[F]](id:6117) UK: 1,792,380 [[C]](id:6122) | RIAA: 14× Platinum (Diamond) [[49]](id:6129) ARIA: 11× Platinum [[26]](id:6134) BPI: 6× Platinum [[50]](id:6139) GLF: Gold [[51]](id:5005) IFPI DEN: 3× Platinum [[52]](id:6148) IFPI NOR: 3× Platinum [[53]](id:6153) MC: 6× Platinum [[28]](id:6158) [PROMUSICAE](id:6162) : Gold [[54]](id:6165) RMNZ: 10× Platinum [[55]](id:6170) |
-      | [Reputation](id:6176) | Released: November 10, 2017 Label: Big Machine Formats: CD, DVD, LP, digital download,  [cassette](id:6182) , streaming |  |  |  |  |  |  |  |  |  |  | US: 2,478,000 [[B]](id:6197) UK: 823,579 [[C]](id:6202) | RIAA: 7× Platinum [[56]](id:6209) ARIA: 6× Platinum [[57]](id:6214) BPI: 3× Platinum [[58]](id:6219) GLF: Platinum [[45]](id:6224) IFPI DEN: 2× Platinum [[59]](id:6229) IFPI NOR: Gold [[53]](id:6234) MC: 8× Platinum [[28]](id:6239) PROMUSICAE: Gold [[60]](id:6244) RMNZ: 6× Platinum [[61]](id:6249) |
-      | [Lover](id:6255) | Released: August 23, 2019 Label:  [Republic](id:6260) Formats: CD, LP, digital download, cassette, streaming |  |  |  |  |  |  |  |  |  |  | US: 2,317,000 [[D]](id:6276) CAN: 61,000 [[F]](id:6281) UK: 726,521 [[C]](id:6286) | RIAA: 7× Platinum [[63]](id:6293) ARIA: 4× Platinum [[57]](id:6298) BPI: 3× Platinum [[64]](id:6303) IFPI DEN: 3× Platinum [[65]](id:6308) IFPI NOR: Platinum [[53]](id:6313) MC: 9× Platinum [[28]](id:6318) PROMUSICAE: Gold [[66]](id:6323) RMNZ: 6× Platinum [[67]](id:6328) |
-      | [Folklore](id:6334) | Released: July 24, 2020 Label: Republic Formats: CD, LP, digital download, cassette, streaming |  |  |  |  |  |  |  |  |  |  | US: 2,289,000 [[B]](id:6354) CAN: 62,000 [[G]](id:6359) UK: 692,553 [[C]](id:6364) | RIAA: 6× Platinum [[69]](id:6371) ARIA: 3× Platinum [[57]](id:6376) BPI: 3× Platinum [[70]](id:6381) IFPI DEN: 3× Platinum [[71]](id:6386) IFPI NOR: Platinum [[53]](id:6391) MC: 7× Platinum [[28]](id:6396) PROMUSICAE: Gold [[72]](id:6401) RMNZ: 5× Platinum [[73]](id:6406) |
-      | [Evermore](id:6412) | Released: December 11, 2020 Label: Republic Formats: CD, LP, digital download, cassette, streaming |  |  |  |  |  |  |  |  |  |  | US: 913,000 [[H]](id:6432) CAN: 31,000 [[I]](id:6437) UK: 421,769 [[C]](id:6442) | RIAA: 4× Platinum [[76]](id:6449) ARIA: 2× Platinum [[57]](id:6454) BPI: Platinum [[77]](id:6459) IFPI DEN: Platinum [[78]](id:6464) IFPI NOR: Gold [[53]](id:6469) MC: 4× Platinum [[28]](id:6474) PROMUSICAE: Gold [[79]](id:6479) RMNZ: 3× Platinum [[80]](id:6484) |
-      | [Midnights](id:6490) | Released: October 21, 2022 Label: Republic Formats: CD, LP, digital download, cassette, streaming |  |  |  |  |  |  |  |  |  |  | US: 2,814,000 [[B]](id:6510) UK: 830,787 [[C]](id:5001) | RIAA: 7× Platinum [[81]](id:6521) ARIA: 3× Platinum [[82]](id:6526) BPI: 3× Platinum [[83]](id:6531) IFPI DEN: 3× Platinum [[84]](id:6536) IFPI NOR: Gold [[53]](id:6541) MC: 8× Platinum [[28]](id:6546) PROMUSICAE: 2× Platinum [[85]](id:6551) RMNZ: 5× Platinum [[86]](id:6556) |
-      | [The Tortured Poets Department](id:6562) | Released: April 19, 2024 Label: Republic Formats: CD, LP, digital download, cassette, streaming |  |  |  |  |  |  |  |  |  |  | US: 3,491,000 [[J]](id:6582) CAN: 108,000 [[K]](id:6587) UK: 313,800 [[L]](id:6592) | RIAA: 8× Platinum [[90]](id:6599) ARIA: 3× Platinum [[57]](id:6604) BPI: 3× Platinum [[91]](id:6609) IFPI DEN: 2× Platinum [[92]](id:5009) MC: 7× Platinum [[28]](id:6618) PROMUSICAE: 2× Platinum [[93]](id:6623) RMNZ: 4× Platinum [[94]](id:6628) |
-      | [The Life of a Showgirl](id:6634) | Released: October 3, 2025 Label: Republic Formats: CD, LP, digital download, cassette, streaming |  |  |  |  |  |  |  |  |  |  | US: 3,834,500 [[M]](id:6654) | RIAA: 5× Platinum [[105]](id:6661) ARIA: 2× Platinum [[57]](id:6666) BPI: 2× Platinum [[106]](id:6671) IFPI DEN: Gold [[107]](id:6676) MC: 4× Platinum [[28]](id:6681) PROMUSICAE: Platinum [[108]](id:6686) RMNZ: 2× Platinum [[109]](id:6691) |
+      |  |  |  | [[A]](click:5706) | [Certifications](click:5710) |
+      | [US](click:5713) 
+ [[19]](click:5715) | [AUS](click:5719) 
+ [[6]](click:5722) | [CAN](click:5726) 
+ [[8]](click:5729) | [DEN](click:5733) 
+ [[16]](click:5736) | [IRE](click:5740) 
+ [[17]](click:5743) | [NZ](click:5747) 
+ [[9]](click:5750) | [NOR](click:5754) 
+ [[18]](click:5757) | [SPA](click:5761) 
+ [[13]](click:5764) | [SWE](click:5768) 
+ [[14]](click:5771) | [UK](click:5775) 
+ [[10]](click:5777) |
+      | [Taylor Swift](click:5783) | Released: October 24, 2006 Label:  [Big Machine](click:5788) Formats:  [CD](click:5790) ,  [DVD](click:5791) ,  [LP](click:5792) ,  [digital download](click:5793) ,  [streaming](click:5794) |  |  |  |  |  |  |  |  |  |  | US: 5,871,000 [[B]](click:5809) UK: 251,320 [[C]](click:5814) | [RIAA](click:5820) : 8× Platinum [[25]](click:5823) [ARIA](click:5827) : 2× Platinum [[26]](click:5830) [BPI](click:5834) : Platinum [[27]](click:5837) [MC](click:5841) : 5× Platinum [[28]](click:5844) [RMNZ](click:5848) : Platinum [[29]](click:5851) |
+      | [Fearless](click:5857) | Released: November 11, 2008 Label: Big Machine Formats: CD, DVD, LP, digital download, streaming |  |  |  |  |  |  |  |  |  |  | US: 7,286,000 [[D]](click:5877) AUS: 500,000 [[E]](click:5882) UK: 718,518 [[C]](click:5887) | RIAA: 11× Platinum (Diamond) [[32]](click:5894) ARIA: 8× Platinum [[26]](click:5899) BPI: 2× Platinum [[33]](click:5904) [IFPI DEN](click:5908) : Platinum [[34]](click:5911) [IFPI NOR](click:5915) : Gold [[35]](click:5918) [IRMA](click:5922) : 2× Platinum [[36]](click:5925) MC: 4× Platinum [[28]](click:5930) RMNZ: 6× Platinum [[37]](click:5935) |
+      | [Speak Now](click:4995) | Released: October 25, 2010 Label: Big Machine Formats: CD, DVD, LP, digital download, streaming |  |  |  |  |  |  |  |  |  |  | US: 4,817,000 [[B]](click:5960) UK: 416,676 [[C]](click:5965) | RIAA: 6× Platinum [[38]](click:5972) ARIA: 3× Platinum [[26]](click:5977) BPI: Platinum [[39]](click:5982) IFPI NOR: Gold [[35]](click:5987) IRMA: Gold [[40]](click:5992) MC: 3× Platinum [[28]](click:5997) RMNZ: 3× Platinum [[41]](click:6002) |
+      | [Red](click:6008) | Released: October 22, 2012 Label: Big Machine Formats: CD, DVD, LP, digital download, streaming |  |  |  |  |  |  |  |  |  |  | US: 4,582,000 [[B]](click:6028) UK: 874,532 [[C]](click:6033) | RIAA: 8× Platinum [[42]](click:6040) ARIA: 5× Platinum [[43]](click:6045) BPI: 3× Platinum [[44]](click:6050) [GLF](click:6054) : Gold [[45]](click:6057) IFPI DEN: Platinum [[46]](click:6062) IRMA: Platinum [[47]](click:6067) MC: 4× Platinum [[28]](click:6072) RMNZ: 6× Platinum [[48]](click:6077) |
+      | [1989](click:6083) | Released: October 27, 2014 Label: Big Machine Formats: CD, DVD, LP, digital download, streaming |  |  |  |  |  |  |  |  |  |  | US: 6,472,000 [[B]](click:6103) Canada CAN : 542,000 [[F]](click:6109) UK: 1,792,380 [[C]](click:6114) | RIAA: 14× Platinum (Diamond) [[49]](click:6121) ARIA: 11× Platinum [[26]](click:6126) BPI: 6× Platinum [[50]](click:6131) GLF: Gold [[51]](click:6136) IFPI DEN: 3× Platinum [[52]](click:6141) IFPI NOR: 3× Platinum [[53]](click:6146) MC: 6× Platinum [[28]](click:6151) [PROMUSICAE](click:6155) : Gold [[54]](click:6158) RMNZ: 10× Platinum [[55]](click:6163) |
+      | [Reputation](click:6169) | Released: November 10, 2017 Label: Big Machine Formats: CD, DVD, LP, digital download,  [cassette](click:6175) , streaming |  |  |  |  |  |  |  |  |  |  | US: 2,478,000 [[B]](click:6190) UK: 823,579 [[C]](click:6195) | RIAA: 7× Platinum [[56]](click:6202) ARIA: 6× Platinum [[57]](click:6207) BPI: 3× Platinum [[58]](click:6212) GLF: Platinum [[45]](click:6217) IFPI DEN: 2× Platinum [[59]](click:6222) IFPI NOR: Gold [[53]](click:6227) MC: 8× Platinum [[28]](click:6232) PROMUSICAE: Gold [[60]](click:6237) RMNZ: 6× Platinum [[61]](click:6242) |
+      | [Lover](click:6248) | Released: August 23, 2019 Label:  [Republic](click:6253) Formats: CD, LP, digital download, cassette, streaming |  |  |  |  |  |  |  |  |  |  | US: 2,317,000 [[D]](click:6269) CAN: 61,000 [[F]](click:6274) UK: 726,521 [[C]](click:6279) | RIAA: 7× Platinum [[63]](click:6286) ARIA: 4× Platinum [[57]](click:6291) BPI: 3× Platinum [[64]](click:6296) IFPI DEN: 3× Platinum [[65]](click:6301) IFPI NOR: Platinum [[53]](click:6306) MC: 9× Platinum [[28]](click:6311) PROMUSICAE: Gold [[66]](click:6316) RMNZ: 6× Platinum [[67]](click:6321) |
+      | [Folklore](click:6327) | Released: July 24, 2020 Label: Republic Formats: CD, LP, digital download, cassette, streaming |  |  |  |  |  |  |  |  |  |  | US: 2,289,000 [[B]](click:6347) CAN: 62,000 [[G]](click:6352) UK: 692,553 [[C]](click:6357) | RIAA: 6× Platinum [[69]](click:6364) ARIA: 3× Platinum [[57]](click:6369) BPI: 3× Platinum [[70]](click:6374) IFPI DEN: 3× Platinum [[71]](click:6379) IFPI NOR: Platinum [[53]](click:6384) MC: 7× Platinum [[28]](click:6389) PROMUSICAE: Gold [[72]](click:6394) RMNZ: 5× Platinum [[73]](click:6399) |
+      | [Evermore](click:6405) | Released: December 11, 2020 Label: Republic Formats: CD, LP, digital download, cassette, streaming |  |  |  |  |  |  |  |  |  |  | US: 913,000 [[H]](click:6425) CAN: 31,000 [[I]](click:6430) UK: 421,769 [[C]](click:6435) | RIAA: 4× Platinum [[76]](click:6442) ARIA: 2× Platinum [[57]](click:6447) BPI: Platinum [[77]](click:6452) IFPI DEN: Platinum [[78]](click:6457) IFPI NOR: Gold [[53]](click:6462) MC: 4× Platinum [[28]](click:6467) PROMUSICAE: Gold [[79]](click:6472) RMNZ: 3× Platinum [[80]](click:6477) |
+      | [Midnights](click:6483) | Released: October 21, 2022 Label: Republic Formats: CD, LP, digital download, cassette, streaming |  |  |  |  |  |  |  |  |  |  | US: 2,814,000 [[B]](click:6503) UK: 830,787 [[C]](click:6508) | RIAA: 7× Platinum [[81]](click:6515) ARIA: 3× Platinum [[82]](click:6520) BPI: 3× Platinum [[83]](click:6525) IFPI DEN: 3× Platinum [[84]](click:6530) IFPI NOR: Gold [[53]](click:6535) MC: 8× Platinum [[28]](click:6540) PROMUSICAE: 2× Platinum [[85]](click:6545) RMNZ: 5× Platinum [[86]](click:6550) |
+      | [The Tortured Poets Department](click:6556) | Released: April 19, 2024 Label: Republic Formats: CD, LP, digital download, cassette, streaming |  |  |  |  |  |  |  |  |  |  | US: 3,491,000 [[J]](click:6576) CAN: 108,000 [[K]](click:6581) UK: 313,800 [[L]](click:6586) | RIAA: 8× Platinum [[90]](click:6593) ARIA: 3× Platinum [[57]](click:6598) BPI: 3× Platinum [[91]](click:6603) IFPI DEN: 2× Platinum [[92]](click:6608) MC: 7× Platinum [[28]](click:6613) PROMUSICAE: 2× Platinum [[93]](click:6618) RMNZ: 4× Platinum [[94]](click:6623) |
+      | [The Life of a Showgirl](click:6629) | Released: October 3, 2025 Label: Republic Formats: CD, LP, digital download, cassette, streaming |  |  |  |  |  |  |  |  |  |  | US: 3,834,500 [[M]](click:6649) | RIAA: 5× Platinum [[105]](click:6656) ARIA: 2× Platinum [[57]](click:6661) BPI: 2× Platinum [[106]](click:6666) IFPI DEN: Gold [[107]](click:6671) MC: 4× Platinum [[28]](click:6676) PROMUSICAE: Platinum [[108]](click:6681) RMNZ: 2× Platinum [[109]](click:6686) |
       |  |
-    table(id:6706): List of re-recorded albums, with selected details and chart positions
-      id:6707, caption
+    table: List of re-recorded albums, with selected details and chart positions
+      caption
         List of re-recorded albums, with selected details and chart positions
-      |  |  |  | [[A]](id:6717) | [Certifications](id:6721) |
-      | [US](id:6724) 
- [[19]](id:6726) | [AUS](id:6730) 
- [[6]](id:6732) | [CAN](id:6736) 
- [[8]](id:6738) | [DEN](id:6742) 
- [[16]](id:6744) | [IRE](id:6748) 
- [[17]](id:6750) | [NZ](id:6754) 
- [[9]](id:6756) | [NOR](id:6760) 
- [[18]](id:6762) | [SPA](id:6766) 
- [[13]](id:6768) | [SWE](id:6772) 
- [[14]](id:6774) | [UK](id:6778) 
- [[10]](id:6780) |
-      | [Fearless (Taylor's Version)](id:6786) | Released: April 9, 2021 Label: Republic Formats: CD, LP, digital download, cassette, streaming |  |  |  |  |  |  |  |  |  |  | US: 737,000 [[N]](id:6806) CAN: 18,000 [[O]](id:6811) UK: 217,947 [[C]](id:6816) | RIAA: 4× Platinum [[111]](id:6823) ARIA: Platinum [[82]](id:6828) BPI: Platinum [[112]](id:6833) IFPI DEN: Gold [[113]](id:6838) MC: 3× Platinum [[28]](id:6843) PROMUSICAE: Gold [[114]](id:6848) RMNZ: 2× Platinum [[115]](id:6853) |
-      | [Red (Taylor's Version)](id:6859) | Released: November 12, 2021 Label: Republic Formats: CD, LP, digital download, streaming |  |  |  |  |  |  |  |  |  |  | US: 950,000 [[N]](id:6879) CAN: 24,000 [[O]](id:6884) UK: 357,565 [[C]](id:6889) | RIAA: 6× Platinum [[116]](id:6896) ARIA: Platinum [[26]](id:6901) BPI: Platinum [[117]](id:6906) IFPI DEN: Platinum [[118]](id:6911) MC: 4× Platinum [[28]](id:6916) PROMUSICAE: Gold [[119]](id:6921) RMNZ: 3× Platinum [[120]](id:6926) |
-      | [Speak Now (Taylor's Version)](id:6932) | Released: July 7, 2023 Label: Republic Formats: CD, LP, digital download, cassette, streaming |  |  |  |  |  |  |  |  |  |  | US: 908,000 [[P]](id:6952) UK: 209,302 [[C]](id:6957) | RIAA: 4× Platinum [[122]](id:6964) ARIA: Platinum [[82]](id:6969) BPI: Platinum [[123]](id:6974) IFPI DEN: Gold [[124]](id:6979) MC: 2× Platinum [[28]](id:6984) PROMUSICAE: Gold [[125]](id:6989) RMNZ: Platinum [[126]](id:6994) |
-      | [1989 (Taylor's Version)](id:7000) | Released: October 27, 2023 Label: Republic Formats: CD, LP, digital download, cassette, streaming |  |  |  |  |  |  |  |  |  |  | US: 2,389,000 [[B]](id:7020) UK: 390,226 [[C]](id:7025) | RIAA: 4× Platinum [[127]](id:7032) ARIA: 3× Platinum [[57]](id:7037) BPI: 2× Platinum [[128]](id:7042) IFPI DEN: Platinum [[129]](id:7047) MC: 4× Platinum [[28]](id:7052) PROMUSICAE: Platinum [[130]](id:7057) RMNZ: 3× Platinum [[131]](id:7062) |
-    table(id:7072): List of live albums with selected chart figures and notes
-      id:7073, caption
+      |  |  |  | [[A]](click:6712) | [Certifications](click:6716) |
+      | [US](click:6719) 
+ [[19]](click:6721) | [AUS](click:6725) 
+ [[6]](click:6727) | [CAN](click:6731) 
+ [[8]](click:6733) | [DEN](click:6737) 
+ [[16]](click:4998) | [IRE](click:6742) 
+ [[17]](click:6744) | [NZ](click:6748) 
+ [[9]](click:6750) | [NOR](click:6754) 
+ [[18]](click:6756) | [SPA](click:6760) 
+ [[13]](click:6762) | [SWE](click:6766) 
+ [[14]](click:6768) | [UK](click:6772) 
+ [[10]](click:6774) |
+      | [Fearless (Taylor's Version)](click:6780) | Released: April 9, 2021 Label: Republic Formats: CD, LP, digital download, cassette, streaming |  |  |  |  |  |  |  |  |  |  | US: 737,000 [[N]](click:6800) CAN: 18,000 [[O]](click:6805) UK: 217,947 [[C]](click:6810) | RIAA: 4× Platinum [[111]](click:6817) ARIA: Platinum [[82]](click:6822) BPI: Platinum [[112]](click:6827) IFPI DEN: Gold [[113]](click:6832) MC: 3× Platinum [[28]](click:6837) PROMUSICAE: Gold [[114]](click:6842) RMNZ: 2× Platinum [[115]](click:6847) |
+      | [Red (Taylor's Version)](click:6853) | Released: November 12, 2021 Label: Republic Formats: CD, LP, digital download, streaming |  |  |  |  |  |  |  |  |  |  | US: 950,000 [[N]](click:6873) CAN: 24,000 [[O]](click:6878) UK: 357,565 [[C]](click:6883) | RIAA: 6× Platinum [[116]](click:6890) ARIA: Platinum [[26]](click:6895) BPI: Platinum [[117]](click:6900) IFPI DEN: Platinum [[118]](click:6905) MC: 4× Platinum [[28]](click:6910) PROMUSICAE: Gold [[119]](click:6915) RMNZ: 3× Platinum [[120]](click:6920) |
+      | [Speak Now (Taylor's Version)](click:6926) | Released: July 7, 2023 Label: Republic Formats: CD, LP, digital download, cassette, streaming |  |  |  |  |  |  |  |  |  |  | US: 908,000 [[P]](click:6946) UK: 209,302 [[C]](click:6951) | RIAA: 4× Platinum [[122]](click:6958) ARIA: Platinum [[82]](click:6963) BPI: Platinum [[123]](click:6968) IFPI DEN: Gold [[124]](click:6973) MC: 2× Platinum [[28]](click:6978) PROMUSICAE: Gold [[125]](click:6983) RMNZ: Platinum [[126]](click:6988) |
+      | [1989 (Taylor's Version)](click:6994) | Released: October 27, 2023 Label: Republic Formats: CD, LP, digital download, cassette, streaming |  |  |  |  |  |  |  |  |  |  | US: 2,389,000 [[B]](click:7014) UK: 390,226 [[C]](click:7019) | RIAA: 4× Platinum [[127]](click:7026) ARIA: 3× Platinum [[57]](click:7031) BPI: 2× Platinum [[128]](click:7036) IFPI DEN: Platinum [[129]](click:7041) MC: 4× Platinum [[28]](click:7046) PROMUSICAE: Platinum [[130]](click:7051) RMNZ: 3× Platinum [[131]](click:7056) |
+    table: List of live albums with selected chart figures and notes
+      caption
         List of live albums with selected chart figures and notes
-      |  |  |  |  | [Certifications](id:7083) |
-      | [US](id:7086) 
- [[19]](id:5000) | [AUS](id:7091) 
- [[6]](id:7093) | [CAN](id:7097) 
- [[8]](id:7099) | [DEN](id:7103) 
- [[16]](id:7105) | [IRE](id:7109) 
- [[17]](id:7111) | [NZ](id:7115) 
- [[9]](id:7117) | [SPA](id:7121) 
- [[13]](id:7123) | [UK](id:7127) 
- [[10]](id:7129) |
-      | [Speak Now World Tour – Live](id:7135) | Released: November 21, 2011 Label: Big Machine Formats: Digital download, streaming, CD+DVD/ [Blu-ray](id:7141) |  |  |  |  |  |  |  | [[Q]](id:7151) | US: 376,000 [[H]](id:7158) | ARIA: Gold [[82]](id:7165) |
-      | [Live from Clear Channel Stripped 2008](id:7171) | Released: April 23, 2020 [[133]](id:7176) Label: Big Machine Formats: Digital download, streaming |  |  |  |  |  |  |  |  |  |  |
-      | [Folklore: The Long Pond Studio Sessions](id:7194) | Released: November 24, 2020 Label: Republic Formats: Digital download, streaming, LP |  |  |  |  |  |  |  |  | US: 75,000 [[R]](id:7212) |  |
-      | [Lover (Live from Paris)](id:7219) | Released: February 14, 2023 Label: Republic Formats: Digital download, LP |  |  |  |  |  |  |  |  | US: 216,000 [[S]](id:7237) |  |
+      |  |  |  |  | [Certifications](click:7077) |
+      | [US](click:7080) 
+ [[19]](click:7082) | [AUS](click:7086) 
+ [[6]](click:7088) | [CAN](click:7092) 
+ [[8]](click:7094) | [DEN](click:7098) 
+ [[16]](click:7100) | [IRE](click:7104) 
+ [[17]](click:7106) | [NZ](click:7110) 
+ [[9]](click:7112) | [SPA](click:7116) 
+ [[13]](click:7118) | [UK](click:7122) 
+ [[10]](click:7124) |
+      | [Speak Now World Tour – Live](click:7130) | Released: November 21, 2011 Label: Big Machine Formats: Digital download, streaming, CD+DVD/ [Blu-ray](click:7136) |  |  |  |  |  |  |  | [[Q]](click:7146) | US: 376,000 [[H]](click:7153) | ARIA: Gold [[82]](click:7160) |
+      | [Live from Clear Channel Stripped 2008](click:7166) | Released: April 23, 2020 [[133]](click:7171) Label: Big Machine Formats: Digital download, streaming |  |  |  |  |  |  |  |  |  |  |
+      | [Folklore: The Long Pond Studio Sessions](click:7189) | Released: November 24, 2020 Label: Republic Formats: Digital download, streaming, LP |  |  |  |  |  |  |  |  | US: 75,000 [[R]](click:7207) |  |
+      | [Lover (Live from Paris)](click:7214) | Released: February 14, 2023 Label: Republic Formats: Digital download, LP |  |  |  |  |  |  |  |  | US: 216,000 [[S]](click:7232) |  |
       |  |
-    table(id:7250): List of extended plays, with selected chart positions and sales figures
-      id:7251, caption
+    table: List of extended plays, with selected chart positions and sales figures
+      caption
         List of extended plays, with selected chart positions and sales figures
       |  |  | 
- |  | [Certifications](id:7261) |
-      | [US](id:7264) 
- [[19]](id:7266) |
-      |  | Released: October 24, 2006 [[136]](id:7276)  ( [Napster](id:7279)  exclusive) Label: Big Machine Formats: Digital download, streaming |  |  |  |
-      | [The Taylor Swift Holiday Collection](id:7288) | Released: October 14, 2007 [[137]](id:7293) Label: Big Machine Formats: CD, digital download, streaming |  | US: 1,100,000 [[H]](id:7303) | RIAA: Platinum [[138]](id:7310) ARIA: Gold [[26]](id:7315) |
-      |  | Released: November 2007 ( [Rhapsody](id:7324)  exclusive) [[139]](id:7326) Label: Big Machine Format: Digital download, streaming |  |  |  |
-      |  | Released: January 15, 2008 ( [iTunes](id:7340)  exclusive) [[140]](id:7342) Label: Big Machine Formats: Digital download, streaming |  |  |  |
-      | [Beautiful Eyes](id:7353) | Released: July 15, 2008 ( [Walmart](id:7357)  exclusive) [[141]](id:7359) Label: Big Machine Formats: CD+DVD |  | US: 369,000 [[H]](id:7369) |  |
+ |  | [Certifications](click:7256) |
+      | [US](click:7259) 
+ [[19]](click:7261) |
+      |  | Released: October 24, 2006 [[136]](click:7271)  ( [Napster](click:7274)  exclusive) Label: Big Machine Formats: Digital download, streaming |  |  |  |
+      | [The Taylor Swift Holiday Collection](click:7283) | Released: October 14, 2007 [[137]](click:7288) Label: Big Machine Formats: CD, digital download, streaming |  | US: 1,100,000 [[H]](click:7298) | RIAA: Platinum [[138]](click:7305) ARIA: Gold [[26]](click:7310) |
+      |  | Released: November 2007 ( [Rhapsody](click:7319)  exclusive) [[139]](click:7321) Label: Big Machine Format: Digital download, streaming |  |  |  |
+      |  | Released: January 15, 2008 ( [iTunes](click:7335)  exclusive) [[140]](click:7337) Label: Big Machine Formats: Digital download, streaming |  |  |  |
+      | [Beautiful Eyes](click:7348) | Released: July 15, 2008 ( [Walmart](click:7352)  exclusive) [[141]](click:7354) Label: Big Machine Formats: CD+DVD |  | US: 369,000 [[H]](click:7364) |  |
       |  |
-    table(id:7389): List of compilations
-      id:7390, caption
+    table: List of compilations
+      caption
         List of compilations
       |  |  |  |
-      |  | Released: April 13, 2018 Label: Big Machine | A  [Spotify](id:7408) -exclusive EP consisting of a live acoustic version of " [Delicate](id:7409) " and a cover of  [Earth, Wind & Fire](id:7410) 's " [September](id:7411) " recorded in Nashville. [[142]](id:7413) |
-      | [Reputation Stadium Tour Surprise Song Playlist](id:7419) | Released: November 30, 2018 Label: Big Machine | A playlist consisting of "surprise songs" that Swift performed on her  [Reputation Stadium Tour](id:7427) [[143]](id:7429) |
-      |  | Released: August 21, 2020 [[144]](id:7439) Label: Republic | Playlists consisting of songs from  Folklore [[145]](id:7448) |
-      |  | Released: August 24, 2020 [[146]](id:7458) Label: Republic |
-      |  | Released: August 27, 2020 [[147]](id:7469) Label: Republic |
-      |  | Released: September 21, 2020 [[148]](id:7480) Label: Republic | A playlist consisting of songs from  Folklore  and a live performance of " [Betty](id:7488) " at the  [55th Academy of Country Music Awards](id:7489)  (2020) [[145]](id:7491) |
-      |  | Released: December 16, 2020 Label: Republic | A remix EP consisting of alternate versions and videos of " [Willow](id:7504) " [[149]](id:7506) |
-      |  | Released: January 21, 2021 [[150]](id:7516) Label: Republic | Playlists consisting of songs from  Folklore  and  Evermore [[151]](id:7526) |
-      |  | Released: January 28, 2021 [[152]](id:7536) Label: Republic |
-      |  | Released: February 4, 2021 [[153]](id:7547) Label: Republic |
-      |  | Released: May 13, 2021 Label: Republic | Playlists consisting of songs from  Fearless (Taylor's Version) [[154]](id:7563) |
+      |  | Released: April 13, 2018 Label: Big Machine | A  [Spotify](click:7403) -exclusive EP consisting of a live acoustic version of " [Delicate](click:7404) " and a cover of  [Earth, Wind & Fire](click:7405) 's " [September](click:7406) " recorded in Nashville. [[142]](click:7408) |
+      | [Reputation Stadium Tour Surprise Song Playlist](click:7414) | Released: November 30, 2018 Label: Big Machine | A playlist consisting of "surprise songs" that Swift performed on her  [Reputation Stadium Tour](click:7422) [[143]](click:7424) |
+      |  | Released: August 21, 2020 [[144]](click:7434) Label: Republic | Playlists consisting of songs from  Folklore [[145]](click:7443) |
+      |  | Released: August 24, 2020 [[146]](click:7453) Label: Republic |
+      |  | Released: August 27, 2020 [[147]](click:7464) Label: Republic |
+      |  | Released: September 21, 2020 [[148]](click:7475) Label: Republic | A playlist consisting of songs from  Folklore  and a live performance of " [Betty](click:7483) " at the  [55th Academy of Country Music Awards](click:7484)  (2020) [[145]](click:7486) |
+      |  | Released: December 16, 2020 Label: Republic | A remix EP consisting of alternate versions and videos of " [Willow](click:7499) " [[149]](click:7501) |
+      |  | Released: January 21, 2021 [[150]](click:7511) Label: Republic | Playlists consisting of songs from  Folklore  and  Evermore [[151]](click:7521) |
+      |  | Released: January 28, 2021 [[152]](click:7531) Label: Republic |
+      |  | Released: February 4, 2021 [[153]](click:7542) Label: Republic |
+      |  | Released: May 13, 2021 Label: Republic | Playlists consisting of songs from  Fearless (Taylor's Version) [[154]](click:7558) |
       |  | Released: May 19, 2021 Label: Republic |
       |  | Released: May 24, 2021 Label: Republic |
       |  | Released: May 26, 2021 Label: Republic |
-      |  | Released: January 13, 2022 Label: Republic | Playlists consisting of songs from  Red (Taylor's Version) [[155]](id:7599) |
+      |  | Released: January 13, 2022 Label: Republic | Playlists consisting of songs from  Red (Taylor's Version) [[155]](click:7594) |
       |  | Released: January 18, 2022 Label: Republic |
       |  | Released: January 25, 2022 Label: Republic |
       |  | Released: January 31, 2022 Label: Republic |
-      |  | Released October 14, 2022 Label: Republic | [Apple Music](id:7633) -exclusive playlists consisting of songs from Swift's past albums [[156]](id:7635) |
+      |  | Released October 14, 2022 Label: Republic | [Apple Music](click:7628) -exclusive playlists consisting of songs from Swift's past albums [[156]](click:7630) |
       |  |
       |  |
-      |  | Released: November 11, 2022 Label: Republic | A remix EP containing alternate versions of " [Anti-Hero](id:7654) " [[157]](id:7656) |
-      |  | Released: March 3, 2023 Label: Republic | A remix EP containing alternate versions of " [Lavender Haze](id:7669) " [[158]](id:7671) |
-      |  | Released: March 17, 2023 Label: Republic | A playlist consisting of songs from  Fearless (Taylor's Version)  and " [If This Was a Movie (Taylor's Version)](id:7685) " [[159]](id:7687) |
-      |  | A playlist consisting of songs from  Lover  and " [All of the Girls You Loved Before](id:7697) " [[160]](id:7699) |
-      |  | A playlist consisting of songs from  Red (Taylor's Version)  and " [Eyes Open (Taylor's Version)](id:7709) " and " [Safe & Sound (Taylor's Version)](id:7710) " featuring  [Joy Williams](id:7711)  and  [John Paul White](id:7712) [[161]](id:7714) |
-      |  | Released: October 18, 2023 Label: Republic | An EP containing " [Cruel Summer](id:7727) ", a remix of it, and a live version from  [the Eras Tour](id:7728) [[162]](id:7730) |
-      |  | Released: April 5, 2024 Label: Republic | [Apple Music](id:7743) -exclusive playlists consisting of songs from Swift's past albums [[163]](id:7745) |
+      |  | Released: November 11, 2022 Label: Republic | A remix EP containing alternate versions of " [Anti-Hero](click:7649) " [[157]](click:7651) |
+      |  | Released: March 3, 2023 Label: Republic | A remix EP containing alternate versions of " [Lavender Haze](click:7664) " [[158]](click:7666) |
+      |  | Released: March 17, 2023 Label: Republic | A playlist consisting of songs from  Fearless (Taylor's Version)  and " [If This Was a Movie (Taylor's Version)](click:7680) " [[159]](click:7682) |
+      |  | A playlist consisting of songs from  Lover  and " [All of the Girls You Loved Before](click:7692) " [[160]](click:7694) |
+      |  | A playlist consisting of songs from  Red (Taylor's Version)  and " [Eyes Open (Taylor's Version)](click:7704) " and " [Safe & Sound (Taylor's Version)](click:7705) " featuring  [Joy Williams](click:7706)  and  [John Paul White](click:7707) [[161]](click:7709) |
+      |  | Released: October 18, 2023 Label: Republic | An EP containing " [Cruel Summer](click:7722) ", a remix of it, and a live version from  [the Eras Tour](click:7723) [[162]](click:7725) |
+      |  | Released: April 5, 2024 Label: Republic | [Apple Music](click:7738) -exclusive playlists consisting of songs from Swift's past albums [[163]](click:7740) |
       |  |
       |  |
       |  |
       |  |
-      |  | Released: October 3, 2024 Label: Republic | A playlist consisting of songs from  The Tortured Poets Department  set at the Eras Tour [[164]](id:7772) |
-      |  | Released: August 12, 2025 Label: Republic | A Spotify-exclusive playlist consisting of songs produced by  [Max Martin](id:7785)  and  [Shellback](id:7786)  from Swift's past albums [[165]](id:7788) |
-    table(id:7798): List of box sets
-      id:7799, caption
+      |  | Released: October 3, 2024 Label: Republic | A playlist consisting of songs from  The Tortured Poets Department  set at the Eras Tour [[164]](click:7767) |
+      |  | Released: August 12, 2025 Label: Republic | A Spotify-exclusive playlist consisting of songs produced by  [Max Martin](click:7780)  and  [Shellback](click:7781)  from Swift's past albums [[165]](click:7783) |
+    table: List of box sets
+      caption
         List of box sets
       |  |  |  |
-      |  | Released: November 22, 2013 Format: CD Label: Universal | A Germany-exclusive  [box set](id:7818)  consisting of 5 CDs— Taylor Swift ,  Fearless ,  Speak Now ,  Red , and  Speak Now World Tour – Live [[166]](id:7825) |
-    - [List of artists who have achieved simultaneous number-one single and album in the United States](id:8194)
-    - [Official website](id:10809)
-    - [Taylor Swift](id:10811)  at  [AllMusic](id:10812)
-    - [Taylor Swift](id:10814)  discography at  [MusicBrainz](id:10815)
-    id:7792, heading, Box set
-    id:6697, heading, Re-recordings
-    id:7066, heading, Live albums
-    id:7244, heading, Extended plays
-    id:7383, heading, Streaming-exclusive compilations
-    id:5698, heading, Studio albums
-    id:5341, navigation, Views
-      - [Read](id:5346)
-      - [Edit](id:5349)
-      - [View history](id:5352)
-    id:5354, navigation, Page tools
-      [Tools](id:5356)
-    id:7376, heading, Miscellaneous
-    id:7829, heading, Footnotes
+      |  | Released: November 22, 2013 Format: CD Label: Universal | A Germany-exclusive  [box set](click:7813)  consisting of 5 CDs— Taylor Swift ,  Fearless ,  Speak Now ,  Red , and  Speak Now World Tour – Live [[166]](click:7820) |
+    - [List of artists who have achieved simultaneous number-one single and album in the United States](click:8187)
+    - [Official website](click:10810)
+    - [Taylor Swift](click:10812)  at  [AllMusic](click:10813)
+    - [Taylor Swift](click:10815)  discography at  [MusicBrainz](click:10816)
+    heading, Studio albums
+    heading, Box set
+    heading, Extended plays
+    heading, Miscellaneous
+    navigation, Namespaces
+      - [Article](click:5317)
+      - [Talk](click:5320)
+    heading, Streaming-exclusive compilations
+    heading, Live albums
+    navigation, Views
+      - [Read](click:5336)
+      - [Edit](click:5339)
+      - [View history](click:5342)
+    navigation, Page tools
+      [Tools](click:5346)
+    heading, Re-recordings
+    heading, Footnotes

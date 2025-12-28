@@ -16,18 +16,24 @@ func TestNavigate(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	result, err := browser.Navigate(ctx, "https://example.org")
+	b, closeB := browser.NewBrowser(ctx)
+	defer closeB()
+
+	result, err := b.Navigate("https://example.org")
 	require.NoError(t, err)
 
-	assert.Equal(t, "Example Domain", result.Page.Title)
-	assert.Contains(t, result.Page.Contents, "This domain is for use in documentation examples")
+	assert.Equal(t, "Example Domain", result.Title)
+	assert.Contains(t, result.Contents, "This domain is for use in documentation examples")
 }
 
 func TestNavigateBigPage(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	result, err := browser.Navigate(ctx, "https://www.ign.com/reviews/games")
+	b, closeB := browser.NewBrowser(ctx)
+	defer closeB()
+
+	result, err := b.Navigate("https://www.ign.com/reviews/games")
 	require.NoError(t, err)
 
 	t.Log(result)

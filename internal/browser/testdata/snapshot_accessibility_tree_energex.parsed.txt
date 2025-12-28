@@ -1,84 +1,37 @@
-id:2, RootWebArea, Energex Emergency Outages
-  id:201, heading, Angular 20 Test - Step 2
-  id:202, paragraph
+RootWebArea, Energex Emergency Outages
+  heading, Angular 20 Test - Step 2
+  paragraph
     Testing with minimal dashboard component...
-  id:227, main
-    id:288, tablist
-      id:290, tab, by Suburb
-        by 
-        Suburb
-      id:300, tab, by Council
-        by 
-        Council
-        [](id:308)
-    id:173, LabelText
-      I want to search for an outage
-    id:112, combobox, Enter street, suburb or postcode
-    [Search](id:116)
-    id:120, tabpanel, by Suburb
-      [View outages for FERNY GLEN](id:349)
-        4
-        id:148, LineBreak, 
-
-        Customers affected
-        id:351, heading, Ferny Glen
-        1 outage
-      [View outages for FLYING FOX](id:362)
-        id:364, heading, Flying Fox
-        1 outage
-        1
-        id:154, LineBreak, 
-
-        Customers affected
-      [View outages for BEECHMONT](id:336)
-        152
-        id:142, LineBreak, 
-
-        id:338, heading, Beechmont
-        Customers affected
-        1 outage
-      [View outages for WITHEREN](id:388)
-        8
-        id:166, LineBreak, 
-
-        id:390, heading, Witheren
-        Customers affected
-        1 outage
-      [View outages for BANYA](id:323)
-        26
-        id:136, LineBreak, 
-
-        Customers affected
-        id:325, heading, Banya
-        1 outage
-      [View outages for TALLEBUDGERA VALLEY](id:375)
-        8
-        id:160, LineBreak, 
-
-        id:377, heading, Tallebudgera Valley
-        Customers affected
-        1 outage
-    [Manually refresh outage data](id:43)
+  sectionfooter
+    - [Right to information](click:261)
+    - [Terms of use](click:263)
+    - [Privacy policy](click:265)
+    - [Sitemap](click:267)
+    - © 2025 Energex
+    [Facebook](click:252)
+    [Youtube](click:254)
+    [LinkedIn](click:256)
+    1766891703
+  main
+    [Manually refresh outage data](click:48)
       outages updated every 15 
       minutes
-      [refresh outages](id:44)
-    Last updated
-    27 Dec 2025
-    2:15 
-    pm
+      [refresh outages](click:49)
     Customers affected
     in South East Queensland
-    199
+    0
+    There are currently no power outages reported for South East Queensland.
+    LineBreak, 
+
+    Check for 
+    [planned outages](click:215)
+     or call 
+    [13 62 62](click:216)
+     (24/7) to report an outage.
+    Last updated
+    28 Dec 2025
+    1:15 
+    pm
   - Outages Emergency
-  - [Home](id:218)
-  - [Contact Us](id:222)
-  id:427, sectionfooter
-    1766808903
-    [Facebook](id:433)
-    [Youtube](id:435)
-    [LinkedIn](id:437)
-    - [Right to information](id:442)
-    - [Terms of use](id:444)
-    - [Privacy policy](id:446)
-    - [Sitemap](id:448)
-    - © 2025 Energex
+  - [Home](click:154)
+  - [Contact Us](click:158)
