@@ -5,10 +5,8 @@ import (
 	_ "embed"
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	"github.com/alexpls/untils_go/internal/browser"
-	"github.com/alexpls/untils_go/internal/search"
 	"github.com/openai/openai-go/v3"
 	"github.com/openai/openai-go/v3/responses"
 )
@@ -83,74 +81,34 @@ func (c *checker) perform(ctx context.Context, params *CheckParams) (*CheckResul
 
 func (c *checker) callTools(ctx context.Context, toolCalls []responses.ResponseFunctionToolCall) {
 	for _, call := range toolCalls {
-		params, err := toolCallParams(call.Name, call.Arguments)
-		if err != nil {
-			c.messages = append(c.messages, systemMessage("error: invalid tool call"))
-			continue
-		}
-
-		result, err := c.callTool(ctx, call.Name, params)
+		result, err := c.callTool(ctx, call.Name, call.Arguments)
 		if err != nil {
 			c.service.logger.Error("error executing tool call", "tool", call.Name, "error", err)
 			c.messages = append(c.messages, systemMessage("error executing tool call: "+err.Error()))
 			continue
 		}
-
-		c.service.logger.Debug("tool response", "tool", call.Name, "result", result)
-
-		c.messages = append(c.messages, responses.ResponseInputItemUnionParam{
-			OfFunctionCallOutput: &responses.ResponseInputItemFunctionCallOutputParam{
-				CallID: call.CallID,
-				Output: responses.ResponseInputItemFunctionCallOutputOutputUnionParam{
-					OfString: openai.String(result),
-				},
-			},
-		})
+		c.messages = append(c.messages, toolOutputMessage(call.ID, result))
 	}
 }
 
-func (c *checker) callTool(ctx context.Context, name string, params any) (string, error) {
-	stats := statsFromContext(ctx)
+func (c *checker) callTool(ctx context.Context, name string, args string) (string, error) {
+	tc := &toolContext{
+		ctx:     ctx,
+		service: c.service,
+		stats:   statsFromContext(ctx),
+		getBrowser: func() *browser.BrowserCtx {
+			if c.browserCtx == nil {
+				bctx, bcancel := browser.NewBrowser(ctx, c.service.logger)
+				c.browserCtx, c.browserCancel = &bctx, bcancel
+			}
+			return c.browserCtx
+		},
+	}
 
-	switch p := params.(type) {
-	case browserNavigateToolParams:
-		// TODO: prevent multiple calls with the same args
-
-		stats.sitesVisited = append(stats.sitesVisited, p.URL)
-
-		if c.browserCtx == nil {
-			bctx, bcancel := browser.NewBrowser(ctx, c.service.logger)
-			c.browserCtx, c.browserCancel = &bctx, bcancel
-		}
-
-		res, err := c.browserCtx.Navigate(p.URL)
-		if err != nil {
-			return "", err
-		}
-		return res.String(), nil
-
-	case browserClickToolParams:
-		page, err := c.browserCtx.Click(p.NodeID)
-		if err != nil {
-			c.service.logger.Error("error performing click", "node_id", p.NodeID, "error", err)
-			return "", err
-		}
-		return page.String(), nil
-
-	case searchToolParams:
-		res, err := c.service.webSearcher.Search(search.NewSearchParams(p.Query))
-		if err != nil {
-			return "", fmt.Errorf("performing search: %w", err)
-		}
-
-		var sb strings.Builder
-		sb.WriteString("## Search results for query: " + p.Query + "\n\n")
-		for _, result := range res.Results {
-			sb.WriteString("- " + result.String() + "\n")
-		}
-
-		return sb.String(), nil
-	default:
+	caller, ok := toolRegistry[name]
+	if !ok {
 		return "", fmt.Errorf("tool does not exist: %s", name)
 	}
+
+	return caller.call(tc, args)
 }

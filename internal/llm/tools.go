@@ -1,85 +1,145 @@
 package llm
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
+	"github.com/alexpls/untils_go/internal/browser"
+	"github.com/alexpls/untils_go/internal/search"
 	"github.com/openai/openai-go/v3"
 	"github.com/openai/openai-go/v3/responses"
 )
 
-// TODO: a lot of boilerplate here - consider extracting tool interface
-
-const (
-	browserNavigateToolName = "browser_navigate"
-	browserClickToolName    = "browser_click"
-	// intentionally different to "web_search" to avoid name collisions with OAI/x.ai
-	searchToolName = "search_request"
-)
-
-type browserNavigateToolParams struct {
-	URL string `json:"url"`
+var toolRegistry = map[string]toolCaller{
+	browserNavigateTool.name: browserNavigateTool,
+	browserClickTool.name:    browserClickTool,
+	searchTool.name:          searchTool,
 }
 
-type browserClickToolParams struct {
-	NodeID string `json:"node_id"`
+// toolContext provides dependencies that tools need for execution.
+// It must be created per request.
+type toolContext struct {
+	ctx        context.Context
+	service    *Service
+	getBrowser func() *browser.BrowserCtx
+	stats      *stats
 }
 
-type searchToolParams struct {
-	Query string `json:"string"`
+type tool[P any] struct {
+	name        string
+	description string
+	execute     func(tc *toolContext, params P) (string, error)
 }
 
-func browserTools() []responses.ToolUnionParam {
-	return []responses.ToolUnionParam{
-		{
-			OfFunction: &responses.FunctionToolParam{
-				Name:        browserNavigateToolName,
-				Description: openai.String("Use a web browser to navigate to the given URL and retrieve the page contents"),
-				Parameters:  jsonSchema(browserNavigateToolParams{}),
-			},
-		},
-		{
-			OfFunction: &responses.FunctionToolParam{
-				Name: browserClickToolName,
-				Description: openai.String("Use a web browser to click on an element on the current page, " +
-					"identified by its unique ID (e.g. [learn more](click:123) - the ID is 123)"),
-				Parameters: jsonSchema(browserClickToolParams{}),
-			},
+// toOpenAIParam returns the tool definition as expected by the OpenAI API.
+func (t tool[P]) toOpenAIParam() responses.ToolUnionParam {
+	var zero P
+	return responses.ToolUnionParam{
+		OfFunction: &responses.FunctionToolParam{
+			Name:        t.name,
+			Description: openai.String(t.description),
+			Parameters:  jsonSchema(zero),
 		},
 	}
 }
 
-func searchTools() []responses.ToolUnionParam {
-	return []responses.ToolUnionParam{{
-		OfFunction: &responses.FunctionToolParam{
-			Name:        searchToolName,
-			Description: openai.String("Use a web search engine to search for the given query and retrieve relevant results"),
-			Parameters:  jsonSchema(searchToolParams{}),
-		},
-	}}
+func (t tool[P]) call(tc *toolContext, args string) (string, error) {
+	var params P
+	if err := json.Unmarshal([]byte(args), &params); err != nil {
+		return "", fmt.Errorf("unmarshaling %s params: %w", t.name, err)
+	}
+	return t.execute(tc, params)
 }
 
-func toolCallParams(name, args string) (any, error) {
-	switch name {
-	case browserNavigateToolName:
-		var params browserNavigateToolParams
-		if err := json.Unmarshal([]byte(args), &params); err != nil {
-			return nil, fmt.Errorf("unmarshaling tool call params: %w", err)
+// toolCaller is a non-generic interface for calling tools
+type toolCaller interface {
+	call(tc *toolContext, args string) (string, error)
+}
+
+// tool definitions
+
+type browserNavigateParams struct {
+	URL string `json:"url"`
+}
+
+var browserNavigateTool = tool[browserNavigateParams]{
+	name:        "browser_navigate",
+	description: "Use a web browser to navigate to the given URL and retrieve the page contents",
+	execute: func(tc *toolContext, p browserNavigateParams) (string, error) {
+		tc.stats.sitesVisited = append(tc.stats.sitesVisited, p.URL)
+
+		b := tc.getBrowser()
+		res, err := b.Navigate(p.URL)
+		if err != nil {
+			return "", err
 		}
-		return params, nil
-	case browserClickToolName:
-		var params browserClickToolParams
-		if err := json.Unmarshal([]byte(args), &params); err != nil {
-			return nil, fmt.Errorf("unmarshaling tool call params: %w", err)
+		return res.String(), nil
+	},
+}
+
+type browserClickParams struct {
+	NodeID string `json:"node_id"`
+}
+
+var browserClickTool = tool[browserClickParams]{
+	name:        "browser_click",
+	description: "Use a web browser to click on an element on the current page, identified by its unique ID (e.g. [learn more](click:123) - the ID is 123)",
+	execute: func(tc *toolContext, p browserClickParams) (string, error) {
+		b := tc.getBrowser()
+		page, err := b.Click(p.NodeID)
+		if err != nil {
+			tc.service.logger.Error("error performing click", "node_id", p.NodeID, "error", err)
+			return "", err
 		}
-		return params, nil
-	case searchToolName:
-		var params searchToolParams
-		if err := json.Unmarshal([]byte(args), &params); err != nil {
-			return nil, fmt.Errorf("unmarshaling tool call params: %w", err)
+		return page.String(), nil
+	},
+}
+
+type searchParams struct {
+	Query string `json:"query"`
+}
+
+var searchTool = tool[searchParams]{
+	name:        "search_request",
+	description: "Use a web search engine to search for the given query and retrieve relevant results",
+	execute: func(tc *toolContext, p searchParams) (string, error) {
+		res, err := tc.service.webSearcher.Search(search.NewSearchParams(p.Query))
+		if err != nil {
+			return "", fmt.Errorf("performing search: %w", err)
 		}
-		return params, nil
-	default:
-		return nil, fmt.Errorf("tool does not exist: %s", name)
+
+		var sb strings.Builder
+		sb.WriteString("## Search results for query: " + p.Query + "\n\n")
+		for _, result := range res.Results {
+			sb.WriteString("- " + result.String() + "\n")
+		}
+
+		return sb.String(), nil
+	},
+}
+
+func browserTools() []responses.ToolUnionParam {
+	return []responses.ToolUnionParam{
+		browserNavigateTool.toOpenAIParam(),
+		browserClickTool.toOpenAIParam(),
+	}
+}
+
+func searchTools() []responses.ToolUnionParam {
+	return []responses.ToolUnionParam{
+		searchTool.toOpenAIParam(),
+	}
+}
+
+func toolOutputMessage(callID, output string) responses.ResponseInputItemUnionParam {
+	return responses.ResponseInputItemUnionParam{
+		OfFunctionCallOutput: &responses.ResponseInputItemFunctionCallOutputParam{
+			CallID: callID,
+			Output: responses.ResponseInputItemFunctionCallOutputOutputUnionParam{
+				OfString: openai.String(output),
+			},
+		},
 	}
 }
