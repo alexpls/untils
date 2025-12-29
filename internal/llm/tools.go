@@ -8,6 +8,7 @@ import (
 
 	"github.com/alexpls/untils_go/internal/browser"
 	"github.com/alexpls/untils_go/internal/search"
+	"github.com/alexpls/untils_go/internal/wideevents"
 	"github.com/openai/openai-go/v3"
 	"github.com/openai/openai-go/v3/responses"
 )
@@ -24,7 +25,6 @@ type toolContext struct {
 	ctx        context.Context
 	service    *Service
 	getBrowser func() *browser.BrowserCtx
-	stats      *stats
 }
 
 type tool[P any] struct {
@@ -68,7 +68,8 @@ var browserNavigateTool = tool[browserNavigateParams]{
 	name:        "browser_navigate",
 	description: "Use a web browser to navigate to the given URL and retrieve the page contents",
 	execute: func(tc *toolContext, p browserNavigateParams) (string, error) {
-		tc.stats.sitesVisited = append(tc.stats.sitesVisited, p.URL)
+		llmEvent, _ := wideevents.GetOrCreateFromContext(tc.ctx, newLLMEvent)
+		llmEvent.addSiteVisited(p.URL)
 
 		b := tc.getBrowser()
 		res, err := b.Navigate(p.URL)

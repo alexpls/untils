@@ -35,7 +35,6 @@ func NewCheckWorker(monitorService *Service, logger *slog.Logger) *CheckWorker {
 
 func (w *CheckWorker) Work(ctx context.Context, job *river.Job[CheckArgs]) error {
 	logger := w.logger.With("monitor_check_id", job.Args.MonitorCheckID)
-	start := time.Now()
 
 	logger.Info("starting check worker")
 
@@ -53,8 +52,6 @@ func (w *CheckWorker) Work(ctx context.Context, job *river.Job[CheckArgs]) error
 		logger.Error("failed to perform monitor check", "error", err)
 		return err
 	}
-
-	logger.Info("successfully completed check worker", "duration_ms", time.Since(start).Milliseconds())
 
 	return nil
 }

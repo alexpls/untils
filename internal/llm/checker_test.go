@@ -3,8 +3,10 @@
 package llm
 
 import (
+	"log/slog"
 	"testing"
 
+	"github.com/alexpls/untils_go/internal/wideevents"
 	"github.com/stretchr/testify/require"
 )
 
@@ -13,8 +15,14 @@ func TestChecker(t *testing.T) {
 
 	checker := newChecker(svc)
 
-	ctx, stats := withStatsContext(t.Context())
-	defer stats.log(svc.logger)
+	events := make(wideevents.Events)
+	ctx := wideevents.ContextWithEvents(t.Context(), events)
+	llmEvent := wideevents.GetOrCreate(events, newLLMEvent)
+
+	defer func() {
+		llmEvent.finish()
+		svc.logger.LogAttrs(ctx, slog.LevelInfo, "llm workflow complete", events.SlogAttrs()...)
+	}()
 
 	res, err := checker.perform(ctx, &CheckParams{
 		Subject: "Latest game IGN has given a 10/10 rating to",

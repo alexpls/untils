@@ -95,7 +95,6 @@ func (c *checker) callTool(ctx context.Context, name string, args string) (strin
 	tc := &toolContext{
 		ctx:     ctx,
 		service: c.service,
-		stats:   statsFromContext(ctx),
 		getBrowser: func() *browser.BrowserCtx {
 			if c.browserCtx == nil {
 				bctx, bcancel := browser.NewBrowser(ctx, c.service.logger)

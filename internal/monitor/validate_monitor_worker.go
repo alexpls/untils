@@ -34,7 +34,6 @@ func NewValidateMonitorWorker(monitorService *Service, logger *slog.Logger) *Val
 
 func (w *ValidateMonitorWorker) Work(ctx context.Context, job *river.Job[ValidateMonitorArgs]) error {
 	logger := w.logger.With("monitor_id", job.Args.MonitorID)
-	start := time.Now()
 
 	logger.Info("starting validate monitor worker")
 
@@ -55,8 +54,6 @@ func (w *ValidateMonitorWorker) Work(ctx context.Context, job *river.Job[Validat
 		logger.Error("failed to validate monitor", "error", err)
 		return err
 	}
-
-	logger.Info("successfully validated monitor", "duration_ms", time.Since(start).Milliseconds())
 
 	return nil
 }

@@ -5,12 +5,16 @@ package llm
 import (
 	"testing"
 
+	"github.com/alexpls/untils_go/internal/wideevents"
 	"github.com/stretchr/testify/require"
 )
 
 func TestTriager(t *testing.T) {
 	svc := newServiceForTest(t)
-	ctx, _ := withStatsContext(t.Context())
+
+	events := make(wideevents.Events)
+	ctx := wideevents.ContextWithEvents(t.Context(), events)
+
 	prompt := NewTriager(svc, &TriageParams{
 		Subject: "Who is a good boy?",
 	})

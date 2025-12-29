@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-	"time"
 
 	"github.com/alexpls/untils_go/internal/search"
+	"github.com/alexpls/untils_go/internal/wideevents"
 	"github.com/openai/openai-go/v3"
 	"github.com/openai/openai-go/v3/responses"
 )
@@ -33,51 +33,27 @@ type responseResult struct {
 }
 
 func (s *Service) response(ctx context.Context, params responses.ResponseNewParams) (*responseResult, error) {
-	stats := statsFromContext(ctx)
-	turn := stats.newTurn()
+	llmEvent, _ := wideevents.GetOrCreateFromContext(ctx, newLLMEvent)
+	turn := llmEvent.newTurn()
 
-	var logAttrs []any
-
-	defer func() {
-		logAttrs = append(logAttrs,
-			slog.String("model", model),
-			slog.Int("turn_num", len(stats.turns)),
-		)
-		s.logger.Debug("turn complete", logAttrs...)
-	}()
+	defer turn.finish()
 
 	resp, err := s.client.Responses.New(ctx, params)
 
-	turn.end = time.Now()
-
-	logAttrs = append(logAttrs,
-		slog.Duration("duration", turn.duration()),
-		slog.Bool("success", err == nil),
-	)
-
 	if err != nil {
-		turn.err = err
+		turn.addError(err)
 		return nil, fmt.Errorf("fetching llm response: %w", err)
 	}
-
-	logAttrs = append(logAttrs, slog.String("response", resp.OutputText()))
-	// logAttrs = append(logAttrs, slog.String("raw_json", resp.RawJSON()))
 
 	cost, err := calculateCost(model, resp)
 	if err != nil {
 		s.logger.Error("failed to calculate cost", "error", err)
 	} else {
-		turn.cost = cost
-		logAttrs = append(logAttrs,
-			slog.Float64("cost_usd", cost),
-			slog.Int64("input_tokens", resp.Usage.InputTokens),
-			slog.Int64("output_tokens", resp.Usage.OutputTokens),
-		)
+		turn.addCost(cost)
 	}
 
 	toolCalls := extractToolCalls(resp.Output)
 	for _, item := range toolCalls {
-		logAttrs = append(logAttrs, slog.String("tool."+item.Name, item.Arguments))
 		turn.incrToolCall(item.Name)
 	}
 

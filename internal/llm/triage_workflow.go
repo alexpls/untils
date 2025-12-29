@@ -3,6 +3,8 @@ package llm
 import (
 	"context"
 	"fmt"
+
+	"github.com/alexpls/untils_go/internal/wideevents"
 )
 
 type TriageWorkflow struct {
@@ -18,9 +20,9 @@ type TriageWorkflowReponse struct {
 	Check   *CheckResult
 }
 
-func (w *TriageWorkflow) Run(parentCtx context.Context, params *TriageParams) (*TriageWorkflowReponse, error) {
-	ctx, stats := withStatsContext(parentCtx)
-	defer stats.log(w.service.logger)
+func (w *TriageWorkflow) Run(ctx context.Context, params *TriageParams) (*TriageWorkflowReponse, error) {
+	llmEvent, _ := wideevents.GetOrCreateFromContext(ctx, newLLMEvent)
+	defer llmEvent.finish()
 
 	lg := w.service.logger.With("workflow", "triage")
 
