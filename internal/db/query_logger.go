@@ -7,8 +7,25 @@ import (
 	"strings"
 	"time"
 
+	"github.com/alexpls/untils_go/internal/wideevents"
 	"github.com/jackc/pgx/v5"
 )
+
+type DBLogEvent struct {
+	QueriesCount         int
+	QueriesTotalDuration time.Duration
+}
+
+func (d *DBLogEvent) Key() string {
+	return "db"
+}
+
+func (d *DBLogEvent) SlogAttr() slog.Attr {
+	return slog.Group(d.Key(),
+		slog.Int("query_count", d.QueriesCount),
+		slog.Duration("query_total_duration", d.QueriesTotalDuration),
+	)
+}
 
 var whitespaceCollapse = regexp.MustCompile(`\s+`)
 
@@ -41,5 +58,12 @@ func (t loggingTracer) TraceQueryEnd(ctx context.Context, conn *pgx.Conn, data p
 		return
 	}
 
-	t.logger.DebugContext(ctx, "Ran SQL query", "q", sql, "duration_ms", time.Since(start).Milliseconds())
+	if ev, ok := wideevents.GetOrCreateFromContext(ctx, func() *DBLogEvent {
+		return &DBLogEvent{}
+	}); ok {
+		ev.QueriesCount++
+		ev.QueriesTotalDuration += time.Since(start)
+	} else {
+		t.logger.DebugContext(ctx, "SQL query", "q", sql, "duration_ms", time.Since(start).Milliseconds())
+	}
 }

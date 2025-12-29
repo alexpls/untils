@@ -33,6 +33,7 @@ type NavigateResult struct {
 	Page          *Page
 }
 
+// BrowserCtx wraps a chromedp context
 type BrowserCtx struct {
 	context.Context
 	ID     string
@@ -40,6 +41,8 @@ type BrowserCtx struct {
 }
 
 func NewBrowser(parentCtx context.Context, logger *slog.Logger) (BrowserCtx, context.CancelFunc) {
+	// TODO: Make sure browser is configured with timeout
+
 	ctx, cancel := chromedp.NewContext(parentCtx)
 	return BrowserCtx{Context: ctx, logger: logger}, cancel
 }

@@ -2,6 +2,7 @@ package faviconget
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"log/slog"
@@ -11,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/alexpls/untils_go/internal/wideevents"
 	"golang.org/x/sync/singleflight"
 )
 
@@ -25,6 +27,22 @@ type faviconGetter struct {
 	logger   *slog.Logger
 	client   *http.Client
 	getGroup singleflight.Group
+}
+
+type FaviconGetLogEvent struct {
+	AttemptSuccess int
+	AttemptFailed  int
+}
+
+func (e *FaviconGetLogEvent) Key() string {
+	return "faviconget"
+}
+
+func (e *FaviconGetLogEvent) SlogAttr() slog.Attr {
+	return slog.Group(e.Key(),
+		slog.Int("attempt_success", e.AttemptSuccess),
+		slog.Int("attempt_failed", e.AttemptFailed),
+	)
 }
 
 func Handler(logger *slog.Logger) http.Handler {
@@ -44,7 +62,7 @@ func Handler(logger *slog.Logger) http.Handler {
 			http.Error(w, "invalid path", http.StatusBadRequest)
 			return
 		}
-		favicon, err := getter.getFavicon(hostname)
+		favicon, err := getter.getFavicon(r.Context(), hostname)
 		if err != nil {
 			http.NotFound(w, r)
 			return
@@ -59,7 +77,11 @@ func Handler(logger *slog.Logger) http.Handler {
 	})
 }
 
-func (g *faviconGetter) getFavicon(hostname string) (*favicon, error) {
+func (g *faviconGetter) getFavicon(ctx context.Context, hostname string) (*favicon, error) {
+	logEvent, _ := wideevents.GetOrCreateFromContext(ctx, func() *FaviconGetLogEvent {
+		return &FaviconGetLogEvent{}
+	})
+
 	faviconPaths := []string{
 		"/favicon.svg", "/favicon.png", "/favicon.ico",
 	}
@@ -70,20 +92,24 @@ func (g *faviconGetter) getFavicon(hostname string) (*favicon, error) {
 			flogger := g.logger.With("url", faviconMaybe)
 
 			if !g.shouldDownload(faviconMaybe) {
+				logEvent.AttemptFailed++
 				continue
 			}
 
 			res, err := g.client.Get(faviconMaybe)
 			if err != nil {
+				logEvent.AttemptFailed++
 				flogger.Error("favicon request error", "error", err)
 				continue
 			}
 			if res.StatusCode > 399 {
+				logEvent.AttemptFailed++
 				flogger.Debug("favicon request unsuccessful status", "status", res.StatusCode)
 				res.Body.Close()
 				continue
 			}
 			if !strings.HasPrefix(res.Header.Get("content-type"), "image/") {
+				logEvent.AttemptFailed++
 				flogger.Debug("favicon response not an image", "content_type", res.Header.Get("content-type"))
 				res.Body.Close()
 				continue
@@ -93,9 +119,12 @@ func (g *faviconGetter) getFavicon(hostname string) (*favicon, error) {
 			data, err := io.ReadAll(limit)
 			res.Body.Close()
 			if err != nil {
+				logEvent.AttemptFailed++
 				flogger.Error("favicon read error", "error", err)
 				continue
 			}
+
+			logEvent.AttemptSuccess++
 
 			return &favicon{
 				Data:        data,

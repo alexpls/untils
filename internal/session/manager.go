@@ -5,7 +5,6 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
-	"time"
 
 	"github.com/alexpls/untils_go/internal/db/sqlc"
 	"github.com/jackc/pgx/v5"
@@ -13,14 +12,10 @@ import (
 
 const cookieName = "sid"
 const sessionCtxKey = "sessionCtxKey"
-const trimInterval = time.Hour
 
 type Manager struct {
 	store  *store
 	logger *slog.Logger
-
-	trimStopCh chan struct{}
-	trimDoneCh chan struct{}
 }
 
 func NewManager(db sqlc.DBTX, queries *sqlc.Queries, logger *slog.Logger) *Manager {
@@ -31,50 +26,6 @@ func NewManager(db sqlc.DBTX, queries *sqlc.Queries, logger *slog.Logger) *Manag
 		},
 		logger: logger,
 	}
-}
-
-func (sm *Manager) StartTrim() {
-	sm.logger.Info("starting session trimmer")
-
-	if sm.trimStopCh != nil {
-		sm.logger.Warn("session trimming already running")
-		return
-	}
-
-	sm.trimStopCh = make(chan struct{})
-	sm.trimDoneCh = make(chan struct{})
-
-	go func() {
-		defer close(sm.trimDoneCh)
-		ticker := time.NewTicker(trimInterval)
-		defer ticker.Stop()
-
-		for {
-			numTrimmed, err := sm.store.trim()
-			if err != nil {
-				sm.logger.Error("error trimming sessions", "error", err)
-			} else {
-				sm.logger.Info("trimmed sessions", "num_trimmed", numTrimmed)
-			}
-
-			select {
-			case <-ticker.C:
-				continue
-			case <-sm.trimStopCh:
-				return
-			}
-		}
-	}()
-}
-
-func (sm *Manager) StopTrim() {
-	if sm.trimStopCh == nil {
-		return
-	}
-	close(sm.trimStopCh)
-	<-sm.trimDoneCh
-	sm.trimStopCh = nil
-	sm.trimDoneCh = nil
 }
 
 func (sm *Manager) Handler(next http.Handler) http.Handler {
@@ -154,4 +105,8 @@ func FromRequest(r *http.Request) *Session {
 		panic("no session in context")
 	}
 	return sess
+}
+
+func (sm *Manager) NewTrimWorker(logger *slog.Logger) *TrimWorker {
+	return NewTrimWorker(sm.store, logger)
 }

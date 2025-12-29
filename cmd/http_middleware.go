@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"time"
@@ -9,6 +10,7 @@ import (
 	"github.com/alexpls/untils_go/internal/db/sqlc"
 	"github.com/alexpls/untils_go/internal/reqcontext"
 	"github.com/alexpls/untils_go/internal/session"
+	"github.com/alexpls/untils_go/internal/wideevents"
 )
 
 type HandlerFuncWithUser func(http.ResponseWriter, *http.Request, *sqlc.User)
@@ -71,25 +73,56 @@ func (a *app) setTimezoneContext(next http.Handler) http.Handler {
 	})
 }
 
+type HTTPLogEvent struct {
+	Method     string
+	URI        string
+	Duration   time.Duration
+	StatusCode int
+	Error      string
+}
+
+func (h *HTTPLogEvent) Key() string {
+	return "http"
+}
+
+func (h *HTTPLogEvent) SlogAttr() slog.Attr {
+	return slog.Group(h.Key(),
+		slog.String("method", h.Method),
+		slog.String("uri", h.URI),
+		slog.Int("status_code", h.StatusCode),
+		slog.Duration("duration", h.Duration),
+	)
+}
+
 func (a *app) logRequests(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
-		a.logger.Info("http request",
-			"method", r.Method,
-			"uri", r.URL.RequestURI())
+
+		events := wideevents.Events{}
+		ctx2 := wideevents.ContextWithEvents(r.Context(), events)
+
+		httpEvent := wideevents.GetOrCreate(events, func() *HTTPLogEvent {
+			return &HTTPLogEvent{
+				Method: r.Method,
+				URI:    r.URL.RequestURI(),
+			}
+		})
 
 		rec := &statusRecorder{
 			ResponseWriter: w,
 			status:         http.StatusOK,
 		}
 
-		next.ServeHTTP(rec, r)
+		next.ServeHTTP(rec, r.WithContext(ctx2))
 
-		duration := time.Since(start)
-		ms := float64(duration) / float64(time.Millisecond)
-		a.logger.Info("http request done",
-			"status", rec.status,
-			"took", fmt.Sprintf("%.3fms", ms))
+		httpEvent.Duration = time.Since(start)
+		httpEvent.StatusCode = rec.status
+
+		if httpEvent.Error != "" {
+			a.logger.LogAttrs(r.Context(), slog.LevelError, "http request", events.SlogAttrs()...)
+		} else {
+			a.logger.LogAttrs(r.Context(), slog.LevelInfo, "http request", events.SlogAttrs()...)
+		}
 	})
 }
 

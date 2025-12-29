@@ -26,6 +26,7 @@ import (
 	"github.com/openai/openai-go/v3/option"
 	"github.com/riverqueue/river"
 	"github.com/riverqueue/river/riverdriver/riverpgxv5"
+	"github.com/riverqueue/river/rivertype"
 )
 
 type app struct {
@@ -87,12 +88,29 @@ func createApp(c *config) (*app, func()) {
 	a.queries = sqlc.New()
 
 	workers := river.NewWorkers()
+
+	periodicJobs := []*river.PeriodicJob{
+		river.NewPeriodicJob(
+			river.PeriodicInterval(session.TrimInterval),
+			func() (river.JobArgs, *river.InsertOpts) {
+				return session.TrimArgs{}, nil
+			},
+			&river.PeriodicJobOpts{RunOnStart: true},
+		),
+	}
+
+	riverLogger := slog.New(slogRiverHandler).With("source", "river")
+
 	a.river = must.NoErrVal(river.NewClient(riverpgxv5.New(a.db), &river.Config{
-		Logger: slog.New(slogRiverHandler).With("source", "river"),
+		Logger: riverLogger,
 		Queues: map[string]river.QueueConfig{
 			river.QueueDefault: {MaxWorkers: 50},
 		},
-		Workers: workers,
+		Workers:      workers,
+		PeriodicJobs: periodicJobs,
+		Middleware: []rivertype.Middleware{
+			newWideEventMiddleware(riverLogger),
+		},
 	}))
 
 	a.webSearcher = search.NewBraveClient(c.braveKey, a.logger.With("source", "search.brave"))
@@ -106,7 +124,6 @@ func createApp(c *config) (*app, func()) {
 	a.auth = auth.NewAuth(a.logger.With("source", "auth"), a.db, a.queries, a.validate)
 
 	a.sessionManager = session.NewManager(a.db, a.queries, a.logger.With("source", "session"))
-	a.sessionManager.StartTrim()
 
 	a.pushoverStore = pushover.NewStore(a.db, a.queries, a.validate)
 	a.pushoverClient = pushover.NewPushoverClient(c.pushoverKey, a.logger.With("source", "pushover"), a.pushoverStore)
@@ -124,6 +141,7 @@ func createApp(c *config) (*app, func()) {
 
 	river.AddWorker(workers, monitor.NewCheckWorker(a.monitor, a.logger.With("source", "monitor.check_worker")))
 	river.AddWorker(workers, monitor.NewValidateMonitorWorker(a.monitor, a.logger.With("source", "monitor.validate_monitor_worker")))
+	river.AddWorker(workers, a.sessionManager.NewTrimWorker(a.logger.With("source", "session.trim_worker")))
 	must.NoErr(a.river.Start(ctx))
 
 	closer := func() {
@@ -143,7 +161,6 @@ func createApp(c *config) (*app, func()) {
 			a.logger.Error("timeout out while waiting for app context cancellation")
 		}
 
-		a.sessionManager.StopTrim()
 		dbCloser()
 	}
 
