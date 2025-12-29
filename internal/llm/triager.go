@@ -33,9 +33,8 @@ type TriageParams struct {
 var triagerPrompt string
 
 type TriagerResponse struct {
-	Approved         bool   `json:"approved"`
-	RephrasedSubject string `json:"rephrased_subject"`
-	RejectedReason   string `json:"rejected_reason"`
+	Approved       bool   `json:"approved"`
+	RejectedReason string `json:"rejected_reason"`
 }
 
 func (p *Triager) Run(ctx context.Context) (*TriagerResponse, error) {

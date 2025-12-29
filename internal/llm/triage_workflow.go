@@ -38,33 +38,22 @@ func (w *TriageWorkflow) Run(parentCtx context.Context, params *TriageParams) (*
 		}
 		turn++
 
-		lg.Info("running triager")
-
 		triageResp, err = triager.Run(ctx)
 		if err != nil {
 			return nil, err
 		}
 		if !triageResp.Approved {
-			lg.Warn("triage not approved", "reason", triageResp.RejectedReason)
 			return &TriageWorkflowReponse{
 				Triager: triageResp,
 				Check:   checkResp,
 			}, nil
 		}
 
-		lg.Info("triager approved")
-
-		subject := triageResp.RephrasedSubject
-		if subject == "" {
-			subject = params.Subject
-		}
-
 		checkParams := &CheckParams{
-			Subject:      subject,
+			Subject:      params.Subject,
 			Instructions: params.Instructions,
 		}
 
-		lg.Info("checking")
 		checker := newChecker(w.service)
 		checkResp, err = checker.perform(ctx, checkParams)
 		if err != nil {
@@ -73,8 +62,6 @@ func (w *TriageWorkflow) Run(parentCtx context.Context, params *TriageParams) (*
 		}
 
 		if !checkResp.Success {
-			lg.Warn("check unsuccessful, sending back")
-
 			feedback := "The expert couldn't answer. Try finding some different sources or picking another expert."
 			if checkResp.Reason != "" {
 				feedback += fmt.Sprintf(" Reason: %s", checkResp.Reason)
@@ -82,8 +69,6 @@ func (w *TriageWorkflow) Run(parentCtx context.Context, params *TriageParams) (*
 			triager.addMessage(systemMessage(feedback))
 			continue
 		}
-
-		lg.Info("check successful")
 
 		return &TriageWorkflowReponse{
 			Triager: triageResp,
