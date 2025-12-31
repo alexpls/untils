@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/alexpls/untils_go/internal/db/sqlc"
-	"github.com/alexpls/untils_go/internal/faviconget"
 	"github.com/alexpls/untils_go/public"
 )
 
@@ -24,9 +23,6 @@ func (a *app) routes() http.Handler {
 
 	// app
 	mux.HandleFunc("GET /app", a.requireAuth(a.appHandler))
-
-	// favicons
-	mux.HandleFunc("GET /app/favicon", a.requireAuth2(faviconget.Handler(a.logger.With("source", "faviconget"))))
 
 	// monitors
 	mux.HandleFunc("GET /app/monitors", a.requireAuth(a.monitorListGet))

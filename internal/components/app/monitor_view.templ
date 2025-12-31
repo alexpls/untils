@@ -172,20 +172,9 @@ templ monitorResultTimelineItem(result *sqlc.MonitorResult) {
 								title={citation.WebsiteTitle + " | " + citation.PageTitle}
 								target="_blank"
 								rel="noref noopener"
-								x-data="{imgLoaded: false}"
 								class="relative w-5 h-5 rounded bg-base-content/10 border border-base-content/40 overflow-hidden flex items-center justify-center"
 							>
-								<span
-									x-text={fmt.Sprintf("imgLoaded ? '' : '%s'", citation.WebsiteTitle[0:1])}
-									class="absolute text-xs font-semibold"
-								></span>
-								<img
-									x-show="imgLoaded"
-									x-init="$el.complete ? imgLoaded = true : null"
-									x-on:load="imgLoaded = true"
-									class="w-full h-full z-10"
-									src={fmt.Sprintf("/app/favicon?path=%s", urlHost(citation.URL))}
-								/>
+								<span class="absolute text-xs font-semibold">{citation.WebsiteTitle[0:1]}</span>
 							</a>
 						}
 						</div>
