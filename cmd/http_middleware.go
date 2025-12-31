@@ -110,6 +110,7 @@ func (a *app) logRequests(next http.Handler) http.Handler {
 
 		rec := &statusRecorder{
 			ResponseWriter: w,
+			Flusher:        w.(http.Flusher),
 			status:         http.StatusOK,
 		}
 
@@ -128,6 +129,7 @@ func (a *app) logRequests(next http.Handler) http.Handler {
 
 type statusRecorder struct {
 	http.ResponseWriter
+	http.Flusher
 	status int
 }
 

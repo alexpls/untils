@@ -6,6 +6,7 @@ import (
 	"github.com/alexpls/untils_go/internal/monitor"
 	"github.com/alexpls/untils_go/internal/validation"
 	"fmt"
+	"github.com/starfederation/datastar-go/datastar"
 )
 
 type MonitorDraftData struct {
@@ -34,16 +35,7 @@ templ MonitorDraftPage(data MonitorDraftData) {
 			</ul>
 		</div>
 
-		<div
-			class="container mx-auto"
-			id="monitor-draft"
-			if monitorLoading(data.Monitor) {
-				hx-get={fmt.Sprintf("/app/monitors/%d", data.Monitor.ID)}
-				hx-select="#monitor-draft"
-				hx-swap="outerHTML"
-				hx-trigger="every 1s"
-			}
-		>
+		<div class="container mx-auto" id="monitor-draft">
 			@header("New monitor", nil) {}
 
 			<div class="m-4">
@@ -118,11 +110,7 @@ templ MonitorDraftPage(data MonitorDraftData) {
 							<li class="list-row flex items-center gap-4">
 								<div>
 									<button
-										hx-post={ fmt.Sprintf("/app/monitors/%d/activate", data.Monitor.ID) }
-										hx-swap="unset"
-										hx-select="unset"
-										hx-target="body"
-										hx-push-url="true"
+										data-on:click={datastar.PostSSE("/app/monitors/%d/activate", data.Monitor.ID)}
 										class="btn btn-sm"
 									>
 										Pick

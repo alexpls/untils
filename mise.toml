@@ -1,6 +1,6 @@
 [tools]
-node = "25.2.1"
 go = "1.25.5"
+bun = "latest"
 
 [settings]
 env_file = '.env.dev'
@@ -9,7 +9,7 @@ env_file = '.env.dev'
 run = "GOOS=linux GOARCH=amd64 go build -o untils_linux_amd64 ./cmd"
 
 [tasks.format]
-run = "go fmt ./... && npm run format"
+run = "go fmt ./... && bun run format"
 
 [tasks.dev-deps]
 run = '''
@@ -26,10 +26,10 @@ templ generate --watch --proxy="http://localhost:4200" --cmd "go run ./cmd serve
 """
 
 [tasks.dev-css]
-run = "npm run watch-css"
+run = "bun run watch-css"
 
 [tasks.dev-js]
-run = "npm run watch-js"
+run = "bun run watch-js"
 
 [tasks.dev]
 run = [

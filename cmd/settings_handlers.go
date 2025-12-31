@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -11,6 +12,7 @@ import (
 	"github.com/alexpls/untils_go/internal/db/sqlc"
 	"github.com/alexpls/untils_go/internal/pushover"
 	"github.com/alexpls/untils_go/internal/validation"
+	"github.com/starfederation/datastar-go/datastar"
 )
 
 func (a *app) settingsGet(w http.ResponseWriter, r *http.Request, user *sqlc.User) {
@@ -97,13 +99,15 @@ func (a *app) pushoverSettingsPost(w http.ResponseWriter, r *http.Request, user 
 }
 
 func (a *app) pushoverSettingsDelete(w http.ResponseWriter, r *http.Request, user *sqlc.User) {
+	sse := datastar.NewSSE(w, r)
+
 	err := a.pushoverStore.DeleteToken(r.Context(), user.ID)
 	if a.internalServerError(err, w) {
 		a.logger.Error("error deleting pushover user token", "error", err)
 		return
 	}
 
-	http.Redirect(w, r, "/app/settings/pushover", http.StatusSeeOther)
+	sse.Redirect("/app/settings/pushover")
 }
 
 func (a *app) emailSettingsGet(w http.ResponseWriter, r *http.Request, user *sqlc.User) {
@@ -114,16 +118,20 @@ func (a *app) emailSettingsGet(w http.ResponseWriter, r *http.Request, user *sql
 	appcomponents.EmailSettings(&data).Render(r.Context(), w)
 }
 
+type timezoneUpdate struct {
+	Timezone string `json:"timezone"`
+}
+
 func (a *app) updateTimezonePost(w http.ResponseWriter, r *http.Request, user *sqlc.User) {
-	if a.internalServerError(r.ParseForm(), w) {
-		a.logger.Error("failed to parse form")
+	var params timezoneUpdate
+	err := json.NewDecoder(r.Body).Decode(&params)
+	if a.badRequest(err, w) {
+		a.logger.Error("error decoding timezone update params", "error", err)
 		return
 	}
 
-	tz := r.FormValue("Timezone")
-
-	err := a.auth.UpdateUserTimezone(r.Context(), user.ID, auth.UpdateUserTimezoneParams{
-		Timezone: tz,
+	err = a.auth.UpdateUserTimezone(r.Context(), user.ID, auth.UpdateUserTimezoneParams{
+		Timezone: params.Timezone,
 	})
 	if a.internalServerError(err, w) {
 		a.logger.Error("error updating user timezone", "error", err)

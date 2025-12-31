@@ -5,6 +5,7 @@ import "github.com/alexpls/untils_go/internal/pushover"
 import "github.com/alexpls/untils_go/internal/db/sqlc"
 import "github.com/alexpls/untils_go/internal/components"
 import "fmt"
+import "github.com/starfederation/datastar-go/datastar"
 
 type SettingsViewModel struct {
 	ActiveIntegrations []*sqlc.ActiveUserIntegrationsRow
@@ -32,8 +33,8 @@ templ Settings(data *SettingsViewModel) {
 						</div>
 						<div>
 							<div
-								x-data={fmt.Sprintf("timezone(%q)", components.CurrentUser(ctx).Timezone)}
-								x-text="tz"
+								data-signals={fmt.Sprintf("$currentTimezoneName = timezoneName(%q)", components.CurrentUser(ctx).Timezone)}
+								data-text="$currentTimezoneName"
 							>
 							</div>
 						</div>
@@ -100,8 +101,7 @@ templ PushoverSettings(data *PushoverSettingsViewModel) {
 
 				<button
 					class="btn btn-error"
-					hx-delete="/app/settings/pushover"
-					hx-target="body"
+					data-on:click={datastar.DeleteSSE("/app/settings/pushover")}
 				>
 					Reset token
 				</button>

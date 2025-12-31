@@ -8,15 +8,17 @@ This file is for coding agents working with this project.
 when they change.
 
 Backend:
+
 - Go http server
 - Templ for templating
 - PostgreSQL database
 - SQLc for SQL query generation
 
 Frontend:
+
 - Tailwind 4 CSS
 - Daisy UI
-- HTMX
+- Datasta
 
 ## Database schema
 
