@@ -1,5 +1,7 @@
 package components
 
+import "time"
+
 templ TimelineItem(heading templ.Component) {
 	<li class={
 		"relative", "py-2", "before:content-['']", "before:absolute",
@@ -18,4 +20,10 @@ templ TimelineItem(heading templ.Component) {
 			{children...}
 		</div>
 	</li>
+}
+
+templ TimeAgo(timestamp time.Time) {
+	<time datetime={ timestamp.Format(time.RFC3339) }>
+		{ formatTimeAgoShort(timestamp) }
+	</time>
 }

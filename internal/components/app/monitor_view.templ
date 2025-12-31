@@ -7,6 +7,7 @@ import (
 	"github.com/alexpls/untils_go/internal/db/sqlc"
 	"net/url"
 	"github.com/starfederation/datastar-go/datastar"
+	"time"
 )
 
 type MonitorViewData struct {
@@ -55,6 +56,7 @@ templ MonitorViewPage(data MonitorViewData) {
 				<div class="col-span-8">
 					<div class="m-4 p-4 bg-base-100 rounded border border-base-content/10">
 						<ul>
+							@checkInProgressTimelineItem()
 							for _, result := range data.Results {
 								@monitorResultTimelineItem(result)
 							}
@@ -138,6 +140,59 @@ templ MonitorNotifiers(data MonitorViewData) {
 			}
 		}
 	</div>
+}
+
+
+templ checkInProgressTimelineHeading() {
+	<div>
+		Check in progress...
+	</div>
+}
+
+type checkEvent struct {
+	StartedAt time.Time
+	FinishedAt time.Time
+	Text      string
+}
+
+var events = []checkEvent{
+	{
+		StartedAt: time.Now().Add(-20 * time.Second),
+		FinishedAt: time.Now().Add(-15 * time.Second),
+		Text:      "Searching the web for \"southeast queensland power outage list\"...",
+	},
+	{
+		StartedAt: time.Now().Add(-15 * time.Second),
+		FinishedAt: time.Now().Add(-10 * time.Second),
+		Text:      "Found 10 results...",
+	},
+	{
+		StartedAt: time.Now().Add(-10 * time.Second),
+		Text:      "Reading energex.com...",
+	},
+}
+
+templ checkInProgressEvent(event checkEvent) {
+	<li class="flex py-0.5 items-center justify-start">
+		<div class="text-base-content/30 mr-1">
+			@components.TimeAgo(event.StartedAt)
+		</div>
+		<div class={templ.KV("animate-pulse", event.FinishedAt.IsZero())}>
+			{event.Text}
+		</div>
+	</li>
+}
+
+templ checkInProgressTimelineItem() {
+	@components.TimelineItem(checkInProgressTimelineHeading()) {
+		<div id="check-events">
+			<ul class="text-sm text-base-content/50">
+				for _, event := range events {
+					@checkInProgressEvent(event)
+				}
+			</ul>
+		</div>
+	}
 }
 
 templ monitorResultTimelineItem(result *sqlc.MonitorResult) {

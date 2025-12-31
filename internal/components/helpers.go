@@ -2,6 +2,7 @@ package components
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"time"
 
@@ -75,4 +76,13 @@ func MaskSecret(str string) string {
 	masked := strings.Repeat(maskChar, len(str)-visibleChars)
 
 	return visible + masked
+}
+
+// formatTimeAgo returns a human-readable string representing the time elapsed since the given timestamp.
+func formatTimeAgoShort(t time.Time) string {
+	duration := time.Since(t)
+
+	seconds := int(duration.Seconds())
+
+	return fmt.Sprintf("%ds", seconds)
 }
