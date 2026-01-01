@@ -7,13 +7,14 @@ import (
 	"github.com/alexpls/untils_go/internal/db/sqlc"
 	"net/url"
 	"github.com/starfederation/datastar-go/datastar"
-	"time"
 )
 
 type MonitorViewData struct {
 	Monitor            *sqlc.Monitor
 	Results            []*sqlc.MonitorResult
 	NextScheduledCheck *sqlc.MonitorCheck
+	InProgressCheck *sqlc.MonitorCheck
+	InProgressCheckEvents []*sqlc.MonitorCheckEvent
 	Notifiers          []*sqlc.MonitorNotifier
 	ActiveIntegrations []*sqlc.ActiveUserIntegrationsRow
 }
@@ -56,7 +57,12 @@ templ MonitorViewPage(data MonitorViewData) {
 				<div class="col-span-8">
 					<div class="m-4 p-4 bg-base-100 rounded border border-base-content/10">
 						<ul>
-							@checkInProgressTimelineItem()
+							if data.InProgressCheck != nil {
+								@checkInProgressTimelineItem(checkInProgressTimelineItemViewData{
+									Check: data.InProgressCheck,
+									Events: data.InProgressCheckEvents,
+								})
+							}
 							for _, result := range data.Results {
 								@monitorResultTimelineItem(result)
 							}
@@ -149,46 +155,45 @@ templ checkInProgressTimelineHeading() {
 	</div>
 }
 
-type checkEvent struct {
-	StartedAt time.Time
-	FinishedAt time.Time
-	Text      string
-}
-
-var events = []checkEvent{
-	{
-		StartedAt: time.Now().Add(-20 * time.Second),
-		FinishedAt: time.Now().Add(-15 * time.Second),
-		Text:      "Searching the web for \"southeast queensland power outage list\"...",
-	},
-	{
-		StartedAt: time.Now().Add(-15 * time.Second),
-		FinishedAt: time.Now().Add(-10 * time.Second),
-		Text:      "Found 10 results...",
-	},
-	{
-		StartedAt: time.Now().Add(-10 * time.Second),
-		Text:      "Reading energex.com...",
-	},
-}
-
-templ checkInProgressEvent(event checkEvent) {
+templ checkInProgressEvent(event *sqlc.MonitorCheckEvent, latest bool) {
 	<li class="flex py-0.5 items-center justify-start">
 		<div class="text-base-content/30 mr-1">
-			@components.TimeAgo(event.StartedAt)
+			@components.TimeAgo(event.CreatedAt)
 		</div>
-		<div class={templ.KV("animate-pulse", event.FinishedAt.IsZero())}>
-			{event.Text}
+		<div class={templ.KV("animate-pulse", latest)}>
+			switch d := event.DetailsStruct().(type) {
+				case *sqlc.MonitorCheckEventWebSearchDetails:
+					<div>
+						Searching for &ldquo;{d.Query}&rdquo;&hellip;
+					</div>
+				case *sqlc.MonitorCheckEventBrowserNavigateDetails:
+					<div>
+						Navigating to &ldquo;<a href={d.URL} target="_blank" rel="noref noopener" class="link">{components.URLHost(d.URL)}</a>&rdquo;&hellip;
+					</div>
+				case *sqlc.MonitorCheckEventBrowserClickDetails:
+					<div>
+						Clicking on a link&hellip;
+					</div>
+				default:
+					<div>
+						Checking&hellip;
+					</div>
+			}
 		</div>
 	</li>
 }
 
-templ checkInProgressTimelineItem() {
+type checkInProgressTimelineItemViewData struct {
+	Check *sqlc.MonitorCheck
+	Events []*sqlc.MonitorCheckEvent
+}
+
+templ checkInProgressTimelineItem(data checkInProgressTimelineItemViewData) {
 	@components.TimelineItem(checkInProgressTimelineHeading()) {
 		<div id="check-events">
 			<ul class="text-sm text-base-content/50">
-				for _, event := range events {
-					@checkInProgressEvent(event)
+				for i, event := range data.Events {
+					@checkInProgressEvent(event, i == len(data.Events)-1)
 				}
 			</ul>
 		</div>

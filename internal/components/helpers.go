@@ -3,6 +3,7 @@ package components
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"strings"
 	"time"
 
@@ -85,4 +86,12 @@ func formatTimeAgoShort(t time.Time) string {
 	seconds := int(duration.Seconds())
 
 	return fmt.Sprintf("%ds", seconds)
+}
+
+func URLHost(raw string) string {
+	u, err := url.Parse(raw)
+	if err != nil {
+		return ""
+	}
+	return u.Host
 }

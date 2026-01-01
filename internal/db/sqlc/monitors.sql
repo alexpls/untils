@@ -52,6 +52,13 @@ and (status = 'scheduled' or status = 'checking')
 order by scheduled_for desc
 limit 1;
 
+-- name: GetInProgressMonitorCheck :one
+select * from monitor_checks
+where monitor_id = @monitor_id
+and status = 'checking'
+order by scheduled_for desc
+limit 1;
+
 -- name: SkipPendingChecks :exec
 update monitor_checks
 set status = 'skipped'

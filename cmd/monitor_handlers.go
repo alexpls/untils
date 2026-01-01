@@ -57,6 +57,19 @@ func (a *app) monitorViewData(ctx context.Context, mon *sqlc.Monitor, u *sqlc.Us
 		return appcomponents.MonitorViewData{}, err
 	}
 
+	inProgressCheck, err := a.monitor.GetInProgressMonitorCheck(ctx, mon)
+	if err != nil {
+		return appcomponents.MonitorViewData{}, err
+	}
+
+	var events []*sqlc.MonitorCheckEvent
+	if inProgressCheck != nil {
+		events, err = a.monitor.ListMonitorCheckEvents(ctx, inProgressCheck.ID)
+		if err != nil {
+			return appcomponents.MonitorViewData{}, err
+		}
+	}
+
 	notifiers, err := a.monitor.ListMonitorNotifiers(ctx, mon)
 	if err != nil {
 		return appcomponents.MonitorViewData{}, err
@@ -68,11 +81,13 @@ func (a *app) monitorViewData(ctx context.Context, mon *sqlc.Monitor, u *sqlc.Us
 	}
 
 	return appcomponents.MonitorViewData{
-		Monitor:            mon,
-		Results:            results,
-		NextScheduledCheck: nextScheduled,
-		Notifiers:          notifiers,
-		ActiveIntegrations: activeIntegrations,
+		Monitor:               mon,
+		Results:               results,
+		NextScheduledCheck:    nextScheduled,
+		InProgressCheck:       inProgressCheck,
+		InProgressCheckEvents: events,
+		Notifiers:             notifiers,
+		ActiveIntegrations:    activeIntegrations,
 	}, nil
 }
 

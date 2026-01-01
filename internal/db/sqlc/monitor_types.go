@@ -2,7 +2,6 @@ package sqlc
 
 import (
 	"encoding/json"
-	"fmt"
 )
 
 type Citations []Citation
@@ -48,26 +47,26 @@ type MonitorCheckEventBrowserNavigateDetails struct {
 
 func (d MonitorCheckEventBrowserNavigateDetails) isMonitorCheckEventDetails() {}
 
-func (e *MonitorCheckEvent) DetailsStruct() (any, error) {
+func (e *MonitorCheckEvent) DetailsStruct() MonitorCheckEventDetails {
 	switch e.Kind {
 	case MonitorCheckEventKindWebSearch:
-		return unmarshalMonitorEventDetails[MonitorCheckEventWebSearchDetails](e.Details)
+		return unmarshalMonitorCheckEventDetails[MonitorCheckEventWebSearchDetails](e.Details)
 
 	case MonitorCheckEventKindBrowserClick:
-		return unmarshalMonitorEventDetails[MonitorCheckEventBrowserClickDetails](e.Details)
+		return unmarshalMonitorCheckEventDetails[MonitorCheckEventBrowserClickDetails](e.Details)
 
 	case MonitorCheckEventKindBrowserNavigate:
-		return unmarshalMonitorEventDetails[MonitorCheckEventBrowserNavigateDetails](e.Details)
+		return unmarshalMonitorCheckEventDetails[MonitorCheckEventBrowserNavigateDetails](e.Details)
 
 	default:
-		return nil, fmt.Errorf("unknown monitor check event kind: %s", e.Kind)
+		panic("unhandled monitor check event kind")
 	}
 }
 
-func unmarshalMonitorEventDetails[T any](data json.RawMessage) (*T, error) {
+func unmarshalMonitorCheckEventDetails[T MonitorCheckEventDetails](data json.RawMessage) *T {
 	var details T
 	if err := json.Unmarshal(data, &details); err != nil {
-		return nil, err
+		panic("unmarshalMonitorEventDetails: " + err.Error())
 	}
-	return &details, nil
+	return &details
 }

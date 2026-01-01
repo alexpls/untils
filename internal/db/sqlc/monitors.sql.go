@@ -268,6 +268,29 @@ func (q *Queries) DeleteMonitorResults(ctx context.Context, db DBTX, monitorID i
 	return err
 }
 
+const getInProgressMonitorCheck = `-- name: GetInProgressMonitorCheck :one
+select id, monitor_id, status, scheduled_for, failure_reason, done_at, result from monitor_checks
+where monitor_id = $1
+and status = 'checking'
+order by scheduled_for desc
+limit 1
+`
+
+func (q *Queries) GetInProgressMonitorCheck(ctx context.Context, db DBTX, monitorID int64) (*MonitorCheck, error) {
+	row := db.QueryRow(ctx, getInProgressMonitorCheck, monitorID)
+	var i MonitorCheck
+	err := row.Scan(
+		&i.ID,
+		&i.MonitorID,
+		&i.Status,
+		&i.ScheduledFor,
+		&i.FailureReason,
+		&i.DoneAt,
+		&i.Result,
+	)
+	return &i, err
+}
+
 const getLatestMonitorResult = `-- name: GetLatestMonitorResult :one
 select id, monitor_id, confirming_check_ids, result, date, date_past_tense_verb, citations, latest_confirmation_at, created_at from monitor_results
 where monitor_id = $1

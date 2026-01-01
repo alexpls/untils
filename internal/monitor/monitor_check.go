@@ -37,6 +37,19 @@ func (s *Service) GetNextMonitorCheck(ctx context.Context, monitor *sqlc.Monitor
 	return check, nil
 }
 
+// GetInProgressMonitorCheck returns the in-progress monitor check for the given monitor,
+// or nil if there is no in-progress check.
+func (s *Service) GetInProgressMonitorCheck(ctx context.Context, monitor *sqlc.Monitor) (*sqlc.MonitorCheck, error) {
+	check, err := s.queries.GetInProgressMonitorCheck(ctx, s.pool, monitor.ID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("getting in progress monitor check: %w", err)
+	}
+	return check, nil
+}
+
 func (s *Service) ScheduleMonitorCheck(ctx context.Context, monitor *sqlc.Monitor, scheduledFor time.Time) (*sqlc.MonitorCheck, error) {
 	return db.WithTxV(s.pool, ctx, func(tx pgx.Tx) (*sqlc.MonitorCheck, error) {
 		check, err := s.scheduleMonitorCheckTx(ctx, tx, monitor, scheduledFor)
