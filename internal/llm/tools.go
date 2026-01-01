@@ -48,20 +48,27 @@ func (t tool[P]) toOpenAIParam() responses.ToolUnionParam {
 }
 
 func (t tool[P]) call(tc *toolContext, args string) (string, error) {
-	var params P
-	if err := json.Unmarshal([]byte(args), &params); err != nil {
-		return "", fmt.Errorf("unmarshaling %s params: %w", t.name, err)
+	params, err := t.unmarshalParams(args)
+	if err != nil {
+		return "", err
 	}
 	return t.execute(tc, params)
 }
 
 func (t tool[P]) checkEvent(tc *toolContext, args string) (CheckEvent, error) {
-	// TODO: Don't duplicate unmarshaling with call()
-	var params P
-	if err := json.Unmarshal([]byte(args), &params); err != nil {
-		return CheckEvent{}, fmt.Errorf("unmarshaling %s params: %w", t.name, err)
+	params, err := t.unmarshalParams(args)
+	if err != nil {
+		return CheckEvent{}, err
 	}
 	return t.makeCheckEvent(tc, params), nil
+}
+
+func (t tool[P]) unmarshalParams(args string) (P, error) {
+	var params P
+	if err := json.Unmarshal([]byte(args), &params); err != nil {
+		return params, fmt.Errorf("unmarshaling %s params: %w", t.name, err)
+	}
+	return params, nil
 }
 
 // toolCaller is a non-generic interface for calling tools
