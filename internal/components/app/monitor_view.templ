@@ -7,6 +7,7 @@ import (
 	"github.com/alexpls/untils_go/internal/db/sqlc"
 	"net/url"
 	"github.com/starfederation/datastar-go/datastar"
+	"github.com/alexpls/untils_go/internal/components/icons"
 )
 
 type MonitorViewData struct {
@@ -162,7 +163,11 @@ templ checkInProgressTimelineHeading() {
 templ checkInProgressEvent(event *sqlc.MonitorCheckEvent, latest bool) {
 	<li class="flex py-0.5 items-center justify-start">
 		<div class="text-base-content/30 mr-1">
-			@components.TimeAgo(event.CreatedAt)
+			if latest {
+				@icons.Loader(icons.IconParams{Size: 16})
+			} else {
+				@icons.CircleCheck(icons.IconParams{Size: 16})
+			}
 		</div>
 		<div class={templ.KV("animate-pulse", latest)}>
 			switch d := event.DetailsStruct().(type) {
@@ -172,7 +177,7 @@ templ checkInProgressEvent(event *sqlc.MonitorCheckEvent, latest bool) {
 					</div>
 				case *sqlc.MonitorCheckEventBrowserNavigateDetails:
 					<div>
-						Navigating to &ldquo;<a href={d.URL} target="_blank" rel="noref noopener" class="link">{components.URLHost(d.URL)}</a>&rdquo;&hellip;
+						Reading &ldquo;<a href={d.URL} target="_blank" rel="noref noopener" class="link">{components.URLHost(d.URL)}</a>&rdquo;&hellip;
 					</div>
 				case *sqlc.MonitorCheckEventBrowserClickDetails:
 					<div>
