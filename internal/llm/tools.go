@@ -14,25 +14,34 @@ import (
 	"github.com/openai/openai-go/v3/responses"
 )
 
-var toolRegistry = map[string]toolCaller{
-	browserNavigateTool.name: browserNavigateTool,
-	browserClickTool.name:    browserClickTool,
-	searchTool.name:          searchTool,
+var toolRegistry = map[string]toolBuilder{
+	browserNavigateTool.name: browserNavigateTool.build,
+	browserClickTool.name:    browserClickTool.build,
+	searchTool.name:          searchTool.build,
 }
 
 // toolContext provides dependencies that tools need for execution.
-// It must be created per request.
+// It must be created per tool call.
 type toolContext struct {
-	ctx        context.Context
-	service    *Service
-	getBrowser func() *browser.BrowserCtx
+	ctx     context.Context
+	service *Service
+	browser func() *browser.BrowserCtx
 }
 
+// toolCall holds a tool call ready for execution with pre-parsed params.
+type toolCall struct {
+	call       func() (string, error)
+	checkEvent func() CheckEvent
+}
+
+// toolBuilder builds a prepared tool call from raw JSON args.
+type toolBuilder func(tc *toolContext, args string) (*toolCall, error)
+
 type tool[P any] struct {
-	name           string
-	description    string
-	execute        func(tc *toolContext, params P) (string, error)
-	makeCheckEvent func(tc *toolContext, params P) CheckEvent
+	name        string
+	description string
+	execute     func(tc *toolContext, params P) (string, error)
+	checkEvent  func(tc *toolContext, params P) CheckEvent
 }
 
 // toOpenAIParam returns the tool definition as expected by the OpenAI API.
@@ -47,34 +56,16 @@ func (t tool[P]) toOpenAIParam() responses.ToolUnionParam {
 	}
 }
 
-func (t tool[P]) call(tc *toolContext, args string) (string, error) {
-	params, err := t.unmarshalParams(args)
-	if err != nil {
-		return "", err
-	}
-	return t.execute(tc, params)
-}
-
-func (t tool[P]) checkEvent(tc *toolContext, args string) (CheckEvent, error) {
-	params, err := t.unmarshalParams(args)
-	if err != nil {
-		return CheckEvent{}, err
-	}
-	return t.makeCheckEvent(tc, params), nil
-}
-
-func (t tool[P]) unmarshalParams(args string) (P, error) {
+// build parses the JSON args once and returns a prepared call.
+func (t tool[P]) build(tc *toolContext, args string) (*toolCall, error) {
 	var params P
 	if err := json.Unmarshal([]byte(args), &params); err != nil {
-		return params, fmt.Errorf("unmarshaling %s params: %w", t.name, err)
+		return nil, fmt.Errorf("unmarshaling %s params: %w", t.name, err)
 	}
-	return params, nil
-}
-
-// toolCaller is a non-generic interface for calling tools
-type toolCaller interface {
-	call(tc *toolContext, args string) (string, error)
-	checkEvent(tc *toolContext, args string) (CheckEvent, error)
+	return &toolCall{
+		call:       func() (string, error) { return t.execute(tc, params) },
+		checkEvent: func() CheckEvent { return t.checkEvent(tc, params) },
+	}, nil
 }
 
 // tool definitions
@@ -90,14 +81,14 @@ var browserNavigateTool = tool[browserNavigateParams]{
 		llmEvent, _ := wideevents.GetOrCreateFromContext(tc.ctx, newLLMEvent)
 		llmEvent.addSiteVisited(p.URL)
 
-		b := tc.getBrowser()
+		b := tc.browser()
 		res, err := b.Navigate(p.URL)
 		if err != nil {
 			return "", err
 		}
 		return res.String(), nil
 	},
-	makeCheckEvent: func(tc *toolContext, params browserNavigateParams) CheckEvent {
+	checkEvent: func(tc *toolContext, params browserNavigateParams) CheckEvent {
 		return CheckEvent{
 			Kind: sqlc.MonitorCheckEventKindBrowserNavigate,
 			Details: sqlc.MonitorCheckEventBrowserNavigateDetails{
@@ -115,7 +106,7 @@ var browserClickTool = tool[browserClickParams]{
 	name:        "browser_click",
 	description: "Use a web browser to click on an element on the current page, identified by its unique ID (e.g. [learn more](click:123) - the ID is 123)",
 	execute: func(tc *toolContext, p browserClickParams) (string, error) {
-		b := tc.getBrowser()
+		b := tc.browser()
 		page, err := b.Click(p.NodeID)
 		if err != nil {
 			tc.service.logger.Error("error performing click", "node_id", p.NodeID, "error", err)
@@ -123,7 +114,7 @@ var browserClickTool = tool[browserClickParams]{
 		}
 		return page.String(), nil
 	},
-	makeCheckEvent: func(tc *toolContext, params browserClickParams) CheckEvent {
+	checkEvent: func(tc *toolContext, params browserClickParams) CheckEvent {
 		return CheckEvent{
 			Kind:    sqlc.MonitorCheckEventKindBrowserClick,
 			Details: sqlc.MonitorCheckEventBrowserClickDetails{},
@@ -152,7 +143,7 @@ var searchTool = tool[searchParams]{
 
 		return sb.String(), nil
 	},
-	makeCheckEvent: func(tc *toolContext, params searchParams) CheckEvent {
+	checkEvent: func(tc *toolContext, params searchParams) CheckEvent {
 		return CheckEvent{
 			Kind: sqlc.MonitorCheckEventKindWebSearch,
 			Details: sqlc.MonitorCheckEventWebSearchDetails{
@@ -160,19 +151,6 @@ var searchTool = tool[searchParams]{
 			},
 		}
 	},
-}
-
-func browserTools() []responses.ToolUnionParam {
-	return []responses.ToolUnionParam{
-		browserNavigateTool.toOpenAIParam(),
-		browserClickTool.toOpenAIParam(),
-	}
-}
-
-func searchTools() []responses.ToolUnionParam {
-	return []responses.ToolUnionParam{
-		searchTool.toOpenAIParam(),
-	}
 }
 
 func toolOutputMessage(callID, output string) responses.ResponseInputItemUnionParam {

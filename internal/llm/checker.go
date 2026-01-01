@@ -58,10 +58,14 @@ func (c *checker) perform(ctx context.Context, params *CheckParams) (*sqlc.Check
 		turn++
 
 		resp, err = c.service.response(ctx, responses.ResponseNewParams{
-			Model:             "grok-4-1-fast-reasoning",
-			Input:             inputItems(c.messages...),
-			Text:              jsonSchemaResponse(sqlc.CheckResult{}),
-			Tools:             append(browserTools(), searchTools()...),
+			Model: "grok-4-1-fast-reasoning",
+			Input: inputItems(c.messages...),
+			Text:  jsonSchemaResponse(sqlc.CheckResult{}),
+			Tools: []responses.ToolUnionParam{
+				browserNavigateTool.toOpenAIParam(),
+				browserClickTool.toOpenAIParam(),
+				searchTool.toOpenAIParam(),
+			},
 			ParallelToolCalls: openai.Bool(false),
 		})
 
@@ -97,7 +101,7 @@ func (c *checker) callTool(ctx context.Context, name string, args string) (strin
 	tc := &toolContext{
 		ctx:     ctx,
 		service: c.service,
-		getBrowser: func() *browser.BrowserCtx {
+		browser: func() *browser.BrowserCtx {
 			if c.browserCtx == nil {
 				bctx, bcancel := browser.NewBrowser(ctx, c.service.logger)
 				c.browserCtx, c.browserCancel = &bctx, bcancel
@@ -106,20 +110,20 @@ func (c *checker) callTool(ctx context.Context, name string, args string) (strin
 		},
 	}
 
-	caller, ok := toolRegistry[name]
+	toolBuilder, ok := toolRegistry[name]
 	if !ok {
 		return "", fmt.Errorf("tool does not exist: %s", name)
 	}
 
-	ev, err := caller.checkEvent(tc, args)
+	tool, err := toolBuilder(tc, args)
 	if err != nil {
-		c.service.logger.Error("error creating tool check event", "error", err)
+		return "", err
 	}
 
 	select {
-	case c.c <- ev:
+	case c.c <- tool.checkEvent():
 	default:
 	}
 
-	return caller.call(tc, args)
+	return tool.call()
 }
