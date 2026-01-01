@@ -74,12 +74,15 @@ func (s *Service) scheduleMonitorCheckTx(ctx context.Context, tx pgx.Tx, monitor
 		return nil, fmt.Errorf("creating monitor check: %w", err)
 	}
 
+	var opts river.InsertOpts
+	if scheduledFor.After(time.Now()) {
+		opts.ScheduledAt = scheduledFor
+	}
+
 	_, err = s.river.InsertTx(ctx, tx, CheckArgs{
 		UserID:         monitor.UserID,
 		MonitorCheckID: check.ID,
-	}, &river.InsertOpts{
-		ScheduledAt: scheduledFor,
-	})
+	}, &opts)
 	if err != nil {
 		return nil, fmt.Errorf("inserting river job: %w", err)
 	}
