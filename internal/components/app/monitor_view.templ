@@ -177,7 +177,7 @@ templ checkInProgressEvent(event *sqlc.MonitorCheckEvent, latest bool) {
 					</div>
 				case *sqlc.MonitorCheckEventBrowserNavigateDetails:
 					<div>
-						Reading &ldquo;<a href={d.URL} target="_blank" rel="noref noopener" class="link">{components.URLHost(d.URL)}</a>&rdquo;&hellip;
+						Browsing &ldquo;<a href={d.URL} target="_blank" rel="noref noopener" class="link">{components.URLHost(d.URL)}</a>&rdquo;&hellip;
 					</div>
 				case *sqlc.MonitorCheckEventBrowserClickDetails:
 					<div>

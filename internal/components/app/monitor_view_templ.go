@@ -467,14 +467,14 @@ func checkInProgressEvent(event *sqlc.MonitorCheckEvent, latest bool) templ.Comp
 				return templ_7745c5c3_Err
 			}
 		case *sqlc.MonitorCheckEventBrowserNavigateDetails:
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "<div>Reading &ldquo;<a href=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "<div>Browsing &ldquo;<a href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var21 templ.SafeURL
 			templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinURLErrs(d.URL)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/monitor_view.templ`, Line: 180, Col: 35}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/monitor_view.templ`, Line: 180, Col: 36}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 			if templ_7745c5c3_Err != nil {
@@ -487,7 +487,7 @@ func checkInProgressEvent(event *sqlc.MonitorCheckEvent, latest bool) templ.Comp
 			var templ_7745c5c3_Var22 string
 			templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(components.URLHost(d.URL))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/monitor_view.templ`, Line: 180, Col: 113}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/monitor_view.templ`, Line: 180, Col: 114}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 			if templ_7745c5c3_Err != nil {
