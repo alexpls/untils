@@ -116,7 +116,10 @@ func (c *checker) callTool(ctx context.Context, name string, args string) (strin
 		c.service.logger.Error("error creating tool check event", "error", err)
 	}
 
-	c.c <- ev
+	select {
+	case c.c <- ev:
+	default:
+	}
 
 	return caller.call(tc, args)
 }
