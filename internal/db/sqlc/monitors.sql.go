@@ -104,22 +104,29 @@ func (q *Queries) CreateMonitorCheck(ctx context.Context, db DBTX, arg *CreateMo
 }
 
 const createMonitorCheckEvent = `-- name: CreateMonitorCheckEvent :one
-insert into monitor_check_events (monitor_check_id, kind, details, created_at)
-values ($1, $2, $3, now())
-returning id, monitor_check_id, kind, details, created_at
+insert into monitor_check_events (monitor_id, monitor_check_id, kind, details, created_at)
+values ($1, $2, $3, $4, now())
+returning id, monitor_id, monitor_check_id, kind, details, created_at
 `
 
 type CreateMonitorCheckEventParams struct {
+	MonitorID      int64
 	MonitorCheckID int64
 	Kind           MonitorCheckEventKind
 	Details        json.RawMessage
 }
 
 func (q *Queries) CreateMonitorCheckEvent(ctx context.Context, db DBTX, arg *CreateMonitorCheckEventParams) (*MonitorCheckEvent, error) {
-	row := db.QueryRow(ctx, createMonitorCheckEvent, arg.MonitorCheckID, arg.Kind, arg.Details)
+	row := db.QueryRow(ctx, createMonitorCheckEvent,
+		arg.MonitorID,
+		arg.MonitorCheckID,
+		arg.Kind,
+		arg.Details,
+	)
 	var i MonitorCheckEvent
 	err := row.Scan(
 		&i.ID,
+		&i.MonitorID,
 		&i.MonitorCheckID,
 		&i.Kind,
 		&i.Details,
@@ -207,9 +214,7 @@ func (q *Queries) DeleteMonitor(ctx context.Context, db DBTX, arg *DeleteMonitor
 
 const deleteMonitorCheckEventsForMonitor = `-- name: DeleteMonitorCheckEventsForMonitor :exec
 delete from monitor_check_events
-where monitor_check_id in (
-    select id from monitor_checks where monitor_id = $1
-)
+where monitor_id = $1
 `
 
 func (q *Queries) DeleteMonitorCheckEventsForMonitor(ctx context.Context, db DBTX, monitorID int64) error {
@@ -437,7 +442,7 @@ func (q *Queries) GetPreviousResultsWithCheck(ctx context.Context, db DBTX, moni
 }
 
 const listMonitorCheckEvents = `-- name: ListMonitorCheckEvents :many
-select id, monitor_check_id, kind, details, created_at from monitor_check_events
+select id, monitor_id, monitor_check_id, kind, details, created_at from monitor_check_events
 where monitor_check_id = $1
 order by created_at asc
 `
@@ -453,6 +458,7 @@ func (q *Queries) ListMonitorCheckEvents(ctx context.Context, db DBTX, monitorCh
 		var i MonitorCheckEvent
 		if err := rows.Scan(
 			&i.ID,
+			&i.MonitorID,
 			&i.MonitorCheckID,
 			&i.Kind,
 			&i.Details,

@@ -21,6 +21,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgxlisten"
 	"github.com/lmittmann/tint"
 	"github.com/openai/openai-go/v3"
 	"github.com/openai/openai-go/v3/option"
@@ -33,10 +34,12 @@ type app struct {
 	config         *config
 	logger         *slog.Logger
 	db             *pgxpool.Pool
+	dbListener     *pgxlisten.Listener
 	queries        *sqlc.Queries
 	auth           *auth.Auth
 	sessionManager *session.Manager
 	monitor        *monitor.Service
+	monitorEvents  *monitor.DBEventHandler
 	llm            *llm.Service
 	river          *river.Client[pgx.Tx]
 	pushoverClient *pushover.Client
@@ -84,6 +87,12 @@ func createApp(c *config) (*app, func()) {
 
 	pool, dbCloser := db.Connect(c.dbUrl, a.logger.With("source", "db"))
 	a.db = pool
+
+	a.dbListener = &pgxlisten.Listener{
+		Connect: func(ctx context.Context) (*pgx.Conn, error) {
+			return pgx.Connect(ctx, c.dbUrl)
+		},
+	}
 
 	a.queries = sqlc.New()
 
@@ -136,6 +145,8 @@ func createApp(c *config) (*app, func()) {
 	})
 
 	a.monitor = monitor.NewService(a.db, a.queries, a.llm, a.river, a.logger.With("source", "monitor"), a.pushoverClient, a.emailService, a.validate)
+	a.monitorEvents = monitor.NewDBEventHandler(a.monitor)
+	a.dbListener.Handle("monitor_events", a.monitorEvents)
 
 	a.userSettings = usersettings.NewService(a.db, a.queries)
 
@@ -143,6 +154,12 @@ func createApp(c *config) (*app, func()) {
 	river.AddWorker(workers, monitor.NewValidateMonitorWorker(a.monitor, a.logger.With("source", "monitor.validate_monitor_worker")))
 	river.AddWorker(workers, a.sessionManager.NewTrimWorker(a.logger.With("source", "session.trim_worker")))
 	must.NoErr(a.river.Start(ctx))
+
+	go func() {
+		if err := a.dbListener.Listen(ctx); err != nil {
+			a.logger.Error("db listener error", "error", err)
+		}
+	}()
 
 	closer := func() {
 		a.logger.Info("gracefully shutting down...")

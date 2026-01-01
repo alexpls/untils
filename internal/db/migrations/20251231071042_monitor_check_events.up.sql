@@ -6,6 +6,7 @@ create type monitor_check_event_kind as enum (
 
 create table monitor_check_events (
     id bigserial primary key,
+    monitor_id bigint not null references monitors(id) on delete cascade,
     monitor_check_id bigint not null references monitor_checks(id) on delete cascade,
     kind monitor_check_event_kind not null,
     details jsonb not null,

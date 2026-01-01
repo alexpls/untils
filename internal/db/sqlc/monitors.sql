@@ -151,12 +151,10 @@ where monitor_check_id = @monitor_check_id
 order by created_at asc;
 
 -- name: CreateMonitorCheckEvent :one
-insert into monitor_check_events (monitor_check_id, kind, details, created_at)
-values (@monitor_check_id, @kind, @details, now())
+insert into monitor_check_events (monitor_id, monitor_check_id, kind, details, created_at)
+values (@monitor_id, @monitor_check_id, @kind, @details, now())
 returning *;
 
 -- name: DeleteMonitorCheckEventsForMonitor :exec
 delete from monitor_check_events
-where monitor_check_id in (
-    select id from monitor_checks where monitor_id = @monitor_id
-);
+where monitor_id = @monitor_id;

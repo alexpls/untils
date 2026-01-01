@@ -140,24 +140,25 @@ func (a *app) monitorViewEventsGet(w http.ResponseWriter, r *http.Request, u *sq
 
 	sse := datastar.NewSSE(w, r)
 
+	ch := a.monitorEvents.Subscribe(sse.Context(), mon.ID)
+
 	for {
-		if sse.IsClosed() {
+		select {
+		case <-ch:
+			data, err := a.monitorViewData(sse.Context(), mon, u)
+			if err != nil {
+				a.logger.Error("error rendering monitor view", "error", err)
+				return
+			}
+
+			comp := appcomponents.MonitorView(data)
+
+			if err = sse.PatchElementTempl(comp); err != nil {
+				a.logger.Error("error sending monitor view events SSE patch", "error", err)
+			}
+		case <-sse.Context().Done():
 			return
 		}
-
-		data, err := a.monitorViewData(sse.Context(), mon, u)
-		if err != nil {
-			a.logger.Error("error rendering monitor view", "error", err)
-			return
-		}
-
-		comp := appcomponents.MonitorView(data)
-
-		if err = sse.PatchElementTempl(comp); err != nil {
-			a.logger.Error("error sending monitor view events SSE patch", "error", err)
-		}
-
-		time.Sleep(time.Second)
 	}
 }
 

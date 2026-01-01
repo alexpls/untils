@@ -1,0 +1,4 @@
+drop trigger monitor_check_events_notify_trigger;
+drop trigger monitor_checks_notify_trigger;
+drop trigger monitors_notify_trigger;
+drop function monitor_events_notify;

@@ -138,7 +138,7 @@ func (s *Service) PerformMonitorCheck(ctx context.Context, userID int64, check *
 
 	go func() {
 		for event := range ch {
-			if _, err := s.CreateMonitorCheckEvent(ctx, check.ID, CreateMonitorCheckEventParams{
+			if _, err := s.CreateMonitorCheckEvent(ctx, check, CreateMonitorCheckEventParams{
 				Kind:    event.Kind,
 				Details: event.Details,
 			}); err != nil {

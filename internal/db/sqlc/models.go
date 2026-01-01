@@ -260,6 +260,7 @@ type MonitorCheck struct {
 
 type MonitorCheckEvent struct {
 	ID             int64
+	MonitorID      int64
 	MonitorCheckID int64
 	Kind           MonitorCheckEventKind
 	Details        json.RawMessage

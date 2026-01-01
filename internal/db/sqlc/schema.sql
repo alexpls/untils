@@ -110,6 +110,27 @@ CREATE TYPE public.river_job_state AS ENUM (
 
 
 --
+-- Name: monitor_events_notify(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.monitor_events_notify() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+begin
+  perform pg_notify(
+    'monitor_events',
+    json_build_object(
+      'table', TG_TABLE_NAME,
+      'action', TG_OP,
+      'data', row_to_json(coalesce(NEW, OLD))
+    )::text
+  );
+  return NEW;
+end;
+$$;
+
+
+--
 -- Name: river_job_state_in_bitmask(bit, public.river_job_state); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -140,6 +161,7 @@ SET default_table_access_method = heap;
 
 CREATE TABLE public.monitor_check_events (
     id bigint NOT NULL,
+    monitor_id bigint NOT NULL,
     monitor_check_id bigint NOT NULL,
     kind public.monitor_check_event_kind NOT NULL,
     details jsonb NOT NULL,
@@ -762,11 +784,47 @@ CREATE UNIQUE INDEX river_job_unique_idx ON public.river_job USING btree (unique
 
 
 --
+-- Name: monitor_check_events monitor_check_events_notify_trigger; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER monitor_check_events_notify_trigger AFTER INSERT OR DELETE OR UPDATE ON public.monitor_check_events FOR EACH ROW EXECUTE FUNCTION public.monitor_events_notify();
+
+
+--
+-- Name: monitor_checks monitor_checks_notify_trigger; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER monitor_checks_notify_trigger AFTER INSERT OR DELETE OR UPDATE ON public.monitor_checks FOR EACH ROW EXECUTE FUNCTION public.monitor_events_notify();
+
+
+--
+-- Name: monitor_results monitor_results_notify_trigger; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER monitor_results_notify_trigger AFTER INSERT OR DELETE OR UPDATE ON public.monitor_results FOR EACH ROW EXECUTE FUNCTION public.monitor_events_notify();
+
+
+--
+-- Name: monitors monitors_notify_trigger; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER monitors_notify_trigger AFTER INSERT OR DELETE OR UPDATE ON public.monitors FOR EACH ROW EXECUTE FUNCTION public.monitor_events_notify();
+
+
+--
 -- Name: monitor_check_events monitor_check_events_monitor_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.monitor_check_events
     ADD CONSTRAINT monitor_check_events_monitor_check_id_fkey FOREIGN KEY (monitor_check_id) REFERENCES public.monitor_checks(id) ON DELETE CASCADE;
+
+
+--
+-- Name: monitor_check_events monitor_check_events_monitor_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.monitor_check_events
+    ADD CONSTRAINT monitor_check_events_monitor_id_fkey FOREIGN KEY (monitor_id) REFERENCES public.monitors(id) ON DELETE CASCADE;
 
 
 --

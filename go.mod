@@ -11,6 +11,7 @@ require (
 	github.com/golang-migrate/migrate/v4 v4.19.1
 	github.com/jackc/pgerrcode v0.0.0-20250907135507-afb5586c32a6
 	github.com/jackc/pgx/v5 v5.7.6
+	github.com/jackc/pgxlisten v0.0.0-20250802141604-12b92425684c
 	github.com/lmittmann/tint v1.1.2
 	github.com/openai/openai-go/v3 v3.12.0
 	github.com/riverqueue/river v0.28.0
@@ -41,7 +42,6 @@ require (
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/riverqueue/river/riverdriver v0.28.0 // indirect
 	github.com/riverqueue/river/rivershared v0.28.0 // indirect
-	github.com/rogpeppe/go-internal v1.14.1 // indirect
 	github.com/tidwall/gjson v1.18.0 // indirect
 	github.com/tidwall/match v1.2.0 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
