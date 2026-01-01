@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/alexpls/untils_go/internal/browser"
+	"github.com/alexpls/untils_go/internal/db/sqlc"
 	"github.com/openai/openai-go/v3"
 	"github.com/openai/openai-go/v3/responses"
 )
@@ -16,16 +17,17 @@ type checker struct {
 	messages      []responses.ResponseInputItemUnionParam
 	browserCtx    *browser.BrowserCtx
 	browserCancel context.CancelFunc
+	c             EventsChan
 }
 
-func newChecker(service *Service) *checker {
-	return &checker{service: service}
+func newChecker(service *Service, c EventsChan) *checker {
+	return &checker{service: service, c: c}
 }
 
 //go:embed checker_prompt.md
 var checkerPrompt string
 
-func (c *checker) perform(ctx context.Context, params *CheckParams) (*CheckResult, error) {
+func (c *checker) perform(ctx context.Context, params *CheckParams) (*sqlc.CheckResult, error) {
 	defer func() {
 		if c.browserCancel != nil {
 			c.browserCancel()
@@ -58,7 +60,7 @@ func (c *checker) perform(ctx context.Context, params *CheckParams) (*CheckResul
 		resp, err = c.service.response(ctx, responses.ResponseNewParams{
 			Model:             "grok-4-1-fast-reasoning",
 			Input:             inputItems(c.messages...),
-			Text:              jsonSchemaResponse(CheckResult{}),
+			Text:              jsonSchemaResponse(sqlc.CheckResult{}),
 			Tools:             append(browserTools(), searchTools()...),
 			ParallelToolCalls: openai.Bool(false),
 		})
@@ -69,7 +71,7 @@ func (c *checker) perform(ctx context.Context, params *CheckParams) (*CheckResul
 		}
 
 		sanitized := sanitizeXAIOutput(resp.OutputText())
-		res := &CheckResult{}
+		res := &sqlc.CheckResult{}
 		if err := json.Unmarshal([]byte(sanitized), res); err != nil {
 			c.messages = append(c.messages, systemMessage("error: invalid response format"))
 			continue
@@ -108,6 +110,13 @@ func (c *checker) callTool(ctx context.Context, name string, args string) (strin
 	if !ok {
 		return "", fmt.Errorf("tool does not exist: %s", name)
 	}
+
+	ev, err := caller.checkEvent(tc, args)
+	if err != nil {
+		c.service.logger.Error("error creating tool check event", "error", err)
+	}
+
+	c.c <- ev
 
 	return caller.call(tc, args)
 }

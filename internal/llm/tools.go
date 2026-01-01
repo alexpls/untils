@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/alexpls/untils_go/internal/browser"
+	"github.com/alexpls/untils_go/internal/db/sqlc"
 	"github.com/alexpls/untils_go/internal/search"
 	"github.com/alexpls/untils_go/internal/wideevents"
 	"github.com/openai/openai-go/v3"
@@ -28,9 +29,10 @@ type toolContext struct {
 }
 
 type tool[P any] struct {
-	name        string
-	description string
-	execute     func(tc *toolContext, params P) (string, error)
+	name           string
+	description    string
+	execute        func(tc *toolContext, params P) (string, error)
+	makeCheckEvent func(tc *toolContext, params P) CheckEvent
 }
 
 // toOpenAIParam returns the tool definition as expected by the OpenAI API.
@@ -53,9 +55,19 @@ func (t tool[P]) call(tc *toolContext, args string) (string, error) {
 	return t.execute(tc, params)
 }
 
+func (t tool[P]) checkEvent(tc *toolContext, args string) (CheckEvent, error) {
+	// TODO: Don't duplicate unmarshaling with call()
+	var params P
+	if err := json.Unmarshal([]byte(args), &params); err != nil {
+		return CheckEvent{}, fmt.Errorf("unmarshaling %s params: %w", t.name, err)
+	}
+	return t.makeCheckEvent(tc, params), nil
+}
+
 // toolCaller is a non-generic interface for calling tools
 type toolCaller interface {
 	call(tc *toolContext, args string) (string, error)
+	checkEvent(tc *toolContext, args string) (CheckEvent, error)
 }
 
 // tool definitions
@@ -78,6 +90,14 @@ var browserNavigateTool = tool[browserNavigateParams]{
 		}
 		return res.String(), nil
 	},
+	makeCheckEvent: func(tc *toolContext, params browserNavigateParams) CheckEvent {
+		return CheckEvent{
+			Kind: sqlc.MonitorCheckEventKindBrowserNavigate,
+			Details: sqlc.MonitorCheckEventBrowserNavigateDetails{
+				URL: params.URL,
+			},
+		}
+	},
 }
 
 type browserClickParams struct {
@@ -95,6 +115,12 @@ var browserClickTool = tool[browserClickParams]{
 			return "", err
 		}
 		return page.String(), nil
+	},
+	makeCheckEvent: func(tc *toolContext, params browserClickParams) CheckEvent {
+		return CheckEvent{
+			Kind:    sqlc.MonitorCheckEventKindBrowserClick,
+			Details: sqlc.MonitorCheckEventBrowserClickDetails{},
+		}
 	},
 }
 
@@ -118,6 +144,14 @@ var searchTool = tool[searchParams]{
 		}
 
 		return sb.String(), nil
+	},
+	makeCheckEvent: func(tc *toolContext, params searchParams) CheckEvent {
+		return CheckEvent{
+			Kind: sqlc.MonitorCheckEventKindWebSearch,
+			Details: sqlc.MonitorCheckEventWebSearchDetails{
+				Query: params.Query,
+			},
+		}
 	},
 }
 

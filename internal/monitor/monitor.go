@@ -93,7 +93,18 @@ func (s *Service) ValidateMonitor(ctx context.Context, monitor *sqlc.Monitor) er
 		return err
 	}
 
-	triageW := llm.NewTriageWorkflow(s.llm)
+	ch := make(llm.EventsChan)
+	defer close(ch)
+
+	triageW := llm.NewTriageWorkflow(s.llm, ch)
+
+	go func() {
+		for range ch {
+			// TODO: do something with this. and actually just use the usual monitor check
+			// process in this whole method
+		}
+	}()
+
 	res, err := triageW.Run(ctx, &llm.TriageParams{
 		Subject:      monitor.Subject.String,
 		Instructions: monitor.Instructions.String,
@@ -149,7 +160,7 @@ func (s *Service) ValidateMonitor(ctx context.Context, monitor *sqlc.Monitor) er
 	})
 }
 
-func CheckResultToCreateMonitorResultParams(monitorID, checkID int64, res *llm.CheckResult) *sqlc.CreateMonitorResultParams {
+func CheckResultToCreateMonitorResultParams(monitorID, checkID int64, res *sqlc.CheckResult) *sqlc.CreateMonitorResultParams {
 	resultDate := pgtype.Timestamptz{Time: time.Time{}, Valid: false}
 	resultDatePastTenseVerb := pgtype.Text{String: "", Valid: false}
 
@@ -275,6 +286,9 @@ func (s *Service) deleteMonitorRelations(ctx context.Context, tx sqlc.DBTX, moni
 	}
 	if err := s.queries.DeleteMonitorResults(ctx, tx, monitorID); err != nil {
 		return fmt.Errorf("deleting monitor results: %w", err)
+	}
+	if err := s.queries.DeleteMonitorCheckEventsForMonitor(ctx, tx, monitorID); err != nil {
+		return fmt.Errorf("deleting monitor check events: %w", err)
 	}
 	return nil
 }

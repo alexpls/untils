@@ -7,9 +7,9 @@ package sqlc
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
-	"github.com/alexpls/untils_go/internal/llm"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -79,7 +79,7 @@ type CreateMonitorCheckParams struct {
 	Status       MonitorCheckStatus
 	ScheduledFor time.Time
 	DoneAt       *time.Time
-	Result       *llm.CheckResult
+	Result       *CheckResult
 }
 
 func (q *Queries) CreateMonitorCheck(ctx context.Context, db DBTX, arg *CreateMonitorCheckParams) (*MonitorCheck, error) {
@@ -99,6 +99,31 @@ func (q *Queries) CreateMonitorCheck(ctx context.Context, db DBTX, arg *CreateMo
 		&i.FailureReason,
 		&i.DoneAt,
 		&i.Result,
+	)
+	return &i, err
+}
+
+const createMonitorCheckEvent = `-- name: CreateMonitorCheckEvent :one
+insert into monitor_check_events (monitor_check_id, kind, details, created_at)
+values ($1, $2, $3, now())
+returning id, monitor_check_id, kind, details, created_at
+`
+
+type CreateMonitorCheckEventParams struct {
+	MonitorCheckID int64
+	Kind           MonitorCheckEventKind
+	Details        json.RawMessage
+}
+
+func (q *Queries) CreateMonitorCheckEvent(ctx context.Context, db DBTX, arg *CreateMonitorCheckEventParams) (*MonitorCheckEvent, error) {
+	row := db.QueryRow(ctx, createMonitorCheckEvent, arg.MonitorCheckID, arg.Kind, arg.Details)
+	var i MonitorCheckEvent
+	err := row.Scan(
+		&i.ID,
+		&i.MonitorCheckID,
+		&i.Kind,
+		&i.Details,
+		&i.CreatedAt,
 	)
 	return &i, err
 }
@@ -138,7 +163,7 @@ type CreateMonitorResultParams struct {
 	Result             string
 	Date               *time.Time
 	DatePastTenseVerb  pgtype.Text
-	Citations          *llm.Citations
+	Citations          *Citations
 }
 
 func (q *Queries) CreateMonitorResult(ctx context.Context, db DBTX, arg *CreateMonitorResultParams) (*MonitorResult, error) {
@@ -177,6 +202,18 @@ type DeleteMonitorParams struct {
 
 func (q *Queries) DeleteMonitor(ctx context.Context, db DBTX, arg *DeleteMonitorParams) error {
 	_, err := db.Exec(ctx, deleteMonitor, arg.UserID, arg.MonitorID)
+	return err
+}
+
+const deleteMonitorCheckEventsForMonitor = `-- name: DeleteMonitorCheckEventsForMonitor :exec
+delete from monitor_check_events
+where monitor_check_id in (
+    select id from monitor_checks where monitor_id = $1
+)
+`
+
+func (q *Queries) DeleteMonitorCheckEventsForMonitor(ctx context.Context, db DBTX, monitorID int64) error {
+	_, err := db.Exec(ctx, deleteMonitorCheckEventsForMonitor, monitorID)
 	return err
 }
 
@@ -376,6 +413,38 @@ func (q *Queries) GetPreviousResultsWithCheck(ctx context.Context, db DBTX, moni
 	return items, nil
 }
 
+const listMonitorCheckEvents = `-- name: ListMonitorCheckEvents :many
+select id, monitor_check_id, kind, details, created_at from monitor_check_events
+where monitor_check_id = $1
+order by created_at asc
+`
+
+func (q *Queries) ListMonitorCheckEvents(ctx context.Context, db DBTX, monitorCheckID int64) ([]*MonitorCheckEvent, error) {
+	rows, err := db.Query(ctx, listMonitorCheckEvents, monitorCheckID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []*MonitorCheckEvent
+	for rows.Next() {
+		var i MonitorCheckEvent
+		if err := rows.Scan(
+			&i.ID,
+			&i.MonitorCheckID,
+			&i.Kind,
+			&i.Details,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listMonitorNotifiers = `-- name: ListMonitorNotifiers :many
 select id, monitor_id, type, created_at from monitor_notifiers
 where monitor_id = $1
@@ -544,7 +613,7 @@ where id = $2
 `
 
 type UpdateMonitorCheckSuccessParams struct {
-	Result *llm.CheckResult
+	Result *CheckResult
 	ID     int64
 }
 

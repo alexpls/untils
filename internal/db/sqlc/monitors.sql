@@ -137,3 +137,19 @@ order by created_at desc;
 delete from monitor_notifiers
 where type = @type
 and monitor_id in (select id from monitors where user_id = @user_id);
+
+-- name: ListMonitorCheckEvents :many
+select * from monitor_check_events
+where monitor_check_id = @monitor_check_id
+order by created_at asc;
+
+-- name: CreateMonitorCheckEvent :one
+insert into monitor_check_events (monitor_check_id, kind, details, created_at)
+values (@monitor_check_id, @kind, @details, now())
+returning *;
+
+-- name: DeleteMonitorCheckEventsForMonitor :exec
+delete from monitor_check_events
+where monitor_check_id in (
+    select id from monitor_checks where monitor_id = @monitor_id
+);

@@ -6,12 +6,55 @@ package sqlc
 
 import (
 	"database/sql/driver"
+	"encoding/json"
 	"fmt"
 	"time"
 
-	"github.com/alexpls/untils_go/internal/llm"
 	"github.com/jackc/pgx/v5/pgtype"
 )
+
+type MonitorCheckEventKind string
+
+const (
+	MonitorCheckEventKindWebSearch       MonitorCheckEventKind = "web_search"
+	MonitorCheckEventKindBrowserNavigate MonitorCheckEventKind = "browser_navigate"
+	MonitorCheckEventKindBrowserClick    MonitorCheckEventKind = "browser_click"
+)
+
+func (e *MonitorCheckEventKind) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = MonitorCheckEventKind(s)
+	case string:
+		*e = MonitorCheckEventKind(s)
+	default:
+		return fmt.Errorf("unsupported scan type for MonitorCheckEventKind: %T", src)
+	}
+	return nil
+}
+
+type NullMonitorCheckEventKind struct {
+	MonitorCheckEventKind MonitorCheckEventKind
+	Valid                 bool // Valid is true if MonitorCheckEventKind is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullMonitorCheckEventKind) Scan(value interface{}) error {
+	if value == nil {
+		ns.MonitorCheckEventKind, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.MonitorCheckEventKind.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullMonitorCheckEventKind) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.MonitorCheckEventKind), nil
+}
 
 type MonitorCheckStatus string
 
@@ -212,7 +255,15 @@ type MonitorCheck struct {
 	ScheduledFor  time.Time
 	FailureReason pgtype.Text
 	DoneAt        *time.Time
-	Result        *llm.CheckResult
+	Result        *CheckResult
+}
+
+type MonitorCheckEvent struct {
+	ID             int64
+	MonitorCheckID int64
+	Kind           MonitorCheckEventKind
+	Details        json.RawMessage
+	CreatedAt      time.Time
 }
 
 type MonitorNotifier struct {
@@ -229,7 +280,7 @@ type MonitorResult struct {
 	Result               string
 	Date                 *time.Time
 	DatePastTenseVerb    pgtype.Text
-	Citations            *llm.Citations
+	Citations            *Citations
 	LatestConfirmationAt time.Time
 	CreatedAt            time.Time
 }

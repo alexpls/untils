@@ -47,6 +47,17 @@ COMMENT ON EXTENSION pgcrypto IS 'cryptographic functions';
 
 
 --
+-- Name: monitor_check_event_kind; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.monitor_check_event_kind AS ENUM (
+    'web_search',
+    'browser_navigate',
+    'browser_click'
+);
+
+
+--
 -- Name: monitor_check_status; Type: TYPE; Schema: public; Owner: -
 --
 
@@ -122,6 +133,38 @@ $$;
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
+
+--
+-- Name: monitor_check_events; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.monitor_check_events (
+    id bigint NOT NULL,
+    monitor_check_id bigint NOT NULL,
+    kind public.monitor_check_event_kind NOT NULL,
+    details jsonb NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: monitor_check_events_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.monitor_check_events_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: monitor_check_events_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.monitor_check_events_id_seq OWNED BY public.monitor_check_events.id;
+
 
 --
 -- Name: monitor_checks; Type: TABLE; Schema: public; Owner: -
@@ -450,6 +493,13 @@ ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
 
 
 --
+-- Name: monitor_check_events id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.monitor_check_events ALTER COLUMN id SET DEFAULT nextval('public.monitor_check_events_id_seq'::regclass);
+
+
+--
 -- Name: monitor_checks id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -489,6 +539,14 @@ ALTER TABLE ONLY public.river_job ALTER COLUMN id SET DEFAULT nextval('public.ri
 --
 
 ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
+
+
+--
+-- Name: monitor_check_events monitor_check_events_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.monitor_check_events
+    ADD CONSTRAINT monitor_check_events_pkey PRIMARY KEY (id);
 
 
 --
@@ -620,6 +678,13 @@ ALTER TABLE ONLY public.users
 
 
 --
+-- Name: idx_monitor_check_events_monitor_check_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_monitor_check_events_monitor_check_id ON public.monitor_check_events USING btree (monitor_check_id);
+
+
+--
 -- Name: idx_monitor_checks_monitor_id_status_scheduled_for; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -694,6 +759,14 @@ CREATE INDEX river_job_state_and_finalized_at_index ON public.river_job USING bt
 --
 
 CREATE UNIQUE INDEX river_job_unique_idx ON public.river_job USING btree (unique_key) WHERE ((unique_key IS NOT NULL) AND (unique_states IS NOT NULL) AND public.river_job_state_in_bitmask(unique_states, state));
+
+
+--
+-- Name: monitor_check_events monitor_check_events_monitor_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.monitor_check_events
+    ADD CONSTRAINT monitor_check_events_monitor_check_id_fkey FOREIGN KEY (monitor_check_id) REFERENCES public.monitor_checks(id) ON DELETE CASCADE;
 
 
 --

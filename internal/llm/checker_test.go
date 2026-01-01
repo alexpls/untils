@@ -13,7 +13,16 @@ import (
 func TestChecker(t *testing.T) {
 	svc := newServiceForTest(t)
 
-	checker := newChecker(svc)
+	ch := make(EventsChan)
+	defer close(ch)
+
+	checker := newChecker(svc, ch)
+
+	go func() {
+		for ev := range ch {
+			t.Logf("Check event: kind=%s details=%+v", ev.Kind, ev.Details)
+		}
+	}()
 
 	events := make(wideevents.Events)
 	ctx := wideevents.ContextWithEvents(t.Context(), events)

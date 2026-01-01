@@ -113,12 +113,26 @@ func (s *Service) PerformMonitorCheck(ctx context.Context, userID int64, check *
 		return err
 	}
 
-	prevResults := make([]llm.CheckResult, len(latest))
+	prevResults := make([]sqlc.CheckResult, len(latest))
 	for i, r := range latest {
 		prevResults[i] = *r.MonitorCheck.Result
 	}
 
-	checker := llm.NewCheckWorkflow(s.llm)
+	ch := make(llm.EventsChan)
+	defer close(ch)
+
+	checker := llm.NewCheckWorkflow(s.llm, ch)
+
+	go func() {
+		for event := range ch {
+			if _, err := s.CreateMonitorCheckEvent(ctx, check.ID, CreateMonitorCheckEventParams{
+				Kind:    event.Kind,
+				Details: event.Details,
+			}); err != nil {
+				s.logger.Error("error creating monitor check event", "error", err)
+			}
+		}
+	}()
 
 	result, err := checker.Run(ctx, &llm.CheckParams{
 		Subject:         monitor.Subject.String,

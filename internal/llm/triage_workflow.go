@@ -4,20 +4,22 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/alexpls/untils_go/internal/db/sqlc"
 	"github.com/alexpls/untils_go/internal/wideevents"
 )
 
 type TriageWorkflow struct {
 	service *Service
+	c       EventsChan
 }
 
-func NewTriageWorkflow(service *Service) *TriageWorkflow {
-	return &TriageWorkflow{service: service}
+func NewTriageWorkflow(service *Service, c EventsChan) *TriageWorkflow {
+	return &TriageWorkflow{service: service, c: c}
 }
 
 type TriageWorkflowReponse struct {
 	Triager *TriagerResponse
-	Check   *CheckResult
+	Check   *sqlc.CheckResult
 }
 
 func (w *TriageWorkflow) Run(ctx context.Context, params *TriageParams) (*TriageWorkflowReponse, error) {
@@ -31,7 +33,7 @@ func (w *TriageWorkflow) Run(ctx context.Context, params *TriageParams) (*Triage
 
 	var err error
 	var triageResp *TriagerResponse
-	var checkResp *CheckResult
+	var checkResp *sqlc.CheckResult
 	triager := NewTriager(w.service, params)
 
 	for {
@@ -56,7 +58,7 @@ func (w *TriageWorkflow) Run(ctx context.Context, params *TriageParams) (*Triage
 			Instructions: params.Instructions,
 		}
 
-		checker := newChecker(w.service)
+		checker := newChecker(w.service, w.c)
 		checkResp, err = checker.perform(ctx, checkParams)
 		if err != nil {
 			lg.Error("error performing check", "error", err)
