@@ -39,85 +39,89 @@ templ MonitorViewPage(data MonitorViewData) {
 			</ul>
 		</div>
 
-		<div class="container mx-auto">
-			@header(data.Monitor.Subject.String, nil) {
-				<div class="text-sm flex gap-x-2 mt-2">
-					<div class="badge badge-soft badge-success">
-						<div aria-label="success" class="status status-success"></div>
-						Monitoring
-					</div>
+		@MonitorView(data)
+	}
+}
 
-					<div class="badge badge-soft text-base-content/60">
-						<span>Created { components.FormatDate(ctx, data.Monitor.CreatedAt) }</span>
-					</div>
+templ MonitorView(data MonitorViewData) {
+	<div id="monitor-view" class="container mx-auto" data-effect={datastar.GetSSE("/app/monitors/%d/events", data.Monitor.ID)}>
+		@header(data.Monitor.Subject.String, nil) {
+			<div class="text-sm flex gap-x-2 mt-2">
+				<div class="badge badge-soft badge-success">
+					<div aria-label="success" class="status status-success"></div>
+					Monitoring
 				</div>
-			}
 
-			<div class="grid grid-cols-12">
-				<div class="col-span-8">
-					<div class="m-4 p-4 bg-base-100 rounded border border-base-content/10">
+				<div class="badge badge-soft text-base-content/60">
+					<span>Created { components.FormatDate(ctx, data.Monitor.CreatedAt) }</span>
+				</div>
+			</div>
+		}
+
+		<div class="grid grid-cols-12">
+			<div class="col-span-8">
+				<div class="m-4 p-4 bg-base-100 rounded border border-base-content/10">
+					<ul>
+						if data.InProgressCheck != nil {
+							@checkInProgressTimelineItem(checkInProgressTimelineItemViewData{
+								Check: data.InProgressCheck,
+								Events: data.InProgressCheckEvents,
+							})
+						}
+						for _, result := range data.Results {
+							@monitorResultTimelineItem(result)
+						}
+						<li>
+							@components.TimelineItem(monitorCreatedTimelineHeading(data.Monitor))
+						</li>
+					</ul>
+				</div>
+			</div>
+
+			<div class="col-span-4 m-4 p-4 border border-base-content/10 rounded">
+				<div>
+					<div class="mb-4">
+						<div class="font-semibold uppercase text-xs">
+							Notifications
+						</div>
+						<div class="mt-1">
+							@MonitorNotifiers(data)
+						</div>
+					</div>
+
+					<div>
+						<div class="font-semibold uppercase text-xs">
+							Next check scheduled at
+						</div>
+						<div>
+							{components.FormatDateTime(ctx, data.NextScheduledCheck.ScheduledFor)}
+						</div>
+					</div>
+
+					<div class="mt-2">
 						<ul>
-							if data.InProgressCheck != nil {
-								@checkInProgressTimelineItem(checkInProgressTimelineItemViewData{
-									Check: data.InProgressCheck,
-									Events: data.InProgressCheckEvents,
-								})
-							}
-							for _, result := range data.Results {
-								@monitorResultTimelineItem(result)
-							}
 							<li>
-								@components.TimelineItem(monitorCreatedTimelineHeading(data.Monitor))
+								<button
+									data-on:click={datastar.PostSSE("/app/monitors/%d/check", data.Monitor.ID)}
+									class="text-sm link"
+								>
+									Check now
+								</button>
+							</li>
+
+							<li>
+								<button
+									data-on:click={datastar.DeleteSSE("/app/monitors/%d", data.Monitor.ID)}
+									class="text-sm text-error link">
+									Delete
+								</button>
 							</li>
 						</ul>
 					</div>
 				</div>
-
-				<div class="col-span-4 m-4 p-4 border border-base-content/10 rounded">
-					<div>
-						<div class="mb-4">
-							<div class="font-semibold uppercase text-xs">
-								Notifications
-							</div>
-							<div class="mt-1">
-								@MonitorNotifiers(data)
-							</div>
-						</div>
-
-						<div>
-							<div class="font-semibold uppercase text-xs">
-								Next check scheduled at
-							</div>
-							<div>
-								{components.FormatDateTime(ctx, data.NextScheduledCheck.ScheduledFor)}
-							</div>
-						</div>
-
-						<div class="mt-2">
-							<ul>
-								<li>
-									<button
-										data-on:click={datastar.PostSSE("/app/monitors/%d/check", data.Monitor.ID)}
-										class="text-sm link"
-									>
-										Check now
-									</button>
-								</li>
-
-								<li>
-									<button
-										data-on:click={datastar.DeleteSSE("/app/monitors/%d", data.Monitor.ID)}
-										class="text-sm text-error link">
-										Delete
-									</button>
-								</li>
-							</ul>
-						</div>
-					</div>
-				</div>
 			</div>
 		</div>
-	}
+	</div>
 }
 
 templ MonitorNotifiers(data MonitorViewData) {

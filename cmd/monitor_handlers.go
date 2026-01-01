@@ -132,6 +132,35 @@ func (a *app) monitorViewGet(w http.ResponseWriter, r *http.Request, u *sqlc.Use
 	comp.Render(r.Context(), w)
 }
 
+func (a *app) monitorViewEventsGet(w http.ResponseWriter, r *http.Request, u *sqlc.User) {
+	mon := a.monitorFromPath(w, r, u)
+	if mon == nil {
+		return
+	}
+
+	sse := datastar.NewSSE(w, r)
+
+	for {
+		if sse.IsClosed() {
+			return
+		}
+
+		data, err := a.monitorViewData(sse.Context(), mon, u)
+		if err != nil {
+			a.logger.Error("error rendering monitor view", "error", err)
+			return
+		}
+
+		comp := appcomponents.MonitorView(data)
+
+		if err = sse.PatchElementTempl(comp); err != nil {
+			a.logger.Error("error sending monitor view events SSE patch", "error", err)
+		}
+
+		time.Sleep(time.Second)
+	}
+}
+
 func (a *app) monitorNewGet(w http.ResponseWriter, r *http.Request, _ *sqlc.User) {
 	a.renderMonitorDraftNew(appcomponents.MonitorNewData{}, r, w)
 }
