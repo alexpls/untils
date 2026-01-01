@@ -7,9 +7,9 @@ import (
 	"slices"
 	"time"
 
-	"github.com/alexpls/untils_go/internal/db"
-	"github.com/alexpls/untils_go/internal/db/sqlc"
-	"github.com/alexpls/untils_go/internal/llm"
+	"github.com/alexpls/untils/internal/db"
+	"github.com/alexpls/untils/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/llm"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/riverqueue/river"

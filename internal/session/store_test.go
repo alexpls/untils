@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/alexpls/untils_go/internal/db/sqlc"
-	"github.com/alexpls/untils_go/internal/testhelper"
+	"github.com/alexpls/untils/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/testhelper"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

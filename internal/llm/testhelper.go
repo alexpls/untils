@@ -4,8 +4,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/alexpls/untils_go/internal/search"
-	"github.com/alexpls/untils_go/internal/testhelper"
+	"github.com/alexpls/untils/internal/search"
+	"github.com/alexpls/untils/internal/testhelper"
 	"github.com/openai/openai-go/v3"
 	"github.com/openai/openai-go/v3/option"
 )

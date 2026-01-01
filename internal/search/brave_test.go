@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/alexpls/untils_go/internal/testhelper"
+	"github.com/alexpls/untils/internal/testhelper"
 	"github.com/stretchr/testify/require"
 )
 

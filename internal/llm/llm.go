@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/alexpls/untils_go/internal/search"
-	"github.com/alexpls/untils_go/internal/wideevents"
+	"github.com/alexpls/untils/internal/search"
+	"github.com/alexpls/untils/internal/wideevents"
 	"github.com/openai/openai-go/v3"
 	"github.com/openai/openai-go/v3/responses"
 )

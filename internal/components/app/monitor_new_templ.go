@@ -5,13 +5,12 @@ package app
 
 //lint:file-ignore SA4006 This context is only used if a nested component is present.
 
-import "github.com/a-h/templ"
-import templruntime "github.com/a-h/templ/runtime"
-
 import (
-	"github.com/alexpls/untils_go/internal/components"
-	"github.com/alexpls/untils_go/internal/monitor"
-	"github.com/alexpls/untils_go/internal/validation"
+	"github.com/a-h/templ"
+	templruntime "github.com/a-h/templ/runtime"
+	"github.com/alexpls/untils/internal/components"
+	"github.com/alexpls/untils/internal/monitor"
+	"github.com/alexpls/untils/internal/validation"
 )
 
 type MonitorNewData struct {

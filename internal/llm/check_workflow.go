@@ -3,8 +3,8 @@ package llm
 import (
 	"context"
 
-	"github.com/alexpls/untils_go/internal/db/sqlc"
-	"github.com/alexpls/untils_go/internal/wideevents"
+	"github.com/alexpls/untils/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/wideevents"
 )
 
 type CheckWorkflow struct {

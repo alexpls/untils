@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/alexpls/untils_go/internal/wideevents"
+	"github.com/alexpls/untils/internal/wideevents"
 	"github.com/jackc/pgx/v5"
 )
 

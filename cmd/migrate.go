@@ -4,7 +4,7 @@ import (
 	"errors"
 	"log/slog"
 
-	"github.com/alexpls/untils_go/internal/db/migrations"
+	"github.com/alexpls/untils/internal/db/migrations"
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/pgx/v5"
 	"github.com/golang-migrate/migrate/v4/source/iofs"

@@ -6,7 +6,7 @@ import (
 	"os"
 	"slices"
 
-	"github.com/alexpls/untils_go/internal/must"
+	"github.com/alexpls/untils/internal/must"
 )
 
 var validSubcommands = []string{"serve", "seed", "migrate"}

@@ -5,7 +5,7 @@ package llm
 import (
 	"testing"
 
-	"github.com/alexpls/untils_go/internal/wideevents"
+	"github.com/alexpls/untils/internal/wideevents"
 	"github.com/stretchr/testify/require"
 )
 

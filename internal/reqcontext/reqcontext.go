@@ -3,7 +3,7 @@ package reqcontext
 import (
 	"context"
 
-	"github.com/alexpls/untils_go/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/db/sqlc"
 )
 
 type contextKey int

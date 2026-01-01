@@ -4,8 +4,8 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/alexpls/untils_go/internal/auth"
-	"github.com/alexpls/untils_go/internal/components/public"
+	"github.com/alexpls/untils/internal/auth"
+	"github.com/alexpls/untils/internal/components/public"
 )
 
 func (a *app) signInGet(w http.ResponseWriter, r *http.Request) {

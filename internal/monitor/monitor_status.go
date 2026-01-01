@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/alexpls/untils_go/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/db/sqlc"
 )
 
 var validMonitorStatusTransitions = map[sqlc.MonitorStatus][]sqlc.MonitorStatus{

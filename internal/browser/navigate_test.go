@@ -6,8 +6,8 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/alexpls/untils_go/internal/browser"
-	"github.com/alexpls/untils_go/internal/testhelper"
+	"github.com/alexpls/untils/internal/browser"
+	"github.com/alexpls/untils/internal/testhelper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

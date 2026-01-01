@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/alexpls/untils_go/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/db/sqlc"
 )
 
 type CheckParams struct {

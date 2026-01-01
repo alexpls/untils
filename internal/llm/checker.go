@@ -6,8 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/alexpls/untils_go/internal/browser"
-	"github.com/alexpls/untils_go/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/browser"
+	"github.com/alexpls/untils/internal/db/sqlc"
 	"github.com/openai/openai-go/v3"
 	"github.com/openai/openai-go/v3/responses"
 )

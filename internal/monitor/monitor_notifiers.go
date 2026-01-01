@@ -5,9 +5,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/alexpls/untils_go/internal/db/sqlc"
-	"github.com/alexpls/untils_go/internal/email"
-	"github.com/alexpls/untils_go/internal/pushover"
+	"github.com/alexpls/untils/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/email"
+	"github.com/alexpls/untils/internal/pushover"
 	"github.com/jackc/pgx/v5"
 	"golang.org/x/sync/errgroup"
 )
@@ -101,8 +101,8 @@ func (s *Service) sendEmailNotification(ctx context.Context, params SendNotifica
 
 	return s.emailService.Send(ctx, &email.SendParams{
 		Recipient: u.Email,
-		Subject: fmt.Sprintf("Changed monitor: %s", params.Monitor.Subject.String),
-		Body: params.Message,
+		Subject:   fmt.Sprintf("Changed monitor: %s", params.Monitor.Subject.String),
+		Body:      params.Message,
 	})
 }
 

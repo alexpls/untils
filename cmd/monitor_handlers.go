@@ -9,10 +9,10 @@ import (
 	"time"
 
 	"github.com/a-h/templ"
-	appcomponents "github.com/alexpls/untils_go/internal/components/app"
-	"github.com/alexpls/untils_go/internal/db/sqlc"
-	"github.com/alexpls/untils_go/internal/monitor"
-	"github.com/alexpls/untils_go/internal/validation"
+	appcomponents "github.com/alexpls/untils/internal/components/app"
+	"github.com/alexpls/untils/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/monitor"
+	"github.com/alexpls/untils/internal/validation"
 	"github.com/starfederation/datastar-go/datastar"
 )
 

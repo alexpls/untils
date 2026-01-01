@@ -5,9 +5,9 @@ import (
 	"errors"
 	"time"
 
-	"github.com/alexpls/untils_go/internal/auth"
-	"github.com/alexpls/untils_go/internal/db/sqlc"
-	"github.com/alexpls/untils_go/internal/must"
+	"github.com/alexpls/untils/internal/auth"
+	"github.com/alexpls/untils/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/must"
 )
 
 func (a *app) seed() {

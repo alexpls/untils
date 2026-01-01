@@ -3,7 +3,7 @@ package main
 import (
 	"net/http"
 
-	"github.com/alexpls/untils_go/internal/components/public"
+	"github.com/alexpls/untils/internal/components/public"
 )
 
 func (a *app) home(w http.ResponseWriter, r *http.Request) {

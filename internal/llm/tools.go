@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/alexpls/untils_go/internal/browser"
-	"github.com/alexpls/untils_go/internal/db/sqlc"
-	"github.com/alexpls/untils_go/internal/search"
-	"github.com/alexpls/untils_go/internal/wideevents"
+	"github.com/alexpls/untils/internal/browser"
+	"github.com/alexpls/untils/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/search"
+	"github.com/alexpls/untils/internal/wideevents"
 	"github.com/openai/openai-go/v3"
 	"github.com/openai/openai-go/v3/responses"
 )

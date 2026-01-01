@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/alexpls/untils_go/internal/wideevents"
+	"github.com/alexpls/untils/internal/wideevents"
 	"github.com/riverqueue/river"
 	"github.com/riverqueue/river/rivertype"
 )

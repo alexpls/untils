@@ -3,8 +3,8 @@ package main
 import (
 	"net/http"
 
-	"github.com/alexpls/untils_go/internal/db/sqlc"
-	"github.com/alexpls/untils_go/public"
+	"github.com/alexpls/untils/internal/db/sqlc"
+	"github.com/alexpls/untils/public"
 )
 
 func (a *app) routes() http.Handler {

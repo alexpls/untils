@@ -5,15 +5,17 @@ package app
 
 //lint:file-ignore SA4006 This context is only used if a nested component is present.
 
-import "github.com/a-h/templ"
-import templruntime "github.com/a-h/templ/runtime"
+import (
+	"fmt"
 
-import "github.com/alexpls/untils_go/internal/validation"
-import "github.com/alexpls/untils_go/internal/pushover"
-import "github.com/alexpls/untils_go/internal/db/sqlc"
-import "github.com/alexpls/untils_go/internal/components"
-import "fmt"
-import "github.com/starfederation/datastar-go/datastar"
+	"github.com/a-h/templ"
+	templruntime "github.com/a-h/templ/runtime"
+	"github.com/alexpls/untils/internal/components"
+	"github.com/alexpls/untils/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/pushover"
+	"github.com/alexpls/untils/internal/validation"
+	"github.com/starfederation/datastar-go/datastar"
+)
 
 type SettingsViewModel struct {
 	ActiveIntegrations []*sqlc.ActiveUserIntegrationsRow

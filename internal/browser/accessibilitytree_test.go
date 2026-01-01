@@ -6,7 +6,7 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/alexpls/untils_go/internal/testhelper"
+	"github.com/alexpls/untils/internal/testhelper"
 	"github.com/chromedp/cdproto/accessibility"
 	"github.com/chromedp/chromedp"
 	"github.com/stretchr/testify/require"

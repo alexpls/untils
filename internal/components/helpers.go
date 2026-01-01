@@ -7,10 +7,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/alexpls/untils_go/internal/db/sqlc"
-	"github.com/alexpls/untils_go/internal/reqcontext"
-	"github.com/alexpls/untils_go/internal/validation"
-	"github.com/alexpls/untils_go/public"
+	"github.com/alexpls/untils/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/reqcontext"
+	"github.com/alexpls/untils/internal/validation"
+	"github.com/alexpls/untils/public"
 )
 
 func IsSignedIn(ctx context.Context) bool {

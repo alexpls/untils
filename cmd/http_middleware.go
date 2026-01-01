@@ -7,10 +7,10 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/alexpls/untils_go/internal/db/sqlc"
-	"github.com/alexpls/untils_go/internal/reqcontext"
-	"github.com/alexpls/untils_go/internal/session"
-	"github.com/alexpls/untils_go/internal/wideevents"
+	"github.com/alexpls/untils/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/reqcontext"
+	"github.com/alexpls/untils/internal/session"
+	"github.com/alexpls/untils/internal/wideevents"
 )
 
 type HandlerFuncWithUser func(http.ResponseWriter, *http.Request, *sqlc.User)

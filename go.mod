@@ -1,4 +1,4 @@
-module github.com/alexpls/untils_go
+module github.com/alexpls/untils
 
 go 1.25.5
 

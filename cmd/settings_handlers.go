@@ -7,11 +7,11 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/alexpls/untils_go/internal/auth"
-	appcomponents "github.com/alexpls/untils_go/internal/components/app"
-	"github.com/alexpls/untils_go/internal/db/sqlc"
-	"github.com/alexpls/untils_go/internal/pushover"
-	"github.com/alexpls/untils_go/internal/validation"
+	"github.com/alexpls/untils/internal/auth"
+	appcomponents "github.com/alexpls/untils/internal/components/app"
+	"github.com/alexpls/untils/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/pushover"
+	"github.com/alexpls/untils/internal/validation"
 	"github.com/starfederation/datastar-go/datastar"
 )
 

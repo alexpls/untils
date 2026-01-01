@@ -3,10 +3,10 @@ package monitor
 import (
 	"log/slog"
 
-	"github.com/alexpls/untils_go/internal/db/sqlc"
-	"github.com/alexpls/untils_go/internal/email"
-	"github.com/alexpls/untils_go/internal/llm"
-	"github.com/alexpls/untils_go/internal/pushover"
+	"github.com/alexpls/untils/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/email"
+	"github.com/alexpls/untils/internal/llm"
+	"github.com/alexpls/untils/internal/pushover"
 	"github.com/go-playground/validator/v10"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"

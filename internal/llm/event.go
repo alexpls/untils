@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/alexpls/untils_go/internal/wideevents"
+	"github.com/alexpls/untils/internal/wideevents"
 )
 
 // LLMEvent tracks statistics for an LLM workflow execution.
