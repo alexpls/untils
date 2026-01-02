@@ -5,9 +5,10 @@ package app
 
 //lint:file-ignore SA4006 This context is only used if a nested component is present.
 
+import "github.com/a-h/templ"
+import templruntime "github.com/a-h/templ/runtime"
+
 import (
-	"github.com/a-h/templ"
-	templruntime "github.com/a-h/templ/runtime"
 	"github.com/alexpls/untils/internal/components"
 	"github.com/alexpls/untils/internal/monitor"
 	"github.com/alexpls/untils/internal/validation"
@@ -92,7 +93,7 @@ func MonitorNewPage(data MonitorNewData) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(data.Values.Subject)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/monitor_new.templ`, Line: 41, Col: 34}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/monitor_new.templ`, Line: 39, Col: 34}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -110,7 +111,7 @@ func MonitorNewPage(data MonitorNewData) templ.Component {
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(err)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/monitor_new.templ`, Line: 44, Col: 40}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/monitor_new.templ`, Line: 42, Col: 40}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {

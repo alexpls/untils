@@ -4,20 +4,20 @@ import (
 	"fmt"
 
 	"github.com/alexpls/untils/internal/components"
-	"github.com/alexpls/untils/internal/db/sqlc"
-	"net/url"
-	"github.com/starfederation/datastar-go/datastar"
 	"github.com/alexpls/untils/internal/components/icons"
+	"github.com/alexpls/untils/internal/db/sqlc"
+	"github.com/starfederation/datastar-go/datastar"
+	"net/url"
 )
 
 type MonitorViewData struct {
-	Monitor            *sqlc.Monitor
-	Results            []*sqlc.MonitorResult
-	NextScheduledCheck *sqlc.MonitorCheck
-	InProgressCheck *sqlc.MonitorCheck
+	Monitor               *sqlc.Monitor
+	Results               []*sqlc.MonitorResult
+	NextScheduledCheck    *sqlc.MonitorCheck
+	InProgressCheck       *sqlc.MonitorCheck
 	InProgressCheckEvents []*sqlc.MonitorCheckEvent
-	Notifiers          []*sqlc.MonitorNotifier
-	ActiveIntegrations []*sqlc.ActiveUserIntegrationsRow
+	Notifiers             []*sqlc.MonitorNotifier
+	ActiveIntegrations    []*sqlc.ActiveUserIntegrationsRow
 }
 
 func (data MonitorViewData) integrationEnabled(name sqlc.Notifier) bool {
@@ -39,33 +39,30 @@ templ MonitorViewPage(data MonitorViewData) {
 				<li>{ data.Monitor.Subject.String }</li>
 			</ul>
 		</div>
-
 		@MonitorView(data)
 	}
 }
 
 templ MonitorView(data MonitorViewData) {
-	<div id="monitor-view" class="container mx-auto" data-effect={datastar.GetSSE("/app/monitors/%d/events", data.Monitor.ID)}>
+	<div id="monitor-view" class="container mx-auto" data-effect={ datastar.GetSSE("/app/monitors/%d/events", data.Monitor.ID) }>
 		@header(data.Monitor.Subject.String, nil) {
 			<div class="text-sm flex gap-x-2 mt-2">
 				<div class="badge badge-soft badge-success">
 					<div aria-label="success" class="status status-success"></div>
 					Monitoring
 				</div>
-
 				<div class="badge badge-soft text-base-content/60">
 					<span>Created { components.FormatDate(ctx, data.Monitor.CreatedAt) }</span>
 				</div>
 			</div>
 		}
-
 		<div class="grid grid-cols-12">
 			<div class="col-span-8">
 				<div class="m-4 p-4 bg-base-100 rounded border border-base-content/10">
 					<ul>
 						if data.InProgressCheck != nil {
 							@checkInProgressTimelineItem(checkInProgressTimelineItemViewData{
-								Check: data.InProgressCheck,
+								Check:  data.InProgressCheck,
 								Events: data.InProgressCheckEvents,
 							})
 						}
@@ -78,7 +75,6 @@ templ MonitorView(data MonitorViewData) {
 					</ul>
 				</div>
 			</div>
-
 			<div class="col-span-4 m-4 p-4 border border-base-content/10 rounded">
 				<div>
 					<div class="mb-4">
@@ -89,31 +85,29 @@ templ MonitorView(data MonitorViewData) {
 							@MonitorNotifiers(data)
 						</div>
 					</div>
-
 					<div>
 						<div class="font-semibold uppercase text-xs">
 							Next check scheduled at
 						</div>
 						<div>
-							{components.FormatDateTime(ctx, data.NextScheduledCheck.ScheduledFor)}
+							{ components.FormatDateTime(ctx, data.NextScheduledCheck.ScheduledFor) }
 						</div>
 					</div>
-
 					<div class="mt-2">
 						<ul>
 							<li>
 								<button
-									data-on:click={datastar.PostSSE("/app/monitors/%d/check", data.Monitor.ID)}
+									data-on:click={ datastar.PostSSE("/app/monitors/%d/check", data.Monitor.ID) }
 									class="text-sm link"
 								>
 									Check now
 								</button>
 							</li>
-
 							<li>
 								<button
-									data-on:click={datastar.DeleteSSE("/app/monitors/%d", data.Monitor.ID)}
-									class="text-sm text-error link">
+									data-on:click={ datastar.DeleteSSE("/app/monitors/%d", data.Monitor.ID) }
+									class="text-sm text-error link"
+								>
 									Delete
 								</button>
 							</li>
@@ -132,27 +126,27 @@ templ MonitorNotifiers(data MonitorViewData) {
 				if data.integrationEnabled(integration.Name) {
 					<div class="flex items-center justify-between">
 						<div class="flex items-center gap-x-2">
-							<div class="badge badge-sm badge-outline badge-success">{integration.DisplayName()}</div>
+							<div class="badge badge-sm badge-outline badge-success">{ integration.DisplayName() }</div>
 						</div>
 						<button
-							data-on:click={datastar.DeleteSSE("/app/monitors/%d/notifiers/%s", data.Monitor.ID, integration.Name)}
-							class="btn btn-xs btn-ghost text-error">
+							data-on:click={ datastar.DeleteSSE("/app/monitors/%d/notifiers/%s", data.Monitor.ID, integration.Name) }
+							class="btn btn-xs btn-ghost text-error"
+						>
 							Remove
 						</button>
 					</div>
 				} else {
 					<button
 						class="btn btn-xs btn-outline"
-						data-on:click={datastar.PostSSE("/app/monitors/%d/notifiers/%s", data.Monitor.ID, integration.Name)}
+						data-on:click={ datastar.PostSSE("/app/monitors/%d/notifiers/%s", data.Monitor.ID, integration.Name) }
 					>
-						Add {integration.Name}
+						Add { integration.Name }
 					</button>
 				}
 			}
 		}
 	</div>
 }
-
 
 templ checkInProgressTimelineHeading() {
 	<div>
@@ -169,15 +163,15 @@ templ checkInProgressEvent(event *sqlc.MonitorCheckEvent, latest bool) {
 				@icons.CircleCheck(icons.IconParams{Size: 16})
 			}
 		</div>
-		<div class={templ.KV("animate-pulse", latest)}>
+		<div class={ templ.KV("animate-pulse", latest) }>
 			switch d := event.DetailsStruct().(type) {
 				case *sqlc.MonitorCheckEventWebSearchDetails:
 					<div>
-						Searching for &ldquo;{d.Query}&rdquo;&hellip;
+						Searching for &ldquo;{ d.Query }&rdquo;&hellip;
 					</div>
 				case *sqlc.MonitorCheckEventBrowserNavigateDetails:
 					<div>
-						Browsing &ldquo;<a href={d.URL} target="_blank" rel="noref noopener" class="link">{components.URLHost(d.URL)}</a>&rdquo;&hellip;
+						Browsing &ldquo;<a href={ d.URL } target="_blank" rel="noref noopener" class="link">{ components.URLHost(d.URL) }</a>&rdquo;&hellip;
 					</div>
 				case *sqlc.MonitorCheckEventBrowserClickDetails:
 					<div>
@@ -193,7 +187,7 @@ templ checkInProgressEvent(event *sqlc.MonitorCheckEvent, latest bool) {
 }
 
 type checkInProgressTimelineItemViewData struct {
-	Check *sqlc.MonitorCheck
+	Check  *sqlc.MonitorCheck
 	Events []*sqlc.MonitorCheckEvent
 }
 
@@ -217,17 +211,15 @@ templ monitorResultTimelineItem(result *sqlc.MonitorResult) {
 				{ components.FormatDate(ctx, *result.Date) }
 			</div>
 		}
-
 		<div class="pt-2 text-sm text-base-content/60 flex space-x-4">
 			<div>
 				<div class="font-semibold uppercase text-xs">
 					Latest check
 				</div>
 				<div>
-					{components.FormatDateTime(ctx, result.LatestConfirmationAt)}
+					{ components.FormatDateTime(ctx, result.LatestConfirmationAt) }
 				</div>
 			</div>
-
 			<div>
 				<div class="font-semibold uppercase text-xs">
 					Sources
@@ -235,17 +227,17 @@ templ monitorResultTimelineItem(result *sqlc.MonitorResult) {
 				<div>
 					if result.Citations != nil && len(*result.Citations) > 0 {
 						<div class="flex space-x-1">
-						for _, citation := range *result.Citations {
-							<a
-								href={citation.URL}
-								title={citation.WebsiteTitle + " | " + citation.PageTitle}
-								target="_blank"
-								rel="noref noopener"
-								class="relative w-5 h-5 rounded bg-base-content/10 border border-base-content/40 overflow-hidden flex items-center justify-center"
-							>
-								<span class="absolute text-xs font-semibold">{citation.WebsiteTitle[0:1]}</span>
-							</a>
-						}
+							for _, citation := range *result.Citations {
+								<a
+									href={ citation.URL }
+									title={ citation.WebsiteTitle + " | " + citation.PageTitle }
+									target="_blank"
+									rel="noref noopener"
+									class="relative w-5 h-5 rounded bg-base-content/10 border border-base-content/40 overflow-hidden flex items-center justify-center"
+								>
+									<span class="absolute text-xs font-semibold">{ citation.WebsiteTitle[0:1] }</span>
+								</a>
+							}
 						</div>
 					} else {
 						<div>(none)</div>
@@ -258,13 +250,13 @@ templ monitorResultTimelineItem(result *sqlc.MonitorResult) {
 
 templ monitorResultHeading(result *sqlc.MonitorResult) {
 	<div class="text-lg font-semibold">
-		{result.Result}
+		{ result.Result }
 	</div>
 }
 
 templ monitorCreatedTimelineHeading(mon *sqlc.Monitor) {
 	<div class="text-base-content/60">
-		Created {components.FormatDate(ctx, mon.CreatedAt)}
+		Created { components.FormatDate(ctx, mon.CreatedAt) }
 	</div>
 }
 

@@ -14,16 +14,14 @@ type SettingsViewModel struct {
 templ Settings(data *SettingsViewModel) {
 	@appLayout() {
 		@header("Settings", nil)
-
 		<div class="container max-w-160 p-4 space-y-4">
 			<div class="bg-base-100 border rounded border-base-content/10">
 				<h2 class="text-xl font-semibold p-4 border-b border-base-content/10">Account</h2>
-
 				<ul class="list">
 					<li class="text-base list-row justify-between flex items-center">
 						<div>Email address</div>
 						<div>
-							<div>{components.CurrentUser(ctx).Email}</div>
+							<div>{ components.CurrentUser(ctx).Email }</div>
 						</div>
 					</li>
 					<li class="text-base list-row justify-between flex items-center">
@@ -33,30 +31,26 @@ templ Settings(data *SettingsViewModel) {
 						</div>
 						<div>
 							<div
-								data-signals={fmt.Sprintf("$currentTimezoneName = timezoneName(%q)", components.CurrentUser(ctx).Timezone)}
+								data-signals={ fmt.Sprintf("$currentTimezoneName = timezoneName(%q)", components.CurrentUser(ctx).Timezone) }
 								data-text="$currentTimezoneName"
-							>
-							</div>
+							></div>
 						</div>
 					</li>
 				</ul>
 			</div>
-
 			<div class="bg-base-100 border rounded border-base-content/10">
 				<h2 class="text-xl font-semibold p-4 border-b border-base-content/10">Integrations</h2>
-
 				<ul class="list">
 					for _, integration := range data.ActiveIntegrations {
 						<li class="list-row justify-between flex items-center">
 							<div class="text-base flex items-center space-x-2">
-								<div>{integration.DisplayName()}</div>
-
+								<div>{ integration.DisplayName() }</div>
 								if integration.Active {
 									<div class="badge badge-sm badge-outline badge-success">Active</div>
 								}
 							</div>
 							<div>
-								<a href={fmt.Sprintf("/app/settings/%s", integration.Name)} class="btn btn-sm btn-primary">Configure</a>
+								<a href={ fmt.Sprintf("/app/settings/%s", integration.Name) } class="btn btn-sm btn-primary">Configure</a>
 							</div>
 						</li>
 					}
@@ -69,7 +63,7 @@ templ Settings(data *SettingsViewModel) {
 type PushoverSettingsViewModel struct {
 	Token *sqlc.PushoverUserToken
 
-	Values pushover.CreateOrUpdateTokenParams
+	Values           pushover.CreateOrUpdateTokenParams
 	ValidationErrors validation.ValidationErrors
 }
 
@@ -87,21 +81,18 @@ templ PushoverSettings(data *PushoverSettingsViewModel) {
 				<li>Pushover</li>
 			</ul>
 		</div>
-
 		@header("Configure Pushover", nil)
-
 		<div class="container max-w-160 p-4 space-y-4">
 			if data.Token != nil {
 				<div role="alert" class="alert alert-info">
 					<span>
 						Your Pushover integration is configured with
-						token: {components.MaskSecret(data.Token.Token)}.
+						token: { components.MaskSecret(data.Token.Token) }.
 					</span>
 				</div>
-
 				<button
 					class="btn btn-error"
-					data-on:click={datastar.DeleteSSE("/app/settings/pushover")}
+					data-on:click={ datastar.DeleteSSE("/app/settings/pushover") }
 				>
 					Reset token
 				</button>
@@ -110,12 +101,12 @@ templ PushoverSettings(data *PushoverSettingsViewModel) {
 					<fieldset class="fieldset">
 						<legend class="fieldset-legend">Pushover token</legend>
 						<input
-							class={"input", templ.KV("input-error", components.ValidationError(data, "Token") != "") }
+							class={ "input", templ.KV("input-error", components.ValidationError(data, "Token") != "") }
 							type="text"
 							autocomplete="off"
 							placeholder="Enter token here"
 							name="Token"
-							value={data.Values.Token}
+							value={ data.Values.Token }
 						/>
 						if err := components.ValidationError(data, "Token"); err != "" {
 							<p class="label text-error">{ err }</p>
@@ -123,7 +114,6 @@ templ PushoverSettings(data *PushoverSettingsViewModel) {
 							<p class="label text-error">&nbsp;</p>
 						}
 					</fieldset>
-
 					<button class="btn btn-primary" type="submit">Set token</button>
 				</form>
 			}
@@ -145,12 +135,10 @@ templ EmailSettings(data *EmailSettingsViewModel) {
 				<li>Email</li>
 			</ul>
 		</div>
-
 		@header("Configure Email", nil)
-
 		<div class="container max-w-160 p-4 space-y-4">
 			Nothing to configure. Emails will be sent to your account
-			email address: <strong>{data.Email}</strong>.
+			email address: <strong>{ data.Email }</strong>.
 		</div>
 	}
 }

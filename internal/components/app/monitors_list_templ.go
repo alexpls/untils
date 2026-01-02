@@ -5,11 +5,11 @@ package app
 
 //lint:file-ignore SA4006 This context is only used if a nested component is present.
 
+import "github.com/a-h/templ"
+import templruntime "github.com/a-h/templ/runtime"
+
 import (
 	"fmt"
-
-	"github.com/a-h/templ"
-	templruntime "github.com/a-h/templ/runtime"
 	"github.com/alexpls/untils/internal/db/sqlc"
 )
 
@@ -100,7 +100,7 @@ func MonitorsListPage(data MonitorsListData) templ.Component {
 					var templ_7745c5c3_Var4 templ.SafeURL
 					templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinURLErrs(fmt.Sprintf("/app/monitors/%d", mon.ID))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/monitors_list.templ`, Line: 28, Col: 94}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/monitors_list.templ`, Line: 27, Col: 95}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 					if templ_7745c5c3_Err != nil {
@@ -113,7 +113,7 @@ func MonitorsListPage(data MonitorsListData) templ.Component {
 					var templ_7745c5c3_Var5 string
 					templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(mon.Subject.String)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/monitors_list.templ`, Line: 29, Col: 28}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/monitors_list.templ`, Line: 28, Col: 29}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 					if templ_7745c5c3_Err != nil {

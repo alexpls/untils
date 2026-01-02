@@ -1,11 +1,11 @@
 package app
 
 import (
+	"fmt"
 	"github.com/alexpls/untils/internal/components"
 	"github.com/alexpls/untils/internal/db/sqlc"
 	"github.com/alexpls/untils/internal/monitor"
 	"github.com/alexpls/untils/internal/validation"
-	"fmt"
 	"github.com/starfederation/datastar-go/datastar"
 )
 
@@ -34,12 +34,10 @@ templ MonitorDraftPage(data MonitorDraftData) {
 				<li>New</li>
 			</ul>
 		</div>
-
 		<div class="container mx-auto" id="monitor-draft">
-			@header("New monitor", nil) {}
-
+			@header("New monitor", nil)
 			<div class="m-4">
-				<form method="post" action={fmt.Sprintf("/app/monitors/%d", data.Monitor.ID)}>
+				<form method="post" action={ fmt.Sprintf("/app/monitors/%d", data.Monitor.ID) }>
 					<fieldset class="fieldset">
 						<legend class="fieldset-legend">
 							What would you like to monitor?
@@ -87,7 +85,6 @@ templ MonitorDraftPage(data MonitorDraftData) {
 						Update
 					</button>
 				</form>
-
 				if data.Monitor.Status == sqlc.MonitorStatusRejected {
 					<div class="mt-4 p-4 bg-error/10 rounded border border-error/20">
 						<p class="text-error">
@@ -101,7 +98,6 @@ templ MonitorDraftPage(data MonitorDraftData) {
 					</div>
 				}
 			</div>
-
 			if data.Monitor.Status == sqlc.MonitorStatusReady {
 				<div class="m-4 p-4 bg-base-100 rounded border border-base-content/10">
 					<h3 class="font-semibold mb-3">Select a result to monitor</h3>
@@ -110,7 +106,7 @@ templ MonitorDraftPage(data MonitorDraftData) {
 							<li class="list-row flex items-center gap-4">
 								<div>
 									<button
-										data-on:click={datastar.PostSSE("/app/monitors/%d/activate", data.Monitor.ID)}
+										data-on:click={ datastar.PostSSE("/app/monitors/%d/activate", data.Monitor.ID) }
 										class="btn btn-sm"
 									>
 										Pick

@@ -5,12 +5,11 @@ package app
 
 //lint:file-ignore SA4006 This context is only used if a nested component is present.
 
-import (
-	"github.com/a-h/templ"
-	templruntime "github.com/a-h/templ/runtime"
-	"github.com/alexpls/untils/internal/components"
-	"github.com/alexpls/untils/internal/components/icons"
-)
+import "github.com/a-h/templ"
+import templruntime "github.com/a-h/templ/runtime"
+
+import "github.com/alexpls/untils/internal/components"
+import "github.com/alexpls/untils/internal/components/icons"
 
 func appLayout() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -53,7 +52,7 @@ func appLayout() templ.Component {
 				var templ_7745c5c3_Var3 string
 				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(templ.JSONString(components.TimezoneFromCookie(ctx)))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/layout.templ`, Line: 11, Col: 78}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/layout.templ`, Line: 11, Col: 80}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {
@@ -138,7 +137,7 @@ func header(title string, actions templ.Component) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/layout.templ`, Line: 62, Col: 11}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/layout.templ`, Line: 61, Col: 12}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
