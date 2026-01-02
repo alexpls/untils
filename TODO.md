@@ -4,13 +4,11 @@
 - [ ] Feature: User signup
 - [ ] Feature: Monitors list page pagination
 - [ ] Improvement: Feed back more of the different checks to the LLM, to help give a better answer
-- [ ] Improvement: UI auto-updates when checks start
 - [ ] Improvement: Request ID on all logs (context logger?)
 - [ ] Improvement: Better use of context. Should pass it all the way down and rely less on closer functions during app startup/shutdown
 - [ ] Improvement: Pass the user's timezone as context to all prompts
 - [ ] Improvement: Provide additional instructions to a monitor's check (do something with the ones we're already saving from LLM)
 - [ ] Refactor: Put river into its own db schema?
-- [ ] Improvement: Monitor draft page refresh should not retrigger POST, but instead GET
 - [ ] Feature: Checks should be able to have multiple results
 - [ ] Refactor: Forms should have some helpers extracted
 - [ ] Improvement: Pushover form should show a spinner while we're validating the token
@@ -20,6 +18,8 @@
 
 ## Done
 
+- [x] Improvement: UI auto-updates when checks start
+- [x] Improvement: Monitor draft page refresh should not retrigger POST, but instead GET
 - [x] Refactor: make monitor notifiers more generic (e.g. for email later)
 - [x] Feature: User settings (timezone, notification integrations config)
 - [x] Improvement: Figure out html template formatting
