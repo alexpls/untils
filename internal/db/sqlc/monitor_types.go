@@ -10,6 +10,13 @@ type Citation struct {
 	URL          string `json:"url"`
 	WebsiteTitle string `json:"website_title"`
 	PageTitle    string `json:"page_title"`
+	// FaviconURL is the URL of the favicon for the cited website.
+	//
+	// Empty string if no favicon is available.
+	//
+	// TODO: plumbing the favicon URL through the LLM like this is
+	// wasteful and error-prone.
+	FaviconURL string `json:"favicon_url"`
 }
 
 type Date struct {

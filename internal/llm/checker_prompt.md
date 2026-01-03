@@ -88,6 +88,8 @@ In order to achieve this you will use two tools:
 - Result text must be plain text. No emojis or markdown formatting.
 - Result text must not include any citations for where the info came from, these
   should be added to the "citations" array instead.
+- If the citation has a Favicon URL provided, include it verbatim in the `favicon_url`
+  field of the citation.
 - Never address the user directly.
 - Never respond along the lines of "no change since the previous answer". Instead,
   just reuse the same response as last time.

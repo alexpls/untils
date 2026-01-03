@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/alexpls/untils/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/faviconproxy"
 	"github.com/alexpls/untils/public"
 )
 
@@ -44,6 +45,9 @@ func (a *app) routes() http.Handler {
 	mux.HandleFunc("POST /app/settings/pushover", a.requireAuth(a.pushoverSettingsPost))
 	mux.HandleFunc("DELETE /app/settings/pushover", a.requireAuth(a.pushoverSettingsDelete))
 	mux.HandleFunc("GET /app/settings/email", a.requireAuth(a.emailSettingsGet))
+
+	// favicon
+	mux.Handle("GET /app/favicon", a.requireAuth2(faviconproxy.Handler()))
 
 	// middleware
 	csrf := http.NewCrossOriginProtection()

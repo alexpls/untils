@@ -18,13 +18,21 @@ import (
 )
 
 type Page struct {
-	URL      string
-	Title    string
-	Contents string
+	URL        string
+	Title      string
+	Contents   string
+	FaviconURL string
 }
 
 func (p Page) String() string {
-	return fmt.Sprintf("Title: %s\nURL: %s\n\n%s", p.Title, p.URL, p.Contents)
+	return fmt.Sprintf("Title: %s\n"+
+		"URL: %s\n"+
+		"Favicon URL: %s\n"+
+		"Contents:\n%s\n",
+		p.Title,
+		p.URL,
+		p.FaviconURL,
+		p.Contents)
 }
 
 type NavigateResult struct {
@@ -102,7 +110,7 @@ func (ctx *BrowserCtx) Navigate(path string) (*Page, error) {
 	return pageResult(ctx)
 }
 
-func pageResult(ctx context.Context) (*Page, error) {
+func pageResult(ctx *BrowserCtx) (*Page, error) {
 	var urlStr string
 
 	if err := chromedp.Run(ctx,
@@ -118,10 +126,12 @@ func pageResult(ctx context.Context) (*Page, error) {
 
 	var title string
 	var tree axTree
+	var f string
 
 	if err := chromedp.Run(ctx,
 		tidyHTML(u),
 		chromedp.Title(&title),
+		favicon(&f),
 		accessibilityTree(&tree),
 	); err != nil {
 		return nil, err
@@ -130,9 +140,10 @@ func pageResult(ctx context.Context) (*Page, error) {
 	pageContents := tree.String()
 
 	return &Page{
-		URL:      urlStr,
-		Title:    title,
-		Contents: pageContents,
+		URL:        urlStr,
+		Title:      title,
+		Contents:   pageContents,
+		FaviconURL: f,
 	}, nil
 }
 

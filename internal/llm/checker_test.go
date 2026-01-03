@@ -3,14 +3,14 @@
 package llm
 
 import (
-	"log/slog"
 	"testing"
 
 	"github.com/alexpls/untils/internal/wideevents"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestChecker(t *testing.T) {
+func TestCheckerEasySubject(t *testing.T) {
 	svc := newServiceForTest(t)
 
 	ch := make(EventsChan)
@@ -19,24 +19,24 @@ func TestChecker(t *testing.T) {
 	checker := newChecker(svc, ch)
 
 	go func() {
-		for ev := range ch {
-			t.Logf("Check event: kind=%s details=%+v", ev.Kind, ev.Details)
+		for range ch {
+			// draining the channel
 		}
 	}()
 
 	events := make(wideevents.Events)
 	ctx := wideevents.ContextWithEvents(t.Context(), events)
 	llmEvent := wideevents.GetOrCreate(events, newLLMEvent)
-
-	defer func() {
-		llmEvent.finish()
-		svc.logger.LogAttrs(ctx, slog.LevelInfo, "llm workflow complete", events.SlogAttrs()...)
-	}()
+	defer llmEvent.finish()
 
 	res, err := checker.perform(ctx, &CheckParams{
-		Subject: "Latest game IGN has given a 10/10 rating to",
+		Subject:      "Latest album by Tool",
+		Instructions: "Use https://en.wikipedia.org/wiki/Tool_discography",
 	})
 	require.NoError(t, err)
 
-	t.Logf("Response: %+v", res)
+	assert.Contains(t, res.ResultPlaintext, "Fear Inoculum")
+	assert.Len(t, res.Citations, 1)
+	assert.Contains(t, res.Citations[0].URL, "wikipedia.org")
+	assert.Contains(t, res.Citations[0].FaviconURL, "wikipedia.org/static/favicon/wikipedia.ico")
 }

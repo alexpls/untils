@@ -230,12 +230,16 @@ templ monitorResultTimelineItem(result *sqlc.MonitorResult) {
 							for _, citation := range *result.Citations {
 								<a
 									href={ citation.URL }
-									title={ citation.WebsiteTitle + " | " + citation.PageTitle }
+									title={ citation.PageTitle + " | " + citation.WebsiteTitle }
 									target="_blank"
 									rel="noref noopener"
 									class="relative w-5 h-5 rounded bg-base-content/10 border border-base-content/40 overflow-hidden flex items-center justify-center"
 								>
-									<span class="absolute text-xs font-semibold">{ citation.WebsiteTitle[0:1] }</span>
+									if citation.FaviconURL != "" {
+										<img src={citationFaviconProxiedURL(citation)} alt={ citation.WebsiteTitle  } class="w-full h-full object-contain" />
+									} else {
+										<span class="absolute text-xs font-semibold">{ citation.WebsiteTitle[0:1] }</span>
+									}
 								</a>
 							}
 						</div>
@@ -266,4 +270,12 @@ func urlHost(path string) string {
 		return path
 	}
 	return fmt.Sprintf("%s://%s", u.Scheme, u.Host)
+}
+
+func citationFaviconProxiedURL(citation sqlc.Citation) string {
+	if citation.FaviconURL == "" {
+		return ""
+	}
+	params := url.Values{"url": []string{citation.FaviconURL}}
+	return "/app/favicon?" + params.Encode()
 }
