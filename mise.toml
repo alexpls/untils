@@ -22,7 +22,7 @@ go install golang.org/x/tools/gopls@latest
 
 [tasks.dev-server]
 run = """
-templ generate --watch --proxy="http://localhost:4200" --cmd "go run ./cmd serve -env $ENV -db $PG_URL -xai-key $XAI_KEY -openai-key $OPENAI_KEY -pushover-key $PUSHOVER_KEY -brave-key $BRAVE_KEY" | tee dev.log
+templ generate --watch --proxy="http://localhost:4200" --open-browser=false --cmd "go run ./cmd serve -env $ENV -db $PG_URL -xai-key $XAI_KEY -openai-key $OPENAI_KEY -pushover-key $PUSHOVER_KEY -brave-key $BRAVE_KEY" | tee dev.log
 """
 
 [tasks.dev-css]
