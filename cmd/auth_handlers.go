@@ -6,9 +6,15 @@ import (
 
 	"github.com/alexpls/untils/internal/auth"
 	"github.com/alexpls/untils/internal/components/public"
+	"github.com/alexpls/untils/internal/reqcontext"
 )
 
 func (a *app) signInGet(w http.ResponseWriter, r *http.Request) {
+	if _, ok := reqcontext.UserFromContext(r.Context()); ok {
+		http.Redirect(w, r, "/app", http.StatusSeeOther)
+		return
+	}
+
 	ret := r.URL.Query().Get("return")
 	data := public.SignInData{
 		Return: ret,
