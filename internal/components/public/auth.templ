@@ -47,6 +47,17 @@ templ SignInPage(data SignInData) {
 					<button class="btn" type="submit">Sign in</button>
 				</div>
 			</form>
+
+			if components.IsDev(ctx) {
+				<div class="mt-3">
+					<form action="/sign_in" method="post">
+						<input type="hidden" name="return" value={ data.Return }/>
+						<input type="hidden" name="email" value="alexpls@fastmail.com"/>
+						<input type="hidden" name="password" value="abc123"/>
+						<button type="submit" class="btn btn-warning">Dev: Sign in as alexpls@fastmail.com</button>
+					</form>
+				</div>
+			}
 		</div>
 	}
 }

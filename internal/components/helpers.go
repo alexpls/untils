@@ -65,6 +65,14 @@ func ValidationError(data validation.HasValidationErrors, field string) string {
 	return ""
 }
 
+func IsDev(ctx context.Context) bool {
+	env, ok := reqcontext.EnvFromContext(ctx)
+	if !ok {
+		panic("env not set in context")
+	}
+	return env == "dev"
+}
+
 func MaskSecret(str string) string {
 	visibleChars := 3
 	maskChar := "•"
