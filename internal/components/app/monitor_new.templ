@@ -2,8 +2,10 @@ package app
 
 import (
 	"github.com/alexpls/untils/internal/components"
+	"github.com/alexpls/untils/internal/components/icons"
 	"github.com/alexpls/untils/internal/monitor"
 	"github.com/alexpls/untils/internal/validation"
+	"math/rand/v2"
 )
 
 type MonitorNewData struct {
@@ -17,36 +19,88 @@ func (m MonitorNewData) GetValidationErrors() validation.ValidationErrors {
 
 templ MonitorNewPage(data MonitorNewData) {
 	@appLayout() {
-		<div class="py-2 px-4 breadcrumbs text-sm border-b border-base-content/10">
-			<ul>
-				<li>
-					<a href="/app" class="link link-hover">Monitors</a>
-				</li>
-				<li>New</li>
-			</ul>
-		</div>
-		<div class="container mx-auto">
-			@header("New monitor", nil)
-			<div class="m-4">
-				<form method="post" action="/app/monitors/new">
-					<fieldset class="fieldset">
-						<legend class="fieldset-legend">What would you like to monitor?</legend>
-						<input
-							class={ "input", templ.KV("input-error", components.ValidationError(data, "Subject") != "") }
-							type="text"
-							placeholder="Type here"
-							name="Subject"
-							value={ data.Values.Subject }
-						/>
-						if err := components.ValidationError(data, "Subject"); err != "" {
-							<p class="label text-error">{ err }</p>
-						} else {
-							<p class="label text-error">&nbsp;</p>
-						}
-					</fieldset>
-					<button class="btn btn-primary" type="submit">Create</button>
-				</form>
+		<div class="flex flex-col h-full">
+			<div class="py-2 px-4 breadcrumbs text-sm border-b border-base-content/10">
+				<ul>
+					<li>
+						<a href="/app" class="link link-hover">Monitors</a>
+					</li>
+					<li>New</li>
+				</ul>
+			</div>
+			<div class="flex-1 flex items-center justify-center">
+				<div class="text-center w-full">
+					<h2 class="font-black text-4xl mb-8">What do you want to monitor?</h2>
+					<div class="m-4 w-full mx-auto max-w-120">
+						<form method="post" action="/app/monitors/new">
+							<fieldset class="fieldset">
+								<textarea
+									class={ templ.Classes(
+										"textarea", "textarea-xl",
+										templ.KV("textarea-error", components.ValidationError(data, "Subject") != ""),
+										templ.KV("textarea-primary", components.ValidationError(data, "Subject") == ""),
+										"field-sizing-content", "resize-none",
+										"w-full", "min-h-lh", "max-h-[4lh]",
+									) }
+									placeholder="Type here..."
+									name="Subject"
+									data-effect="el.selectionStart = el.value.length"
+									data-on:keydown="
+										if (evt.key === 'Enter') {
+											evt.preventDefault();
+											el.form.submit();
+										}
+									"
+									autofocus
+								>{ data.Values.Subject }</textarea>
+								<div class="text-left">
+									if err := components.ValidationError(data, "Subject"); err != "" {
+										<p class="label text-error mt-1">{ err }</p>
+									}
+								</div>
+							</fieldset>
+							<button class="btn mt-4 btn-primary btn-lg w-full" type="submit">
+								<span class="mr-1">Continue</span>
+								@icons.ArrowRight(icons.IconParams{})
+							</button>
+						</form>
+						<div class="mt-8">
+							<h4 class="text-base-content/50">
+								<strong>Need inspiration?</strong> How about when...
+							</h4>
+							@subjectExamplesCarousel()
+						</div>
+					</div>
+				</div>
 			</div>
 		</div>
 	}
+}
+
+func subjectExamples() []string {
+	subs := []string{
+		"A band you like releases a new album",
+		"A movie rated over 90% on Rotten Tomatoes is released",
+		"A product you want goes on sale",
+		"Someone you're interested in has a new podcast appearance",
+		"A new episode of a TV series is released",
+		"A blog you like publishes a new post",
+		"Best Picture is announced at the Oscars",
+		"IGN rates a game at 9/10 or higher",
+	}
+	rand.Shuffle(len(subs), func(i, j int) {
+		subs[i], subs[j] = subs[j], subs[i]
+	})
+	return subs
+}
+
+templ subjectExamplesCarousel() {
+	{{ example := subjectExamples()[0] }}
+	<div class="relative overflow-hidden">
+		<div class="flex">
+			<div class="w-full shrink-0 px-2 text-base-content/50">
+				{ example }
+			</div>
+		</div>
+	</div>
 }
