@@ -93,19 +93,9 @@ func (s *Service) ValidateMonitor(ctx context.Context, monitor *sqlc.Monitor) er
 		return err
 	}
 
-	ch := make(llm.EventsChan)
-	defer close(ch)
+	triage := llm.NewTriageWorkflow(s.llm)
 
-	triageW := llm.NewTriageWorkflow(s.llm, ch)
-
-	go func() {
-		for range ch {
-			// TODO: do something with this. and actually just use the usual monitor check
-			// process in this whole method
-		}
-	}()
-
-	res, err := triageW.Run(ctx, &llm.TriageParams{
+	trigageRes, err := triage.Run(ctx, &llm.TriageParams{
 		Subject:      monitor.Subject.String,
 		Instructions: monitor.Instructions.String,
 	})
@@ -113,51 +103,61 @@ func (s *Service) ValidateMonitor(ctx context.Context, monitor *sqlc.Monitor) er
 		return fmt.Errorf("triage workflow: %w", err)
 	}
 
-	return db.WithTx(s.pool, ctx, func(tx pgx.Tx) error {
+	if !trigageRes.Approved {
+		if err = s.queries.RejectMonitor(ctx, s.pool, &sqlc.RejectMonitorParams{
+			ID:             monitor.ID,
+			UserID:         monitor.UserID,
+			RejectedReason: pgtype.Text{String: trigageRes.RejectedReason, Valid: true},
+		}); err != nil {
+			return fmt.Errorf("rejecting monitor: %w", err)
+		}
+		return nil
+	}
+
+	var check *sqlc.MonitorCheck
+
+	if err := db.WithTx(s.pool, ctx, func(tx pgx.Tx) error {
 		if err := s.validateMonitorsSameVersion(ctx, tx, monitor); err != nil {
-			s.logger.Warn("skipping validation due to monitor version mismatch", "details", err)
-			return nil
+			return err
 		}
 
-		if !res.Triager.Approved {
-			if err = s.queries.RejectMonitor(ctx, tx, &sqlc.RejectMonitorParams{
-				ID:             monitor.ID,
-				UserID:         monitor.UserID,
-				RejectedReason: pgtype.Text{String: res.Triager.RejectedReason, Valid: true},
-			}); err != nil {
-				return fmt.Errorf("rejecting monitor: %w", err)
-			}
-			return nil
-		} else {
-			if monitor, err = s.queries.UpdateMonitorToReady(ctx, tx, &sqlc.UpdateMonitorToReadyParams{
-				UserID:    monitor.UserID,
-				MonitorID: monitor.ID,
-				Subject:   pgtype.Text{String: monitor.Subject.String, Valid: true},
-				Expert:    pgtype.Text{String: "default", Valid: true}, // TODO: get rid of 'expert' here and in the DB if it's not being used
-			}); err != nil {
-				return fmt.Errorf("updating monitor expert: %w", err)
-			}
+		monitor, err = s.queries.UpdateMonitorStatus(ctx, tx, &sqlc.UpdateMonitorStatusParams{
+			ID:     monitor.ID,
+			UserID: monitor.UserID,
+			Status: sqlc.MonitorStatusPreviewing,
+		})
+		if err != nil {
+			return err
+		}
 
-			now := time.Now()
-			check, err := s.queries.CreateMonitorCheck(ctx, tx, &sqlc.CreateMonitorCheckParams{
-				MonitorID:    monitor.ID,
-				Status:       sqlc.MonitorCheckStatusSuccess,
-				ScheduledFor: now,
-				DoneAt:       &now,
-				Result:       res.Check,
-			})
-			if err != nil {
-				return fmt.Errorf("creating monitor check: %w", err)
-			}
-
-			params := CheckResultToCreateMonitorResultParams(check.MonitorID, check.ID, res.Check)
-			if _, err = s.queries.CreateMonitorResult(ctx, tx, params); err != nil {
-				return fmt.Errorf("creating check result: %w", err)
-			}
+		check, err = s.queries.CreateMonitorCheck(ctx, tx, &sqlc.CreateMonitorCheckParams{
+			MonitorID:    monitor.ID,
+			Status:       sqlc.MonitorCheckStatusScheduled,
+			ScheduledFor: time.Now(),
+		})
+		if err != nil {
+			return err
 		}
 
 		return nil
+	}); err != nil {
+		return err
+	}
+
+	// TODO: go back to the triager if the check fails
+	err = s.PerformMonitorCheck(ctx, monitor.UserID, check, false)
+	if err != nil {
+		return fmt.Errorf("performing monitor check: %w", err)
+	}
+
+	_, err = s.queries.UpdateMonitorToReady(ctx, s.pool, &sqlc.UpdateMonitorToReadyParams{
+		MonitorID: monitor.ID,
+		UserID:    monitor.UserID,
+		Subject:   monitor.Subject,
+		Expert:    pgtype.Text{String: "default", Valid: true},
 	})
+
+	return err
 }
 
 func CheckResultToCreateMonitorResultParams(monitorID, checkID int64, res *sqlc.CheckResult) *sqlc.CreateMonitorResultParams {

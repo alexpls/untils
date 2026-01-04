@@ -158,7 +158,7 @@ templ checkInProgressEvent(event *sqlc.MonitorCheckEvent, latest bool) {
 	<li class="flex py-0.5 items-center justify-start">
 		<div class="text-base-content/30 mr-1">
 			if latest {
-				@icons.Loader(icons.IconParams{Size: 16})
+				@icons.Loader(icons.IconParams{Size: 16, Classes: templ.Classes("animate-spin")})
 			} else {
 				@icons.CircleCheck(icons.IconParams{Size: 16})
 			}
@@ -236,7 +236,7 @@ templ monitorResultTimelineItem(result *sqlc.MonitorResult) {
 									class="relative w-5 h-5 rounded bg-base-content/10 border border-base-content/40 overflow-hidden flex items-center justify-center"
 								>
 									if citation.FaviconURL != "" {
-										<img src={citationFaviconProxiedURL(citation)} alt={ citation.WebsiteTitle  } class="w-full h-full object-contain" />
+										<img src={ citationFaviconProxiedURL(citation) } alt={ citation.WebsiteTitle } class="w-full h-full object-contain"/>
 									} else {
 										<span class="absolute text-xs font-semibold">{ citation.WebsiteTitle[0:1] }</span>
 									}

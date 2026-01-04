@@ -90,8 +90,9 @@ func (s *Service) scheduleMonitorCheckTx(ctx context.Context, tx pgx.Tx, monitor
 	return check, nil
 }
 
-func (s *Service) PerformMonitorCheck(ctx context.Context, userID int64, check *sqlc.MonitorCheck) error {
+func (s *Service) PerformMonitorCheck(ctx context.Context, userID int64, check *sqlc.MonitorCheck, scheduleNext bool) error {
 	if slices.Contains(MonitorCheckTerminalStatuses, check.Status) {
+		s.logger.Warn("tried to perform a monitor check that is already in a terminal status", "check_id", check.ID, "status", check.Status)
 		return nil
 	}
 
@@ -114,9 +115,11 @@ func (s *Service) PerformMonitorCheck(ctx context.Context, userID int64, check *
 			}
 		}
 
-		_, err = s.scheduleMonitorCheckTx(ctx, tx, monitor, time.Now().Add(monitorCheckFrequency))
-		if err != nil {
-			return nil, err
+		if scheduleNext {
+			_, err = s.scheduleMonitorCheckTx(ctx, tx, monitor, time.Now().Add(monitorCheckFrequency))
+			if err != nil {
+				return nil, err
+			}
 		}
 
 		if err = s.queries.UpdateMonitorCheckChecking(ctx, tx, check.ID); err != nil {

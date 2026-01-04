@@ -56,8 +56,11 @@ templ MonitorDraftView(data MonitorDraftData) {
 						placeholder="Type here..."
 						name="Subject"
 						disabled?={ monitorLoading(data.Monitor) }
-						data-on:focus="$showSubjectUpdateButton = true"
-						data-on:blur="$showSubjectUpdateButton = false"
+						data-bind:subject.current
+						data-signals:subject.initial={ templ.JSONString(data.Monitor.Subject.String) }
+						data-computed:subject.changed="$subject.current !== $subject.initial"
+						data-on:focus="$subject.updating = true"
+						data-on:blur="$subject.updating = false"
 						data-on:keydown="
 								if (evt.key === 'Enter') {
 									evt.preventDefault();
@@ -68,10 +71,9 @@ templ MonitorDraftView(data MonitorDraftData) {
 					if err := components.ValidationError(data, "Subject"); err != "" {
 						<p class="label text-error mt-1">{ err }</p>
 					}
-					{{ /* TODO: hide subject button if no changes to input have been made and it's been blurred */ }}
 					<div
 						class="overflow-hidden max-h-0 transition-all duration-500"
-						data-class:max-h-96="$showSubjectUpdateButton"
+						data-class="{'max-h-96': $subject.updating || $subject.changed}"
 					>
 						<button
 							class="mt-2 btn btn-primary btn-lg w-full"
@@ -124,9 +126,9 @@ templ MonitorDraftView(data MonitorDraftData) {
 					switch data.Monitor.Status {
 						case sqlc.MonitorStatusPreviewing:
 							<div class="flex items-start">
-								@icons.CircleCheck(icons.IconParams{
+								@icons.Loader(icons.IconParams{
 									Size:    18,
-									Classes: templ.Classes("shrink-0", "mt-1"),
+									Classes: templ.Classes("shrink-0", "mt-1", "animate-spin"),
 								})
 								<div class="ml-2">
 									<p>Previewing...</p>
