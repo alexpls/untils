@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"github.com/alexpls/untils/internal/components"
+	"github.com/alexpls/untils/internal/components/icons"
 	"github.com/alexpls/untils/internal/db/sqlc"
 	"github.com/alexpls/untils/internal/monitor"
 	"github.com/alexpls/untils/internal/validation"
@@ -10,10 +11,12 @@ import (
 )
 
 type MonitorDraftData struct {
-	Monitor          *sqlc.Monitor
-	ResultPreviews   []*sqlc.MonitorResult
-	ValidationErrors validation.ValidationErrors
-	Values           monitor.UpdateMonitorDraftParams
+	Monitor               *sqlc.Monitor
+	ResultPreview         *sqlc.MonitorResult
+	CheckInProgress       *sqlc.MonitorCheck
+	CheckInProgressEvents []*sqlc.MonitorCheckEvent
+	ValidationErrors      validation.ValidationErrors
+	Values                monitor.UpdateMonitorDraftParams
 }
 
 func (m MonitorDraftData) GetValidationErrors() validation.ValidationErrors {
@@ -34,98 +37,158 @@ templ MonitorDraftPage(data MonitorDraftData) {
 				<li>New</li>
 			</ul>
 		</div>
-		<div class="container mx-auto" id="monitor-draft">
-			@header("New monitor", nil)
-			<div class="m-4">
-				<form method="post" action={ fmt.Sprintf("/app/monitors/%d", data.Monitor.ID) }>
-					<fieldset class="fieldset">
-						<legend class="fieldset-legend">
-							What would you like to monitor?
-						</legend>
-						<input
-							class={ "input", templ.KV("input-error", components.ValidationError(data, "Subject") != "") }
-							type="text"
-							placeholder="Type here"
-							name="Subject"
-							value={ data.Values.Subject }
-							if monitorLoading(data.Monitor) {
-								disabled
-							}
-						/>
-						if err := components.ValidationError(data, "Subject"); err != "" {
-							<p class="label text-error">{ err }</p>
-						} else {
-							<p class="label text-error">&nbsp;</p>
-						}
-					</fieldset>
-					<fieldset class="fieldset">
-						<legend class="fieldset-legend">Any instructions?</legend>
-						<textarea
-							class={ "textarea", templ.KV("textarea-error", components.ValidationError(data, "Instructions") != "") }
-							type="text"
-							placeholder="Type here"
-							name="Instructions"
-							if monitorLoading(data.Monitor) {
-								disabled
-							}
-						>{ data.Values.Instructions }</textarea>
-						if err := components.ValidationError(data, "Instructions"); err != "" {
-							<p class="label text-error">{ err }</p>
-						} else {
-							<p class="label text-error">&nbsp;</p>
-						}
-					</fieldset>
-					<button
-						class="btn btn-primary"
-						type="submit"
-						if monitorLoading(data.Monitor) {
-							disabled
-						}
+		@MonitorDraftView(data)
+	}
+}
+
+templ MonitorDraftView(data MonitorDraftData) {
+	<div class="max-w-120 mx-auto" id="monitor-draft-view" data-effect={ datastar.GetSSE("/app/monitors/%d/events", data.Monitor.ID) }>
+		<div class="mt-4">
+			<form method="POST" action={ fmt.Sprintf("/app/monitors/%d", data.Monitor.ID) }>
+				<fieldset class="fieldset">
+					<textarea
+						class={ templ.Classes(
+								"textarea", "textarea-xl",
+								templ.KV("textarea-error", components.ValidationError(data, "Subject") != ""),
+								"field-sizing-content", "resize-none",
+								"w-full", "min-h-lh", "max-h-[4lh]",
+							) }
+						placeholder="Type here..."
+						name="Subject"
+						disabled?={ monitorLoading(data.Monitor) }
+						data-on:focus="$showSubjectUpdateButton = true"
+						data-on:blur="$showSubjectUpdateButton = false"
+						data-on:keydown="
+								if (evt.key === 'Enter') {
+									evt.preventDefault();
+									el.form.submit();
+								}
+							"
+					>{ data.Monitor.Subject.String }</textarea>
+					if err := components.ValidationError(data, "Subject"); err != "" {
+						<p class="label text-error mt-1">{ err }</p>
+					}
+					{{ /* TODO: hide subject button if no changes to input have been made and it's been blurred */ }}
+					<div
+						class="overflow-hidden max-h-0 transition-all duration-500"
+						data-class:max-h-96="$showSubjectUpdateButton"
 					>
-						Update
-					</button>
-				</form>
-				if data.Monitor.Status == sqlc.MonitorStatusRejected {
-					<div class="mt-4 p-4 bg-error/10 rounded border border-error/20">
-						<p class="text-error">
-							<span class="font-semibold">Rejected:</span>
-							if data.Monitor.RejectedReason.Valid {
-								{ data.Monitor.RejectedReason.String }
-							} else {
-								No reason provided
-							}
-						</p>
+						<button
+							class="mt-2 btn btn-primary btn-lg w-full"
+							type="submit"
+						>
+							<span class="mr-1">Update</span>
+						</button>
 					</div>
-				}
-			</div>
-			if data.Monitor.Status == sqlc.MonitorStatusReady {
-				<div class="m-4 p-4 bg-base-100 rounded border border-base-content/10">
-					<h3 class="font-semibold mb-3">Select a result to monitor</h3>
-					<ul class="list">
-						for _, preview := range data.ResultPreviews {
-							<li class="list-row flex items-center gap-4">
-								<div>
-									<button
-										data-on:click={ datastar.PostSSE("/app/monitors/%d/activate", data.Monitor.ID) }
-										class="btn btn-sm"
-									>
-										Pick
-									</button>
-								</div>
-								<div class="flex-1">
-									<div class="font-semibold">{ preview.Result }</div>
-									if preview.Date != nil && preview.DatePastTenseVerb.Valid {
-										<div class="text-sm text-base-content/60">
-											{ preview.DatePastTenseVerb.String }
-											{ components.FormatDate(ctx, *preview.Date) }
+				</fieldset>
+			</form>
+		</div>
+		<div class="mt-4">
+			<div class="bg-base-100 border border-primary rounded">
+				<div class="p-3 space-y-3 border-b border-base-content/10">
+					switch data.Monitor.Status {
+						case sqlc.MonitorStatusValidating:
+							<div class="flex items-start">
+								@icons.Loader(icons.IconParams{
+									Size:    18,
+									Classes: templ.Classes("shrink-0", "mt-1", "animate-spin"),
+								})
+								<span class="ml-2">Validating subject...</span>
+							</div>
+						case sqlc.MonitorStatusRejected:
+							<div class="flex items-start text-error">
+								@icons.TriangleAlert(icons.IconParams{
+									Size:    18,
+									Classes: templ.Classes("shrink-0", "mt-1"),
+								})
+								<span class="ml-2">
+									<strong>Rejected:</strong>
+									if data.Monitor.RejectedReason.String != "" {
+										{ data.Monitor.RejectedReason.String }
+									} else {
+										Subject is not valid.
+									}
+								</span>
+							</div>
+						default:
+							<div class="flex items-start text-success">
+								@icons.CircleCheck(icons.IconParams{
+									Size:    18,
+									Classes: templ.Classes("shrink-0", "mt-1"),
+								})
+								<span class="ml-2">Subject valid</span>
+							</div>
+					}
+				</div>
+				<div class="p-3 space-y-3 border-b border-base-content/10">
+					switch data.Monitor.Status {
+						case sqlc.MonitorStatusPreviewing:
+							<div class="flex items-start">
+								@icons.CircleCheck(icons.IconParams{
+									Size:    18,
+									Classes: templ.Classes("shrink-0", "mt-1"),
+								})
+								<div class="ml-2">
+									<p>Previewing...</p>
+									if data.CheckInProgress != nil && data.CheckInProgressEvents != nil && len(data.CheckInProgressEvents) > 0 {
+										<div>
+											<ul>
+												@checkInProgressTimelineItem(checkInProgressTimelineItemViewData{
+													Check:  data.CheckInProgress,
+													Events: data.CheckInProgressEvents,
+												})
+											</ul>
 										</div>
 									}
 								</div>
-							</li>
-						}
-					</ul>
+							</div>
+						case sqlc.MonitorStatusReady:
+							<div class="flex items-start">
+								@icons.CircleCheck(icons.IconParams{
+									Size:    18,
+									Classes: templ.Classes("shrink-0", "mt-1", "text-success"),
+								})
+								<div class="ml-2">
+									<p class="text-success">Preview successful</p>
+									<div>
+										<ul>
+											@monitorResultTimelineItem(data.ResultPreview)
+										</ul>
+									</div>
+								</div>
+							</div>
+						default:
+							<span class="ml-1 text-base-content/30">Previewing the first check</span>
+					}
 				</div>
-			}
+				<div class="p-3 space-y-3">
+					switch data.Monitor.Status {
+						case sqlc.MonitorStatusReady:
+							<div class="flex items-start">
+								@icons.CircleCheck(icons.IconParams{
+									Size:    18,
+									Classes: templ.Classes("shrink-0", "mt-1", "text-success"),
+								})
+								<div class="ml-2 w-full">
+									<p class="text-success">Ready to go</p>
+									<button
+										class="btn btn-primary mt-2 flex items-center"
+										data-on:click={ datastar.PostSSE("/app/monitors/%d/activate", data.Monitor.ID) }
+									>
+										<span>Start monitoring now</span>
+										@icons.ArrowRight(icons.IconParams{Size: 15})
+									</button>
+								</div>
+							</div>
+						default:
+							<div class="flex items-start">
+								<div class="text-base-content/30">
+									Ready to go
+								</div>
+							</div>
+					}
+				</div>
+			</div>
 		</div>
-	}
+	</div>
 }

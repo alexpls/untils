@@ -32,7 +32,7 @@ templ MonitorNewPage(data MonitorNewData) {
 				<div class="text-center w-full">
 					<h2 class="font-black text-4xl mb-8">What do you want to monitor?</h2>
 					<div class="m-4 w-full mx-auto max-w-120">
-						<form method="post" action="/app/monitors/new">
+						<form method="POST" action="/app/monitors/new">
 							<fieldset class="fieldset">
 								<textarea
 									class={ templ.Classes(
@@ -54,12 +54,15 @@ templ MonitorNewPage(data MonitorNewData) {
 									autofocus
 								>{ data.Values.Subject }</textarea>
 								<div class="text-left">
-									if err := components.ValidationError(data, "Subject"); err != "" {
-										<p class="label text-error mt-1">{ err }</p>
+									if components.ValidationError(data, "Subject") != "" {
+										<p class="label text-error mt-1">{ components.ValidationError(data, "Subject") }</p>
 									}
 								</div>
 							</fieldset>
-							<button class="btn mt-4 btn-primary btn-lg w-full" type="submit">
+							<button
+								class="btn mt-4 btn-primary btn-lg w-full"
+								type="submit"
+							>
 								<span class="mr-1">Continue</span>
 								@icons.ArrowRight(icons.IconParams{})
 							</button>

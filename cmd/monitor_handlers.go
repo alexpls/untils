@@ -29,21 +29,48 @@ func (a *app) monitorListGet(w http.ResponseWriter, r *http.Request, u *sqlc.Use
 }
 
 func (a *app) renderMonitorDraft(ctx context.Context, mon *sqlc.Monitor, values monitor.UpdateMonitorDraftParams, validationErrs validation.ValidationErrors) (templ.Component, error) {
-	var previews []*sqlc.MonitorResult
+	data, err := a.monitorDraftViewData(ctx, mon, values, validationErrs)
+	if err != nil {
+		return nil, err
+	}
+	return appcomponents.MonitorDraftPage(data), nil
+}
+
+func (a *app) monitorDraftViewData(ctx context.Context, mon *sqlc.Monitor, values monitor.UpdateMonitorDraftParams, validationErrs validation.ValidationErrors) (appcomponents.MonitorDraftData, error) {
+	var preview *sqlc.MonitorResult
 	if mon.Status == sqlc.MonitorStatusReady {
 		res, err := a.monitor.ListMonitorResults(ctx, mon)
 		if err != nil {
-			return nil, err
+			return appcomponents.MonitorDraftData{}, err
 		}
-		previews = res
+		if len(res) != 1 {
+			return appcomponents.MonitorDraftData{}, fmt.Errorf("expected exactly one monitor result for preview, got %d", len(res))
+		}
+		preview = res[0]
 	}
-	comp := appcomponents.MonitorDraftPage(appcomponents.MonitorDraftData{
-		Monitor:          mon,
-		Values:           values,
-		ResultPreviews:   previews,
-		ValidationErrors: validationErrs,
-	})
-	return comp, nil
+
+	check, err := a.monitor.GetInProgressMonitorCheck(ctx, mon)
+	if err != nil {
+		return appcomponents.MonitorDraftData{}, err
+	}
+
+	var checkEvents []*sqlc.MonitorCheckEvent
+	if check != nil {
+		var err error
+		checkEvents, err = a.monitor.ListMonitorCheckEvents(ctx, check.ID)
+		if err != nil {
+			return appcomponents.MonitorDraftData{}, err
+		}
+	}
+
+	return appcomponents.MonitorDraftData{
+		Monitor:               mon,
+		Values:                values,
+		ResultPreview:         preview,
+		CheckInProgress:       check,
+		CheckInProgressEvents: checkEvents,
+		ValidationErrors:      validationErrs,
+	}, nil
 }
 
 func (a *app) monitorViewData(ctx context.Context, mon *sqlc.Monitor, u *sqlc.User) (appcomponents.MonitorViewData, error) {
@@ -145,17 +172,34 @@ func (a *app) monitorViewEventsGet(w http.ResponseWriter, r *http.Request, u *sq
 	for {
 		select {
 		case <-ch:
-			data, err := a.monitorViewData(sse.Context(), mon, u)
-			if err != nil {
-				a.logger.Error("error rendering monitor view", "error", err)
-				return
+			mon = a.monitorFromPath(w, r, u) // Refresh monitor data
+
+			var comp templ.Component
+
+			switch mon.Status {
+			case sqlc.MonitorStatusActive:
+				data, err := a.monitorViewData(sse.Context(), mon, u)
+				if err != nil {
+					a.logger.Error("error rendering monitor view", "error", err)
+					return
+				}
+
+				comp = appcomponents.MonitorView(data)
+
+			default:
+				data, err := a.monitorDraftViewData(sse.Context(), mon, monitor.NewUpdateMonitorDraftParams(mon), nil)
+				if err != nil {
+					a.logger.Error("error rendering monitor draft view", "error", err)
+					return
+				}
+
+				comp = appcomponents.MonitorDraftView(data)
 			}
 
-			comp := appcomponents.MonitorView(data)
-
-			if err = sse.PatchElementTempl(comp); err != nil {
+			if err := sse.PatchElementTempl(comp); err != nil {
 				a.logger.Error("error sending monitor view events SSE patch", "error", err)
 			}
+
 		case <-sse.Context().Done():
 			return
 		}
