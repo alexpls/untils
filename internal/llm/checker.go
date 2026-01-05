@@ -48,7 +48,7 @@ func (c *checker) perform(ctx context.Context, params *CheckParams) (*sqlc.Check
 	}
 
 	var resp *responseResult
-	maxTurns := 10
+	maxTurns := 30
 	turn := 0
 
 	for {

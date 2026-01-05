@@ -83,12 +83,19 @@ func (s *Service) DeleteMonitor(ctx context.Context, userID, monitorID int64) er
 
 // TODO: the "validate" name should be more like triage now to align with package llm
 func (s *Service) ValidateMonitor(ctx context.Context, monitor *sqlc.Monitor) error {
-	if monitor.Status != sqlc.MonitorStatusValidating {
-		return fmt.Errorf("monitor: must be in 'validating' status, got: %s", monitor.Status)
+	if monitor.Status == sqlc.MonitorStatusActive {
+		return fmt.Errorf("can't validate an active monitor")
 	}
 
 	if err := db.WithTx(s.pool, ctx, func(tx pgx.Tx) error {
-		return s.deleteMonitorRelations(ctx, tx, monitor.ID)
+		var err error
+
+		if err = s.deleteMonitorRelations(ctx, tx, monitor.ID); err != nil {
+			return err
+		}
+
+		monitor, err = s.updateMonitorStatus(ctx, tx, monitor, sqlc.MonitorStatusValidating)
+		return err
 	}); err != nil {
 		return err
 	}
