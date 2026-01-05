@@ -37,13 +37,16 @@ templ MonitorDraftPage(data MonitorDraftData) {
 				<li>New</li>
 			</ul>
 		</div>
+		<div class="text-center mt-12">
+			<h2 class="text-4xl font-black">What do you want to monitor?</h2>
+		</div>
 		@MonitorDraftView(data)
 	}
 }
 
 templ MonitorDraftView(data MonitorDraftData) {
 	<div class="max-w-120 mx-auto" id="monitor-draft-view" data-effect={ datastar.GetSSE("/app/monitors/%d/events", data.Monitor.ID) }>
-		<div class="mt-4">
+		<div class="mt-8">
 			<form method="POST" action={ fmt.Sprintf("/app/monitors/%d", data.Monitor.ID) }>
 				<fieldset class="fieldset">
 					<textarea
@@ -55,7 +58,6 @@ templ MonitorDraftView(data MonitorDraftData) {
 							) }
 						placeholder="Type here..."
 						name="Subject"
-						disabled?={ monitorLoading(data.Monitor) }
 						data-bind:subject.current
 						data-signals:subject.initial={ templ.JSONString(data.Monitor.Subject.String) }
 						data-computed:subject.changed="$subject.current !== $subject.initial"
@@ -86,7 +88,7 @@ templ MonitorDraftView(data MonitorDraftData) {
 			</form>
 		</div>
 		<div class="mt-4">
-			<div class="bg-base-100 border border-primary rounded">
+			<div class="bg-base-100 border border-base-content/20 rounded">
 				<div class="p-3 space-y-3 border-b border-base-content/10">
 					switch data.Monitor.Status {
 						case sqlc.MonitorStatusValidating:
