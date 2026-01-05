@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -12,15 +13,17 @@ import (
 )
 
 type DBEventHandler struct {
-	s             *Service
-	mu            sync.RWMutex
-	subscriptions map[int64]map[chan struct{}]struct{}
+	s           *Service
+	mu          sync.RWMutex
+	subs        map[int64]map[chan struct{}]struct{}
+	subsRebuilt time.Time
 }
 
 func NewDBEventHandler(s *Service) *DBEventHandler {
 	return &DBEventHandler{
-		s:             s,
-		subscriptions: make(map[int64]map[chan struct{}]struct{}),
+		s:           s,
+		subs:        make(map[int64]map[chan struct{}]struct{}),
+		subsRebuilt: time.Now(),
 	}
 }
 
@@ -35,7 +38,7 @@ func (d *DBEventHandler) HandleNotification(ctx context.Context, notification *p
 	d.mu.RLock()
 	defer d.mu.RUnlock()
 
-	subscribers, ok := d.subscriptions[monitorID]
+	subscribers, ok := d.subs[monitorID]
 	if !ok {
 		return nil
 	}
@@ -51,15 +54,19 @@ func (d *DBEventHandler) HandleNotification(ctx context.Context, notification *p
 }
 
 func (d *DBEventHandler) Subscribe(ctx context.Context, monitorID int64) <-chan struct{} {
-	ch := make(chan struct{})
-
 	d.mu.Lock()
 	defer d.mu.Unlock()
 
-	if _, ok := d.subscriptions[monitorID]; !ok {
-		d.subscriptions[monitorID] = make(map[chan struct{}]struct{})
+	if time.Since(d.subsRebuilt) > time.Hour {
+		d.rebuildSubsLocked()
 	}
-	d.subscriptions[monitorID][ch] = struct{}{}
+
+	ch := make(chan struct{})
+
+	if _, ok := d.subs[monitorID]; !ok {
+		d.subs[monitorID] = make(map[chan struct{}]struct{})
+	}
+	d.subs[monitorID][ch] = struct{}{}
 
 	go func() {
 		<-ctx.Done()
@@ -67,9 +74,9 @@ func (d *DBEventHandler) Subscribe(ctx context.Context, monitorID int64) <-chan 
 		d.mu.Lock()
 		defer d.mu.Unlock()
 
-		delete(d.subscriptions[monitorID], ch)
-		if len(d.subscriptions[monitorID]) == 0 {
-			delete(d.subscriptions, monitorID)
+		delete(d.subs[monitorID], ch)
+		if len(d.subs[monitorID]) == 0 {
+			delete(d.subs, monitorID)
 		}
 
 		close(ch)
@@ -111,4 +118,19 @@ func monitorIDFromPayload(payload string) (int64, error) {
 	default:
 		return 0, fmt.Errorf("payload for unexpected table: %s", n.Table)
 	}
+}
+
+// rebuildSubsLocked creates a new subscriptions map to prevent memory leaks.
+// This function must be called with the mutex already locked.
+func (d *DBEventHandler) rebuildSubsLocked() {
+	newSubs := make(map[int64]map[chan struct{}]struct{})
+	for monitorID := range d.subs {
+		newSubs[monitorID] = make(map[chan struct{}]struct{})
+		for ch := range d.subs[monitorID] {
+			newSubs[monitorID][ch] = struct{}{}
+		}
+	}
+
+	d.subs = newSubs
+	d.subsRebuilt = time.Now()
 }
