@@ -79,8 +79,14 @@ templ MonitorDraftView(data MonitorDraftData) {
 						<button
 							class="mt-2 btn btn-primary btn-lg w-full"
 							type="submit"
+							data-on:click="
+								if (!$subject.changed) {
+									evt.preventDefault();
+									el.form.elements['Subject'].focus();
+								}
+							"
 						>
-							<span class="mr-1">Update</span>
+							<span class="mr-1">Change it</span>
 						</button>
 					</div>
 				</fieldset>
@@ -187,7 +193,7 @@ templ MonitorDraftView(data MonitorDraftData) {
 			</div>
 		</div>
 		if data.Monitor.Status == sqlc.MonitorStatusReady {
-			<div class="mt-4">
+			<div class="mt-6">
 				<button
 					class="btn btn-primary btn-lg w-full mt-2 flex items-center"
 					data-on:click={ datastar.PostSSE("/app/monitors/%d/activate", data.Monitor.ID) }

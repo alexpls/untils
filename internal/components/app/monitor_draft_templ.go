@@ -218,7 +218,7 @@ func MonitorDraftView(data MonitorDraftData) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<div class=\"overflow-hidden max-h-0 transition-all duration-500\" data-class=\"{'max-h-96': $subject.updating || $subject.changed}\"><button class=\"mt-2 btn btn-primary btn-lg w-full\" type=\"submit\"><span class=\"mr-1\">Update</span></button></div></fieldset></form></div><div class=\"mt-4\"><div class=\"bg-base-100 border border-base-content/20 rounded\"><div class=\"p-3 space-y-3 border-b border-base-content/10\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<div class=\"overflow-hidden max-h-0 transition-all duration-500\" data-class=\"{'max-h-96': $subject.updating || $subject.changed}\"><button class=\"mt-2 btn btn-primary btn-lg w-full\" type=\"submit\" data-on:click=\"\n\t\t\t\t\t\t\t\tif (!$subject.changed) {\n\t\t\t\t\t\t\t\t\tevt.preventDefault();\n\t\t\t\t\t\t\t\t\tel.form.elements['Subject'].focus();\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\"><span class=\"mr-1\">Change it</span></button></div></fieldset></form></div><div class=\"mt-4\"><div class=\"bg-base-100 border border-base-content/20 rounded\"><div class=\"p-3 space-y-3 border-b border-base-content/10\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -259,7 +259,7 @@ func MonitorDraftView(data MonitorDraftData) templ.Component {
 				var templ_7745c5c3_Var11 string
 				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(data.Monitor.RejectedReason.String)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/monitor_draft.templ`, Line: 110, Col: 46}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/monitor_draft.templ`, Line: 116, Col: 46}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 				if templ_7745c5c3_Err != nil {
@@ -396,14 +396,14 @@ func MonitorDraftView(data MonitorDraftData) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if data.Monitor.Status == sqlc.MonitorStatusReady {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "<div class=\"mt-4\"><button class=\"btn btn-primary btn-lg w-full mt-2 flex items-center\" data-on:click=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "<div class=\"mt-6\"><button class=\"btn btn-primary btn-lg w-full mt-2 flex items-center\" data-on:click=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var12 string
 			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(datastar.PostSSE("/app/monitors/%d/activate", data.Monitor.ID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/monitor_draft.templ`, Line: 193, Col: 83}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/monitor_draft.templ`, Line: 199, Col: 83}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
