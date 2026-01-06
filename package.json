@@ -2,8 +2,8 @@
   "name": "untils",
   "private": "true",
   "dependencies": {
-    "daisyui": "^5.5.5",
-    "tailwindcss": "^4.1.16"
+    "daisyui": "^5.5.14",
+    "tailwindcss": "^4.1.18"
   },
   "scripts": {
     "format": "bunx prettier . --write",
