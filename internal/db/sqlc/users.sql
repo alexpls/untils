@@ -9,7 +9,7 @@ select * from users where email = @email limit 1;
 -- name: GetUser :one
 select * from users where id = @id limit 1;
 
--- name: ActiveUserIntegrations :many
+-- name: UserIntegrations :many
 select
     'pushover'::notifier as name,
     exists(

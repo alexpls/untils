@@ -1,6 +1,6 @@
 package sqlc
 
-func (row *ActiveUserIntegrationsRow) DisplayName() string {
+func (row *UserIntegrationsRow) DisplayName() string {
 	switch row.Name {
 	case NotifierEmail:
 		return "Email"

@@ -16,7 +16,7 @@ import "fmt"
 import "github.com/starfederation/datastar-go/datastar"
 
 type SettingsViewModel struct {
-	ActiveIntegrations []*sqlc.ActiveUserIntegrationsRow
+	ActiveIntegrations []*sqlc.UserIntegrationsRow
 }
 
 func Settings(data *SettingsViewModel) templ.Component {

@@ -17,6 +17,7 @@ type MonitorDraftData struct {
 	CheckInProgressEvents []*sqlc.MonitorCheckEvent
 	ValidationErrors      validation.ValidationErrors
 	Values                monitor.UpdateMonitorDraftParams
+	Notifiers             []*MonitorNotifierViewData
 }
 
 func (m MonitorDraftData) GetValidationErrors() validation.ValidationErrors {
@@ -57,11 +58,11 @@ templ MonitorDraftView(data MonitorDraftData) {
 							) }
 						placeholder="Type here..."
 						name="Subject"
-						data-bind:subject.current
-						data-signals:subject.initial={ templ.JSONString(data.Monitor.Subject.String) }
-						data-computed:subject.changed="$subject.current !== $subject.initial"
-						data-on:focus="$subject.updating = true"
-						data-on:blur="$subject.updating = false"
+						data-bind:_subject.current
+						data-signals:_subject.initial={ templ.JSONString(data.Monitor.Subject.String) }
+						data-computed:_subject.changed="$_subject.current !== $_subject.initial"
+						data-on:focus="$_subject.updating = true"
+						data-on:blur="$_subject.updating = false"
 						data-on:keydown="
 								if (evt.key === 'Enter') {
 									evt.preventDefault();
@@ -74,13 +75,13 @@ templ MonitorDraftView(data MonitorDraftData) {
 					}
 					<div
 						class="overflow-hidden max-h-0 transition-all duration-500"
-						data-class="{'max-h-96': $subject.updating || $subject.changed}"
+						data-class="{'max-h-96': $_subject.updating || $_subject.changed}"
 					>
 						<button
 							class="mt-2 btn btn-primary btn-lg w-full"
 							type="submit"
 							data-on:click="
-								if (!$subject.changed) {
+								if (!$_subject.changed) {
 									evt.preventDefault();
 									el.form.elements['Subject'].focus();
 								}
@@ -180,6 +181,12 @@ templ MonitorDraftView(data MonitorDraftData) {
 								})
 								<div class="ml-2 w-full">
 									<p class="text-success">Ready to go</p>
+									<div class="text-base-content/50 mt-1">
+										When a new result is detected&hellip;
+									</div>
+									<div class="space-y-1 mt-2">
+										@MonitorNotifiers(data.Monitor, data.Notifiers)
+									</div>
 								</div>
 							</div>
 						default:

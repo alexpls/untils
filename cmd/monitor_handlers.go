@@ -28,114 +28,6 @@ func (a *app) monitorListGet(w http.ResponseWriter, r *http.Request, u *sqlc.Use
 	}).Render(r.Context(), w)
 }
 
-func (a *app) renderMonitorDraft(ctx context.Context, mon *sqlc.Monitor, values monitor.UpdateMonitorDraftParams, validationErrs validation.ValidationErrors) (templ.Component, error) {
-	data, err := a.monitorDraftViewData(ctx, mon, values, validationErrs)
-	if err != nil {
-		return nil, err
-	}
-	return appcomponents.MonitorDraftPage(data), nil
-}
-
-func (a *app) monitorDraftViewData(ctx context.Context, mon *sqlc.Monitor, values monitor.UpdateMonitorDraftParams, validationErrs validation.ValidationErrors) (appcomponents.MonitorDraftData, error) {
-	var preview *sqlc.MonitorResult
-	if mon.Status == sqlc.MonitorStatusReady {
-		res, err := a.monitor.ListMonitorResults(ctx, mon)
-		if err != nil {
-			return appcomponents.MonitorDraftData{}, err
-		}
-		if len(res) != 1 {
-			return appcomponents.MonitorDraftData{}, fmt.Errorf("expected exactly one monitor result for preview, got %d", len(res))
-		}
-		preview = res[0]
-	}
-
-	check, err := a.monitor.GetInProgressMonitorCheck(ctx, mon)
-	if err != nil {
-		return appcomponents.MonitorDraftData{}, err
-	}
-
-	var checkEvents []*sqlc.MonitorCheckEvent
-	if check != nil {
-		var err error
-		checkEvents, err = a.monitor.ListMonitorCheckEvents(ctx, check.ID)
-		if err != nil {
-			return appcomponents.MonitorDraftData{}, err
-		}
-	}
-
-	return appcomponents.MonitorDraftData{
-		Monitor:               mon,
-		Values:                values,
-		ResultPreview:         preview,
-		CheckInProgress:       check,
-		CheckInProgressEvents: checkEvents,
-		ValidationErrors:      validationErrs,
-	}, nil
-}
-
-func (a *app) monitorViewData(ctx context.Context, mon *sqlc.Monitor, u *sqlc.User) (appcomponents.MonitorViewData, error) {
-	results, err := a.monitor.ListMonitorResults(ctx, mon)
-	if err != nil {
-		return appcomponents.MonitorViewData{}, err
-	}
-
-	nextScheduled, err := a.monitor.GetNextMonitorCheck(ctx, mon)
-	if err != nil {
-		return appcomponents.MonitorViewData{}, err
-	}
-
-	inProgressCheck, err := a.monitor.GetInProgressMonitorCheck(ctx, mon)
-	if err != nil {
-		return appcomponents.MonitorViewData{}, err
-	}
-
-	var events []*sqlc.MonitorCheckEvent
-	if inProgressCheck != nil {
-		events, err = a.monitor.ListMonitorCheckEvents(ctx, inProgressCheck.ID)
-		if err != nil {
-			return appcomponents.MonitorViewData{}, err
-		}
-	}
-
-	notifiers, err := a.monitor.ListMonitorNotifiers(ctx, mon)
-	if err != nil {
-		return appcomponents.MonitorViewData{}, err
-	}
-
-	activeIntegrations, err := a.userSettings.ActiveIntegrations(ctx, u.ID)
-	if err != nil {
-		return appcomponents.MonitorViewData{}, err
-	}
-
-	return appcomponents.MonitorViewData{
-		Monitor:               mon,
-		Results:               results,
-		NextScheduledCheck:    nextScheduled,
-		InProgressCheck:       inProgressCheck,
-		InProgressCheckEvents: events,
-		Notifiers:             notifiers,
-		ActiveIntegrations:    activeIntegrations,
-	}, nil
-}
-
-func (a *app) monitorComponent(ctx context.Context, mon *sqlc.Monitor, u *sqlc.User) (templ.Component, error) {
-	data, err := a.monitorViewData(ctx, mon, u)
-	if err != nil {
-		return nil, err
-	}
-	comp := appcomponents.MonitorViewPage(data)
-	return comp, nil
-}
-
-func (a *app) monitorNofifiersComponent(ctx context.Context, mon *sqlc.Monitor, u *sqlc.User) (templ.Component, error) {
-	data, err := a.monitorViewData(ctx, mon, u)
-	if err != nil {
-		return nil, err
-	}
-	comp := appcomponents.MonitorNotifiers(data)
-	return comp, nil
-}
-
 func (a *app) monitorViewGet(w http.ResponseWriter, r *http.Request, u *sqlc.User) {
 	mon := a.monitorFromPath(w, r, u)
 	if mon == nil {
@@ -146,7 +38,7 @@ func (a *app) monitorViewGet(w http.ResponseWriter, r *http.Request, u *sqlc.Use
 	var comp templ.Component
 
 	if mon.Status != sqlc.MonitorStatusActive {
-		comp, err = a.renderMonitorDraft(r.Context(), mon, monitor.NewUpdateMonitorDraftParams(mon), nil)
+		comp, err = a.renderMonitorDraft(r.Context(), mon, u, monitor.NewUpdateMonitorDraftParams(mon), nil)
 	} else {
 		comp, err = a.monitorComponent(r.Context(), mon, u)
 	}
@@ -187,7 +79,7 @@ func (a *app) monitorViewEventsGet(w http.ResponseWriter, r *http.Request, u *sq
 				comp = appcomponents.MonitorView(data)
 
 			default:
-				data, err := a.monitorDraftViewData(sse.Context(), mon, monitor.NewUpdateMonitorDraftParams(mon), nil)
+				data, err := a.monitorDraftViewData(sse.Context(), mon, u, monitor.NewUpdateMonitorDraftParams(mon), nil)
 				if err != nil {
 					a.logger.Error("error rendering monitor draft view", "error", err)
 					return
@@ -208,10 +100,6 @@ func (a *app) monitorViewEventsGet(w http.ResponseWriter, r *http.Request, u *sq
 
 func (a *app) monitorNewGet(w http.ResponseWriter, r *http.Request, _ *sqlc.User) {
 	a.renderMonitorDraftNew(appcomponents.MonitorNewData{}, r, w)
-}
-
-func (a *app) renderMonitorDraftNew(data appcomponents.MonitorNewData, r *http.Request, w http.ResponseWriter) {
-	appcomponents.MonitorNewPage(data).Render(r.Context(), w)
 }
 
 func (a *app) monitorUpdatePost(w http.ResponseWriter, r *http.Request, u *sqlc.User) {
@@ -236,7 +124,7 @@ func (a *app) monitorUpdatePost(w http.ResponseWriter, r *http.Request, u *sqlc.
 	if err != nil {
 		if validationErrs := validation.MapValidationErrors(err); validationErrs != nil {
 			a.logger.Warn("failed validation when updating monitor", "validation_errors", validationErrs)
-			comp, err := a.renderMonitorDraft(r.Context(), mon, monitorDraftParams, validationErrs)
+			comp, err := a.renderMonitorDraft(r.Context(), mon, u, monitorDraftParams, validationErrs)
 			if a.internalServerError(err, w) {
 				a.logger.Error("error rendering monitor draft after validation error", "error", err)
 				return
@@ -249,7 +137,7 @@ func (a *app) monitorUpdatePost(w http.ResponseWriter, r *http.Request, u *sqlc.
 		return
 	}
 
-	comp, err := a.renderMonitorDraft(r.Context(), updatedMon, monitor.NewUpdateMonitorDraftParams(updatedMon), nil)
+	comp, err := a.renderMonitorDraft(r.Context(), updatedMon, u, monitor.NewUpdateMonitorDraftParams(updatedMon), nil)
 	if a.internalServerError(err, w) {
 		a.logger.Error("error rendering monitor draft after update", "error", err)
 		return
@@ -418,4 +306,162 @@ func (a *app) monitorIDFromPath(r *http.Request) int64 {
 		return 0
 	}
 	return monitorID
+}
+
+func (a *app) renderMonitorDraft(
+	ctx context.Context,
+	mon *sqlc.Monitor,
+	user *sqlc.User,
+	values monitor.UpdateMonitorDraftParams,
+	validationErrs validation.ValidationErrors,
+) (templ.Component, error) {
+	data, err := a.monitorDraftViewData(ctx, mon, user, values, validationErrs)
+	if err != nil {
+		return nil, err
+	}
+	return appcomponents.MonitorDraftPage(data), nil
+}
+
+func (a *app) renderMonitorDraftNew(data appcomponents.MonitorNewData, r *http.Request, w http.ResponseWriter) {
+	appcomponents.MonitorNewPage(data).Render(r.Context(), w)
+}
+
+func (a *app) monitorComponent(ctx context.Context, mon *sqlc.Monitor, u *sqlc.User) (templ.Component, error) {
+	data, err := a.monitorViewData(ctx, mon, u)
+	if err != nil {
+		return nil, err
+	}
+	comp := appcomponents.MonitorViewPage(data)
+	return comp, nil
+}
+
+func (a *app) monitorNofifiersComponent(ctx context.Context, mon *sqlc.Monitor, u *sqlc.User) (templ.Component, error) {
+	data, err := a.monitorNotifierViewData(ctx, mon, u)
+	if err != nil {
+		return nil, err
+	}
+	comp := appcomponents.MonitorNotifiers(mon, data)
+	return comp, nil
+}
+
+func (a *app) monitorDraftViewData(
+	ctx context.Context,
+	mon *sqlc.Monitor,
+	user *sqlc.User,
+	values monitor.UpdateMonitorDraftParams,
+	validationErrs validation.ValidationErrors,
+) (appcomponents.MonitorDraftData, error) {
+	var preview *sqlc.MonitorResult
+	if mon.Status == sqlc.MonitorStatusReady {
+		res, err := a.monitor.ListMonitorResults(ctx, mon)
+		if err != nil {
+			return appcomponents.MonitorDraftData{}, err
+		}
+		if len(res) != 1 {
+			return appcomponents.MonitorDraftData{}, fmt.Errorf("expected exactly one monitor result for preview, got %d", len(res))
+		}
+		preview = res[0]
+	}
+
+	check, err := a.monitor.GetInProgressMonitorCheck(ctx, mon)
+	if err != nil {
+		return appcomponents.MonitorDraftData{}, err
+	}
+
+	var checkEvents []*sqlc.MonitorCheckEvent
+	if check != nil {
+		var err error
+		checkEvents, err = a.monitor.ListMonitorCheckEvents(ctx, check.ID)
+		if err != nil {
+			return appcomponents.MonitorDraftData{}, err
+		}
+	}
+
+	notifiers, err := a.monitorNotifierViewData(ctx, mon, user)
+	if err != nil {
+		return appcomponents.MonitorDraftData{}, err
+	}
+
+	return appcomponents.MonitorDraftData{
+		Monitor:               mon,
+		Values:                values,
+		ResultPreview:         preview,
+		CheckInProgress:       check,
+		CheckInProgressEvents: checkEvents,
+		ValidationErrors:      validationErrs,
+		Notifiers:             notifiers,
+	}, nil
+}
+
+func (a *app) monitorViewData(ctx context.Context, mon *sqlc.Monitor, u *sqlc.User) (appcomponents.MonitorViewData, error) {
+	results, err := a.monitor.ListMonitorResults(ctx, mon)
+	if err != nil {
+		return appcomponents.MonitorViewData{}, err
+	}
+
+	nextScheduled, err := a.monitor.GetNextMonitorCheck(ctx, mon)
+	if err != nil {
+		return appcomponents.MonitorViewData{}, err
+	}
+
+	inProgressCheck, err := a.monitor.GetInProgressMonitorCheck(ctx, mon)
+	if err != nil {
+		return appcomponents.MonitorViewData{}, err
+	}
+
+	var events []*sqlc.MonitorCheckEvent
+	if inProgressCheck != nil {
+		events, err = a.monitor.ListMonitorCheckEvents(ctx, inProgressCheck.ID)
+		if err != nil {
+			return appcomponents.MonitorViewData{}, err
+		}
+	}
+
+	notifiers, err := a.monitorNotifierViewData(ctx, mon, u)
+	if err != nil {
+		return appcomponents.MonitorViewData{}, err
+	}
+
+	return appcomponents.MonitorViewData{
+		Monitor:               mon,
+		Results:               results,
+		NextScheduledCheck:    nextScheduled,
+		InProgressCheck:       inProgressCheck,
+		InProgressCheckEvents: events,
+		Notifiers:             notifiers,
+	}, nil
+}
+
+func (a *app) monitorNotifierViewData(ctx context.Context, mon *sqlc.Monitor, u *sqlc.User) (notifiers []*appcomponents.MonitorNotifierViewData, err error) {
+	notifs, err := a.monitor.ListMonitorNotifiers(ctx, mon)
+	if err != nil {
+		return notifiers, err
+	}
+
+	integrations, err := a.userSettings.Integrations(ctx, u.ID)
+	if err != nil {
+		return notifiers, err
+	}
+
+	for _, integration := range integrations {
+		if !integration.Active {
+			continue
+		}
+
+		var active bool
+
+		for _, notif := range notifs {
+			if notif.Type == integration.Name {
+				active = true
+				break
+			}
+		}
+
+		notifiers = append(notifiers, &appcomponents.MonitorNotifierViewData{
+			Integration: integration,
+			Active:      active,
+		})
+	}
+
+	return notifiers, nil
 }

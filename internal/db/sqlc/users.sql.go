@@ -10,44 +10,6 @@ import (
 	"time"
 )
 
-const activeUserIntegrations = `-- name: ActiveUserIntegrations :many
-select
-    'pushover'::notifier as name,
-    exists(
-        select 1 from pushover_user_tokens
-        where user_id = $1
-    ) as active
-union
-select
-    'email'::notifier as name,
-    true as active
-`
-
-type ActiveUserIntegrationsRow struct {
-	Name   Notifier
-	Active bool
-}
-
-func (q *Queries) ActiveUserIntegrations(ctx context.Context, db DBTX, userID int64) ([]*ActiveUserIntegrationsRow, error) {
-	rows, err := db.Query(ctx, activeUserIntegrations, userID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []*ActiveUserIntegrationsRow
-	for rows.Next() {
-		var i ActiveUserIntegrationsRow
-		if err := rows.Scan(&i.Name, &i.Active); err != nil {
-			return nil, err
-		}
-		items = append(items, &i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const createUser = `-- name: CreateUser :one
 insert into users (email, password_hash, timezone, created_at, updated_at)
 values ($1, $2, $3, $4, $5)
@@ -142,4 +104,42 @@ func (q *Queries) UpdateUserTimezone(ctx context.Context, db DBTX, arg *UpdateUs
 		&i.UpdatedAt,
 	)
 	return &i, err
+}
+
+const userIntegrations = `-- name: UserIntegrations :many
+select
+    'pushover'::notifier as name,
+    exists(
+        select 1 from pushover_user_tokens
+        where user_id = $1
+    ) as active
+union
+select
+    'email'::notifier as name,
+    true as active
+`
+
+type UserIntegrationsRow struct {
+	Name   Notifier
+	Active bool
+}
+
+func (q *Queries) UserIntegrations(ctx context.Context, db DBTX, userID int64) ([]*UserIntegrationsRow, error) {
+	rows, err := db.Query(ctx, userIntegrations, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []*UserIntegrationsRow
+	for rows.Next() {
+		var i UserIntegrationsRow
+		if err := rows.Scan(&i.Name, &i.Active); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

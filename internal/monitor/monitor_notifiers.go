@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/alexpls/untils/internal/db"
 	"github.com/alexpls/untils/internal/db/sqlc"
 	"github.com/alexpls/untils/internal/email"
 	"github.com/alexpls/untils/internal/pushover"
@@ -21,9 +22,15 @@ func (s *Service) ListMonitorNotifiers(ctx context.Context, mon *sqlc.Monitor) (
 }
 
 func (s *Service) CreateMonitorNotifier(ctx context.Context, mon *sqlc.Monitor, notifierType sqlc.Notifier) (*sqlc.MonitorNotifier, error) {
+	return db.WithTxV(s.pool, ctx, func(tx pgx.Tx) (*sqlc.MonitorNotifier, error) {
+		return s.createMonitorNotifierTx(ctx, tx, mon, notifierType)
+	})
+}
+
+func (s *Service) createMonitorNotifierTx(ctx context.Context, tx pgx.Tx, mon *sqlc.Monitor, notifierType sqlc.Notifier) (*sqlc.MonitorNotifier, error) {
 	switch notifierType {
 	case sqlc.NotifierPushover:
-		_, err := s.queries.GetPushoverUserToken(ctx, s.pool, mon.UserID)
+		_, err := s.queries.GetPushoverUserToken(ctx, tx, mon.UserID)
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
 				return nil, ErrNotifierNotConfigured
@@ -32,7 +39,7 @@ func (s *Service) CreateMonitorNotifier(ctx context.Context, mon *sqlc.Monitor, 
 		}
 	}
 
-	notifier, err := s.queries.CreateMonitorNotifier(ctx, s.pool, &sqlc.CreateMonitorNotifierParams{
+	notifier, err := s.queries.CreateMonitorNotifier(ctx, tx, &sqlc.CreateMonitorNotifierParams{
 		MonitorID: mon.ID,
 		Type:      notifierType,
 	})
@@ -59,6 +66,11 @@ type SendNotificationsParams struct {
 }
 
 func (s *Service) SendNotifications(ctx context.Context, params SendNotificationsParams) error {
+	if params.Monitor.Status != sqlc.MonitorStatusActive {
+		s.logger.Warn("skipping notifications for inactive monitor", "monitor_id", params.Monitor.ID)
+		return nil
+	}
+
 	notifiers, err := s.ListMonitorNotifiers(ctx, params.Monitor)
 	if err != nil {
 		return fmt.Errorf("listing monitor notifiers: %w", err)
@@ -88,6 +100,25 @@ func (s *Service) SendNotifications(ctx context.Context, params SendNotification
 
 	if err := g.Wait(); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (s *Service) enableAllNotifiers(ctx context.Context, tx pgx.Tx, mon *sqlc.Monitor) error {
+	integrations, err := s.queries.UserIntegrations(ctx, tx, mon.UserID)
+	if err != nil {
+		return err
+	}
+
+	for _, integration := range integrations {
+		if !integration.Active {
+			continue
+		}
+
+		if _, err := s.createMonitorNotifierTx(ctx, tx, mon, integration.Name); err != nil {
+			return err
+		}
 	}
 
 	return nil

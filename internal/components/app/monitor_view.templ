@@ -16,17 +16,14 @@ type MonitorViewData struct {
 	NextScheduledCheck    *sqlc.MonitorCheck
 	InProgressCheck       *sqlc.MonitorCheck
 	InProgressCheckEvents []*sqlc.MonitorCheckEvent
-	Notifiers             []*sqlc.MonitorNotifier
-	ActiveIntegrations    []*sqlc.ActiveUserIntegrationsRow
+	Notifiers             []*MonitorNotifierViewData
 }
 
-func (data MonitorViewData) integrationEnabled(name sqlc.Notifier) bool {
-	for _, notifier := range data.Notifiers {
-		if notifier.Type == name {
-			return true
-		}
-	}
-	return false
+type MonitorNotifierViewData struct {
+	// Integration represents the integration configured on the account (e.g. pushover, email)
+	Integration *sqlc.UserIntegrationsRow
+	// Active indicates whether the notifier integration is active for the user.
+	Active bool
 }
 
 templ MonitorViewPage(data MonitorViewData) {
@@ -81,15 +78,15 @@ templ MonitorView(data MonitorViewData) {
 						<div class="font-semibold uppercase text-xs">
 							Notifications
 						</div>
-						<div class="mt-1">
-							@MonitorNotifiers(data)
+						<div class="mt-2">
+							@MonitorNotifiers(data.Monitor, data.Notifiers)
 						</div>
 					</div>
 					<div>
 						<div class="font-semibold uppercase text-xs">
 							Next check scheduled at
 						</div>
-						<div>
+						<div class="text-sm text-base-content/60 mt-1">
 							{ components.FormatDateTime(ctx, data.NextScheduledCheck.ScheduledFor) }
 						</div>
 					</div>
@@ -119,31 +116,25 @@ templ MonitorView(data MonitorViewData) {
 	</div>
 }
 
-templ MonitorNotifiers(data MonitorViewData) {
+templ MonitorNotifiers(monitor *sqlc.Monitor, notifiers []*MonitorNotifierViewData) {
 	<div id="monitor-notifiers">
-		for _, integration := range data.ActiveIntegrations {
-			if integration.Active {
-				if data.integrationEnabled(integration.Name) {
-					<div class="flex items-center justify-between">
-						<div class="flex items-center gap-x-2">
-							<div class="badge badge-sm badge-outline badge-success">{ integration.DisplayName() }</div>
-						</div>
-						<button
-							data-on:click={ datastar.DeleteSSE("/app/monitors/%d/notifiers/%s", data.Monitor.ID, integration.Name) }
-							class="btn btn-xs btn-ghost text-error"
-						>
-							Remove
-						</button>
-					</div>
-				} else {
-					<button
-						class="btn btn-xs btn-outline"
-						data-on:click={ datastar.PostSSE("/app/monitors/%d/notifiers/%s", data.Monitor.ID, integration.Name) }
-					>
-						Add { integration.Name }
-					</button>
-				}
-			}
+		for _, notifier := range notifiers {
+			<div>
+				<label class="label text-sm">
+					<input
+						name={ notifier.Integration.Name }
+						type="checkbox"
+						class="checkbox checkbox-sm"
+						checked?={ notifier.Active }
+						if notifier.Active {
+							data-on:change={ datastar.DeleteSSE("/app/monitors/%d/notifiers/%s", monitor.ID, notifier.Integration.Name) }
+						} else {
+							data-on:change={ datastar.PostSSE("/app/monitors/%d/notifiers/%s", monitor.ID, notifier.Integration.Name) }
+						}
+					/>
+					Notify by { notifier.Integration.DisplayName() }
+				</label>
+			</div>
 		}
 	</div>
 }

@@ -20,8 +20,8 @@ func NewService(db *pgxpool.Pool, queries *sqlc.Queries) *Service {
 	}
 }
 
-func (s *Service) ActiveIntegrations(ctx context.Context, userID int64) ([]*sqlc.ActiveUserIntegrationsRow, error) {
-	ai, err := s.queries.ActiveUserIntegrations(ctx, s.db, userID)
+func (s *Service) Integrations(ctx context.Context, userID int64) ([]*sqlc.UserIntegrationsRow, error) {
+	ai, err := s.queries.UserIntegrations(ctx, s.db, userID)
 	if err != nil {
 		return nil, fmt.Errorf("listing active integrations: %w", err)
 	}

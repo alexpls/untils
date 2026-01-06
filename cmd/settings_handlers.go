@@ -16,7 +16,7 @@ import (
 )
 
 func (a *app) settingsGet(w http.ResponseWriter, r *http.Request, user *sqlc.User) {
-	activeIntegrations, err := a.userSettings.ActiveIntegrations(r.Context(), user.ID)
+	activeIntegrations, err := a.userSettings.Integrations(r.Context(), user.ID)
 	if a.internalServerError(err, w) {
 		a.logger.Error("error listing active integrations", "error", err)
 		return

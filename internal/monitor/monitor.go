@@ -59,6 +59,10 @@ func (s *Service) CreateMonitor(ctx context.Context, params CreateMonitorParams)
 			return nil, fmt.Errorf("creating monitor: %w", err)
 		}
 
+		if err := s.enableAllNotifiers(ctx, tx, created); err != nil {
+			return nil, fmt.Errorf("enabling notifiers: %w", err)
+		}
+
 		if _, err = s.river.InsertTx(ctx, tx, ValidateMonitorArgs{
 			UserID:    created.UserID,
 			MonitorID: created.ID,

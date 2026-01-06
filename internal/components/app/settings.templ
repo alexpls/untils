@@ -8,7 +8,7 @@ import "fmt"
 import "github.com/starfederation/datastar-go/datastar"
 
 type SettingsViewModel struct {
-	ActiveIntegrations []*sqlc.ActiveUserIntegrationsRow
+	ActiveIntegrations []*sqlc.UserIntegrationsRow
 }
 
 templ Settings(data *SettingsViewModel) {
