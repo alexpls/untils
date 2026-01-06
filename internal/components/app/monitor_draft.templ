@@ -37,9 +37,7 @@ templ MonitorDraftPage(data MonitorDraftData) {
 				<li>New</li>
 			</ul>
 		</div>
-		<div class="text-center mt-12">
-			<h2 class="text-4xl font-black">What do you want to monitor?</h2>
-		</div>
+		@monitorNewHeading()
 		@MonitorDraftView(data)
 	}
 }
@@ -51,6 +49,7 @@ templ MonitorDraftView(data MonitorDraftData) {
 				<fieldset class="fieldset">
 					<textarea
 						class={ templ.Classes(
+								monitorSubjectTextareaViewTransition(),
 								"textarea", "textarea-xl",
 								templ.KV("textarea-error", components.ValidationError(data, "Subject") != ""),
 								"field-sizing-content", "resize-none",
@@ -175,13 +174,6 @@ templ MonitorDraftView(data MonitorDraftData) {
 								})
 								<div class="ml-2 w-full">
 									<p class="text-success">Ready to go</p>
-									<button
-										class="btn btn-primary mt-2 flex items-center"
-										data-on:click={ datastar.PostSSE("/app/monitors/%d/activate", data.Monitor.ID) }
-									>
-										<span>Start monitoring now</span>
-										@icons.ArrowRight(icons.IconParams{Size: 15})
-									</button>
 								</div>
 							</div>
 						default:
@@ -194,5 +186,30 @@ templ MonitorDraftView(data MonitorDraftData) {
 				</div>
 			</div>
 		</div>
+		if data.Monitor.Status == sqlc.MonitorStatusReady {
+			<div class="mt-4">
+				<button
+					class="btn btn-primary btn-lg w-full mt-2 flex items-center"
+					data-on:click={ datastar.PostSSE("/app/monitors/%d/activate", data.Monitor.ID) }
+				>
+					<span>Start monitoring now</span>
+					@icons.ArrowRight(icons.IconParams{Size: 15})
+				</button>
+			</div>
+		}
+	</div>
+}
+
+css monitorSubjectTextareaViewTransition() {
+	view-transition-name: monitor-subject-textarea;
+}
+
+css monitorNewHeadingViewTransition() {
+	view-transition-name: monitor-new-heading;
+}
+
+templ monitorNewHeading() {
+	<div class={ "text-center", "mt-12", monitorNewHeadingViewTransition() }>
+		<h2 class="text-4xl font-black">What do you want to monitor?</h2>
 	</div>
 }

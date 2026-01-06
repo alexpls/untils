@@ -30,12 +30,13 @@ templ MonitorNewPage(data MonitorNewData) {
 			</div>
 			<div class="flex-1 flex items-center justify-center">
 				<div class="text-center w-full">
-					<h2 class="font-black text-4xl mb-8">What do you want to monitor?</h2>
-					<div class="m-4 w-full mx-auto max-w-120">
+					@monitorNewHeading()
+					<div class="m-4 w-full mx-auto max-w-120 mt-8">
 						<form method="POST" action="/app/monitors/new">
 							<fieldset class="fieldset">
 								<textarea
 									class={ templ.Classes(
+										monitorSubjectTextareaViewTransition(),
 										"textarea", "textarea-xl",
 										templ.KV("textarea-error", components.ValidationError(data, "Subject") != ""),
 										templ.KV("textarea-primary", components.ValidationError(data, "Subject") == ""),

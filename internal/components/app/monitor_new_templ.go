@@ -58,11 +58,20 @@ func MonitorNewPage(data MonitorNewData) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"flex flex-col h-full\"><div class=\"py-2 px-4 breadcrumbs text-sm border-b border-base-content/10\"><ul><li><a href=\"/app\" class=\"link link-hover\">Monitors</a></li><li>New</li></ul></div><div class=\"flex-1 flex items-center justify-center\"><div class=\"text-center w-full\"><h2 class=\"font-black text-4xl mb-8\">What do you want to monitor?</h2><div class=\"m-4 w-full mx-auto max-w-120\"><form method=\"POST\" action=\"/app/monitors/new\"><fieldset class=\"fieldset\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"flex flex-col h-full\"><div class=\"py-2 px-4 breadcrumbs text-sm border-b border-base-content/10\"><ul><li><a href=\"/app\" class=\"link link-hover\">Monitors</a></li><li>New</li></ul></div><div class=\"flex-1 flex items-center justify-center\"><div class=\"text-center w-full\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = monitorNewHeading().Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"m-4 w-full mx-auto max-w-120 mt-8\"><form method=\"POST\" action=\"/app/monitors/new\"><fieldset class=\"fieldset\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 = []any{templ.Classes(
+				monitorSubjectTextareaViewTransition(),
 				"textarea", "textarea-xl",
 				templ.KV("textarea-error", components.ValidationError(data, "Subject") != ""),
 				templ.KV("textarea-primary", components.ValidationError(data, "Subject") == ""),
@@ -73,7 +82,7 @@ func MonitorNewPage(data MonitorNewData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<textarea class=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<textarea class=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -86,43 +95,43 @@ func MonitorNewPage(data MonitorNewData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" placeholder=\"Type here...\" name=\"Subject\" data-effect=\"el.selectionStart = el.value.length\" data-on:keydown=\"\n\t\t\t\t\t\t\t\t\t\tif (evt.key === 'Enter') {\n\t\t\t\t\t\t\t\t\t\t\tevt.preventDefault();\n\t\t\t\t\t\t\t\t\t\t\tel.form.submit();\n\t\t\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\t\t\" autofocus>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" placeholder=\"Type here...\" name=\"Subject\" data-effect=\"el.selectionStart = el.value.length\" data-on:keydown=\"\n\t\t\t\t\t\t\t\t\t\tif (evt.key === 'Enter') {\n\t\t\t\t\t\t\t\t\t\t\tevt.preventDefault();\n\t\t\t\t\t\t\t\t\t\t\tel.form.submit();\n\t\t\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\t\t\" autofocus>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(data.Values.Subject)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/monitor_new.templ`, Line: 55, Col: 30}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/monitor_new.templ`, Line: 56, Col: 30}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</textarea><div class=\"text-left\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</textarea><div class=\"text-left\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if components.ValidationError(data, "Subject") != "" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<p class=\"label text-error mt-1\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<p class=\"label text-error mt-1\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(components.ValidationError(data, "Subject"))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/monitor_new.templ`, Line: 58, Col: 88}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/monitor_new.templ`, Line: 59, Col: 88}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</p>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</p>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</div></fieldset><button class=\"btn mt-4 btn-primary btn-lg w-full\" type=\"submit\"><span class=\"mr-1\">Continue</span>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div></fieldset><button class=\"btn mt-4 btn-primary btn-lg w-full\" type=\"submit\"><span class=\"mr-1\">Continue</span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -130,7 +139,7 @@ func MonitorNewPage(data MonitorNewData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</button></form><div class=\"mt-8\"><h4 class=\"text-base-content/50\"><strong>Need inspiration?</strong> How about when...</h4>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</button></form><div class=\"mt-8\"><h4 class=\"text-base-content/50\"><strong>Need inspiration?</strong> How about when...</h4>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -138,7 +147,7 @@ func MonitorNewPage(data MonitorNewData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</div></div></div></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</div></div></div></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -191,20 +200,20 @@ func subjectExamplesCarousel() templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 		example := subjectExamples()[0]
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<div class=\"relative overflow-hidden\"><div class=\"flex\"><div class=\"w-full shrink-0 px-2 text-base-content/50\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<div class=\"relative overflow-hidden\"><div class=\"flex\"><div class=\"w-full shrink-0 px-2 text-base-content/50\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(example)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/monitor_new.templ`, Line: 105, Col: 13}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/monitor_new.templ`, Line: 106, Col: 13}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
