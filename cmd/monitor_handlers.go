@@ -444,7 +444,7 @@ func (a *app) monitorNotifierViewData(ctx context.Context, mon *sqlc.Monitor, u 
 	}
 
 	for _, integration := range integrations {
-		if !integration.Active {
+		if !integration.Configured {
 			continue
 		}
 

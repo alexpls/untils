@@ -22,7 +22,7 @@ type MonitorViewData struct {
 type MonitorNotifierViewData struct {
 	// Integration represents the integration configured on the account (e.g. pushover, email)
 	Integration *sqlc.UserIntegrationsRow
-	// Active indicates whether the notifier integration is active for the user.
+	// Active indicates whether the notifier is active for this monitor.
 	Active bool
 }
 

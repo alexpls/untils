@@ -16,7 +16,7 @@ import "fmt"
 import "github.com/starfederation/datastar-go/datastar"
 
 type SettingsViewModel struct {
-	ActiveIntegrations []*sqlc.UserIntegrationsRow
+	ConfiguredIntegrations []*sqlc.UserIntegrationsRow
 }
 
 func Settings(data *SettingsViewModel) templ.Component {
@@ -86,7 +86,7 @@ func Settings(data *SettingsViewModel) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			for _, integration := range data.ActiveIntegrations {
+			for _, integration := range data.ConfiguredIntegrations {
 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<li class=\"list-row justify-between flex items-center\"><div class=\"text-base flex items-center space-x-2\"><div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -104,8 +104,8 @@ func Settings(data *SettingsViewModel) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				if integration.Active {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div class=\"badge badge-sm badge-outline badge-success\">Active</div>")
+				if integration.Configured {
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div class=\"badge badge-sm badge-outline badge-success\">Configured</div>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}

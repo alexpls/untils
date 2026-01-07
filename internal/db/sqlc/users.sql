@@ -15,11 +15,11 @@ select
     exists(
         select 1 from pushover_user_tokens
         where user_id = @user_id
-    ) as active
+    ) as configured
 union
 select
     'email'::notifier as name,
-    true as active;
+    true as configured;
 
 -- name: UpdateUserTimezone :one
 update users

@@ -112,16 +112,16 @@ select
     exists(
         select 1 from pushover_user_tokens
         where user_id = $1
-    ) as active
+    ) as configured
 union
 select
     'email'::notifier as name,
-    true as active
+    true as configured
 `
 
 type UserIntegrationsRow struct {
-	Name   Notifier
-	Active bool
+	Name       Notifier
+	Configured bool
 }
 
 func (q *Queries) UserIntegrations(ctx context.Context, db DBTX, userID int64) ([]*UserIntegrationsRow, error) {
@@ -133,7 +133,7 @@ func (q *Queries) UserIntegrations(ctx context.Context, db DBTX, userID int64) (
 	var items []*UserIntegrationsRow
 	for rows.Next() {
 		var i UserIntegrationsRow
-		if err := rows.Scan(&i.Name, &i.Active); err != nil {
+		if err := rows.Scan(&i.Name, &i.Configured); err != nil {
 			return nil, err
 		}
 		items = append(items, &i)

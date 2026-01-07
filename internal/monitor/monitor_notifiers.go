@@ -112,7 +112,7 @@ func (s *Service) enableAllNotifiers(ctx context.Context, tx pgx.Tx, mon *sqlc.M
 	}
 
 	for _, integration := range integrations {
-		if !integration.Active {
+		if !integration.Configured {
 			continue
 		}
 

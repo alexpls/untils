@@ -8,7 +8,7 @@ import "fmt"
 import "github.com/starfederation/datastar-go/datastar"
 
 type SettingsViewModel struct {
-	ActiveIntegrations []*sqlc.UserIntegrationsRow
+	ConfiguredIntegrations []*sqlc.UserIntegrationsRow
 }
 
 templ Settings(data *SettingsViewModel) {
@@ -41,12 +41,12 @@ templ Settings(data *SettingsViewModel) {
 			<div class="bg-base-100 border rounded border-base-content/10">
 				<h2 class="text-xl font-semibold p-4 border-b border-base-content/10">Integrations</h2>
 				<ul class="list">
-					for _, integration := range data.ActiveIntegrations {
+					for _, integration := range data.ConfiguredIntegrations {
 						<li class="list-row justify-between flex items-center">
 							<div class="text-base flex items-center space-x-2">
 								<div>{ integration.DisplayName() }</div>
-								if integration.Active {
-									<div class="badge badge-sm badge-outline badge-success">Active</div>
+								if integration.Configured {
+									<div class="badge badge-sm badge-outline badge-success">Configured</div>
 								}
 							</div>
 							<div>
