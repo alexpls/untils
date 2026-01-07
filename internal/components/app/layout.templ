@@ -5,7 +5,13 @@ import "github.com/alexpls/untils/internal/components"
 templ appLayout() {
 	@components.Layout() {
 		@timezoneSync()
-		<header>
+		<header
+			class="sticky top-0 z-0"
+			data-signals:_header.scroll-y="0"
+			data-init="$_header.height = el.offsetHeight"
+			data-on:scroll__window="$_header.scrollY = window.scrollY"
+			data-style:opacity="Math.max(0, 1 - $_header.scrollY / ($_header.height/1.5))"
+		>
 			<div class="container flex mx-auto justify-between items-center py-2.5 text-muted">
 				<div>
 					<a href="/app" class="font-stretch-expanded font-bold hover:bg-base-200 rounded p-2 px-3 transition-colors">
@@ -29,6 +35,7 @@ templ appLayout() {
 			"border", "border-base-content/10", "border-b-0",
 			"rounded-lg", "rounded-bl-none", "rounded-br-none",
 			"shadow-xl",
+			"relative", "z-10",
 		) }
 		>
 			{ children... }
