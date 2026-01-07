@@ -13,10 +13,9 @@ type SettingsViewModel struct {
 
 templ Settings(data *SettingsViewModel) {
 	@appLayout() {
-		@header("Settings", nil)
-		<div class="container max-w-160 p-4 space-y-4">
-			<div class="bg-base-100 border rounded border-base-content/10">
-				<h2 class="text-xl font-semibold p-4 border-b border-base-content/10">Account</h2>
+		@headerCentered("Settings")
+		<div class="mx-auto max-w-160 p-4 space-y-4">
+			@settingsPanel("Account") {
 				<ul class="list">
 					<li class="text-base list-row justify-between flex items-center">
 						<div>Email address</div>
@@ -37,9 +36,8 @@ templ Settings(data *SettingsViewModel) {
 						</div>
 					</li>
 				</ul>
-			</div>
-			<div class="bg-base-100 border rounded border-base-content/10">
-				<h2 class="text-xl font-semibold p-4 border-b border-base-content/10">Integrations</h2>
+			}
+			@settingsPanel("Integrations") {
 				<ul class="list">
 					for _, integration := range data.ConfiguredIntegrations {
 						<li class="list-row justify-between flex items-center">
@@ -55,7 +53,7 @@ templ Settings(data *SettingsViewModel) {
 						</li>
 					}
 				</ul>
-			</div>
+			}
 		</div>
 	}
 }
@@ -81,41 +79,47 @@ templ PushoverSettings(data *PushoverSettingsViewModel) {
 				<li>Pushover</li>
 			</ul>
 		</div>
-		@header("Configure Pushover", nil)
-		<div class="container max-w-160 p-4 space-y-4">
-			if data.Token != nil {
-				<div role="alert" class="alert alert-info">
-					<span>
-						Your Pushover integration is configured with
-						token: { components.MaskSecret(data.Token.Token) }.
-					</span>
-				</div>
-				<button
-					class="btn btn-error"
-					data-on:click={ datastar.DeleteSSE("/app/settings/pushover") }
-				>
-					Reset token
-				</button>
-			} else {
-				<form method="post" action="/app/settings/pushover">
-					<fieldset class="fieldset">
-						<legend class="fieldset-legend">Pushover token</legend>
-						<input
-							class={ "input", templ.KV("input-error", components.ValidationError(data, "Token") != "") }
-							type="text"
-							autocomplete="off"
-							placeholder="Enter token here"
-							name="Token"
-							value={ data.Values.Token }
-						/>
-						if err := components.ValidationError(data, "Token"); err != "" {
-							<p class="label text-error">{ err }</p>
+		@headerCentered("Configure Pushover")
+		<div class="max-w-160 mx-auto p-4 space-y-4">
+			@settingsPanel("") {
+				<ul class="list">
+					<li class="list-row">
+						if data.Token != nil {
+							<div role="alert" class="alert alert-info">
+								<span>
+									Your Pushover integration is configured with
+									token: { components.MaskSecret(data.Token.Token) }.
+								</span>
+							</div>
+							<button
+								class="btn btn-error"
+								data-on:click={ datastar.DeleteSSE("/app/settings/pushover") }
+							>
+								Reset token
+							</button>
 						} else {
-							<p class="label text-error">&nbsp;</p>
+							<form method="post" action="/app/settings/pushover">
+								<fieldset class="fieldset">
+									<legend class="fieldset-legend">Pushover token</legend>
+									<input
+										class={ "input", templ.KV("input-error", components.ValidationError(data, "Token") != "") }
+										type="text"
+										autocomplete="off"
+										placeholder="Enter token here"
+										name="Token"
+										value={ data.Values.Token }
+									/>
+									if err := components.ValidationError(data, "Token"); err != "" {
+										<p class="label text-error">{ err }</p>
+									} else {
+										<p class="label text-error">&nbsp;</p>
+									}
+								</fieldset>
+								<button class="btn btn-primary" type="submit">Set token</button>
+							</form>
 						}
-					</fieldset>
-					<button class="btn btn-primary" type="submit">Set token</button>
-				</form>
+					</li>
+				</ul>
 			}
 		</div>
 	}
@@ -135,10 +139,25 @@ templ EmailSettings(data *EmailSettingsViewModel) {
 				<li>Email</li>
 			</ul>
 		</div>
-		@header("Configure Email", nil)
-		<div class="container max-w-160 p-4 space-y-4">
-			Nothing to configure. Emails will be sent to your account
-			email address: <strong>{ data.Email }</strong>.
+		@headerCentered("Configure Email")
+		<div class="max-w-160 mx-auto p-4 space-y-4">
+			@settingsPanel("") {
+				<div role="alert" class="alert alert-info">
+					<span>
+						Nothing to configure. Emails will be sent to your
+						email address: <strong>{ data.Email }</strong>.
+					</span>
+				</div>
+			}
 		</div>
 	}
+}
+
+templ settingsPanel(title string) {
+	<div class="bg-base-100 border rounded border-base-content/10">
+		if title != "" {
+			<h2 class="text-xl font-semibold p-4 border-b border-base-content/10">{ title }</h2>
+		}
+		{ children... }
+	</div>
 }

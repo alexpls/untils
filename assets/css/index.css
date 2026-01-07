@@ -2,5 +2,13 @@
 @plugin "daisyui";
 
 @view-transition {
-  navigation: auto;
+    navigation: auto;
+}
+
+@utility text-muted {
+    color: color-mix(
+        in oklab,
+        var(--color-base-content) 60%,
+        var(--color-base-100)
+    );
 }

@@ -17,25 +17,23 @@ templ monitorListPageActions() {
 
 templ MonitorsListPage(data MonitorsListData) {
 	@appLayout() {
-		<div class="container mx-auto">
-			@header("Monitors", monitorListPageActions())
-			if len(data.Monitors) > 0 {
-				<ul class="list px-0 mx-0">
-					for _, mon := range data.Monitors {
-						<li class="list-row">
-							<div>
-								<a class="link link-hover font-semibold" href={ fmt.Sprintf("/app/monitors/%d", mon.ID) }>
-									{ mon.Subject.String }
-								</a>
-							</div>
-						</li>
-					}
-				</ul>
-			} else {
-				<div class="p-4">
-					No monitors to show.
-				</div>
-			}
-		</div>
+		@header("Monitors", monitorListPageActions())
+		if len(data.Monitors) > 0 {
+			<ul class="list px-0 mx-0">
+				for _, mon := range data.Monitors {
+					<li class="list-row">
+						<div>
+							<a class="link link-hover font-semibold" href={ fmt.Sprintf("/app/monitors/%d", mon.ID) }>
+								{ mon.Subject.String }
+							</a>
+						</div>
+					</li>
+				}
+			</ul>
+		} else {
+			<div class="p-4">
+				No monitors to show.
+			</div>
+		}
 	}
 }

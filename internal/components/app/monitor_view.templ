@@ -41,7 +41,7 @@ templ MonitorViewPage(data MonitorViewData) {
 }
 
 templ MonitorView(data MonitorViewData) {
-	<div id="monitor-view" class="container mx-auto" data-effect={ datastar.GetSSE("/app/monitors/%d/events", data.Monitor.ID) }>
+	<div id="monitor-view" data-effect={ datastar.GetSSE("/app/monitors/%d/events", data.Monitor.ID) }>
 		@header(data.Monitor.Subject.String, nil) {
 			<div class="text-sm flex gap-x-2 mt-2">
 				<div class="badge badge-soft badge-success">
