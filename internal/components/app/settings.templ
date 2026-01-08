@@ -12,7 +12,9 @@ type SettingsViewModel struct {
 }
 
 templ Settings(data *SettingsViewModel) {
-	@appLayout() {
+	@appLayout([]breadcrumb{
+		{title: "Dashboard", href: "/app"},
+	}) {
 		@headerCentered("Settings")
 		<div class="mx-auto max-w-160 p-4 space-y-4">
 			@settingsPanel("Account") {
@@ -70,7 +72,9 @@ func (m PushoverSettingsViewModel) GetValidationErrors() validation.ValidationEr
 }
 
 templ PushoverSettings(data *PushoverSettingsViewModel) {
-	@appLayout() {
+	@appLayout([]breadcrumb{
+		{title: "Dashboard", href: "/app"},
+	}) {
 		<div class="py-2 px-4 breadcrumbs text-sm border-b border-base-content/10">
 			<ul>
 				<li>
@@ -130,7 +134,9 @@ type EmailSettingsViewModel struct {
 }
 
 templ EmailSettings(data *EmailSettingsViewModel) {
-	@appLayout() {
+	@appLayout([]breadcrumb{
+		{title: "Dashboard", href: "/app"},
+	}) {
 		<div class="py-2 px-4 breadcrumbs text-sm border-b border-base-content/10">
 			<ul>
 				<li>

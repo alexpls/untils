@@ -3,7 +3,6 @@ package main
 import (
 	"net/http"
 
-	"github.com/alexpls/untils/internal/db/sqlc"
 	"github.com/alexpls/untils/internal/faviconproxy"
 	"github.com/alexpls/untils/public"
 )
@@ -23,7 +22,7 @@ func (a *app) routes() http.Handler {
 	mux.HandleFunc("GET /sign_out", a.signOutGet)
 
 	// app
-	mux.HandleFunc("GET /app", a.requireAuth(a.appHandler))
+	mux.HandleFunc("GET /app", a.requireAuth(a.dashboardGet))
 
 	// monitors
 	mux.HandleFunc("GET /app/monitors", a.requireAuth(a.monitorListGet))
@@ -57,8 +56,4 @@ func (a *app) routes() http.Handler {
 		csrf.Handler, a.logRequests, a.setTimezoneContext,
 		sess.Handler, a.setUserContext, a.setEnvContext,
 	)
-}
-
-func (a *app) appHandler(w http.ResponseWriter, r *http.Request, _ *sqlc.User) {
-	http.Redirect(w, r, "/app/monitors", http.StatusSeeOther)
 }

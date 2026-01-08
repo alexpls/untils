@@ -18,16 +18,11 @@ func (m MonitorNewData) GetValidationErrors() validation.ValidationErrors {
 }
 
 templ MonitorNewPage(data MonitorNewData) {
-	@appLayout() {
+	@appLayout([]breadcrumb{
+		{title: "Dashboard", href: "/app"},
+		{title: "Monitors", href: "/app/monitors"},
+	}) {
 		<div class="flex flex-col h-full">
-			<div class="py-2 px-4 breadcrumbs text-sm border-b border-base-content/10">
-				<ul>
-					<li>
-						<a href="/app" class="link link-hover">Monitors</a>
-					</li>
-					<li>New</li>
-				</ul>
-			</div>
 			<div class="flex-1 flex items-center justify-center">
 				<div class="text-center w-full">
 					@monitorNewHeading()

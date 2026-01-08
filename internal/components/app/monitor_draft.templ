@@ -29,15 +29,10 @@ func monitorLoading(mon *sqlc.Monitor) bool {
 }
 
 templ MonitorDraftPage(data MonitorDraftData) {
-	@appLayout() {
-		<div class="py-2 px-4 breadcrumbs text-sm border-b border-base-content/10">
-			<ul>
-				<li>
-					<a href="/app" class="link link-hover">Monitors</a>
-				</li>
-				<li>New</li>
-			</ul>
-		</div>
+	@appLayout([]breadcrumb{
+		{title: "Dashboard", href: "/app"},
+		{title: "Monitors", href: "/app/monitors"},
+	}) {
 		@monitorNewHeading()
 		@MonitorDraftView(data)
 	}
@@ -168,7 +163,15 @@ templ MonitorDraftView(data MonitorDraftData) {
 								</div>
 							</div>
 						default:
-							<span class="ml-1 text-base-content/30">Previewing the first check</span>
+							<div class="flex items-start">
+								@icons.Spacer(icons.IconParams{
+									Size:    18,
+									Classes: templ.Classes("shrink-0", "mt-1"),
+								})
+								<div class="ml-2">
+									<p class="text-base-content/30">Previewing the first check</p>
+								</div>
+							</div>
 					}
 				</div>
 				<div class="p-3 space-y-3">
@@ -191,7 +194,11 @@ templ MonitorDraftView(data MonitorDraftData) {
 							</div>
 						default:
 							<div class="flex items-start">
-								<div class="text-base-content/30">
+								@icons.Spacer(icons.IconParams{
+									Size:    18,
+									Classes: templ.Classes("shrink-0", "mt-1"),
+								})
+								<div class="ml-2 w-full text-base-content/30">
 									Ready to go
 								</div>
 							</div>

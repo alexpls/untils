@@ -100,7 +100,7 @@ func MonitorsListPage(data MonitorsListData) templ.Component {
 					var templ_7745c5c3_Var4 templ.SafeURL
 					templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinURLErrs(fmt.Sprintf("/app/monitors/%d", mon.ID))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/monitors_list.templ`, Line: 26, Col: 94}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/monitors_list.templ`, Line: 29, Col: 94}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 					if templ_7745c5c3_Err != nil {
@@ -113,7 +113,7 @@ func MonitorsListPage(data MonitorsListData) templ.Component {
 					var templ_7745c5c3_Var5 string
 					templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(mon.Subject.String)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/monitors_list.templ`, Line: 27, Col: 28}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/monitors_list.templ`, Line: 30, Col: 28}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 					if templ_7745c5c3_Err != nil {
@@ -136,7 +136,10 @@ func MonitorsListPage(data MonitorsListData) templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = appLayout().Render(templ.WithChildren(ctx, templ_7745c5c3_Var3), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = appLayout([]breadcrumb{
+			{title: "Dashboard", href: "/app"},
+			{title: "Monitors", href: "/app/monitors"},
+		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var3), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

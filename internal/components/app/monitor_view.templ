@@ -27,15 +27,10 @@ type MonitorNotifierViewData struct {
 }
 
 templ MonitorViewPage(data MonitorViewData) {
-	@appLayout() {
-		<div class="py-2 px-4 breadcrumbs text-sm border-b border-base-content/10">
-			<ul>
-				<li>
-					<a href="/app" class="link link-hover">Monitors</a>
-				</li>
-				<li>{ data.Monitor.Subject.String }</li>
-			</ul>
-		</div>
+	@appLayout([]breadcrumb{
+		{title: "Dashboard", href: "/app"},
+		{title: "Monitors", href: "/app/monitors"},
+	}) {
 		@MonitorView(data)
 	}
 }

@@ -16,7 +16,10 @@ templ monitorListPageActions() {
 }
 
 templ MonitorsListPage(data MonitorsListData) {
-	@appLayout() {
+	@appLayout([]breadcrumb{
+		{title: "Dashboard", href: "/app"},
+		{title: "Monitors", href: "/app/monitors"},
+	}) {
 		@header("Monitors", monitorListPageActions())
 		if len(data.Monitors) > 0 {
 			<ul class="list px-0 mx-0">

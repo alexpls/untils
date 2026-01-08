@@ -1,8 +1,9 @@
 package app
 
 import "github.com/alexpls/untils/internal/components"
+import "github.com/alexpls/untils/internal/components/icons"
 
-templ appLayout() {
+templ appLayout(breadcrumbs []breadcrumb) {
 	@components.Layout() {
 		@timezoneSync()
 		<header
@@ -13,16 +14,19 @@ templ appLayout() {
 			data-style:opacity="Math.max(0, 1 - $_header.scrollY / ($_header.height/1.5))"
 		>
 			<div class="container flex mx-auto justify-between items-center py-2.5 text-muted">
-				<div>
-					<a href="/app" class="font-stretch-expanded font-bold hover:bg-base-200 rounded p-2 px-3 transition-colors">
+				<div class="flex items-center">
+					<a href="/app" class="font-stretch-expanded hover:bg-base-200 rounded p-2 px-3 transition-colors">
 						untils
 					</a>
+					for _, b := range breadcrumbs {
+						@breadcrumbView(b)
+					}
 				</div>
 				<div class="flex justify-end">
-					<a href="/app/settings" class="font-bold flex items-center text-sm hover:bg-base-200 rounded p-2 px-3 transition-colors">
+					<a href="/app/settings" class="flex items-center text-sm hover:bg-base-200 rounded p-2 px-3 transition-colors">
 						Settings
 					</a>
-					<a href="/sign_out" class="font-bold flex items-center text-sm hover:bg-base-200 rounded p-2 px-3 transition-colors">
+					<a href="/sign_out" class="flex items-center text-sm hover:bg-base-200 rounded p-2 px-3 transition-colors">
 						Sign out
 					</a>
 				</div>
@@ -83,4 +87,15 @@ templ timezoneSync() {
 			data-effect="@post('/app/settings/timezone')"
 		></div>
 	}
+}
+
+type breadcrumb struct {
+	title, href string
+}
+
+templ breadcrumbView(b breadcrumb) {
+	@icons.ChevronRight(icons.IconParams{Size: 16})
+	<a href={ b.href } class="hover:bg-base-200 rounded p-2 px-3 transition-colors">
+		{ b.title }
+	</a>
 }
