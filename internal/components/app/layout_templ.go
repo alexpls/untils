@@ -68,6 +68,7 @@ func appLayout(breadcrumbs []breadcrumb) templ.Component {
 				"hover:cursor-pointer", "hover:bg-base-200",
 				"group-has-[:popover-open]:bg-base-200",
 				"group-has-[:popover-open]:rounded-bl-none",
+				"group-has-[:popover-open]:rounded-br-none",
 				"rounded",
 				"transition-colors",
 			)}
@@ -96,7 +97,7 @@ func appLayout(breadcrumbs []breadcrumb) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "Menu</button><ul class=\"dropdown dropdown-end menu rounded-box rounded-tr-none bg-base-200 shadow-lg text-base px-3\" id=\"header-menu\" style=\"position-anchor: --header-menu\" popover><li><a href=\"/app/settings\">Settings</a></li><li><a href=\"/sign_out\">Sign out</a></li></ul></div></div></header>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "Menu</button><ul class=\"dropdown dropdown-end menu rounded-box rounded-tr-none bg-base-200 shadow-lg text-base px-3\" id=\"header-menu\" style=\"position-anchor: --header-menu\" popover><li class=\"content-end\"><a href=\"/app/settings\">Settings</a></li><li class=\"content-end\"><a href=\"/sign_out\">Sign out</a></li></ul></div></div></header>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -187,7 +188,7 @@ func headerCentered(title string) templ.Component {
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/layout.templ`, Line: 80, Col: 10}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/layout.templ`, Line: 81, Col: 10}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -247,7 +248,7 @@ func header(title string, actions templ.Component) templ.Component {
 			var templ_7745c5c3_Var12 string
 			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/layout.templ`, Line: 89, Col: 11}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/layout.templ`, Line: 90, Col: 11}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
@@ -355,7 +356,7 @@ func timezoneSync() templ.Component {
 			var templ_7745c5c3_Var15 string
 			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(templ.JSONString(components.TimezoneFromCookie(ctx)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/layout.templ`, Line: 113, Col: 79}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/layout.templ`, Line: 114, Col: 79}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {
@@ -406,7 +407,7 @@ func breadcrumbView(b breadcrumb) templ.Component {
 		var templ_7745c5c3_Var17 templ.SafeURL
 		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinURLErrs(b.href)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/layout.templ`, Line: 125, Col: 17}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/layout.templ`, Line: 126, Col: 17}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {
@@ -419,7 +420,7 @@ func breadcrumbView(b breadcrumb) templ.Component {
 		var templ_7745c5c3_Var18 string
 		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(b.title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/layout.templ`, Line: 126, Col: 11}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/layout.templ`, Line: 127, Col: 11}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {
