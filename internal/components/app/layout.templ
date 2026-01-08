@@ -22,13 +22,40 @@ templ appLayout(breadcrumbs []breadcrumb) {
 						@breadcrumbView(b)
 					}
 				</div>
-				<div class="flex justify-end">
-					<a href="/app/settings" class="flex items-center text-sm hover:bg-base-200 rounded p-2 px-3 transition-colors">
-						Settings
-					</a>
-					<a href="/sign_out" class="flex items-center text-sm hover:bg-base-200 rounded p-2 px-3 transition-colors">
-						Sign out
-					</a>
+				<div class="flex-end group">
+					<button
+						style="anchor-name: --header-menu"
+						popovertarget="header-menu"
+						class={ templ.Classes(
+							"flex", "items-center",
+							"p-2","px-3",
+							"hover:cursor-pointer","hover:bg-base-200",
+							"group-has-[:popover-open]:bg-base-200",
+							"group-has-[:popover-open]:rounded-bl-none",
+							"rounded",
+							"transition-colors",
+						) }
+					>
+						@icons.Menu(icons.IconParams{Size: 18, Classes: templ.Classes("mr-1")})
+						Menu
+					</button>
+					<ul
+						class="dropdown dropdown-end menu rounded-box rounded-tr-none bg-base-200 shadow-lg text-base px-3"
+						id="header-menu"
+						style="position-anchor: --header-menu"
+						popover
+					>
+						<li>
+							<a href="/app/settings">
+								Settings
+							</a>
+						</li>
+						<li>
+							<a href="/sign_out">
+								Sign out
+							</a>
+						</li>
+					</ul>
 				</div>
 			</div>
 		</header>
