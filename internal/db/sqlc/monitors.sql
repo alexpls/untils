@@ -59,6 +59,16 @@ and status = 'checking'
 order by scheduled_for desc
 limit 1;
 
+-- name: GetMonitorCheckStats :one
+select
+    count(*) filter (where mc.done_at >= now() - interval '7 days') as checks_last_7_days,
+    count(*) filter (where mc.done_at >= now() - interval '30 days') as checks_last_30_days,
+    count(*) as checks_all_time
+from monitor_checks mc
+join monitors m on m.id = mc.monitor_id
+where m.user_id = @user_id
+and mc.status = 'success';
+
 -- name: SkipPendingChecks :exec
 update monitor_checks
 set status = 'skipped'

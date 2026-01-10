@@ -367,6 +367,30 @@ func (q *Queries) GetMonitorCheck(ctx context.Context, db DBTX, id int64) (*Moni
 	return &i, err
 }
 
+const getMonitorCheckStats = `-- name: GetMonitorCheckStats :one
+select
+    count(*) filter (where mc.done_at >= now() - interval '7 days') as checks_last_7_days,
+    count(*) filter (where mc.done_at >= now() - interval '30 days') as checks_last_30_days,
+    count(*) as checks_all_time
+from monitor_checks mc
+join monitors m on m.id = mc.monitor_id
+where m.user_id = $1
+and mc.status = 'success'
+`
+
+type GetMonitorCheckStatsRow struct {
+	ChecksLast7Days  int64
+	ChecksLast30Days int64
+	ChecksAllTime    int64
+}
+
+func (q *Queries) GetMonitorCheckStats(ctx context.Context, db DBTX, userID int64) (*GetMonitorCheckStatsRow, error) {
+	row := db.QueryRow(ctx, getMonitorCheckStats, userID)
+	var i GetMonitorCheckStatsRow
+	err := row.Scan(&i.ChecksLast7Days, &i.ChecksLast30Days, &i.ChecksAllTime)
+	return &i, err
+}
+
 const getNextMonitorCheck = `-- name: GetNextMonitorCheck :one
 select id, monitor_id, status, scheduled_for, failure_reason, done_at, result from monitor_checks
 where monitor_id = $1

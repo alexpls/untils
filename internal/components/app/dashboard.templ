@@ -8,6 +8,14 @@ import (
 	"github.com/starfederation/datastar-go/datastar"
 )
 
+type LoadingStatus int
+
+const (
+	_                    LoadingStatus = iota
+	LoadingStatusLoading               // Data is loading
+	LoadingStatusLoaded                // Data has loaded
+)
+
 templ DashboardPage(data DashboardViewData) {
 	@appLayout([]breadcrumb{
 		{title: "Dashboard", href: "/app"},
@@ -18,6 +26,7 @@ templ DashboardPage(data DashboardViewData) {
 
 type DashboardViewData struct {
 	MonitorActivity MonitorActivityWidgetData
+	CheckStats      CheckStatsWidgetData
 }
 
 templ DashboardView(data DashboardViewData) {
@@ -30,18 +39,10 @@ templ DashboardView(data DashboardViewData) {
 			@monitorActivityWidget(data.MonitorActivity)
 		</div>
 		<div class="col-span-6">
-			@upcomingChecksWidget()
+			@checksWidget(data.CheckStats)
 		</div>
 	</div>
 }
-
-type LoadingStatus int
-
-const (
-	_                    LoadingStatus = iota
-	LoadingStatusLoading               // Data is loading
-	LoadingStatusLoaded                // Data has loaded
-)
 
 type MonitorActivityWidgetData struct {
 	Loading LoadingStatus
@@ -52,7 +53,7 @@ templ monitorActivityWidget(data MonitorActivityWidgetData) {
 	@dashboardWidget("Activity across your monitors", monitorActivityWidgetActions()) {
 		switch data.Loading {
 			case LoadingStatusLoading:
-				<div class="w-full h-full skeleton rounded-none bg-base-200"></div>
+				@dashboardWidgetLoader()
 			case LoadingStatusLoaded:
 				@components.Timeline() {
 					for _, item := range data.Items {
@@ -90,13 +91,32 @@ templ monitorActivityWidgetActions() {
 	</a>
 }
 
-templ upcomingChecksWidget() {
-	@dashboardWidget("Upcoming checks", nil) {
-		<div class="p-4">
-			<p class="text-center text-muted">
-				No activity to show
-			</p>
-		</div>
+type CheckStatsWidgetData struct {
+	Loading    LoadingStatus
+	CheckStats *sqlc.GetMonitorCheckStatsRow
+}
+
+templ checksWidget(data CheckStatsWidgetData) {
+	@dashboardWidget("Check stats", nil) {
+		switch data.Loading {
+			case LoadingStatusLoading:
+				@dashboardWidgetLoader()
+			case LoadingStatusLoaded:
+				<div class="grid grid-cols-3 gap-2 p-4">
+					<div class="border border-base-content/10 rounded flex flex-col items-center py-2">
+						<div class="text-2xl font-black">{ data.CheckStats.ChecksLast7Days }</div>
+						<div class="text-muted">Last 7 days</div>
+					</div>
+					<div class="border border-base-content/10 rounded flex flex-col items-center py-2">
+						<div class="text-2xl font-black">{ data.CheckStats.ChecksLast30Days }</div>
+						<div class="text-muted">Last 30 days</div>
+					</div>
+					<div class="border border-base-content/10 rounded flex flex-col items-center py-2">
+						<div class="text-2xl font-black">{ data.CheckStats.ChecksAllTime }</div>
+						<div class="text-muted">All time</div>
+					</div>
+				</div>
+		}
 	}
 }
 
@@ -119,4 +139,8 @@ templ dashboardWidget(title string, actions templ.Component) {
 			{ children... }
 		</div>
 	</div>
+}
+
+templ dashboardWidgetLoader() {
+	<div class="w-full h-full skeleton rounded-none bg-base-200"></div>
 }

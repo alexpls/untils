@@ -50,6 +50,10 @@ func (s *Service) GetInProgressMonitorCheck(ctx context.Context, monitor *sqlc.M
 	return check, nil
 }
 
+func (s *Service) GetMonitorCheckStats(ctx context.Context, userID int64) (*sqlc.GetMonitorCheckStatsRow, error) {
+	return s.queries.GetMonitorCheckStats(ctx, s.pool, userID)
+}
+
 func (s *Service) ScheduleMonitorCheck(ctx context.Context, monitor *sqlc.Monitor, scheduledFor time.Time) (*sqlc.MonitorCheck, error) {
 	return db.WithTxV(s.pool, ctx, func(tx pgx.Tx) (*sqlc.MonitorCheck, error) {
 		check, err := s.scheduleMonitorCheckTx(ctx, tx, monitor, scheduledFor)
