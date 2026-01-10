@@ -1,20 +1,52 @@
 package components
 
-templ TimelineItem(heading templ.Component) {
+import (
+	"fmt"
+	"strconv"
+	"time"
+)
+
+templ Timeline() {
+	<div class="m-4 p-4 bg-base-100 rounded border border-base-content/10">
+		<ul>
+			{ children... }
+		</ul>
+	</div>
+}
+
+templ TimelineItem(heading templ.Component, side templ.Component) {
 	<li
 		class={ "relative", "py-2", "before:content-['']", "before:absolute",
 		"before:bg-base-content/10", "before:top-0", "before:bottom-0",
-		"before:left-0", "before:w-0.5", "first:before:top-4", "last:before:bottom-4" }
+		"before:w-0.5", "first:before:top-4", "last:before:bottom-4",
+		templ.KV("before:left-24", side != nil),
+		templ.KV("before:left-0", side == nil) }
 	>
 		<div class="flex items-center">
+			if side != nil {
+				<div class="w-24 shrink-0 pr-4 text-right text-xs text-muted">
+					@side
+				</div>
+			}
 			<div
 				class={ "relative", "w-4", "h-4", "mr-2", "ml-[calc((var(--spacing)*4)/-2+1px)]",
-				"border-2", "border-base-100", "bg-primary", "z-10", "rounded-full" }
+				"border-2", "border-base-100", "bg-primary", "z-10", "rounded-full", "shrink-0" }
 			></div>
-			@heading
+			<div class="min-w-0">
+				@heading
+			</div>
 		</div>
-		<div class="pl-4.5">
+		<div class={ templ.KV("pl-28.5", side != nil), templ.KV("pl-4.5", side == nil) }>
 			{ children... }
 		</div>
 	</li>
+}
+
+templ TimeAgo(id string, t time.Time) {
+	{{ uni := strconv.FormatInt(t.UnixMilli(), 10) }}
+	<span
+		data-signals__ifmissing={ fmt.Sprintf("{_timeago%s: timeAgo(%s)}", id, uni) }
+		data-on-interval__duration.1s={ fmt.Sprintf("$_timeago%s = timeAgo(%s)", id, uni) }
+		data-text={ fmt.Sprintf("$_timeago%s", id) }
+	></span>
 }

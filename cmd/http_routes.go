@@ -21,8 +21,9 @@ func (a *app) routes() http.Handler {
 	mux.HandleFunc("POST /sign_in", a.signInPost)
 	mux.HandleFunc("GET /sign_out", a.signOutGet)
 
-	// app
+	// dashboard
 	mux.HandleFunc("GET /app", a.requireAuth(a.dashboardGet))
+	mux.HandleFunc("GET /app/dashboard/events", a.requireAuth(a.dashboardEvents))
 
 	// monitors
 	mux.HandleFunc("GET /app/monitors", a.requireAuth(a.monitorListGet))

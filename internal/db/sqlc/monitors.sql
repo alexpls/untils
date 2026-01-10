@@ -123,6 +123,22 @@ set confirming_check_ids = array_append(confirming_check_ids, @confirming_check_
     latest_confirmation_at = now()
 where id = @monitor_result_id;
 
+-- name: ListMonitorActivity :many
+select
+    mon.id::bigint as monitor_id,
+    res.id::bigint as result_id,
+    mon.subject,
+    res.result,
+    res.created_at,
+    res.date,
+    res.date_past_tense_verb
+from monitor_results res
+left join monitors mon on mon.id = res.monitor_id
+where mon.status = 'active'
+and mon.user_id = @user_id
+order by res.created_at desc
+limit 7;
+
 -- name: BumpMonitorVersion :exec
 update monitors set updated_at = now() where id = @monitor_id;
 

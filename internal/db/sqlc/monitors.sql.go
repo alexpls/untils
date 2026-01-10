@@ -441,6 +441,61 @@ func (q *Queries) GetPreviousResultsWithCheck(ctx context.Context, db DBTX, moni
 	return items, nil
 }
 
+const listMonitorActivity = `-- name: ListMonitorActivity :many
+select
+    mon.id::bigint as monitor_id,
+    res.id::bigint as result_id,
+    mon.subject,
+    res.result,
+    res.created_at,
+    res.date,
+    res.date_past_tense_verb
+from monitor_results res
+left join monitors mon on mon.id = res.monitor_id
+where mon.status = 'active'
+and mon.user_id = $1
+order by res.created_at desc
+limit 7
+`
+
+type ListMonitorActivityRow struct {
+	MonitorID         int64
+	ResultID          int64
+	Subject           pgtype.Text
+	Result            string
+	CreatedAt         time.Time
+	Date              *time.Time
+	DatePastTenseVerb pgtype.Text
+}
+
+func (q *Queries) ListMonitorActivity(ctx context.Context, db DBTX, userID int64) ([]*ListMonitorActivityRow, error) {
+	rows, err := db.Query(ctx, listMonitorActivity, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []*ListMonitorActivityRow
+	for rows.Next() {
+		var i ListMonitorActivityRow
+		if err := rows.Scan(
+			&i.MonitorID,
+			&i.ResultID,
+			&i.Subject,
+			&i.Result,
+			&i.CreatedAt,
+			&i.Date,
+			&i.DatePastTenseVerb,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listMonitorCheckEvents = `-- name: ListMonitorCheckEvents :many
 select id, monitor_id, monitor_check_id, kind, details, created_at from monitor_check_events
 where monitor_check_id = $1

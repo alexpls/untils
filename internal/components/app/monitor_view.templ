@@ -50,22 +50,20 @@ templ MonitorView(data MonitorViewData) {
 		}
 		<div class="grid grid-cols-12">
 			<div class="col-span-8">
-				<div class="m-4 p-4 bg-base-100 rounded border border-base-content/10">
-					<ul>
-						if data.InProgressCheck != nil {
-							@checkInProgressTimelineItem(checkInProgressTimelineItemViewData{
-								Check:  data.InProgressCheck,
-								Events: data.InProgressCheckEvents,
-							})
-						}
-						for _, result := range data.Results {
-							@monitorResultTimelineItem(result)
-						}
-						<li>
-							@components.TimelineItem(monitorCreatedTimelineHeading(data.Monitor))
-						</li>
-					</ul>
-				</div>
+				@components.Timeline() {
+					if data.InProgressCheck != nil {
+						@checkInProgressTimelineItem(checkInProgressTimelineItemViewData{
+							Check:  data.InProgressCheck,
+							Events: data.InProgressCheckEvents,
+						})
+					}
+					for _, result := range data.Results {
+						@monitorResultTimelineItem(result)
+					}
+					<li>
+						@components.TimelineItem(monitorCreatedTimelineHeading(data.Monitor), nil)
+					</li>
+				}
 			</div>
 			<div class="col-span-4 m-4 p-4 border border-base-content/10 rounded">
 				<div>
@@ -178,7 +176,7 @@ type checkInProgressTimelineItemViewData struct {
 }
 
 templ checkInProgressTimelineItem(data checkInProgressTimelineItemViewData) {
-	@components.TimelineItem(checkInProgressTimelineHeading()) {
+	@components.TimelineItem(checkInProgressTimelineHeading(), nil) {
 		<div id="check-events">
 			<ul class="text-sm text-base-content/50">
 				for i, event := range data.Events {
@@ -190,7 +188,7 @@ templ checkInProgressTimelineItem(data checkInProgressTimelineItemViewData) {
 }
 
 templ monitorResultTimelineItem(result *sqlc.MonitorResult) {
-	@components.TimelineItem(monitorResultHeading(result)) {
+	@components.TimelineItem(monitorResultHeading(result), nil) {
 		if result.Date != nil && result.DatePastTenseVerb.Valid {
 			<div class="text-sm">
 				{ result.DatePastTenseVerb.String }

@@ -1,14 +1,122 @@
 package app
 
-templ DashboardPage() {
+import (
+	"fmt"
+	"github.com/alexpls/untils/internal/components"
+	"github.com/alexpls/untils/internal/components/icons"
+	"github.com/alexpls/untils/internal/db/sqlc"
+	"github.com/starfederation/datastar-go/datastar"
+)
+
+templ DashboardPage(data DashboardViewData) {
 	@appLayout([]breadcrumb{
 		{title: "Dashboard", href: "/app"},
 	}) {
+		@DashboardView(data)
+	}
+}
+
+type DashboardViewData struct {
+	MonitorActivity MonitorActivityWidgetData
+}
+
+templ DashboardView(data DashboardViewData) {
+	<div
+		id="dashboard"
+		class="grid grid-cols-12 gap-4 p-4"
+		data-effect={ datastar.GetSSE("/app/dashboard/events") }
+	>
+		<div class="col-span-6">
+			@monitorActivityWidget(data.MonitorActivity)
+		</div>
+		<div class="col-span-6">
+			@upcomingChecksWidget()
+		</div>
+	</div>
+}
+
+type LoadingStatus int
+
+const (
+	_                    LoadingStatus = iota
+	LoadingStatusLoading               // Data is loading
+	LoadingStatusLoaded                // Data has loaded
+)
+
+type MonitorActivityWidgetData struct {
+	Loading LoadingStatus
+	Items   []*sqlc.ListMonitorActivityRow
+}
+
+templ monitorActivityWidget(data MonitorActivityWidgetData) {
+	@dashboardWidget("Activity across your monitors", monitorActivityWidgetActions()) {
+		switch data.Loading {
+			case LoadingStatusLoading:
+				<div class="w-full h-full skeleton rounded-none bg-base-200"></div>
+			case LoadingStatusLoaded:
+				@components.Timeline() {
+					for _, item := range data.Items {
+						@components.TimelineItem(
+							monitorActivityWidgetTimelineItemHeading(item),
+							monitorActivityWidgetTimelineItemSide(item),
+						) {
+							{ item.Result }
+						}
+					}
+				}
+		}
+	}
+}
+
+templ monitorActivityWidgetTimelineItemHeading(item *sqlc.ListMonitorActivityRow) {
+	<h3 class="text-sm text-muted">
+		<a
+			href={ fmt.Sprintf("/app/monitors/%d", item.MonitorID) }
+			class="block max-w-full link link-hover truncate"
+		>
+			{ item.Subject.String }
+		</a>
+	</h3>
+}
+
+templ monitorActivityWidgetTimelineItemSide(item *sqlc.ListMonitorActivityRow) {
+	@components.TimeAgo(fmt.Sprintf("result%d", item.ResultID), item.CreatedAt)
+}
+
+templ monitorActivityWidgetActions() {
+	<a href="/app/monitors" class="flex items-center btn btn-sm">
+		Monitors
+		@icons.ArrowRight(icons.IconParams{Size: 16, Classes: templ.Classes("")})
+	</a>
+}
+
+templ upcomingChecksWidget() {
+	@dashboardWidget("Upcoming checks", nil) {
 		<div class="p-4">
-			<p>TODO: dashboard</p>
-			<ul class="mt-3">
-				<li><a href="/app/monitors">Monitors</a></li>
-			</ul>
+			<p class="text-center text-muted">
+				No activity to show
+			</p>
 		</div>
 	}
+}
+
+templ dashboardWidget(title string, actions templ.Component) {
+	<div class="bg-base-100 rounded border border-base-content/10">
+		<div class="border-b border-base-content/10 p-4 py-3 flex items-center justify-between">
+			<h2 class="text-lg font-black">
+				{ title }
+			</h2>
+			<div>
+				if actions != nil {
+					@actions
+				} else {
+					<!-- TODO: spacer to keep layout alignment, must be another way? -->
+					<a href="#" class="btn btn-sm invisible pointer-events-none"></a>
+				}
+			</div>
+		</div>
+		<div>
+			{ children... }
+		</div>
+	</div>
 }
