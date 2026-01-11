@@ -18,7 +18,7 @@ Frontend:
 
 - Tailwind 4 CSS
 - Daisy UI
-- Datasta
+- Datastar (ref: https://data-star.dev/reference/attributes)
 
 ## Database schema
 
@@ -34,5 +34,4 @@ as this file could be very big.
 When the development server is running, Templ files will be generated when modified.
 
 You may use the Chrome MCP server to access the website at address
-http://localhost:4200/app and logging in with username "alexpls@fastmail.com"
-and password "abc123".
+http://untils.localhost:7331/app and log in by clicking the dev mode button.

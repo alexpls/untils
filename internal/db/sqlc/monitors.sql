@@ -69,6 +69,18 @@ join monitors m on m.id = mc.monitor_id
 where m.user_id = @user_id
 and mc.status = 'success';
 
+-- name: GetDailyMonitorCheckCounts :many
+select
+    cast(calendar.day as date) as day,
+    count(mc.id)::int as check_count
+from generate_series(now() - interval '6 days', now(), '1 day') as calendar(day)
+left join monitors m on m.user_id = @user_id
+left join monitor_checks mc on mc.monitor_id = m.id
+    and mc.status = 'success'
+    and cast(mc.done_at as date) = cast(calendar.day as date)
+group by calendar.day
+order by day asc;
+
 -- name: SkipPendingChecks :exec
 update monitor_checks
 set status = 'skipped'

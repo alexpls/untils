@@ -92,8 +92,26 @@ templ monitorActivityWidgetActions() {
 }
 
 type CheckStatsWidgetData struct {
-	Loading    LoadingStatus
-	CheckStats *sqlc.GetMonitorCheckStatsRow
+	Loading          LoadingStatus
+	CheckStats       *sqlc.GetMonitorCheckStatsRow
+	DailyCheckCounts []*sqlc.GetDailyMonitorCheckCountsRow
+}
+
+func (d CheckStatsWidgetData) DailyCheckCountsTimeSeries() components.TimeSeries {
+	ts := make(components.TimeSeries, len(d.DailyCheckCounts))
+	for i, row := range d.DailyCheckCounts {
+		count := int(row.CheckCount)
+		suffix := "checks"
+		if count == 1 {
+			suffix = "check"
+		}
+		ts[i] = components.TimeSeriesPoint{
+			Label:   row.Day.Time.Format("Mon"),
+			Tooltip: fmt.Sprintf("%s: %d %s", row.Day.Time.Format("Jan 2, 2006"), count, suffix),
+			Value:   count,
+		}
+	}
+	return ts
 }
 
 templ checksWidget(data CheckStatsWidgetData) {
@@ -116,6 +134,7 @@ templ checksWidget(data CheckStatsWidgetData) {
 						<div class="text-muted">All time</div>
 					</div>
 				</div>
+				@components.TimeSeriesBarChart(data.DailyCheckCountsTimeSeries(), 120)
 		}
 	}
 }

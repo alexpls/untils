@@ -364,8 +364,26 @@ func monitorActivityWidgetActions() templ.Component {
 }
 
 type CheckStatsWidgetData struct {
-	Loading    LoadingStatus
-	CheckStats *sqlc.GetMonitorCheckStatsRow
+	Loading          LoadingStatus
+	CheckStats       *sqlc.GetMonitorCheckStatsRow
+	DailyCheckCounts []*sqlc.GetDailyMonitorCheckCountsRow
+}
+
+func (d CheckStatsWidgetData) DailyCheckCountsTimeSeries() components.TimeSeries {
+	ts := make(components.TimeSeries, len(d.DailyCheckCounts))
+	for i, row := range d.DailyCheckCounts {
+		count := int(row.CheckCount)
+		suffix := "checks"
+		if count == 1 {
+			suffix = "check"
+		}
+		ts[i] = components.TimeSeriesPoint{
+			Label:   row.Day.Time.Format("Mon"),
+			Tooltip: fmt.Sprintf("%s: %d %s", row.Day.Time.Format("Jan 2, 2006"), count, suffix),
+			Value:   count,
+		}
+	}
+	return ts
 }
 
 func checksWidget(data CheckStatsWidgetData) templ.Component {
@@ -415,7 +433,7 @@ func checksWidget(data CheckStatsWidgetData) templ.Component {
 				var templ_7745c5c3_Var17 string
 				templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(data.CheckStats.ChecksLast7Days)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/dashboard.templ`, Line: 107, Col: 72}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/dashboard.templ`, Line: 125, Col: 72}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 				if templ_7745c5c3_Err != nil {
@@ -428,7 +446,7 @@ func checksWidget(data CheckStatsWidgetData) templ.Component {
 				var templ_7745c5c3_Var18 string
 				templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(data.CheckStats.ChecksLast30Days)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/dashboard.templ`, Line: 111, Col: 73}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/dashboard.templ`, Line: 129, Col: 73}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 				if templ_7745c5c3_Err != nil {
@@ -441,13 +459,17 @@ func checksWidget(data CheckStatsWidgetData) templ.Component {
 				var templ_7745c5c3_Var19 string
 				templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(data.CheckStats.ChecksAllTime)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/dashboard.templ`, Line: 115, Col: 70}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/dashboard.templ`, Line: 133, Col: 70}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</div><div class=\"text-muted\">All time</div></div></div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = components.TimeSeriesBarChart(data.DailyCheckCountsTimeSeries(), 120).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -490,7 +512,7 @@ func dashboardWidget(title string, actions templ.Component) templ.Component {
 		var templ_7745c5c3_Var21 string
 		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/dashboard.templ`, Line: 127, Col: 11}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/dashboard.templ`, Line: 146, Col: 11}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 		if templ_7745c5c3_Err != nil {

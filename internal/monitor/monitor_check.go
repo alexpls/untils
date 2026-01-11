@@ -54,6 +54,10 @@ func (s *Service) GetMonitorCheckStats(ctx context.Context, userID int64) (*sqlc
 	return s.queries.GetMonitorCheckStats(ctx, s.pool, userID)
 }
 
+func (s *Service) GetDailyMonitorCheckCounts(ctx context.Context, userID int64) ([]*sqlc.GetDailyMonitorCheckCountsRow, error) {
+	return s.queries.GetDailyMonitorCheckCounts(ctx, s.pool, userID)
+}
+
 func (s *Service) ScheduleMonitorCheck(ctx context.Context, monitor *sqlc.Monitor, scheduledFor time.Time) (*sqlc.MonitorCheck, error) {
 	return db.WithTxV(s.pool, ctx, func(tx pgx.Tx) (*sqlc.MonitorCheck, error) {
 		check, err := s.scheduleMonitorCheckTx(ctx, tx, monitor, scheduledFor)

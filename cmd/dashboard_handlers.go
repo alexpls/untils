@@ -31,7 +31,13 @@ func (a *app) dashboardEvents(w http.ResponseWriter, r *http.Request, u *sqlc.Us
 
 	checkStats, err := a.monitor.GetMonitorCheckStats(r.Context(), u.ID)
 	if a.internalServerError(err, w) {
-		a.logger.Error("error listing monitor activity", "error", err)
+		a.logger.Error("error getting monitor check stats", "error", err)
+		return
+	}
+
+	dailyCheckCounts, err := a.monitor.GetDailyMonitorCheckCounts(r.Context(), u.ID)
+	if a.internalServerError(err, w) {
+		a.logger.Error("error getting daily monitor check counts", "error", err)
 		return
 	}
 
@@ -41,8 +47,9 @@ func (a *app) dashboardEvents(w http.ResponseWriter, r *http.Request, u *sqlc.Us
 			Items:   activity,
 		},
 		CheckStats: appcomponents.CheckStatsWidgetData{
-			Loading:    appcomponents.LoadingStatusLoaded,
-			CheckStats: checkStats,
+			Loading:          appcomponents.LoadingStatusLoaded,
+			CheckStats:       checkStats,
+			DailyCheckCounts: dailyCheckCounts,
 		},
 	}
 

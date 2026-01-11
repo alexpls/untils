@@ -14,6 +14,7 @@
 - [ ] Improvement: Pushover form should show a spinner while we're validating the token
 - [ ] Improvement: Triage workflow should document steps it took to get to a satisfactory answer so future workflows can do them too - possibly able to skip making new searches this way and just re-request existing URLs?
 - [ ] Fix: When restarting a check (e.g. after server restart), make sure to clear old check events for it
+- [ ] Fix: Need an anchored positioning tooltip polyfill for Firefox
 
 ## Done
 

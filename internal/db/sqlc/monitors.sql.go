@@ -273,6 +273,44 @@ func (q *Queries) DeleteMonitorResults(ctx context.Context, db DBTX, monitorID i
 	return err
 }
 
+const getDailyMonitorCheckCounts = `-- name: GetDailyMonitorCheckCounts :many
+select
+    cast(calendar.day as date) as day,
+    count(mc.id)::int as check_count
+from generate_series(now() - interval '6 days', now(), '1 day') as calendar(day)
+left join monitors m on m.user_id = $1
+left join monitor_checks mc on mc.monitor_id = m.id
+    and mc.status = 'success'
+    and cast(mc.done_at as date) = cast(calendar.day as date)
+group by calendar.day
+order by day asc
+`
+
+type GetDailyMonitorCheckCountsRow struct {
+	Day        pgtype.Date
+	CheckCount int32
+}
+
+func (q *Queries) GetDailyMonitorCheckCounts(ctx context.Context, db DBTX, userID int64) ([]*GetDailyMonitorCheckCountsRow, error) {
+	rows, err := db.Query(ctx, getDailyMonitorCheckCounts, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []*GetDailyMonitorCheckCountsRow
+	for rows.Next() {
+		var i GetDailyMonitorCheckCountsRow
+		if err := rows.Scan(&i.Day, &i.CheckCount); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getInProgressMonitorCheck = `-- name: GetInProgressMonitorCheck :one
 select id, monitor_id, status, scheduled_for, failure_reason, done_at, result from monitor_checks
 where monitor_id = $1
