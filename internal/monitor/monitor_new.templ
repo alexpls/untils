@@ -1,16 +1,17 @@
-package app
+package monitor
 
 import (
-	"github.com/alexpls/untils/internal/components"
-	"github.com/alexpls/untils/internal/components/icons"
-	"github.com/alexpls/untils/internal/monitor"
-	"github.com/alexpls/untils/internal/validation"
 	"math/rand/v2"
+
+	"github.com/alexpls/untils/internal/components"
+	"github.com/alexpls/untils/internal/components/app"
+	"github.com/alexpls/untils/internal/components/icons"
+	"github.com/alexpls/untils/internal/validation"
 )
 
 type MonitorNewData struct {
 	ValidationErrors validation.ValidationErrors
-	Values           monitor.CreateMonitorParams
+	Values           CreateMonitorParams
 }
 
 func (m MonitorNewData) GetValidationErrors() validation.ValidationErrors {
@@ -18,9 +19,9 @@ func (m MonitorNewData) GetValidationErrors() validation.ValidationErrors {
 }
 
 templ MonitorNewPage(data MonitorNewData) {
-	@appLayout([]breadcrumb{
-		{title: "Dashboard", href: "/app"},
-		{title: "Monitors", href: "/app/monitors"},
+	@app.AppLayout([]app.Breadcrumb{
+		{Title: "Dashboard", Href: "/app"},
+		{Title: "Monitors", Href: "/app/monitors"},
 	}) {
 		<div class="flex flex-col h-full">
 			<div class="flex-1 flex items-center justify-center">

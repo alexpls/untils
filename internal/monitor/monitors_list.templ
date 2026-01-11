@@ -1,7 +1,9 @@
-package app
+package monitor
 
 import (
 	"fmt"
+
+	"github.com/alexpls/untils/internal/components/app"
 	"github.com/alexpls/untils/internal/db/sqlc"
 )
 
@@ -16,11 +18,11 @@ templ monitorListPageActions() {
 }
 
 templ MonitorsListPage(data MonitorsListData) {
-	@appLayout([]breadcrumb{
-		{title: "Dashboard", href: "/app"},
-		{title: "Monitors", href: "/app/monitors"},
+	@app.AppLayout([]app.Breadcrumb{
+		{Title: "Dashboard", Href: "/app"},
+		{Title: "Monitors", Href: "/app/monitors"},
 	}) {
-		@header("Monitors", monitorListPageActions())
+		@app.Header("Monitors", monitorListPageActions())
 		if len(data.Monitors) > 0 {
 			<ul class="list px-0 mx-0">
 				for _, mon := range data.Monitors {

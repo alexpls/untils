@@ -15,14 +15,6 @@ import (
 
 var monitorCheckFrequency = 6 * time.Hour
 
-func (s *Service) ListMonitors(ctx context.Context, userID int64) ([]*sqlc.Monitor, error) {
-	return s.queries.ListMonitors(ctx, s.pool, userID)
-}
-
-func (s *Service) ListMonitorActivity(ctx context.Context, userID int64) ([]*sqlc.ListMonitorActivityRow, error) {
-	return s.queries.ListMonitorActivity(ctx, s.pool, userID)
-}
-
 func (s *Service) GetMonitor(ctx context.Context, userID, monitorID int64) (*sqlc.Monitor, error) {
 	monitor, err := s.queries.GetMonitor(ctx, s.pool, &sqlc.GetMonitorParams{
 		UserID: userID,

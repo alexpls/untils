@@ -3,9 +3,14 @@ package app
 import "github.com/alexpls/untils/internal/components"
 import "github.com/alexpls/untils/internal/components/icons"
 
-templ appLayout(breadcrumbs []breadcrumb) {
+// Breadcrumb represents a navigation breadcrumb
+type Breadcrumb struct {
+	Title, Href string
+}
+
+templ AppLayout(breadcrumbs []Breadcrumb) {
 	@components.Layout() {
-		@timezoneSync()
+		@TimezoneSync()
 		<header
 			class="sticky top-0 z-0"
 			data-signals:_header.scroll-y="0"
@@ -19,7 +24,7 @@ templ appLayout(breadcrumbs []breadcrumb) {
 						untils
 					</a>
 					for _, b := range breadcrumbs {
-						@breadcrumbView(b)
+						@BreadcrumbView(b)
 					}
 				</div>
 				<div class="flex-end group">
@@ -75,16 +80,16 @@ templ appLayout(breadcrumbs []breadcrumb) {
 	}
 }
 
-templ headerCentered(title string) {
-	@headerContainer() {
+templ HeaderCentered(title string) {
+	@HeaderContainer() {
 		<h2 class="text-2xl font-semibold text-base-content text-center">
 			{ title }
 		</h2>
 	}
 }
 
-templ header(title string, actions templ.Component) {
-	@headerContainer() {
+templ Header(title string, actions templ.Component) {
+	@HeaderContainer() {
 		<div class="flex justify-between items-center">
 			<h2 class="text-2xl font-semibold text-base-content">
 				{ title }
@@ -99,7 +104,7 @@ templ header(title string, actions templ.Component) {
 	}
 }
 
-templ headerContainer() {
+templ HeaderContainer() {
 	<header class="border-b border-base-content/10">
 		<div class="p-5">
 			{ children... }
@@ -107,23 +112,20 @@ templ headerContainer() {
 	</header>
 }
 
-templ timezoneSync() {
-	if components.CurrentUser(ctx).Timezone != components.TimezoneFromCookie(ctx) {
+templ TimezoneSync() {
+	{{ tzCookie := components.TimezoneFromCookie(ctx) }}
+	if tzCookie != "" && components.CurrentUser(ctx).Timezone != tzCookie {
 		<div
 			class="hidden"
-			data-signals:timezone={ templ.JSONString(components.TimezoneFromCookie(ctx)) }
+			data-signals:timezone={ templ.JSONString(tzCookie) }
 			data-effect="@post('/app/settings/timezone')"
 		></div>
 	}
 }
 
-type breadcrumb struct {
-	title, href string
-}
-
-templ breadcrumbView(b breadcrumb) {
+templ BreadcrumbView(b Breadcrumb) {
 	@icons.ChevronRight(icons.IconParams{Size: 16})
-	<a href={ b.href } class="hover:bg-base-200 rounded p-2 px-3 transition-colors">
-		{ b.title }
+	<a href={ b.Href } class="hover:bg-base-200 rounded p-2 px-3 transition-colors">
+		{ b.Title }
 	</a>
 }

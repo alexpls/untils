@@ -25,7 +25,3 @@ func (s *Service) CreateMonitorCheckEvent(ctx context.Context, check *sqlc.Monit
 		Details:        j,
 	})
 }
-
-func (s *Service) ListMonitorCheckEvents(ctx context.Context, monitorCheckID int64) ([]*sqlc.MonitorCheckEvent, error) {
-	return s.queries.ListMonitorCheckEvents(ctx, s.pool, monitorCheckID)
-}

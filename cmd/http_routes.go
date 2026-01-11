@@ -14,37 +14,37 @@ func (a *app) routes() http.Handler {
 	mux.Handle("/assets/", public.Handler())
 
 	// public pages
-	mux.HandleFunc("GET /{$}", a.home)
+	mux.HandleFunc("GET /{$}", a.pagesHandlers.Home)
 
 	// auth pages
-	mux.HandleFunc("GET /sign_in", a.signInGet)
-	mux.HandleFunc("POST /sign_in", a.signInPost)
-	mux.HandleFunc("GET /sign_out", a.signOutGet)
+	mux.HandleFunc("GET /sign_in", a.authHandlers.SignInGet)
+	mux.HandleFunc("POST /sign_in", a.authHandlers.SignInPost)
+	mux.HandleFunc("GET /sign_out", a.authHandlers.SignOutGet)
 
 	// dashboard
-	mux.HandleFunc("GET /app", a.requireAuth(a.dashboardGet))
-	mux.HandleFunc("GET /app/dashboard/events", a.requireAuth(a.dashboardEvents))
+	mux.HandleFunc("GET /app", a.requireAuth(a.dashboardHandlers.Get))
+	mux.HandleFunc("GET /app/dashboard/events", a.requireAuth(a.dashboardHandlers.Events))
 
 	// monitors
-	mux.HandleFunc("GET /app/monitors", a.requireAuth(a.monitorListGet))
-	mux.HandleFunc("GET /app/monitors/new", a.requireAuth(a.monitorNewGet))
-	mux.HandleFunc("POST /app/monitors/new", a.requireAuth(a.monitorCreatePost))
-	mux.HandleFunc("GET /app/monitors/{id}", a.requireAuth(a.monitorViewGet))
-	mux.HandleFunc("GET /app/monitors/{id}/events", a.requireAuth(a.monitorViewEventsGet))
-	mux.HandleFunc("POST /app/monitors/{id}", a.requireAuth(a.monitorUpdatePost))
-	mux.HandleFunc("DELETE /app/monitors/{id}", a.requireAuth(a.monitorDelete))
-	mux.HandleFunc("POST /app/monitors/{id}/check", a.requireAuth(a.monitorCheckPost))
-	mux.HandleFunc("POST /app/monitors/{id}/activate", a.requireAuth(a.monitorActivatePost))
-	mux.HandleFunc("POST /app/monitors/{id}/notifiers/{type}", a.requireAuth(a.monitorNotifierPost))
-	mux.HandleFunc("DELETE /app/monitors/{id}/notifiers/{type}", a.requireAuth(a.monitorNotifierDelete))
+	mux.HandleFunc("GET /app/monitors", a.requireAuth(a.monitorHandlers.ListGet))
+	mux.HandleFunc("GET /app/monitors/new", a.requireAuth(a.monitorHandlers.NewGet))
+	mux.HandleFunc("POST /app/monitors/new", a.requireAuth(a.monitorHandlers.CreatePost))
+	mux.HandleFunc("GET /app/monitors/{id}", a.requireAuth(a.monitorHandlers.ViewGet))
+	mux.HandleFunc("GET /app/monitors/{id}/events", a.requireAuth(a.monitorHandlers.ViewEventsGet))
+	mux.HandleFunc("POST /app/monitors/{id}", a.requireAuth(a.monitorHandlers.UpdatePost))
+	mux.HandleFunc("DELETE /app/monitors/{id}", a.requireAuth(a.monitorHandlers.Delete))
+	mux.HandleFunc("POST /app/monitors/{id}/check", a.requireAuth(a.monitorHandlers.CheckPost))
+	mux.HandleFunc("POST /app/monitors/{id}/activate", a.requireAuth(a.monitorHandlers.ActivatePost))
+	mux.HandleFunc("POST /app/monitors/{id}/notifiers/{type}", a.requireAuth(a.monitorHandlers.NotifierPost))
+	mux.HandleFunc("DELETE /app/monitors/{id}/notifiers/{type}", a.requireAuth(a.monitorHandlers.NotifierDelete))
 
 	// settings
-	mux.HandleFunc("GET /app/settings", a.requireAuth(a.settingsGet))
-	mux.HandleFunc("POST /app/settings/timezone", a.requireAuth(a.updateTimezonePost))
-	mux.HandleFunc("GET /app/settings/pushover", a.requireAuth(a.pushoverSettingsGet))
-	mux.HandleFunc("POST /app/settings/pushover", a.requireAuth(a.pushoverSettingsPost))
-	mux.HandleFunc("DELETE /app/settings/pushover", a.requireAuth(a.pushoverSettingsDelete))
-	mux.HandleFunc("GET /app/settings/email", a.requireAuth(a.emailSettingsGet))
+	mux.HandleFunc("GET /app/settings", a.requireAuth(a.settingsHandlers.SettingsGet))
+	mux.HandleFunc("POST /app/settings/timezone", a.requireAuth(a.settingsHandlers.UpdateTimezonePost))
+	mux.HandleFunc("GET /app/settings/pushover", a.requireAuth(a.settingsHandlers.PushoverSettingsGet))
+	mux.HandleFunc("POST /app/settings/pushover", a.requireAuth(a.settingsHandlers.PushoverSettingsPost))
+	mux.HandleFunc("DELETE /app/settings/pushover", a.requireAuth(a.settingsHandlers.PushoverSettingsDelete))
+	mux.HandleFunc("GET /app/settings/email", a.requireAuth(a.settingsHandlers.EmailSettingsGet))
 
 	// favicon
 	mux.Handle("GET /app/favicon", a.requireAuth2(faviconproxy.Handler()))

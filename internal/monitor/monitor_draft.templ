@@ -1,11 +1,12 @@
-package app
+package monitor
 
 import (
 	"fmt"
+
 	"github.com/alexpls/untils/internal/components"
+	"github.com/alexpls/untils/internal/components/app"
 	"github.com/alexpls/untils/internal/components/icons"
 	"github.com/alexpls/untils/internal/db/sqlc"
-	"github.com/alexpls/untils/internal/monitor"
 	"github.com/alexpls/untils/internal/validation"
 	"github.com/starfederation/datastar-go/datastar"
 )
@@ -16,7 +17,7 @@ type MonitorDraftData struct {
 	CheckInProgress       *sqlc.MonitorCheck
 	CheckInProgressEvents []*sqlc.MonitorCheckEvent
 	ValidationErrors      validation.ValidationErrors
-	Values                monitor.UpdateMonitorDraftParams
+	Values                UpdateMonitorDraftParams
 	Notifiers             []*MonitorNotifierViewData
 }
 
@@ -29,9 +30,9 @@ func monitorLoading(mon *sqlc.Monitor) bool {
 }
 
 templ MonitorDraftPage(data MonitorDraftData) {
-	@appLayout([]breadcrumb{
-		{title: "Dashboard", href: "/app"},
-		{title: "Monitors", href: "/app/monitors"},
+	@app.AppLayout([]app.Breadcrumb{
+		{Title: "Dashboard", Href: "/app"},
+		{Title: "Monitors", Href: "/app/monitors"},
 	}) {
 		@monitorNewHeading()
 		@MonitorDraftView(data)

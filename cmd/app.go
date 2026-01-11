@@ -7,16 +7,18 @@ import (
 	"time"
 
 	"github.com/alexpls/untils/internal/auth"
+	"github.com/alexpls/untils/internal/dashboard"
 	"github.com/alexpls/untils/internal/db"
 	"github.com/alexpls/untils/internal/db/sqlc"
 	"github.com/alexpls/untils/internal/email"
 	"github.com/alexpls/untils/internal/llm"
 	"github.com/alexpls/untils/internal/monitor"
 	"github.com/alexpls/untils/internal/must"
+	"github.com/alexpls/untils/internal/pages"
 	"github.com/alexpls/untils/internal/pushover"
 	"github.com/alexpls/untils/internal/search"
 	"github.com/alexpls/untils/internal/session"
-	"github.com/alexpls/untils/internal/usersettings"
+	"github.com/alexpls/untils/internal/settings"
 	"github.com/alexpls/untils/public"
 	"github.com/go-playground/validator/v10"
 	"github.com/jackc/pgx/v5"
@@ -31,23 +33,27 @@ import (
 )
 
 type app struct {
-	config         *config
-	logger         *slog.Logger
-	db             *pgxpool.Pool
-	dbListener     *pgxlisten.Listener
-	queries        *sqlc.Queries
-	auth           *auth.Auth
-	sessionManager *session.Manager
-	monitor        *monitor.Service
-	monitorEvents  *monitor.DBEventHandler
-	llm            *llm.Service
-	river          *river.Client[pgx.Tx]
-	pushoverClient *pushover.Client
-	pushoverStore  *pushover.Store
-	emailService   *email.Service
-	validate       *validator.Validate
-	userSettings   *usersettings.Service
-	webSearcher    search.WebSearcher
+	config            *config
+	logger            *slog.Logger
+	db                *pgxpool.Pool
+	dbListener        *pgxlisten.Listener
+	queries           *sqlc.Queries
+	auth              *auth.Auth
+	sessionManager    *session.Manager
+	monitor           *monitor.Service
+	monitorEvents     *monitor.DBEventHandler
+	monitorHandlers   *monitor.Handlers
+	dashboardHandlers *dashboard.Handlers
+	pagesHandlers     *pages.Handlers
+	authHandlers      *auth.Handlers
+	settingsHandlers  *settings.Handlers
+	llm               *llm.Service
+	river             *river.Client[pgx.Tx]
+	pushoverClient    *pushover.Client
+	pushoverStore     *pushover.Store
+	emailService      *email.Service
+	validate          *validator.Validate
+	webSearcher       search.WebSearcher
 }
 
 func createApp(c *config) (*app, func()) {
@@ -148,7 +154,15 @@ func createApp(c *config) (*app, func()) {
 	a.monitorEvents = monitor.NewDBEventHandler(a.monitor)
 	a.dbListener.Handle("monitor_events", a.monitorEvents)
 
-	a.userSettings = usersettings.NewService(a.db, a.queries)
+	a.monitorHandlers = monitor.NewHandlers(a.monitor, a.monitorEvents, a.queries, a.db, a.logger.With("source", "monitor.handlers"))
+
+	a.dashboardHandlers = dashboard.NewHandlers(a.queries, a.db, a.logger.With("source", "dashboard.handlers"))
+
+	a.pagesHandlers = pages.NewHandlers()
+
+	a.authHandlers = auth.NewHandlers(a.auth, a.sessionManager, a.logger.With("source", "auth.handlers"))
+
+	a.settingsHandlers = settings.NewHandlers(a.queries, a.db, a.pushoverStore, a.pushoverClient, a.auth, a.logger.With("source", "settings.handlers"))
 
 	river.AddWorker(workers, monitor.NewCheckWorker(a.monitor, a.logger.With("source", "monitor.check_worker")))
 	river.AddWorker(workers, monitor.NewValidateMonitorWorker(a.monitor, a.logger.With("source", "monitor.validate_monitor_worker")))

@@ -1,8 +1,10 @@
-package app
+package dashboard
 
 import (
 	"fmt"
+
 	"github.com/alexpls/untils/internal/components"
+	"github.com/alexpls/untils/internal/components/app"
 	"github.com/alexpls/untils/internal/components/icons"
 	"github.com/alexpls/untils/internal/db/sqlc"
 	"github.com/starfederation/datastar-go/datastar"
@@ -17,8 +19,8 @@ const (
 )
 
 templ DashboardPage(data DashboardViewData) {
-	@appLayout([]breadcrumb{
-		{title: "Dashboard", href: "/app"},
+	@app.AppLayout([]app.Breadcrumb{
+		{Title: "Dashboard", Href: "/app"},
 	}) {
 		@DashboardView(data)
 	}

@@ -11,7 +11,12 @@ import templruntime "github.com/a-h/templ/runtime"
 import "github.com/alexpls/untils/internal/components"
 import "github.com/alexpls/untils/internal/components/icons"
 
-func appLayout(breadcrumbs []breadcrumb) templ.Component {
+// Breadcrumb represents a navigation breadcrumb
+type Breadcrumb struct {
+	Title, Href string
+}
+
+func AppLayout(breadcrumbs []Breadcrumb) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -44,7 +49,7 @@ func appLayout(breadcrumbs []breadcrumb) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = timezoneSync().Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = TimezoneSync().Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -53,7 +58,7 @@ func appLayout(breadcrumbs []breadcrumb) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			for _, b := range breadcrumbs {
-				templ_7745c5c3_Err = breadcrumbView(b).Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = BreadcrumbView(b).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -148,7 +153,7 @@ func appLayout(breadcrumbs []breadcrumb) templ.Component {
 	})
 }
 
-func headerCentered(title string) templ.Component {
+func HeaderCentered(title string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -188,7 +193,7 @@ func headerCentered(title string) templ.Component {
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/layout.templ`, Line: 81, Col: 10}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/layout.templ`, Line: 86, Col: 10}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -200,7 +205,7 @@ func headerCentered(title string) templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = headerContainer().Render(templ.WithChildren(ctx, templ_7745c5c3_Var8), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = HeaderContainer().Render(templ.WithChildren(ctx, templ_7745c5c3_Var8), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -208,7 +213,7 @@ func headerCentered(title string) templ.Component {
 	})
 }
 
-func header(title string, actions templ.Component) templ.Component {
+func Header(title string, actions templ.Component) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -248,7 +253,7 @@ func header(title string, actions templ.Component) templ.Component {
 			var templ_7745c5c3_Var12 string
 			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/layout.templ`, Line: 90, Col: 11}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/layout.templ`, Line: 95, Col: 11}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
@@ -282,7 +287,7 @@ func header(title string, actions templ.Component) templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = headerContainer().Render(templ.WithChildren(ctx, templ_7745c5c3_Var11), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = HeaderContainer().Render(templ.WithChildren(ctx, templ_7745c5c3_Var11), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -290,7 +295,7 @@ func header(title string, actions templ.Component) templ.Component {
 	})
 }
 
-func headerContainer() templ.Component {
+func HeaderContainer() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -327,7 +332,7 @@ func headerContainer() templ.Component {
 	})
 }
 
-func timezoneSync() templ.Component {
+func TimezoneSync() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -348,15 +353,16 @@ func timezoneSync() templ.Component {
 			templ_7745c5c3_Var14 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		if components.CurrentUser(ctx).Timezone != components.TimezoneFromCookie(ctx) {
+		tzCookie := components.TimezoneFromCookie(ctx)
+		if tzCookie != "" && components.CurrentUser(ctx).Timezone != tzCookie {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<div class=\"hidden\" data-signals:timezone=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var15 string
-			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(templ.JSONString(components.TimezoneFromCookie(ctx)))
+			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(templ.JSONString(tzCookie))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/layout.templ`, Line: 114, Col: 79}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/layout.templ`, Line: 120, Col: 53}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {
@@ -371,11 +377,7 @@ func timezoneSync() templ.Component {
 	})
 }
 
-type breadcrumb struct {
-	title, href string
-}
-
-func breadcrumbView(b breadcrumb) templ.Component {
+func BreadcrumbView(b Breadcrumb) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -405,9 +407,9 @@ func breadcrumbView(b breadcrumb) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var17 templ.SafeURL
-		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinURLErrs(b.href)
+		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinURLErrs(b.Href)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/layout.templ`, Line: 126, Col: 17}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/layout.templ`, Line: 128, Col: 17}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {
@@ -418,9 +420,9 @@ func breadcrumbView(b breadcrumb) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var18 string
-		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(b.title)
+		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(b.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/layout.templ`, Line: 127, Col: 11}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app/layout.templ`, Line: 129, Col: 11}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {

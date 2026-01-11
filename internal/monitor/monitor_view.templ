@@ -1,13 +1,13 @@
-package app
+package monitor
 
 import (
-	"fmt"
+	"net/url"
 
 	"github.com/alexpls/untils/internal/components"
+	"github.com/alexpls/untils/internal/components/app"
 	"github.com/alexpls/untils/internal/components/icons"
 	"github.com/alexpls/untils/internal/db/sqlc"
 	"github.com/starfederation/datastar-go/datastar"
-	"net/url"
 )
 
 type MonitorViewData struct {
@@ -27,9 +27,9 @@ type MonitorNotifierViewData struct {
 }
 
 templ MonitorViewPage(data MonitorViewData) {
-	@appLayout([]breadcrumb{
-		{title: "Dashboard", href: "/app"},
-		{title: "Monitors", href: "/app/monitors"},
+	@app.AppLayout([]app.Breadcrumb{
+		{Title: "Dashboard", Href: "/app"},
+		{Title: "Monitors", Href: "/app/monitors"},
 	}) {
 		@MonitorView(data)
 	}
@@ -37,7 +37,7 @@ templ MonitorViewPage(data MonitorViewData) {
 
 templ MonitorView(data MonitorViewData) {
 	<div id="monitor-view" data-effect={ datastar.GetSSE("/app/monitors/%d/events", data.Monitor.ID) }>
-		@header(data.Monitor.Subject.String, nil) {
+		@app.Header(data.Monitor.Subject.String, nil) {
 			<div class="text-sm flex gap-x-2 mt-2">
 				<div class="badge badge-soft badge-success">
 					<div aria-label="success" class="status status-success"></div>
@@ -246,14 +246,6 @@ templ monitorCreatedTimelineHeading(mon *sqlc.Monitor) {
 	<div class="text-base-content/60">
 		Created { components.FormatDate(ctx, mon.CreatedAt) }
 	</div>
-}
-
-func urlHost(path string) string {
-	u, err := url.Parse(path)
-	if err != nil {
-		return path
-	}
-	return fmt.Sprintf("%s://%s", u.Scheme, u.Host)
 }
 
 func citationFaviconProxiedURL(citation sqlc.Citation) string {
