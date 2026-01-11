@@ -7,13 +7,13 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/alexpls/untils/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/db/models"
 	"github.com/alexpls/untils/internal/reqcontext"
 	"github.com/alexpls/untils/internal/session"
 	"github.com/alexpls/untils/internal/wideevents"
 )
 
-type HandlerFuncWithUser func(http.ResponseWriter, *http.Request, *sqlc.User)
+type HandlerFuncWithUser func(http.ResponseWriter, *http.Request, *models.User)
 
 // TODO: dump this in favor of more conventional http.Handler args
 func (a *app) requireAuth(next HandlerFuncWithUser) http.HandlerFunc {
@@ -34,7 +34,7 @@ func (a *app) requireAuth(next HandlerFuncWithUser) http.HandlerFunc {
 }
 
 func (a *app) requireAuth2(next http.Handler) http.HandlerFunc {
-	return a.requireAuth(func(w http.ResponseWriter, r *http.Request, _ *sqlc.User) {
+	return a.requireAuth(func(w http.ResponseWriter, r *http.Request, _ *models.User) {
 		next.ServeHTTP(w, r)
 	})
 }

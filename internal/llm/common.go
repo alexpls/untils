@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/alexpls/untils/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/db/models"
 )
 
 type CheckParams struct {
 	Subject         string
 	Instructions    string
-	PreviousResults []sqlc.CheckResult
+	PreviousResults []models.CheckResult
 }
 
 func (c CheckParams) PreviousResultsString() (string, error) {

@@ -6,7 +6,7 @@ import (
 	"github.com/alexpls/untils/internal/components"
 	"github.com/alexpls/untils/internal/components/app"
 	"github.com/alexpls/untils/internal/components/icons"
-	"github.com/alexpls/untils/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/db/models"
 	"github.com/starfederation/datastar-go/datastar"
 )
 
@@ -48,7 +48,7 @@ templ DashboardView(data DashboardViewData) {
 
 type MonitorActivityWidgetData struct {
 	Loading LoadingStatus
-	Items   []*sqlc.ListMonitorActivityRow
+	Items   []*models.ListMonitorActivityRow
 }
 
 templ monitorActivityWidget(data MonitorActivityWidgetData) {
@@ -71,7 +71,7 @@ templ monitorActivityWidget(data MonitorActivityWidgetData) {
 	}
 }
 
-templ monitorActivityWidgetTimelineItemHeading(item *sqlc.ListMonitorActivityRow) {
+templ monitorActivityWidgetTimelineItemHeading(item *models.ListMonitorActivityRow) {
 	<h3 class="text-sm text-muted">
 		<a
 			href={ fmt.Sprintf("/app/monitors/%d", item.MonitorID) }
@@ -82,7 +82,7 @@ templ monitorActivityWidgetTimelineItemHeading(item *sqlc.ListMonitorActivityRow
 	</h3>
 }
 
-templ monitorActivityWidgetTimelineItemSide(item *sqlc.ListMonitorActivityRow) {
+templ monitorActivityWidgetTimelineItemSide(item *models.ListMonitorActivityRow) {
 	@components.TimeAgo(fmt.Sprintf("result%d", item.ResultID), item.CreatedAt)
 }
 
@@ -95,8 +95,8 @@ templ monitorActivityWidgetActions() {
 
 type CheckStatsWidgetData struct {
 	Loading          LoadingStatus
-	CheckStats       *sqlc.GetMonitorCheckStatsRow
-	DailyCheckCounts []*sqlc.GetDailyMonitorCheckCountsRow
+	CheckStats       *models.GetMonitorCheckStatsRow
+	DailyCheckCounts []*models.GetDailyMonitorCheckCountsRow
 }
 
 func (d CheckStatsWidgetData) DailyCheckCountsTimeSeries() components.TimeSeries {

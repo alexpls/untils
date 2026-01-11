@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/alexpls/untils/internal/auth"
-	"github.com/alexpls/untils/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/db/models"
 	"github.com/alexpls/untils/internal/pushover"
 	"github.com/alexpls/untils/internal/validation"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -24,7 +24,7 @@ type AuthService interface {
 
 // Handlers contains HTTP handlers for settings routes
 type Handlers struct {
-	queries        *sqlc.Queries
+	queries        *models.Queries
 	pool           *pgxpool.Pool
 	pushoverStore  *pushover.Store
 	pushoverClient *pushover.Client
@@ -34,7 +34,7 @@ type Handlers struct {
 
 // NewHandlers creates a new Handlers instance
 func NewHandlers(
-	queries *sqlc.Queries,
+	queries *models.Queries,
 	pool *pgxpool.Pool,
 	pushoverStore *pushover.Store,
 	pushoverClient *pushover.Client,
@@ -52,7 +52,7 @@ func NewHandlers(
 }
 
 // SettingsGet handles GET /app/settings
-func (h *Handlers) SettingsGet(w http.ResponseWriter, r *http.Request, user *sqlc.User) {
+func (h *Handlers) SettingsGet(w http.ResponseWriter, r *http.Request, user *models.User) {
 	integrations, err := h.queries.UserIntegrations(r.Context(), h.pool, user.ID)
 	if err != nil {
 		h.logger.Error("error listing integrations", "error", err)
@@ -65,7 +65,7 @@ func (h *Handlers) SettingsGet(w http.ResponseWriter, r *http.Request, user *sql
 }
 
 // PushoverSettingsGet handles GET /app/settings/pushover
-func (h *Handlers) PushoverSettingsGet(w http.ResponseWriter, r *http.Request, user *sqlc.User) {
+func (h *Handlers) PushoverSettingsGet(w http.ResponseWriter, r *http.Request, user *models.User) {
 	tok, err := h.pushoverStore.GetToken(r.Context(), user.ID)
 	if err != nil {
 		if !errors.Is(err, pushover.ErrNoPushoverUserToken) {
@@ -91,7 +91,7 @@ func (h *Handlers) PushoverSettingsGet(w http.ResponseWriter, r *http.Request, u
 }
 
 // PushoverSettingsPost handles POST /app/settings/pushover
-func (h *Handlers) PushoverSettingsPost(w http.ResponseWriter, r *http.Request, user *sqlc.User) {
+func (h *Handlers) PushoverSettingsPost(w http.ResponseWriter, r *http.Request, user *models.User) {
 	if err := r.ParseForm(); err != nil {
 		h.logger.Error("failed to parse form", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
@@ -137,7 +137,7 @@ func (h *Handlers) PushoverSettingsPost(w http.ResponseWriter, r *http.Request, 
 }
 
 // PushoverSettingsDelete handles DELETE /app/settings/pushover
-func (h *Handlers) PushoverSettingsDelete(w http.ResponseWriter, r *http.Request, user *sqlc.User) {
+func (h *Handlers) PushoverSettingsDelete(w http.ResponseWriter, r *http.Request, user *models.User) {
 	sse := datastar.NewSSE(w, r)
 
 	err := h.pushoverStore.DeleteToken(r.Context(), user.ID)
@@ -151,7 +151,7 @@ func (h *Handlers) PushoverSettingsDelete(w http.ResponseWriter, r *http.Request
 }
 
 // EmailSettingsGet handles GET /app/settings/email
-func (h *Handlers) EmailSettingsGet(w http.ResponseWriter, r *http.Request, user *sqlc.User) {
+func (h *Handlers) EmailSettingsGet(w http.ResponseWriter, r *http.Request, user *models.User) {
 	EmailSettings(&EmailSettingsViewModel{
 		Email: user.Email,
 	}).Render(r.Context(), w)
@@ -162,7 +162,7 @@ type timezoneUpdate struct {
 }
 
 // UpdateTimezonePost handles POST /app/settings/timezone
-func (h *Handlers) UpdateTimezonePost(w http.ResponseWriter, r *http.Request, user *sqlc.User) {
+func (h *Handlers) UpdateTimezonePost(w http.ResponseWriter, r *http.Request, user *models.User) {
 	var params timezoneUpdate
 	err := json.NewDecoder(r.Body).Decode(&params)
 	if err != nil {

@@ -6,7 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/alexpls/untils/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/db/models"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -18,7 +18,7 @@ type Manager struct {
 	logger *slog.Logger
 }
 
-func NewManager(db sqlc.DBTX, queries *sqlc.Queries, logger *slog.Logger) *Manager {
+func NewManager(db models.DBTX, queries *models.Queries, logger *slog.Logger) *Manager {
 	return &Manager{
 		store: &store{
 			db:      db,

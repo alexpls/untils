@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/a-h/templ"
-	"github.com/alexpls/untils/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/db/models"
 	"github.com/alexpls/untils/internal/validation"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/starfederation/datastar-go/datastar"
@@ -20,13 +20,13 @@ import (
 type Handlers struct {
 	service *Service
 	events  *DBEventHandler
-	queries *sqlc.Queries
+	queries *models.Queries
 	pool    *pgxpool.Pool
 	logger  *slog.Logger
 }
 
 // NewHandlers creates a new Handlers instance
-func NewHandlers(service *Service, events *DBEventHandler, queries *sqlc.Queries, pool *pgxpool.Pool, logger *slog.Logger) *Handlers {
+func NewHandlers(service *Service, events *DBEventHandler, queries *models.Queries, pool *pgxpool.Pool, logger *slog.Logger) *Handlers {
 	return &Handlers{
 		service: service,
 		events:  events,
@@ -37,7 +37,7 @@ func NewHandlers(service *Service, events *DBEventHandler, queries *sqlc.Queries
 }
 
 // ListGet handles GET /app/monitors
-func (h *Handlers) ListGet(w http.ResponseWriter, r *http.Request, user *sqlc.User) {
+func (h *Handlers) ListGet(w http.ResponseWriter, r *http.Request, user *models.User) {
 	monitors, err := h.queries.ListMonitors(r.Context(), h.pool, user.ID)
 	if err != nil {
 		h.logger.Error("error listing monitors", "error", err)
@@ -51,7 +51,7 @@ func (h *Handlers) ListGet(w http.ResponseWriter, r *http.Request, user *sqlc.Us
 }
 
 // ViewGet handles GET /app/monitors/{id}
-func (h *Handlers) ViewGet(w http.ResponseWriter, r *http.Request, user *sqlc.User) {
+func (h *Handlers) ViewGet(w http.ResponseWriter, r *http.Request, user *models.User) {
 	monitorID := monitorIDFromPath(r)
 	if monitorID == 0 {
 		http.Error(w, "Bad request", http.StatusBadRequest)
@@ -70,7 +70,7 @@ func (h *Handlers) ViewGet(w http.ResponseWriter, r *http.Request, user *sqlc.Us
 	}
 
 	var comp templ.Component
-	if mon.Status != sqlc.MonitorStatusActive {
+	if mon.Status != models.MonitorStatusActive {
 		comp, err = h.renderMonitorDraft(r.Context(), mon, user.ID, NewUpdateMonitorDraftParams(mon), nil)
 	} else {
 		comp, err = h.monitorComponent(r.Context(), mon, user.ID)
@@ -84,7 +84,7 @@ func (h *Handlers) ViewGet(w http.ResponseWriter, r *http.Request, user *sqlc.Us
 }
 
 // ViewEventsGet handles GET /app/monitors/{id}/events (SSE)
-func (h *Handlers) ViewEventsGet(w http.ResponseWriter, r *http.Request, user *sqlc.User) {
+func (h *Handlers) ViewEventsGet(w http.ResponseWriter, r *http.Request, user *models.User) {
 	monitorID := monitorIDFromPath(r)
 	if monitorID == 0 {
 		http.Error(w, "Bad request", http.StatusBadRequest)
@@ -113,7 +113,7 @@ func (h *Handlers) ViewEventsGet(w http.ResponseWriter, r *http.Request, user *s
 			var comp templ.Component
 
 			switch mon.Status {
-			case sqlc.MonitorStatusActive:
+			case models.MonitorStatusActive:
 				data, err := h.monitorViewData(sse.Context(), mon, user.ID)
 				if err != nil {
 					h.logger.Error("error rendering monitor view", "error", err)
@@ -143,12 +143,12 @@ func (h *Handlers) ViewEventsGet(w http.ResponseWriter, r *http.Request, user *s
 }
 
 // NewGet handles GET /app/monitors/new
-func (h *Handlers) NewGet(w http.ResponseWriter, r *http.Request, user *sqlc.User) {
+func (h *Handlers) NewGet(w http.ResponseWriter, r *http.Request, user *models.User) {
 	MonitorNewPage(MonitorNewData{}).Render(r.Context(), w)
 }
 
 // UpdatePost handles POST /app/monitors/{id}
-func (h *Handlers) UpdatePost(w http.ResponseWriter, r *http.Request, user *sqlc.User) {
+func (h *Handlers) UpdatePost(w http.ResponseWriter, r *http.Request, user *models.User) {
 	monitorID := monitorIDFromPath(r)
 	if monitorID == 0 {
 		http.Error(w, "Bad request", http.StatusBadRequest)
@@ -207,7 +207,7 @@ func (h *Handlers) UpdatePost(w http.ResponseWriter, r *http.Request, user *sqlc
 }
 
 // ActivatePost handles POST /app/monitors/{id}/activate
-func (h *Handlers) ActivatePost(w http.ResponseWriter, r *http.Request, user *sqlc.User) {
+func (h *Handlers) ActivatePost(w http.ResponseWriter, r *http.Request, user *models.User) {
 	monitorID := monitorIDFromPath(r)
 	if monitorID == 0 {
 		http.Error(w, "Bad request", http.StatusBadRequest)
@@ -227,7 +227,7 @@ func (h *Handlers) ActivatePost(w http.ResponseWriter, r *http.Request, user *sq
 }
 
 // CreatePost handles POST /app/monitors/new
-func (h *Handlers) CreatePost(w http.ResponseWriter, r *http.Request, user *sqlc.User) {
+func (h *Handlers) CreatePost(w http.ResponseWriter, r *http.Request, user *models.User) {
 	if err := r.ParseForm(); err != nil {
 		h.logger.Error("error parsing form", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
@@ -260,7 +260,7 @@ func (h *Handlers) CreatePost(w http.ResponseWriter, r *http.Request, user *sqlc
 }
 
 // CheckPost handles POST /app/monitors/{id}/check
-func (h *Handlers) CheckPost(w http.ResponseWriter, r *http.Request, user *sqlc.User) {
+func (h *Handlers) CheckPost(w http.ResponseWriter, r *http.Request, user *models.User) {
 	monitorID := monitorIDFromPath(r)
 	if monitorID == 0 {
 		http.Error(w, "Bad request", http.StatusBadRequest)
@@ -300,7 +300,7 @@ func (h *Handlers) CheckPost(w http.ResponseWriter, r *http.Request, user *sqlc.
 }
 
 // Delete handles DELETE /app/monitors/{id}
-func (h *Handlers) Delete(w http.ResponseWriter, r *http.Request, user *sqlc.User) {
+func (h *Handlers) Delete(w http.ResponseWriter, r *http.Request, user *models.User) {
 	monitorID := monitorIDFromPath(r)
 	if monitorID == 0 {
 		http.Error(w, "Bad request", http.StatusBadRequest)
@@ -320,7 +320,7 @@ func (h *Handlers) Delete(w http.ResponseWriter, r *http.Request, user *sqlc.Use
 }
 
 // NotifierPost handles POST /app/monitors/{id}/notifiers/{type}
-func (h *Handlers) NotifierPost(w http.ResponseWriter, r *http.Request, user *sqlc.User) {
+func (h *Handlers) NotifierPost(w http.ResponseWriter, r *http.Request, user *models.User) {
 	monitorID := monitorIDFromPath(r)
 	if monitorID == 0 {
 		http.Error(w, "Bad request", http.StatusBadRequest)
@@ -342,7 +342,7 @@ func (h *Handlers) NotifierPost(w http.ResponseWriter, r *http.Request, user *sq
 
 	sse := datastar.NewSSE(w, r)
 
-	_, err = h.service.CreateMonitorNotifier(r.Context(), mon, sqlc.Notifier(notifierType))
+	_, err = h.service.CreateMonitorNotifier(r.Context(), mon, models.Notifier(notifierType))
 	if err != nil {
 		h.logger.Error("error creating notifier", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
@@ -362,7 +362,7 @@ func (h *Handlers) NotifierPost(w http.ResponseWriter, r *http.Request, user *sq
 }
 
 // NotifierDelete handles DELETE /app/monitors/{id}/notifiers/{type}
-func (h *Handlers) NotifierDelete(w http.ResponseWriter, r *http.Request, user *sqlc.User) {
+func (h *Handlers) NotifierDelete(w http.ResponseWriter, r *http.Request, user *models.User) {
 	monitorID := monitorIDFromPath(r)
 	if monitorID == 0 {
 		http.Error(w, "Bad request", http.StatusBadRequest)
@@ -384,7 +384,7 @@ func (h *Handlers) NotifierDelete(w http.ResponseWriter, r *http.Request, user *
 
 	sse := datastar.NewSSE(w, r)
 
-	err = h.service.DeleteMonitorNotifier(r.Context(), mon, sqlc.Notifier(notifierType))
+	err = h.service.DeleteMonitorNotifier(r.Context(), mon, models.Notifier(notifierType))
 	if err != nil {
 		h.logger.Error("error deleting notifier", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
@@ -416,7 +416,7 @@ func monitorIDFromPath(r *http.Request) int64 {
 
 func (h *Handlers) renderMonitorDraft(
 	ctx context.Context,
-	mon *sqlc.Monitor,
+	mon *models.Monitor,
 	userID int64,
 	values UpdateMonitorDraftParams,
 	validationErrs validation.ValidationErrors,
@@ -428,7 +428,7 @@ func (h *Handlers) renderMonitorDraft(
 	return MonitorDraftPage(data), nil
 }
 
-func (h *Handlers) monitorComponent(ctx context.Context, mon *sqlc.Monitor, userID int64) (templ.Component, error) {
+func (h *Handlers) monitorComponent(ctx context.Context, mon *models.Monitor, userID int64) (templ.Component, error) {
 	data, err := h.monitorViewData(ctx, mon, userID)
 	if err != nil {
 		return nil, err
@@ -436,7 +436,7 @@ func (h *Handlers) monitorComponent(ctx context.Context, mon *sqlc.Monitor, user
 	return MonitorViewPage(data), nil
 }
 
-func (h *Handlers) monitorNotifiersComponent(ctx context.Context, mon *sqlc.Monitor, userID int64) (templ.Component, error) {
+func (h *Handlers) monitorNotifiersComponent(ctx context.Context, mon *models.Monitor, userID int64) (templ.Component, error) {
 	data, err := h.monitorNotifierViewData(ctx, mon, userID)
 	if err != nil {
 		return nil, err
@@ -446,13 +446,13 @@ func (h *Handlers) monitorNotifiersComponent(ctx context.Context, mon *sqlc.Moni
 
 func (h *Handlers) monitorDraftViewData(
 	ctx context.Context,
-	mon *sqlc.Monitor,
+	mon *models.Monitor,
 	userID int64,
 	values UpdateMonitorDraftParams,
 	validationErrs validation.ValidationErrors,
 ) (MonitorDraftData, error) {
-	var preview *sqlc.MonitorResult
-	if mon.Status == sqlc.MonitorStatusReady {
+	var preview *models.MonitorResult
+	if mon.Status == models.MonitorStatusReady {
 		res, err := h.queries.ListMonitorResults(ctx, h.pool, mon.ID)
 		if err != nil {
 			return MonitorDraftData{}, err
@@ -468,7 +468,7 @@ func (h *Handlers) monitorDraftViewData(
 		return MonitorDraftData{}, err
 	}
 
-	var checkEvents []*sqlc.MonitorCheckEvent
+	var checkEvents []*models.MonitorCheckEvent
 	if check != nil {
 		var err error
 		checkEvents, err = h.queries.ListMonitorCheckEvents(ctx, h.pool, check.ID)
@@ -493,7 +493,7 @@ func (h *Handlers) monitorDraftViewData(
 	}, nil
 }
 
-func (h *Handlers) monitorViewData(ctx context.Context, mon *sqlc.Monitor, userID int64) (MonitorViewData, error) {
+func (h *Handlers) monitorViewData(ctx context.Context, mon *models.Monitor, userID int64) (MonitorViewData, error) {
 	results, err := h.queries.ListMonitorResults(ctx, h.pool, mon.ID)
 	if err != nil {
 		return MonitorViewData{}, err
@@ -509,7 +509,7 @@ func (h *Handlers) monitorViewData(ctx context.Context, mon *sqlc.Monitor, userI
 		return MonitorViewData{}, err
 	}
 
-	var events []*sqlc.MonitorCheckEvent
+	var events []*models.MonitorCheckEvent
 	if inProgressCheck != nil {
 		events, err = h.queries.ListMonitorCheckEvents(ctx, h.pool, inProgressCheck.ID)
 		if err != nil {
@@ -532,7 +532,7 @@ func (h *Handlers) monitorViewData(ctx context.Context, mon *sqlc.Monitor, userI
 	}, nil
 }
 
-func (h *Handlers) monitorNotifierViewData(ctx context.Context, mon *sqlc.Monitor, userID int64) (notifiers []*MonitorNotifierViewData, err error) {
+func (h *Handlers) monitorNotifierViewData(ctx context.Context, mon *models.Monitor, userID int64) (notifiers []*MonitorNotifierViewData, err error) {
 	notifs, err := h.service.ListMonitorNotifiers(ctx, mon)
 	if err != nil {
 		return notifiers, err

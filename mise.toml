@@ -87,9 +87,9 @@ run = '''
 # stripping restrict tags because sqlc balks when processing them. remove once: https://github.com/sqlc-dev/sqlc/issues/4065 is fixed
 pg_dump "$PG_URL" --schema-only --no-owner --no-privileges --restrict-key stable \
     | sed '/^\\restrict /d;/^\\unrestrict /d' \
-    > internal/db/sqlc/schema.sql
+    > internal/db/models/schema.sql
 '''
 
 [tasks.sqlc-generate]
 depends = ["db-dump-schema"]
-run = "cd internal/db/sqlc && sqlc generate"
+run = "cd internal/db/models && sqlc generate"

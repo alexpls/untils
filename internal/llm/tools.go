@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/alexpls/untils/internal/browser"
-	"github.com/alexpls/untils/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/db/models"
 	"github.com/alexpls/untils/internal/search"
 	"github.com/alexpls/untils/internal/wideevents"
 	"github.com/openai/openai-go/v3"
@@ -90,8 +90,8 @@ var browserNavigateTool = tool[browserNavigateParams]{
 	},
 	checkEvent: func(tc *toolContext, params browserNavigateParams) CheckEvent {
 		return CheckEvent{
-			Kind: sqlc.MonitorCheckEventKindBrowserNavigate,
-			Details: sqlc.MonitorCheckEventBrowserNavigateDetails{
+			Kind: models.MonitorCheckEventKindBrowserNavigate,
+			Details: models.MonitorCheckEventBrowserNavigateDetails{
 				URL: params.URL,
 			},
 		}
@@ -116,8 +116,8 @@ var browserClickTool = tool[browserClickParams]{
 	},
 	checkEvent: func(tc *toolContext, params browserClickParams) CheckEvent {
 		return CheckEvent{
-			Kind:    sqlc.MonitorCheckEventKindBrowserClick,
-			Details: sqlc.MonitorCheckEventBrowserClickDetails{},
+			Kind:    models.MonitorCheckEventKindBrowserClick,
+			Details: models.MonitorCheckEventBrowserClickDetails{},
 		}
 	},
 }
@@ -145,8 +145,8 @@ var searchTool = tool[searchParams]{
 	},
 	checkEvent: func(tc *toolContext, params searchParams) CheckEvent {
 		return CheckEvent{
-			Kind: sqlc.MonitorCheckEventKindWebSearch,
-			Details: sqlc.MonitorCheckEventWebSearchDetails{
+			Kind: models.MonitorCheckEventKindWebSearch,
+			Details: models.MonitorCheckEventWebSearchDetails{
 				Query: params.Query,
 			},
 		}

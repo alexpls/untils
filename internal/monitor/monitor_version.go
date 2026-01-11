@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/alexpls/untils/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/db/models"
 )
 
 type ErrVersionMismatch struct {
-	mon1, mon2 *sqlc.Monitor
+	mon1, mon2 *models.Monitor
 }
 
 func (e ErrVersionMismatch) Error() string {
@@ -18,12 +18,12 @@ func (e ErrVersionMismatch) Error() string {
 		e.mon1.UpdatedAt, e.mon2.UpdatedAt)
 }
 
-func NewErrVersionMismatch(mon1, mon2 *sqlc.Monitor) *ErrVersionMismatch {
+func NewErrVersionMismatch(mon1, mon2 *models.Monitor) *ErrVersionMismatch {
 	return &ErrVersionMismatch{mon1, mon2}
 }
 
-func (s *Service) validateMonitorsSameVersion(ctx context.Context, tx sqlc.DBTX, mon *sqlc.Monitor) error {
-	mon2, err := s.queries.GetMonitor(ctx, tx, &sqlc.GetMonitorParams{
+func (s *Service) validateMonitorsSameVersion(ctx context.Context, tx models.DBTX, mon *models.Monitor) error {
+	mon2, err := s.queries.GetMonitor(ctx, tx, &models.GetMonitorParams{
 		ID:     mon.ID,
 		UserID: mon.UserID,
 	})
@@ -37,7 +37,7 @@ func (s *Service) validateMonitorsSameVersion(ctx context.Context, tx sqlc.DBTX,
 	return nil
 }
 
-func (s *Service) bumpMonitorVersion(ctx context.Context, tx sqlc.DBTX, mon *sqlc.Monitor) error {
+func (s *Service) bumpMonitorVersion(ctx context.Context, tx models.DBTX, mon *models.Monitor) error {
 	if err := s.queries.BumpMonitorVersion(ctx, tx, mon.ID); err != nil {
 		return fmt.Errorf("bumping monitor version: %w", err)
 	}

@@ -1,4 +1,4 @@
-package sqlc
+package models
 
 import (
 	"encoding/json"

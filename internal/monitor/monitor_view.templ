@@ -6,22 +6,22 @@ import (
 	"github.com/alexpls/untils/internal/components"
 	"github.com/alexpls/untils/internal/components/app"
 	"github.com/alexpls/untils/internal/components/icons"
-	"github.com/alexpls/untils/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/db/models"
 	"github.com/starfederation/datastar-go/datastar"
 )
 
 type MonitorViewData struct {
-	Monitor               *sqlc.Monitor
-	Results               []*sqlc.MonitorResult
-	NextScheduledCheck    *sqlc.MonitorCheck
-	InProgressCheck       *sqlc.MonitorCheck
-	InProgressCheckEvents []*sqlc.MonitorCheckEvent
+	Monitor               *models.Monitor
+	Results               []*models.MonitorResult
+	NextScheduledCheck    *models.MonitorCheck
+	InProgressCheck       *models.MonitorCheck
+	InProgressCheckEvents []*models.MonitorCheckEvent
 	Notifiers             []*MonitorNotifierViewData
 }
 
 type MonitorNotifierViewData struct {
 	// Integration represents the integration configured on the account (e.g. pushover, email)
-	Integration *sqlc.UserIntegrationsRow
+	Integration *models.UserIntegrationsRow
 	// Active indicates whether the notifier is active for this monitor.
 	Active bool
 }
@@ -109,7 +109,7 @@ templ MonitorView(data MonitorViewData) {
 	</div>
 }
 
-templ MonitorNotifiers(monitor *sqlc.Monitor, notifiers []*MonitorNotifierViewData) {
+templ MonitorNotifiers(monitor *models.Monitor, notifiers []*MonitorNotifierViewData) {
 	<div id="monitor-notifiers">
 		for _, notifier := range notifiers {
 			<div>
@@ -138,7 +138,7 @@ templ checkInProgressTimelineHeading() {
 	</div>
 }
 
-templ checkInProgressEvent(event *sqlc.MonitorCheckEvent, latest bool) {
+templ checkInProgressEvent(event *models.MonitorCheckEvent, latest bool) {
 	<li class="flex py-0.5 items-center justify-start">
 		<div class="text-base-content/30 mr-1">
 			if latest {
@@ -149,15 +149,15 @@ templ checkInProgressEvent(event *sqlc.MonitorCheckEvent, latest bool) {
 		</div>
 		<div class={ templ.KV("animate-pulse", latest) }>
 			switch d := event.DetailsStruct().(type) {
-				case *sqlc.MonitorCheckEventWebSearchDetails:
+				case *models.MonitorCheckEventWebSearchDetails:
 					<div>
 						Searching for &ldquo;{ d.Query }&rdquo;&hellip;
 					</div>
-				case *sqlc.MonitorCheckEventBrowserNavigateDetails:
+				case *models.MonitorCheckEventBrowserNavigateDetails:
 					<div>
 						Browsing &ldquo;<a href={ d.URL } target="_blank" rel="noref noopener" class="link">{ components.URLHost(d.URL) }</a>&rdquo;&hellip;
 					</div>
-				case *sqlc.MonitorCheckEventBrowserClickDetails:
+				case *models.MonitorCheckEventBrowserClickDetails:
 					<div>
 						Clicking on a link&hellip;
 					</div>
@@ -171,8 +171,8 @@ templ checkInProgressEvent(event *sqlc.MonitorCheckEvent, latest bool) {
 }
 
 type checkInProgressTimelineItemViewData struct {
-	Check  *sqlc.MonitorCheck
-	Events []*sqlc.MonitorCheckEvent
+	Check  *models.MonitorCheck
+	Events []*models.MonitorCheckEvent
 }
 
 templ checkInProgressTimelineItem(data checkInProgressTimelineItemViewData) {
@@ -187,7 +187,7 @@ templ checkInProgressTimelineItem(data checkInProgressTimelineItemViewData) {
 	}
 }
 
-templ monitorResultTimelineItem(result *sqlc.MonitorResult) {
+templ monitorResultTimelineItem(result *models.MonitorResult) {
 	@components.TimelineItem(monitorResultHeading(result), nil) {
 		if result.Date != nil && result.DatePastTenseVerb.Valid {
 			<div class="text-sm">
@@ -236,19 +236,19 @@ templ monitorResultTimelineItem(result *sqlc.MonitorResult) {
 	}
 }
 
-templ monitorResultHeading(result *sqlc.MonitorResult) {
+templ monitorResultHeading(result *models.MonitorResult) {
 	<div class="text-lg font-semibold">
 		{ result.Result }
 	</div>
 }
 
-templ monitorCreatedTimelineHeading(mon *sqlc.Monitor) {
+templ monitorCreatedTimelineHeading(mon *models.Monitor) {
 	<div class="text-base-content/60">
 		Created { components.FormatDate(ctx, mon.CreatedAt) }
 	</div>
 }
 
-func citationFaviconProxiedURL(citation sqlc.Citation) string {
+func citationFaviconProxiedURL(citation models.Citation) string {
 	if citation.FaviconURL == "" {
 		return ""
 	}

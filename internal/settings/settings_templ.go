@@ -10,14 +10,14 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import "github.com/alexpls/untils/internal/validation"
 import "github.com/alexpls/untils/internal/pushover"
-import "github.com/alexpls/untils/internal/db/sqlc"
+import "github.com/alexpls/untils/internal/db/models"
 import "github.com/alexpls/untils/internal/components"
 import "github.com/alexpls/untils/internal/components/app"
 import "fmt"
 import "github.com/starfederation/datastar-go/datastar"
 
 type SettingsViewModel struct {
-	ConfiguredIntegrations []*sqlc.UserIntegrationsRow
+	ConfiguredIntegrations []*models.UserIntegrationsRow
 }
 
 func Settings(data *SettingsViewModel) templ.Component {
@@ -194,7 +194,7 @@ func Settings(data *SettingsViewModel) templ.Component {
 }
 
 type PushoverSettingsViewModel struct {
-	Token *sqlc.PushoverUserToken
+	Token *models.PushoverUserToken
 
 	Values           pushover.CreateOrUpdateTokenParams
 	ValidationErrors validation.ValidationErrors

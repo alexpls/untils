@@ -1,4 +1,4 @@
-package sqlc
+package models
 
 func (row *UserIntegrationsRow) DisplayName() string {
 	switch row.Name {

@@ -6,16 +6,16 @@ import (
 	"github.com/alexpls/untils/internal/components"
 	"github.com/alexpls/untils/internal/components/app"
 	"github.com/alexpls/untils/internal/components/icons"
-	"github.com/alexpls/untils/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/db/models"
 	"github.com/alexpls/untils/internal/validation"
 	"github.com/starfederation/datastar-go/datastar"
 )
 
 type MonitorDraftData struct {
-	Monitor               *sqlc.Monitor
-	ResultPreview         *sqlc.MonitorResult
-	CheckInProgress       *sqlc.MonitorCheck
-	CheckInProgressEvents []*sqlc.MonitorCheckEvent
+	Monitor               *models.Monitor
+	ResultPreview         *models.MonitorResult
+	CheckInProgress       *models.MonitorCheck
+	CheckInProgressEvents []*models.MonitorCheckEvent
 	ValidationErrors      validation.ValidationErrors
 	Values                UpdateMonitorDraftParams
 	Notifiers             []*MonitorNotifierViewData
@@ -25,8 +25,8 @@ func (m MonitorDraftData) GetValidationErrors() validation.ValidationErrors {
 	return m.ValidationErrors
 }
 
-func monitorLoading(mon *sqlc.Monitor) bool {
-	return mon.Status == sqlc.MonitorStatusPreviewing || mon.Status == sqlc.MonitorStatusValidating
+func monitorLoading(mon *models.Monitor) bool {
+	return mon.Status == models.MonitorStatusPreviewing || mon.Status == models.MonitorStatusValidating
 }
 
 templ MonitorDraftPage(data MonitorDraftData) {
@@ -93,7 +93,7 @@ templ MonitorDraftView(data MonitorDraftData) {
 			<div class="bg-base-100 border border-base-content/20 rounded">
 				<div class="p-3 space-y-3 border-b border-base-content/10">
 					switch data.Monitor.Status {
-						case sqlc.MonitorStatusValidating:
+						case models.MonitorStatusValidating:
 							<div class="flex items-start">
 								@icons.Loader(icons.IconParams{
 									Size:    18,
@@ -101,7 +101,7 @@ templ MonitorDraftView(data MonitorDraftData) {
 								})
 								<span class="ml-2">Validating subject...</span>
 							</div>
-						case sqlc.MonitorStatusRejected:
+						case models.MonitorStatusRejected:
 							<div class="flex items-start text-error">
 								@icons.TriangleAlert(icons.IconParams{
 									Size:    18,
@@ -128,7 +128,7 @@ templ MonitorDraftView(data MonitorDraftData) {
 				</div>
 				<div class="p-3 space-y-3 border-b border-base-content/10">
 					switch data.Monitor.Status {
-						case sqlc.MonitorStatusPreviewing:
+						case models.MonitorStatusPreviewing:
 							<div class="flex items-start">
 								@icons.Loader(icons.IconParams{
 									Size:    18,
@@ -148,7 +148,7 @@ templ MonitorDraftView(data MonitorDraftData) {
 									}
 								</div>
 							</div>
-						case sqlc.MonitorStatusReady:
+						case models.MonitorStatusReady:
 							<div class="flex items-start">
 								@icons.CircleCheck(icons.IconParams{
 									Size:    18,
@@ -177,7 +177,7 @@ templ MonitorDraftView(data MonitorDraftData) {
 				</div>
 				<div class="p-3 space-y-3">
 					switch data.Monitor.Status {
-						case sqlc.MonitorStatusReady:
+						case models.MonitorStatusReady:
 							<div class="flex items-start">
 								@icons.CircleCheck(icons.IconParams{
 									Size:    18,
@@ -207,7 +207,7 @@ templ MonitorDraftView(data MonitorDraftData) {
 				</div>
 			</div>
 		</div>
-		if data.Monitor.Status == sqlc.MonitorStatusReady {
+		if data.Monitor.Status == models.MonitorStatusReady {
 			<div class="mt-6">
 				<button
 					class="btn btn-primary btn-lg w-full mt-2 flex items-center"

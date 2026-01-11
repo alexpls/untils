@@ -8,20 +8,20 @@ import (
 	"time"
 
 	"github.com/alexpls/untils/internal/db"
-	"github.com/alexpls/untils/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/db/models"
 	"github.com/alexpls/untils/internal/llm"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/riverqueue/river"
 )
 
-var MonitorCheckTerminalStatuses = []sqlc.MonitorCheckStatus{
-	sqlc.MonitorCheckStatusFailed,
-	sqlc.MonitorCheckStatusSkipped,
-	sqlc.MonitorCheckStatusSuccess,
+var MonitorCheckTerminalStatuses = []models.MonitorCheckStatus{
+	models.MonitorCheckStatusFailed,
+	models.MonitorCheckStatusSkipped,
+	models.MonitorCheckStatusSuccess,
 }
 
-func (s *Service) GetMonitorCheck(ctx context.Context, id int64) (*sqlc.MonitorCheck, error) {
+func (s *Service) GetMonitorCheck(ctx context.Context, id int64) (*models.MonitorCheck, error) {
 	check, err := s.queries.GetMonitorCheck(ctx, s.pool, id)
 	if err != nil {
 		return nil, fmt.Errorf("getting monitor check: %w", err)
@@ -29,7 +29,7 @@ func (s *Service) GetMonitorCheck(ctx context.Context, id int64) (*sqlc.MonitorC
 	return check, nil
 }
 
-func (s *Service) GetNextMonitorCheck(ctx context.Context, monitor *sqlc.Monitor) (*sqlc.MonitorCheck, error) {
+func (s *Service) GetNextMonitorCheck(ctx context.Context, monitor *models.Monitor) (*models.MonitorCheck, error) {
 	check, err := s.queries.GetNextMonitorCheck(ctx, s.pool, monitor.ID)
 	if err != nil {
 		return nil, fmt.Errorf("getting next monitor check: %w", err)
@@ -39,7 +39,7 @@ func (s *Service) GetNextMonitorCheck(ctx context.Context, monitor *sqlc.Monitor
 
 // GetInProgressMonitorCheck returns the in-progress monitor check for the given monitor,
 // or nil if there is no in-progress check.
-func (s *Service) GetInProgressMonitorCheck(ctx context.Context, monitor *sqlc.Monitor) (*sqlc.MonitorCheck, error) {
+func (s *Service) GetInProgressMonitorCheck(ctx context.Context, monitor *models.Monitor) (*models.MonitorCheck, error) {
 	check, err := s.queries.GetInProgressMonitorCheck(ctx, s.pool, monitor.ID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -50,8 +50,8 @@ func (s *Service) GetInProgressMonitorCheck(ctx context.Context, monitor *sqlc.M
 	return check, nil
 }
 
-func (s *Service) ScheduleMonitorCheck(ctx context.Context, monitor *sqlc.Monitor, scheduledFor time.Time) (*sqlc.MonitorCheck, error) {
-	return db.WithTxV(s.pool, ctx, func(tx pgx.Tx) (*sqlc.MonitorCheck, error) {
+func (s *Service) ScheduleMonitorCheck(ctx context.Context, monitor *models.Monitor, scheduledFor time.Time) (*models.MonitorCheck, error) {
+	return db.WithTxV(s.pool, ctx, func(tx pgx.Tx) (*models.MonitorCheck, error) {
 		check, err := s.scheduleMonitorCheckTx(ctx, tx, monitor, scheduledFor)
 		if err != nil {
 			return nil, fmt.Errorf("scheduling monitor check: %w", err)
@@ -60,14 +60,14 @@ func (s *Service) ScheduleMonitorCheck(ctx context.Context, monitor *sqlc.Monito
 	})
 }
 
-func (s *Service) scheduleMonitorCheckTx(ctx context.Context, tx pgx.Tx, monitor *sqlc.Monitor, scheduledFor time.Time) (*sqlc.MonitorCheck, error) {
+func (s *Service) scheduleMonitorCheckTx(ctx context.Context, tx pgx.Tx, monitor *models.Monitor, scheduledFor time.Time) (*models.MonitorCheck, error) {
 	if err := s.queries.SkipPendingChecks(ctx, tx, monitor.ID); err != nil {
 		return nil, fmt.Errorf("skipping pending checks: %w", err)
 	}
 
-	check, err := s.queries.CreateMonitorCheck(ctx, tx, &sqlc.CreateMonitorCheckParams{
+	check, err := s.queries.CreateMonitorCheck(ctx, tx, &models.CreateMonitorCheckParams{
 		MonitorID:    monitor.ID,
-		Status:       sqlc.MonitorCheckStatusScheduled,
+		Status:       models.MonitorCheckStatusScheduled,
 		ScheduledFor: scheduledFor,
 	})
 	if err != nil {
@@ -90,7 +90,7 @@ func (s *Service) scheduleMonitorCheckTx(ctx context.Context, tx pgx.Tx, monitor
 	return check, nil
 }
 
-func (s *Service) PerformMonitorCheck(ctx context.Context, userID int64, check *sqlc.MonitorCheck, scheduleNext bool) error {
+func (s *Service) PerformMonitorCheck(ctx context.Context, userID int64, check *models.MonitorCheck, scheduleNext bool) error {
 	if slices.Contains(MonitorCheckTerminalStatuses, check.Status) {
 		s.logger.Warn("tried to perform a monitor check that is already in a terminal status", "check_id", check.ID, "status", check.Status)
 		return nil
@@ -105,7 +105,7 @@ func (s *Service) PerformMonitorCheck(ctx context.Context, userID int64, check *
 		return fmt.Errorf("getting monitor: %w", err)
 	}
 
-	latest, err := db.WithTxV(s.pool, ctx, func(tx pgx.Tx) ([]*sqlc.GetPreviousResultsWithCheckRow, error) {
+	latest, err := db.WithTxV(s.pool, ctx, func(tx pgx.Tx) ([]*models.GetPreviousResultsWithCheckRow, error) {
 		latest, err := s.queries.GetPreviousResultsWithCheck(ctx, tx, monitor.ID)
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
@@ -132,7 +132,7 @@ func (s *Service) PerformMonitorCheck(ctx context.Context, userID int64, check *
 		return err
 	}
 
-	prevResults := make([]sqlc.CheckResult, len(latest))
+	prevResults := make([]models.CheckResult, len(latest))
 	for i, r := range latest {
 		prevResults[i] = *r.MonitorCheck.Result
 	}
@@ -159,7 +159,7 @@ func (s *Service) PerformMonitorCheck(ctx context.Context, userID int64, check *
 		Instructions:    monitor.Instructions.String,
 	})
 	if err != nil {
-		if cerr := s.queries.UpdateMonitorCheckFailed(ctx, s.pool, &sqlc.UpdateMonitorCheckFailedParams{
+		if cerr := s.queries.UpdateMonitorCheckFailed(ctx, s.pool, &models.UpdateMonitorCheckFailedParams{
 			FailureReason: pgtype.Text{String: err.Error(), Valid: true},
 			ID:            check.ID,
 		}); cerr != nil {
@@ -177,7 +177,7 @@ func (s *Service) PerformMonitorCheck(ctx context.Context, userID int64, check *
 			return fmt.Errorf("bumping monitor version: %w", err)
 		}
 
-		if err := s.queries.UpdateMonitorCheckSuccess(ctx, tx, &sqlc.UpdateMonitorCheckSuccessParams{
+		if err := s.queries.UpdateMonitorCheckSuccess(ctx, tx, &models.UpdateMonitorCheckSuccessParams{
 			ID:     check.ID,
 			Result: result,
 		}); err != nil {
@@ -190,7 +190,7 @@ func (s *Service) PerformMonitorCheck(ctx context.Context, userID int64, check *
 				return fmt.Errorf("creating check result: %w", err)
 			}
 		} else {
-			if err := s.queries.AppendConfirmingCheckIDToResult(ctx, tx, &sqlc.AppendConfirmingCheckIDToResultParams{
+			if err := s.queries.AppendConfirmingCheckIDToResult(ctx, tx, &models.AppendConfirmingCheckIDToResultParams{
 				MonitorResultID:           latest[0].MonitorResult.ID,
 				ConfirmingCheckIDToAppend: check.ID,
 			}); err != nil {

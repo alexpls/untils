@@ -5,43 +5,43 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/alexpls/untils/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/db/models"
 )
 
-var validMonitorStatusTransitions = map[sqlc.MonitorStatus][]sqlc.MonitorStatus{
-	sqlc.MonitorStatusValidating: {
-		sqlc.MonitorStatusPreviewing,
-		sqlc.MonitorStatusRejected,
+var validMonitorStatusTransitions = map[models.MonitorStatus][]models.MonitorStatus{
+	models.MonitorStatusValidating: {
+		models.MonitorStatusPreviewing,
+		models.MonitorStatusRejected,
 	},
-	sqlc.MonitorStatusPreviewing: {
-		sqlc.MonitorStatusReady,
-		sqlc.MonitorStatusRejected,
+	models.MonitorStatusPreviewing: {
+		models.MonitorStatusReady,
+		models.MonitorStatusRejected,
 	},
-	sqlc.MonitorStatusRejected: {
-		sqlc.MonitorStatusValidating,
+	models.MonitorStatusRejected: {
+		models.MonitorStatusValidating,
 	},
-	sqlc.MonitorStatusReady: {
-		sqlc.MonitorStatusValidating,
-		sqlc.MonitorStatusActive,
+	models.MonitorStatusReady: {
+		models.MonitorStatusValidating,
+		models.MonitorStatusActive,
 	},
-	sqlc.MonitorStatusActive: {},
+	models.MonitorStatusActive: {},
 }
 
 type ErrInvalidStatusTransition struct {
-	from sqlc.MonitorStatus
-	to   sqlc.MonitorStatus
+	from models.MonitorStatus
+	to   models.MonitorStatus
 }
 
 func (e ErrInvalidStatusTransition) Error() string {
 	return fmt.Sprintf("monitor: invalid status transition from '%s' to '%s'", e.from, e.to)
 }
 
-func (s *Service) updateMonitorStatus(ctx context.Context, tx sqlc.DBTX, mon *sqlc.Monitor, newStatus sqlc.MonitorStatus) (*sqlc.Monitor, error) {
+func (s *Service) updateMonitorStatus(ctx context.Context, tx models.DBTX, mon *models.Monitor, newStatus models.MonitorStatus) (*models.Monitor, error) {
 	if err := validateMonitorTransition(mon.Status, newStatus); err != nil {
 		return nil, err
 	}
 
-	updatedMon, err := s.queries.UpdateMonitorStatus(ctx, tx, &sqlc.UpdateMonitorStatusParams{
+	updatedMon, err := s.queries.UpdateMonitorStatus(ctx, tx, &models.UpdateMonitorStatusParams{
 		ID:     mon.ID,
 		UserID: mon.UserID,
 		Status: newStatus,
@@ -53,7 +53,7 @@ func (s *Service) updateMonitorStatus(ctx context.Context, tx sqlc.DBTX, mon *sq
 	return updatedMon, nil
 }
 
-func validateMonitorTransition(from sqlc.MonitorStatus, to sqlc.MonitorStatus) error {
+func validateMonitorTransition(from models.MonitorStatus, to models.MonitorStatus) error {
 	if from == to {
 		return nil
 	}

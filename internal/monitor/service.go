@@ -3,7 +3,7 @@ package monitor
 import (
 	"log/slog"
 
-	"github.com/alexpls/untils/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/db/models"
 	"github.com/alexpls/untils/internal/email"
 	"github.com/alexpls/untils/internal/llm"
 	"github.com/alexpls/untils/internal/pushover"
@@ -15,7 +15,7 @@ import (
 
 type Service struct {
 	pool           *pgxpool.Pool
-	queries        *sqlc.Queries
+	queries        *models.Queries
 	llm            *llm.Service
 	river          *river.Client[pgx.Tx]
 	logger         *slog.Logger
@@ -24,7 +24,7 @@ type Service struct {
 	validate       *validator.Validate
 }
 
-func NewService(pool *pgxpool.Pool, queries *sqlc.Queries, llm *llm.Service, river *river.Client[pgx.Tx], logger *slog.Logger, pushoverClient *pushover.Client, emailService *email.Service, validate *validator.Validate) *Service {
+func NewService(pool *pgxpool.Pool, queries *models.Queries, llm *llm.Service, river *river.Client[pgx.Tx], logger *slog.Logger, pushoverClient *pushover.Client, emailService *email.Service, validate *validator.Validate) *Service {
 	return &Service{
 		pool:           pool,
 		queries:        queries,

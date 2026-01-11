@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/alexedwards/argon2id"
-	"github.com/alexpls/untils/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/db/models"
 	"github.com/go-playground/validator/v10"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5"
@@ -17,12 +17,12 @@ import (
 
 type Auth struct {
 	logger   *slog.Logger
-	db       sqlc.DBTX
-	queries  *sqlc.Queries
+	db       models.DBTX
+	queries  *models.Queries
 	validate *validator.Validate
 }
 
-func NewAuth(logger *slog.Logger, db sqlc.DBTX, queries *sqlc.Queries, validate *validator.Validate) *Auth {
+func NewAuth(logger *slog.Logger, db models.DBTX, queries *models.Queries, validate *validator.Validate) *Auth {
 	return &Auth{
 		logger:   logger,
 		db:       db,
@@ -36,14 +36,14 @@ var (
 	ErrUserExists = errors.New("user already exists")
 )
 
-func (a *Auth) CreateUser(ctx context.Context, email string, password string, timezone string) (*sqlc.User, error) {
+func (a *Auth) CreateUser(ctx context.Context, email string, password string, timezone string) (*models.User, error) {
 	hash, err := argon2id.CreateHash(password, argon2id.DefaultParams)
 	if err != nil {
 		return nil, fmt.Errorf("hashing password: %w", err)
 	}
 
 	now := time.Now()
-	user, err := a.queries.CreateUser(ctx, a.db, &sqlc.CreateUserParams{
+	user, err := a.queries.CreateUser(ctx, a.db, &models.CreateUserParams{
 		Email:        email,
 		PasswordHash: hash,
 		CreatedAt:    now,
@@ -61,7 +61,7 @@ func (a *Auth) CreateUser(ctx context.Context, email string, password string, ti
 	return user, nil
 }
 
-func (a *Auth) GetUserByEmailPassword(ctx context.Context, email string, password string) (*sqlc.User, error) {
+func (a *Auth) GetUserByEmailPassword(ctx context.Context, email string, password string) (*models.User, error) {
 	user, err := a.queries.GetUserByEmail(ctx, a.db, email)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -81,7 +81,7 @@ func (a *Auth) GetUserByEmailPassword(ctx context.Context, email string, passwor
 	return user, nil
 }
 
-func (a *Auth) GetUser(ctx context.Context, id int64) (*sqlc.User, error) {
+func (a *Auth) GetUser(ctx context.Context, id int64) (*models.User, error) {
 	user, err := a.queries.GetUser(ctx, a.db, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -101,7 +101,7 @@ func (a *Auth) UpdateUserTimezone(ctx context.Context, id int64, params UpdateUs
 		return err
 	}
 
-	_, err := a.queries.UpdateUserTimezone(ctx, a.db, &sqlc.UpdateUserTimezoneParams{
+	_, err := a.queries.UpdateUserTimezone(ctx, a.db, &models.UpdateUserTimezoneParams{
 		UserID:   id,
 		Timezone: params.Timezone,
 	})

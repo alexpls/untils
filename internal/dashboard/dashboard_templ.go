@@ -14,7 +14,7 @@ import (
 	"github.com/alexpls/untils/internal/components"
 	"github.com/alexpls/untils/internal/components/app"
 	"github.com/alexpls/untils/internal/components/icons"
-	"github.com/alexpls/untils/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/db/models"
 	"github.com/starfederation/datastar-go/datastar"
 )
 
@@ -140,7 +140,7 @@ func DashboardView(data DashboardViewData) templ.Component {
 
 type MonitorActivityWidgetData struct {
 	Loading LoadingStatus
-	Items   []*sqlc.ListMonitorActivityRow
+	Items   []*models.ListMonitorActivityRow
 }
 
 func monitorActivityWidget(data MonitorActivityWidgetData) templ.Component {
@@ -244,7 +244,7 @@ func monitorActivityWidget(data MonitorActivityWidgetData) templ.Component {
 	})
 }
 
-func monitorActivityWidgetTimelineItemHeading(item *sqlc.ListMonitorActivityRow) templ.Component {
+func monitorActivityWidgetTimelineItemHeading(item *models.ListMonitorActivityRow) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -299,7 +299,7 @@ func monitorActivityWidgetTimelineItemHeading(item *sqlc.ListMonitorActivityRow)
 	})
 }
 
-func monitorActivityWidgetTimelineItemSide(item *sqlc.ListMonitorActivityRow) templ.Component {
+func monitorActivityWidgetTimelineItemSide(item *models.ListMonitorActivityRow) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -367,8 +367,8 @@ func monitorActivityWidgetActions() templ.Component {
 
 type CheckStatsWidgetData struct {
 	Loading          LoadingStatus
-	CheckStats       *sqlc.GetMonitorCheckStatsRow
-	DailyCheckCounts []*sqlc.GetDailyMonitorCheckCountsRow
+	CheckStats       *models.GetMonitorCheckStatsRow
+	DailyCheckCounts []*models.GetDailyMonitorCheckCountsRow
 }
 
 func (d CheckStatsWidgetData) DailyCheckCountsTimeSeries() components.TimeSeries {

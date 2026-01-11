@@ -14,16 +14,16 @@ import (
 	"github.com/alexpls/untils/internal/components"
 	"github.com/alexpls/untils/internal/components/app"
 	"github.com/alexpls/untils/internal/components/icons"
-	"github.com/alexpls/untils/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/db/models"
 	"github.com/alexpls/untils/internal/validation"
 	"github.com/starfederation/datastar-go/datastar"
 )
 
 type MonitorDraftData struct {
-	Monitor               *sqlc.Monitor
-	ResultPreview         *sqlc.MonitorResult
-	CheckInProgress       *sqlc.MonitorCheck
-	CheckInProgressEvents []*sqlc.MonitorCheckEvent
+	Monitor               *models.Monitor
+	ResultPreview         *models.MonitorResult
+	CheckInProgress       *models.MonitorCheck
+	CheckInProgressEvents []*models.MonitorCheckEvent
 	ValidationErrors      validation.ValidationErrors
 	Values                UpdateMonitorDraftParams
 	Notifiers             []*MonitorNotifierViewData
@@ -33,8 +33,8 @@ func (m MonitorDraftData) GetValidationErrors() validation.ValidationErrors {
 	return m.ValidationErrors
 }
 
-func monitorLoading(mon *sqlc.Monitor) bool {
-	return mon.Status == sqlc.MonitorStatusPreviewing || mon.Status == sqlc.MonitorStatusValidating
+func monitorLoading(mon *models.Monitor) bool {
+	return mon.Status == models.MonitorStatusPreviewing || mon.Status == models.MonitorStatusValidating
 }
 
 func MonitorDraftPage(data MonitorDraftData) templ.Component {
@@ -224,7 +224,7 @@ func MonitorDraftView(data MonitorDraftData) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		switch data.Monitor.Status {
-		case sqlc.MonitorStatusValidating:
+		case models.MonitorStatusValidating:
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<div class=\"flex items-start\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -240,7 +240,7 @@ func MonitorDraftView(data MonitorDraftData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case sqlc.MonitorStatusRejected:
+		case models.MonitorStatusRejected:
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<div class=\"flex items-start text-error\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -298,7 +298,7 @@ func MonitorDraftView(data MonitorDraftData) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		switch data.Monitor.Status {
-		case sqlc.MonitorStatusPreviewing:
+		case models.MonitorStatusPreviewing:
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<div class=\"flex items-start\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -335,7 +335,7 @@ func MonitorDraftView(data MonitorDraftData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case sqlc.MonitorStatusReady:
+		case models.MonitorStatusReady:
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "<div class=\"flex items-start\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -381,7 +381,7 @@ func MonitorDraftView(data MonitorDraftData) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		switch data.Monitor.Status {
-		case sqlc.MonitorStatusReady:
+		case models.MonitorStatusReady:
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "<div class=\"flex items-start\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -426,7 +426,7 @@ func MonitorDraftView(data MonitorDraftData) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if data.Monitor.Status == sqlc.MonitorStatusReady {
+		if data.Monitor.Status == models.MonitorStatusReady {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "<div class=\"mt-6\"><button class=\"btn btn-primary btn-lg w-full mt-2 flex items-center\" data-on:click=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err

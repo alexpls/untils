@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/alexpls/untils/internal/db"
-	"github.com/alexpls/untils/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/db/models"
 	"github.com/alexpls/untils/internal/llm"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -15,8 +15,8 @@ import (
 
 var monitorCheckFrequency = 6 * time.Hour
 
-func (s *Service) GetMonitor(ctx context.Context, userID, monitorID int64) (*sqlc.Monitor, error) {
-	monitor, err := s.queries.GetMonitor(ctx, s.pool, &sqlc.GetMonitorParams{
+func (s *Service) GetMonitor(ctx context.Context, userID, monitorID int64) (*models.Monitor, error) {
+	monitor, err := s.queries.GetMonitor(ctx, s.pool, &models.GetMonitorParams{
 		UserID: userID,
 		ID:     monitorID,
 	})
@@ -40,13 +40,13 @@ type CreateMonitorParams struct {
 	CommonParams
 }
 
-func (s *Service) CreateMonitor(ctx context.Context, params CreateMonitorParams) (*sqlc.Monitor, error) {
+func (s *Service) CreateMonitor(ctx context.Context, params CreateMonitorParams) (*models.Monitor, error) {
 	if err := s.validate.Struct(params); err != nil {
 		return nil, err
 	}
 
-	return db.WithTxV(s.pool, ctx, func(tx pgx.Tx) (*sqlc.Monitor, error) {
-		created, err := s.queries.CreateMonitor(ctx, tx, &sqlc.CreateMonitorParams{
+	return db.WithTxV(s.pool, ctx, func(tx pgx.Tx) (*models.Monitor, error) {
+		created, err := s.queries.CreateMonitor(ctx, tx, &models.CreateMonitorParams{
 			UserID:       params.UserID,
 			Subject:      pgtype.Text{String: params.Subject, Valid: true},
 			Instructions: pgtype.Text{String: "", Valid: true},
@@ -71,7 +71,7 @@ func (s *Service) CreateMonitor(ctx context.Context, params CreateMonitorParams)
 }
 
 func (s *Service) DeleteMonitor(ctx context.Context, userID, monitorID int64) error {
-	err := s.queries.DeleteMonitor(ctx, s.pool, &sqlc.DeleteMonitorParams{
+	err := s.queries.DeleteMonitor(ctx, s.pool, &models.DeleteMonitorParams{
 		UserID:    userID,
 		MonitorID: monitorID,
 	})
@@ -82,8 +82,8 @@ func (s *Service) DeleteMonitor(ctx context.Context, userID, monitorID int64) er
 }
 
 // TODO: the "validate" name should be more like triage now to align with package llm
-func (s *Service) ValidateMonitor(ctx context.Context, monitor *sqlc.Monitor) error {
-	if monitor.Status == sqlc.MonitorStatusActive {
+func (s *Service) ValidateMonitor(ctx context.Context, monitor *models.Monitor) error {
+	if monitor.Status == models.MonitorStatusActive {
 		return fmt.Errorf("can't validate an active monitor")
 	}
 
@@ -94,7 +94,7 @@ func (s *Service) ValidateMonitor(ctx context.Context, monitor *sqlc.Monitor) er
 			return err
 		}
 
-		monitor, err = s.updateMonitorStatus(ctx, tx, monitor, sqlc.MonitorStatusValidating)
+		monitor, err = s.updateMonitorStatus(ctx, tx, monitor, models.MonitorStatusValidating)
 		return err
 	}); err != nil {
 		return err
@@ -111,7 +111,7 @@ func (s *Service) ValidateMonitor(ctx context.Context, monitor *sqlc.Monitor) er
 	}
 
 	if !trigageRes.Approved {
-		if err = s.queries.RejectMonitor(ctx, s.pool, &sqlc.RejectMonitorParams{
+		if err = s.queries.RejectMonitor(ctx, s.pool, &models.RejectMonitorParams{
 			ID:             monitor.ID,
 			UserID:         monitor.UserID,
 			RejectedReason: pgtype.Text{String: trigageRes.RejectedReason, Valid: true},
@@ -121,25 +121,25 @@ func (s *Service) ValidateMonitor(ctx context.Context, monitor *sqlc.Monitor) er
 		return nil
 	}
 
-	var check *sqlc.MonitorCheck
+	var check *models.MonitorCheck
 
 	if err := db.WithTx(s.pool, ctx, func(tx pgx.Tx) error {
 		if err := s.validateMonitorsSameVersion(ctx, tx, monitor); err != nil {
 			return err
 		}
 
-		monitor, err = s.queries.UpdateMonitorStatus(ctx, tx, &sqlc.UpdateMonitorStatusParams{
+		monitor, err = s.queries.UpdateMonitorStatus(ctx, tx, &models.UpdateMonitorStatusParams{
 			ID:     monitor.ID,
 			UserID: monitor.UserID,
-			Status: sqlc.MonitorStatusPreviewing,
+			Status: models.MonitorStatusPreviewing,
 		})
 		if err != nil {
 			return err
 		}
 
-		check, err = s.queries.CreateMonitorCheck(ctx, tx, &sqlc.CreateMonitorCheckParams{
+		check, err = s.queries.CreateMonitorCheck(ctx, tx, &models.CreateMonitorCheckParams{
 			MonitorID:    monitor.ID,
-			Status:       sqlc.MonitorCheckStatusScheduled,
+			Status:       models.MonitorCheckStatusScheduled,
 			ScheduledFor: time.Now(),
 		})
 		if err != nil {
@@ -157,7 +157,7 @@ func (s *Service) ValidateMonitor(ctx context.Context, monitor *sqlc.Monitor) er
 		return fmt.Errorf("performing monitor check: %w", err)
 	}
 
-	_, err = s.queries.UpdateMonitorToReady(ctx, s.pool, &sqlc.UpdateMonitorToReadyParams{
+	_, err = s.queries.UpdateMonitorToReady(ctx, s.pool, &models.UpdateMonitorToReadyParams{
 		MonitorID: monitor.ID,
 		UserID:    monitor.UserID,
 		Subject:   monitor.Subject,
@@ -167,7 +167,7 @@ func (s *Service) ValidateMonitor(ctx context.Context, monitor *sqlc.Monitor) er
 	return err
 }
 
-func CheckResultToCreateMonitorResultParams(monitorID, checkID int64, res *sqlc.CheckResult) *sqlc.CreateMonitorResultParams {
+func CheckResultToCreateMonitorResultParams(monitorID, checkID int64, res *models.CheckResult) *models.CreateMonitorResultParams {
 	resultDate := pgtype.Timestamptz{Time: time.Time{}, Valid: false}
 	resultDatePastTenseVerb := pgtype.Text{String: "", Valid: false}
 
@@ -184,7 +184,7 @@ func CheckResultToCreateMonitorResultParams(monitorID, checkID int64, res *sqlc.
 		}
 	}
 
-	return &sqlc.CreateMonitorResultParams{
+	return &models.CreateMonitorResultParams{
 		MonitorID:          monitorID,
 		ConfirmingCheckIds: []int64{checkID},
 		Result:             res.ResultPlaintext,
@@ -194,17 +194,17 @@ func CheckResultToCreateMonitorResultParams(monitorID, checkID int64, res *sqlc.
 	}
 }
 
-func (s *Service) ActivateMonitorFromPreview(ctx context.Context, userID, monitorID int64) (*sqlc.Monitor, error) {
+func (s *Service) ActivateMonitorFromPreview(ctx context.Context, userID, monitorID int64) (*models.Monitor, error) {
 	monitor, err := s.GetMonitor(ctx, userID, monitorID)
 	if err != nil {
 		return nil, fmt.Errorf("getting monitor: %w", err)
 	}
 
-	if err = validateMonitorTransition(monitor.Status, sqlc.MonitorStatusActive); err != nil {
+	if err = validateMonitorTransition(monitor.Status, models.MonitorStatusActive); err != nil {
 		return nil, err
 	}
 
-	return db.WithTxV(s.pool, ctx, func(tx pgx.Tx) (*sqlc.Monitor, error) {
+	return db.WithTxV(s.pool, ctx, func(tx pgx.Tx) (*models.Monitor, error) {
 		res, err := s.queries.GetLatestMonitorResult(ctx, tx, monitorID)
 		if err != nil {
 			return nil, fmt.Errorf("getting latest monitor result: %w", err)
@@ -214,7 +214,7 @@ func (s *Service) ActivateMonitorFromPreview(ctx context.Context, userID, monito
 			return nil, fmt.Errorf("scheduling check: %w", err)
 		}
 
-		monitor, err := s.updateMonitorStatus(ctx, tx, monitor, sqlc.MonitorStatusActive)
+		monitor, err := s.updateMonitorStatus(ctx, tx, monitor, models.MonitorStatusActive)
 		if err != nil {
 			return nil, fmt.Errorf("activating monitor: %w", err)
 		}
@@ -227,7 +227,7 @@ type UpdateMonitorDraftParams struct {
 	CommonParams
 }
 
-func NewUpdateMonitorDraftParams(mon *sqlc.Monitor) UpdateMonitorDraftParams {
+func NewUpdateMonitorDraftParams(mon *models.Monitor) UpdateMonitorDraftParams {
 	return UpdateMonitorDraftParams{
 		CommonParams: CommonParams{
 			Subject:      mon.Subject.String,
@@ -236,13 +236,13 @@ func NewUpdateMonitorDraftParams(mon *sqlc.Monitor) UpdateMonitorDraftParams {
 	}
 }
 
-func (s *Service) UpdateMonitorDraft(ctx context.Context, userID, monitorID int64, params UpdateMonitorDraftParams) (*sqlc.Monitor, error) {
+func (s *Service) UpdateMonitorDraft(ctx context.Context, userID, monitorID int64, params UpdateMonitorDraftParams) (*models.Monitor, error) {
 	if err := s.validate.Struct(params); err != nil {
 		return nil, err
 	}
 
-	mon, err := db.WithTxV(s.pool, ctx, func(tx pgx.Tx) (*sqlc.Monitor, error) {
-		mon, err := s.queries.GetMonitor(ctx, tx, &sqlc.GetMonitorParams{
+	mon, err := db.WithTxV(s.pool, ctx, func(tx pgx.Tx) (*models.Monitor, error) {
+		mon, err := s.queries.GetMonitor(ctx, tx, &models.GetMonitorParams{
 			UserID: userID,
 			ID:     monitorID,
 		})
@@ -255,12 +255,12 @@ func (s *Service) UpdateMonitorDraft(ctx context.Context, userID, monitorID int6
 			return mon, nil
 		}
 
-		mon, err = s.updateMonitorStatus(ctx, tx, mon, sqlc.MonitorStatusValidating)
+		mon, err = s.updateMonitorStatus(ctx, tx, mon, models.MonitorStatusValidating)
 		if err != nil {
 			return nil, err
 		}
 
-		mon, err = s.queries.UpdateMonitorDraft(ctx, tx, &sqlc.UpdateMonitorDraftParams{
+		mon, err = s.queries.UpdateMonitorDraft(ctx, tx, &models.UpdateMonitorDraftParams{
 			UserID:       mon.UserID,
 			ID:           mon.ID,
 			Subject:      pgtype.Text{String: params.Subject, Valid: true},
@@ -287,7 +287,7 @@ func (s *Service) UpdateMonitorDraft(ctx context.Context, userID, monitorID int6
 	return mon, nil
 }
 
-func (s *Service) deleteMonitorRelations(ctx context.Context, tx sqlc.DBTX, monitorID int64) error {
+func (s *Service) deleteMonitorRelations(ctx context.Context, tx models.DBTX, monitorID int64) error {
 	if err := s.queries.DeleteMonitorChecks(ctx, tx, monitorID); err != nil {
 		return fmt.Errorf("deleting monitor checks: %w", err)
 	}

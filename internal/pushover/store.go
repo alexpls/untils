@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/alexpls/untils/internal/db"
-	"github.com/alexpls/untils/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/db/models"
 	"github.com/go-playground/validator/v10"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -14,17 +14,17 @@ import (
 
 type Store struct {
 	db       *pgxpool.Pool
-	queries  *sqlc.Queries
+	queries  *models.Queries
 	validate *validator.Validate
 }
 
-func NewStore(db *pgxpool.Pool, queries *sqlc.Queries, validate *validator.Validate) *Store {
+func NewStore(db *pgxpool.Pool, queries *models.Queries, validate *validator.Validate) *Store {
 	return &Store{db: db, queries: queries, validate: validate}
 }
 
 var ErrNoPushoverUserToken = errors.New("no pushover user token found")
 
-func (s *Store) GetToken(ctx context.Context, userID int64) (*sqlc.PushoverUserToken, error) {
+func (s *Store) GetToken(ctx context.Context, userID int64) (*models.PushoverUserToken, error) {
 	tok, err := s.queries.GetPushoverUserToken(ctx, s.db, userID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -39,12 +39,12 @@ type CreateOrUpdateTokenParams struct {
 	Token string `validate:"required"`
 }
 
-func (s *Store) CreateOrUpdateToken(ctx context.Context, userID int64, params CreateOrUpdateTokenParams) (*sqlc.PushoverUserToken, error) {
+func (s *Store) CreateOrUpdateToken(ctx context.Context, userID int64, params CreateOrUpdateTokenParams) (*models.PushoverUserToken, error) {
 	if err := s.validate.Struct(params); err != nil {
 		return nil, err
 	}
 
-	tok, err := s.queries.CreateOrUpdatePushoverUserToken(ctx, s.db, &sqlc.CreateOrUpdatePushoverUserTokenParams{
+	tok, err := s.queries.CreateOrUpdatePushoverUserToken(ctx, s.db, &models.CreateOrUpdatePushoverUserTokenParams{
 		Token:  params.Token,
 		UserID: userID,
 	})
@@ -57,9 +57,9 @@ func (s *Store) CreateOrUpdateToken(ctx context.Context, userID int64, params Cr
 
 func (s *Store) DeleteToken(ctx context.Context, userID int64) error {
 	err := db.WithTx(s.db, ctx, func(tx pgx.Tx) error {
-		if err := s.queries.DeleteMonitorNotifiersByUserAndType(ctx, tx, &sqlc.DeleteMonitorNotifiersByUserAndTypeParams{
+		if err := s.queries.DeleteMonitorNotifiersByUserAndType(ctx, tx, &models.DeleteMonitorNotifiersByUserAndTypeParams{
 			UserID: userID,
-			Type:   sqlc.NotifierPushover,
+			Type:   models.NotifierPushover,
 		}); err != nil {
 			return fmt.Errorf("deleting pushover monitor notifiers: %w", err)
 		}

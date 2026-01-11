@@ -12,11 +12,11 @@ import (
 	"fmt"
 
 	"github.com/alexpls/untils/internal/components/app"
-	"github.com/alexpls/untils/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/db/models"
 )
 
 type MonitorsListData struct {
-	Monitors []*sqlc.Monitor
+	Monitors []*models.Monitor
 }
 
 func monitorListPageActions() templ.Component {

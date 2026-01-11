@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/alexpls/untils/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/db/models"
 	"github.com/alexpls/untils/internal/testhelper"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/stretchr/testify/assert"
@@ -14,7 +14,7 @@ import (
 
 func TestStore_Save(t *testing.T) {
 	pool := testhelper.TestDB(t)
-	s := &store{db: pool, queries: sqlc.New()}
+	s := &store{db: pool, queries: models.New()}
 	ctx := context.Background()
 
 	t.Run("save new session", func(t *testing.T) {
@@ -72,7 +72,7 @@ func TestStore_Save(t *testing.T) {
 
 func TestStore_Get(t *testing.T) {
 	pool := testhelper.TestDB(t)
-	s := &store{db: pool, queries: sqlc.New()}
+	s := &store{db: pool, queries: models.New()}
 	ctx := context.Background()
 
 	t.Run("get existing session", func(t *testing.T) {
@@ -127,7 +127,7 @@ func TestStore_Get(t *testing.T) {
 
 func TestStore_Destroy(t *testing.T) {
 	pool := testhelper.TestDB(t)
-	s := &store{db: pool, queries: sqlc.New()}
+	s := &store{db: pool, queries: models.New()}
 	ctx := context.Background()
 
 	t.Run("destroy existing session", func(t *testing.T) {
@@ -160,7 +160,7 @@ func TestStore_Destroy(t *testing.T) {
 
 func TestStore_Trim(t *testing.T) {
 	pool := testhelper.TestDB(t)
-	s := &store{db: pool, queries: sqlc.New()}
+	s := &store{db: pool, queries: models.New()}
 	ctx := context.Background()
 
 	t.Run("trim expired sessions", func(t *testing.T) {

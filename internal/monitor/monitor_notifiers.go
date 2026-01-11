@@ -6,14 +6,14 @@ import (
 	"fmt"
 
 	"github.com/alexpls/untils/internal/db"
-	"github.com/alexpls/untils/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/db/models"
 	"github.com/alexpls/untils/internal/email"
 	"github.com/alexpls/untils/internal/pushover"
 	"github.com/jackc/pgx/v5"
 	"golang.org/x/sync/errgroup"
 )
 
-func (s *Service) ListMonitorNotifiers(ctx context.Context, mon *sqlc.Monitor) ([]*sqlc.MonitorNotifier, error) {
+func (s *Service) ListMonitorNotifiers(ctx context.Context, mon *models.Monitor) ([]*models.MonitorNotifier, error) {
 	notifiers, err := s.queries.ListMonitorNotifiers(ctx, s.pool, mon.ID)
 	if err != nil {
 		return nil, fmt.Errorf("listing monitor notifiers: %w", err)
@@ -21,15 +21,15 @@ func (s *Service) ListMonitorNotifiers(ctx context.Context, mon *sqlc.Monitor) (
 	return notifiers, nil
 }
 
-func (s *Service) CreateMonitorNotifier(ctx context.Context, mon *sqlc.Monitor, notifierType sqlc.Notifier) (*sqlc.MonitorNotifier, error) {
-	return db.WithTxV(s.pool, ctx, func(tx pgx.Tx) (*sqlc.MonitorNotifier, error) {
+func (s *Service) CreateMonitorNotifier(ctx context.Context, mon *models.Monitor, notifierType models.Notifier) (*models.MonitorNotifier, error) {
+	return db.WithTxV(s.pool, ctx, func(tx pgx.Tx) (*models.MonitorNotifier, error) {
 		return s.createMonitorNotifierTx(ctx, tx, mon, notifierType)
 	})
 }
 
-func (s *Service) createMonitorNotifierTx(ctx context.Context, tx pgx.Tx, mon *sqlc.Monitor, notifierType sqlc.Notifier) (*sqlc.MonitorNotifier, error) {
+func (s *Service) createMonitorNotifierTx(ctx context.Context, tx pgx.Tx, mon *models.Monitor, notifierType models.Notifier) (*models.MonitorNotifier, error) {
 	switch notifierType {
-	case sqlc.NotifierPushover:
+	case models.NotifierPushover:
 		_, err := s.queries.GetPushoverUserToken(ctx, tx, mon.UserID)
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
@@ -39,7 +39,7 @@ func (s *Service) createMonitorNotifierTx(ctx context.Context, tx pgx.Tx, mon *s
 		}
 	}
 
-	notifier, err := s.queries.CreateMonitorNotifier(ctx, tx, &sqlc.CreateMonitorNotifierParams{
+	notifier, err := s.queries.CreateMonitorNotifier(ctx, tx, &models.CreateMonitorNotifierParams{
 		MonitorID: mon.ID,
 		Type:      notifierType,
 	})
@@ -49,8 +49,8 @@ func (s *Service) createMonitorNotifierTx(ctx context.Context, tx pgx.Tx, mon *s
 	return notifier, nil
 }
 
-func (s *Service) DeleteMonitorNotifier(ctx context.Context, mon *sqlc.Monitor, notifierType sqlc.Notifier) error {
-	err := s.queries.DeleteMonitorNotifier(ctx, s.pool, &sqlc.DeleteMonitorNotifierParams{
+func (s *Service) DeleteMonitorNotifier(ctx context.Context, mon *models.Monitor, notifierType models.Notifier) error {
+	err := s.queries.DeleteMonitorNotifier(ctx, s.pool, &models.DeleteMonitorNotifierParams{
 		MonitorID: mon.ID,
 		Type:      notifierType,
 	})
@@ -61,12 +61,12 @@ func (s *Service) DeleteMonitorNotifier(ctx context.Context, mon *sqlc.Monitor, 
 }
 
 type SendNotificationsParams struct {
-	Monitor *sqlc.Monitor
+	Monitor *models.Monitor
 	Message string
 }
 
 func (s *Service) SendNotifications(ctx context.Context, params SendNotificationsParams) error {
-	if params.Monitor.Status != sqlc.MonitorStatusActive {
+	if params.Monitor.Status != models.MonitorStatusActive {
 		s.logger.Warn("skipping notifications for inactive monitor", "monitor_id", params.Monitor.ID)
 		return nil
 	}
@@ -81,14 +81,14 @@ func (s *Service) SendNotifications(ctx context.Context, params SendNotification
 	for _, notifier := range notifiers {
 		// TODO: remove repetitive code in favor of interface abstraction
 		switch notifier.Type {
-		case sqlc.NotifierEmail:
+		case models.NotifierEmail:
 			g.Go(func() error {
 				if err := s.sendEmailNotification(ctx, params); err != nil {
 					return fmt.Errorf("sending email notification: %w", err)
 				}
 				return nil
 			})
-		case sqlc.NotifierPushover:
+		case models.NotifierPushover:
 			g.Go(func() error {
 				if err := s.sendPushoverNotification(ctx, params); err != nil {
 					return fmt.Errorf("sending pushover notification: %w", err)
@@ -105,7 +105,7 @@ func (s *Service) SendNotifications(ctx context.Context, params SendNotification
 	return nil
 }
 
-func (s *Service) enableAllNotifiers(ctx context.Context, tx pgx.Tx, mon *sqlc.Monitor) error {
+func (s *Service) enableAllNotifiers(ctx context.Context, tx pgx.Tx, mon *models.Monitor) error {
 	integrations, err := s.queries.UserIntegrations(ctx, tx, mon.UserID)
 	if err != nil {
 		return err

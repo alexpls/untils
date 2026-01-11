@@ -22,7 +22,7 @@ Frontend:
 
 ## Database schema
 
-You can view the database schema in ./internal/db/sqlc/schema.sql - if you modify
+You can view the database schema in ./internal/db/models/schema.sql - if you modify
 one of the queries, you can get SQLc to regenerate it with `mise run sqlc-generate`.
 
 ## Development server

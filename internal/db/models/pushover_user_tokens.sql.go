@@ -3,7 +3,7 @@
 //   sqlc v1.30.0
 // source: pushover_user_tokens.sql
 
-package sqlc
+package models
 
 import (
 	"context"

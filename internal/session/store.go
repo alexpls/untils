@@ -4,12 +4,12 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/alexpls/untils/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/db/models"
 )
 
 type store struct {
-	db      sqlc.DBTX
-	queries *sqlc.Queries
+	db      models.DBTX
+	queries *models.Queries
 }
 
 func (s *store) get(ctx context.Context, id string) (*Session, error) {
@@ -37,7 +37,7 @@ func (s *store) save(ctx context.Context, sess *Session) error {
 		return err
 	}
 
-	return s.queries.SaveSession(ctx, s.db, &sqlc.SaveSessionParams{
+	return s.queries.SaveSession(ctx, s.db, &models.SaveSessionParams{
 		ID:        sess.ID,
 		CreatedAt: sess.CreatedAt,
 		ExpiresAt: sess.ExpiresAt,

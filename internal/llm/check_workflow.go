@@ -3,7 +3,7 @@ package llm
 import (
 	"context"
 
-	"github.com/alexpls/untils/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/db/models"
 	"github.com/alexpls/untils/internal/wideevents"
 )
 
@@ -15,15 +15,15 @@ type CheckWorkflow struct {
 type EventsChan chan CheckEvent
 
 type CheckEvent struct {
-	Kind    sqlc.MonitorCheckEventKind
-	Details sqlc.MonitorCheckEventDetails
+	Kind    models.MonitorCheckEventKind
+	Details models.MonitorCheckEventDetails
 }
 
 func NewCheckWorkflow(service *Service, ch EventsChan) *CheckWorkflow {
 	return &CheckWorkflow{service: service, Chan: ch}
 }
 
-func (w *CheckWorkflow) Run(ctx context.Context, params *CheckParams) (*sqlc.CheckResult, error) {
+func (w *CheckWorkflow) Run(ctx context.Context, params *CheckParams) (*models.CheckResult, error) {
 	llmEvent, _ := wideevents.GetOrCreateFromContext(ctx, newLLMEvent)
 	defer llmEvent.finish()
 

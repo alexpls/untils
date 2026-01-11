@@ -4,20 +4,20 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/alexpls/untils/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/db/models"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/starfederation/datastar-go/datastar"
 )
 
 // Handlers contains the HTTP handlers for dashboard routes
 type Handlers struct {
-	queries *sqlc.Queries
+	queries *models.Queries
 	pool    *pgxpool.Pool
 	logger  *slog.Logger
 }
 
 // NewHandlers creates a new Handlers instance
-func NewHandlers(queries *sqlc.Queries, pool *pgxpool.Pool, logger *slog.Logger) *Handlers {
+func NewHandlers(queries *models.Queries, pool *pgxpool.Pool, logger *slog.Logger) *Handlers {
 	return &Handlers{
 		queries: queries,
 		pool:    pool,
@@ -26,7 +26,7 @@ func NewHandlers(queries *sqlc.Queries, pool *pgxpool.Pool, logger *slog.Logger)
 }
 
 // Get handles GET /app
-func (h *Handlers) Get(w http.ResponseWriter, r *http.Request, user *sqlc.User) {
+func (h *Handlers) Get(w http.ResponseWriter, r *http.Request, user *models.User) {
 	data := DashboardViewData{
 		MonitorActivity: MonitorActivityWidgetData{
 			Loading: LoadingStatusLoading,
@@ -39,7 +39,7 @@ func (h *Handlers) Get(w http.ResponseWriter, r *http.Request, user *sqlc.User) 
 }
 
 // Events handles GET /app/dashboard/events (SSE)
-func (h *Handlers) Events(w http.ResponseWriter, r *http.Request, user *sqlc.User) {
+func (h *Handlers) Events(w http.ResponseWriter, r *http.Request, user *models.User) {
 	sse := datastar.NewSSE(w, r)
 
 	activity, err := h.queries.ListMonitorActivity(r.Context(), h.pool, user.ID)

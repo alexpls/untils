@@ -9,7 +9,7 @@ import (
 	"github.com/alexpls/untils/internal/auth"
 	"github.com/alexpls/untils/internal/dashboard"
 	"github.com/alexpls/untils/internal/db"
-	"github.com/alexpls/untils/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/db/models"
 	"github.com/alexpls/untils/internal/email"
 	"github.com/alexpls/untils/internal/llm"
 	"github.com/alexpls/untils/internal/monitor"
@@ -37,7 +37,7 @@ type app struct {
 	logger            *slog.Logger
 	db                *pgxpool.Pool
 	dbListener        *pgxlisten.Listener
-	queries           *sqlc.Queries
+	queries           *models.Queries
 	auth              *auth.Auth
 	sessionManager    *session.Manager
 	monitor           *monitor.Service
@@ -100,7 +100,7 @@ func createApp(c *config) (*app, func()) {
 		},
 	}
 
-	a.queries = sqlc.New()
+	a.queries = models.New()
 
 	workers := river.NewWorkers()
 

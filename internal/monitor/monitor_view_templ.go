@@ -14,22 +14,22 @@ import (
 	"github.com/alexpls/untils/internal/components"
 	"github.com/alexpls/untils/internal/components/app"
 	"github.com/alexpls/untils/internal/components/icons"
-	"github.com/alexpls/untils/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/db/models"
 	"github.com/starfederation/datastar-go/datastar"
 )
 
 type MonitorViewData struct {
-	Monitor               *sqlc.Monitor
-	Results               []*sqlc.MonitorResult
-	NextScheduledCheck    *sqlc.MonitorCheck
-	InProgressCheck       *sqlc.MonitorCheck
-	InProgressCheckEvents []*sqlc.MonitorCheckEvent
+	Monitor               *models.Monitor
+	Results               []*models.MonitorResult
+	NextScheduledCheck    *models.MonitorCheck
+	InProgressCheck       *models.MonitorCheck
+	InProgressCheckEvents []*models.MonitorCheckEvent
 	Notifiers             []*MonitorNotifierViewData
 }
 
 type MonitorNotifierViewData struct {
 	// Integration represents the integration configured on the account (e.g. pushover, email)
-	Integration *sqlc.UserIntegrationsRow
+	Integration *models.UserIntegrationsRow
 	// Active indicates whether the notifier is active for this monitor.
 	Active bool
 }
@@ -261,7 +261,7 @@ func MonitorView(data MonitorViewData) templ.Component {
 	})
 }
 
-func MonitorNotifiers(monitor *sqlc.Monitor, notifiers []*MonitorNotifierViewData) templ.Component {
+func MonitorNotifiers(monitor *models.Monitor, notifiers []*MonitorNotifierViewData) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -402,7 +402,7 @@ func checkInProgressTimelineHeading() templ.Component {
 	})
 }
 
-func checkInProgressEvent(event *sqlc.MonitorCheckEvent, latest bool) templ.Component {
+func checkInProgressEvent(event *models.MonitorCheckEvent, latest bool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -465,7 +465,7 @@ func checkInProgressEvent(event *sqlc.MonitorCheckEvent, latest bool) templ.Comp
 			return templ_7745c5c3_Err
 		}
 		switch d := event.DetailsStruct().(type) {
-		case *sqlc.MonitorCheckEventWebSearchDetails:
+		case *models.MonitorCheckEventWebSearchDetails:
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "<div>Searching for &ldquo;")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -483,7 +483,7 @@ func checkInProgressEvent(event *sqlc.MonitorCheckEvent, latest bool) templ.Comp
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case *sqlc.MonitorCheckEventBrowserNavigateDetails:
+		case *models.MonitorCheckEventBrowserNavigateDetails:
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "<div>Browsing &ldquo;<a href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -514,7 +514,7 @@ func checkInProgressEvent(event *sqlc.MonitorCheckEvent, latest bool) templ.Comp
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case *sqlc.MonitorCheckEventBrowserClickDetails:
+		case *models.MonitorCheckEventBrowserClickDetails:
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "<div>Clicking on a link&hellip;</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -534,8 +534,8 @@ func checkInProgressEvent(event *sqlc.MonitorCheckEvent, latest bool) templ.Comp
 }
 
 type checkInProgressTimelineItemViewData struct {
-	Check  *sqlc.MonitorCheck
-	Events []*sqlc.MonitorCheckEvent
+	Check  *models.MonitorCheck
+	Events []*models.MonitorCheckEvent
 }
 
 func checkInProgressTimelineItem(data checkInProgressTimelineItemViewData) templ.Component {
@@ -595,7 +595,7 @@ func checkInProgressTimelineItem(data checkInProgressTimelineItemViewData) templ
 	})
 }
 
-func monitorResultTimelineItem(result *sqlc.MonitorResult) templ.Component {
+func monitorResultTimelineItem(result *models.MonitorResult) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -792,7 +792,7 @@ func monitorResultTimelineItem(result *sqlc.MonitorResult) templ.Component {
 	})
 }
 
-func monitorResultHeading(result *sqlc.MonitorResult) templ.Component {
+func monitorResultHeading(result *models.MonitorResult) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -834,7 +834,7 @@ func monitorResultHeading(result *sqlc.MonitorResult) templ.Component {
 	})
 }
 
-func monitorCreatedTimelineHeading(mon *sqlc.Monitor) templ.Component {
+func monitorCreatedTimelineHeading(mon *models.Monitor) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -876,7 +876,7 @@ func monitorCreatedTimelineHeading(mon *sqlc.Monitor) templ.Component {
 	})
 }
 
-func citationFaviconProxiedURL(citation sqlc.Citation) string {
+func citationFaviconProxiedURL(citation models.Citation) string {
 	if citation.FaviconURL == "" {
 		return ""
 	}

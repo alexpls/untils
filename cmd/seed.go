@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/alexpls/untils/internal/auth"
-	"github.com/alexpls/untils/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/db/models"
 	"github.com/alexpls/untils/internal/must"
 )
 
@@ -34,14 +34,14 @@ func (a *app) seedMonitors(ctx context.Context, userID int64) {
 
 	// Add some completed checks and results for monitor 1
 	check1Time := now.Add(-48 * time.Hour)
-	check1ID := a.seedCheck(ctx, monitor1ID, sqlc.MonitorCheckStatusSuccess, check1Time, &check1Time)
+	check1ID := a.seedCheck(ctx, monitor1ID, models.MonitorCheckStatusSuccess, check1Time, &check1Time)
 
 	check2Time := now.Add(-24 * time.Hour)
-	check2ID := a.seedCheck(ctx, monitor1ID, sqlc.MonitorCheckStatusSuccess, check2Time, &check2Time)
+	check2ID := a.seedCheck(ctx, monitor1ID, models.MonitorCheckStatusSuccess, check2Time, &check2Time)
 
 	// Add a scheduled check
 	nextCheckTime := now.Add(24 * time.Hour)
-	a.seedCheck(ctx, monitor1ID, sqlc.MonitorCheckStatusScheduled, nextCheckTime, nil)
+	a.seedCheck(ctx, monitor1ID, models.MonitorCheckStatusScheduled, nextCheckTime, nil)
 
 	// Add results for monitor 1
 	a.seedResult(ctx, monitor1ID, []int64{check1ID}, "Go 1.22.0", "2024-02-06", "Released", check1Time)
@@ -52,10 +52,10 @@ func (a *app) seedMonitors(ctx context.Context, userID int64) {
 
 	// Add checks for monitor 2
 	check3Time := now.Add(-72 * time.Hour)
-	check3ID := a.seedCheck(ctx, monitor2ID, sqlc.MonitorCheckStatusSuccess, check3Time, &check3Time)
+	check3ID := a.seedCheck(ctx, monitor2ID, models.MonitorCheckStatusSuccess, check3Time, &check3Time)
 
 	check4Time := now.Add(-24 * time.Hour)
-	check4ID := a.seedCheck(ctx, monitor2ID, sqlc.MonitorCheckStatusSuccess, check4Time, &check4Time)
+	check4ID := a.seedCheck(ctx, monitor2ID, models.MonitorCheckStatusSuccess, check4Time, &check4Time)
 
 	// Failed check
 	failedCheckTime := now.Add(-12 * time.Hour)
@@ -63,7 +63,7 @@ func (a *app) seedMonitors(ctx context.Context, userID int64) {
 
 	// Scheduled check
 	nextCheck2Time := now.Add(12 * time.Hour)
-	a.seedCheck(ctx, monitor2ID, sqlc.MonitorCheckStatusScheduled, nextCheck2Time, nil)
+	a.seedCheck(ctx, monitor2ID, models.MonitorCheckStatusScheduled, nextCheck2Time, nil)
 
 	// Results for monitor 2
 	a.seedResult(ctx, monitor2ID, []int64{check3ID, check4ID}, "The Tortured Poets Department", "2024-04-19", "Released", check3Time)
@@ -82,7 +82,7 @@ func (a *app) seedMonitor(ctx context.Context, userID int64, subject, instructio
 	return id
 }
 
-func (a *app) seedCheck(ctx context.Context, monitorID int64, status sqlc.MonitorCheckStatus, scheduledFor time.Time, doneAt *time.Time) int64 {
+func (a *app) seedCheck(ctx context.Context, monitorID int64, status models.MonitorCheckStatus, scheduledFor time.Time, doneAt *time.Time) int64 {
 	var id int64
 	err := a.db.QueryRow(ctx, `
 		INSERT INTO monitor_checks (monitor_id, status, scheduled_for, done_at)

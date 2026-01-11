@@ -3,7 +3,7 @@ package reqcontext
 import (
 	"context"
 
-	"github.com/alexpls/untils/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/db/models"
 )
 
 type contextKey int
@@ -15,12 +15,12 @@ const (
 	envKey
 )
 
-func ContextWithUser(ctx context.Context, user *sqlc.User) context.Context {
+func ContextWithUser(ctx context.Context, user *models.User) context.Context {
 	return context.WithValue(ctx, userKey, user)
 }
 
-func UserFromContext(ctx context.Context) (*sqlc.User, bool) {
-	user, ok := ctx.Value(userKey).(*sqlc.User)
+func UserFromContext(ctx context.Context) (*models.User, bool) {
+	user, ok := ctx.Value(userKey).(*models.User)
 	return user, ok
 }
 

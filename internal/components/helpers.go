@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/alexpls/untils/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/db/models"
 	"github.com/alexpls/untils/internal/reqcontext"
 	"github.com/alexpls/untils/internal/validation"
 	"github.com/alexpls/untils/public"
@@ -17,7 +17,7 @@ func IsSignedIn(ctx context.Context) bool {
 	return ok
 }
 
-func CurrentUser(ctx context.Context) *sqlc.User {
+func CurrentUser(ctx context.Context) *models.User {
 	u, _ := reqcontext.UserFromContext(ctx)
 	return u
 }

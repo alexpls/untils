@@ -7,7 +7,7 @@ import (
 	"fmt"
 
 	"github.com/alexpls/untils/internal/browser"
-	"github.com/alexpls/untils/internal/db/sqlc"
+	"github.com/alexpls/untils/internal/db/models"
 	"github.com/openai/openai-go/v3"
 	"github.com/openai/openai-go/v3/responses"
 )
@@ -27,7 +27,7 @@ func newChecker(service *Service, c EventsChan) *checker {
 //go:embed checker_prompt.md
 var checkerPrompt string
 
-func (c *checker) perform(ctx context.Context, params *CheckParams) (*sqlc.CheckResult, error) {
+func (c *checker) perform(ctx context.Context, params *CheckParams) (*models.CheckResult, error) {
 	defer func() {
 		if c.browserCancel != nil {
 			c.browserCancel()
@@ -60,7 +60,7 @@ func (c *checker) perform(ctx context.Context, params *CheckParams) (*sqlc.Check
 		resp, err = c.service.response(ctx, responses.ResponseNewParams{
 			Model: "grok-4-1-fast-reasoning",
 			Input: inputItems(c.messages...),
-			Text:  jsonSchemaResponse(sqlc.CheckResult{}),
+			Text:  jsonSchemaResponse(models.CheckResult{}),
 			Tools: []responses.ToolUnionParam{
 				browserNavigateTool.toOpenAIParam(),
 				browserClickTool.toOpenAIParam(),
@@ -75,7 +75,7 @@ func (c *checker) perform(ctx context.Context, params *CheckParams) (*sqlc.Check
 		}
 
 		sanitized := sanitizeXAIOutput(resp.OutputText())
-		res := &sqlc.CheckResult{}
+		res := &models.CheckResult{}
 		if err := json.Unmarshal([]byte(sanitized), res); err != nil {
 			c.messages = append(c.messages, systemMessage("error: invalid response format"))
 			continue
