@@ -75,7 +75,7 @@ func TimelineItem(heading templ.Component, side templ.Component) templ.Component
 		var templ_7745c5c3_Var3 = []any{"relative", "py-2", "before:content-['']", "before:absolute",
 			"before:bg-base-content/10", "before:top-0", "before:bottom-0",
 			"before:w-0.5", "first:before:top-4", "last:before:bottom-4",
-			templ.KV("before:left-24", side != nil),
+			templ.KV("before:left-27", side != nil),
 			templ.KV("before:left-0", side == nil)}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var3...)
 		if templ_7745c5c3_Err != nil {
@@ -99,7 +99,7 @@ func TimelineItem(heading templ.Component, side templ.Component) templ.Component
 			return templ_7745c5c3_Err
 		}
 		if side != nil {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"w-24 shrink-0 pr-4 text-right text-xs text-muted\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"w-27 shrink-0 pr-4 text-right text-xs text-muted\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -143,7 +143,7 @@ func TimelineItem(heading templ.Component, side templ.Component) templ.Component
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var7 = []any{templ.KV("pl-28.5", side != nil), templ.KV("pl-4.5", side == nil)}
+		var templ_7745c5c3_Var7 = []any{templ.KV("pl-31.5", side != nil), templ.KV("pl-4.5", side == nil)}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var7...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
