@@ -16,6 +16,7 @@
 - [ ] Fix: When restarting a check (e.g. after server restart), make sure to clear old check events for it
 - [ ] Fix: Need an anchored positioning tooltip polyfill for Firefox
 - [ ] Refactor: Cleanup unused `monitor.expert` column
+- [ ] Feature: "create new monitor" quicklink on dashboard
 
 ## Done
 
