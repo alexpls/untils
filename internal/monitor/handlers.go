@@ -99,7 +99,7 @@ func (h *Handlers) ViewEventsGet(w http.ResponseWriter, r *http.Request, user *m
 
 	sse := datastar.NewSSE(w, r)
 
-	ch := h.events.Subscribe(sse.Context(), mon.ID)
+	ch := h.events.SubscribeMonitor(sse.Context(), mon.ID)
 
 	for {
 		select {

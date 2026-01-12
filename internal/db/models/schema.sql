@@ -116,17 +116,40 @@ CREATE TYPE public.river_job_state AS ENUM (
 CREATE FUNCTION public.monitor_events_notify() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-begin
-  perform pg_notify(
+DECLARE
+  payload_user_id bigint;
+  payload_monitor_id bigint;
+  rec record;
+BEGIN
+  -- Use NEW for INSERT/UPDATE, OLD for DELETE
+  IF TG_OP = 'DELETE' THEN
+    rec := OLD;
+  ELSE
+    rec := NEW;
+  END IF;
+
+  -- Get monitor_id and user_id based on which table triggered
+  IF TG_TABLE_NAME = 'monitors' THEN
+    payload_monitor_id := rec.id;
+    payload_user_id := rec.user_id;
+  ELSE
+    payload_monitor_id := rec.monitor_id;
+    SELECT user_id INTO payload_user_id
+    FROM monitors
+    WHERE id = payload_monitor_id;
+  END IF;
+
+  PERFORM pg_notify(
     'monitor_events',
     json_build_object(
       'table', TG_TABLE_NAME,
       'action', TG_OP,
-      'data', row_to_json(coalesce(NEW, OLD))
+      'monitor_id', payload_monitor_id,
+      'user_id', payload_user_id
     )::text
   );
-  return NEW;
-end;
+  RETURN NEW;
+END;
 $$;
 
 
