@@ -17,6 +17,7 @@
 - [ ] Fix: Need an anchored positioning tooltip polyfill for Firefox
 - [ ] Refactor: Cleanup unused `monitor.expert` column
 - [ ] Feature: "create new monitor" quicklink on dashboard
+- [ ] Feature: handle future dates better. At the moment with the 'past tense' date requirement, release dates are referred to in the past tense, even though they haven't happened yet.
 
 ## Done
 
