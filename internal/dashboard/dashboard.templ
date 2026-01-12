@@ -53,21 +53,23 @@ type MonitorActivityWidgetData struct {
 
 templ monitorActivityWidget(data MonitorActivityWidgetData) {
 	@dashboardWidget("Activity across your monitors", monitorActivityWidgetActions()) {
-		switch data.Loading {
-			case LoadingStatusLoading:
-				@dashboardWidgetLoader()
-			case LoadingStatusLoaded:
-				@components.Timeline() {
-					for _, item := range data.Items {
-						@components.TimelineItem(
-							monitorActivityWidgetTimelineItemHeading(item),
-							monitorActivityWidgetTimelineItemSide(item),
-						) {
-							{ item.Result }
+		<div class={ monitorActivityWidgetTransition() }>
+			switch data.Loading {
+				case LoadingStatusLoading:
+					@dashboardWidgetLoader()
+				case LoadingStatusLoaded:
+					@components.Timeline() {
+						for _, item := range data.Items {
+							@components.TimelineItem(
+								monitorActivityWidgetTimelineItemHeading(item),
+								monitorActivityWidgetTimelineItemSide(item),
+							) {
+								{ item.Result }
+							}
 						}
 					}
-				}
-		}
+			}
+		</div>
 	}
 }
 
@@ -118,26 +120,28 @@ func (d CheckStatsWidgetData) DailyCheckCountsTimeSeries() components.TimeSeries
 
 templ checksWidget(data CheckStatsWidgetData) {
 	@dashboardWidget("Check stats", nil) {
-		switch data.Loading {
-			case LoadingStatusLoading:
-				@dashboardWidgetLoader()
-			case LoadingStatusLoaded:
-				<div class="grid grid-cols-3 gap-2 p-4">
-					<div class="border border-base-content/10 rounded flex flex-col items-center py-2">
-						<div class="text-2xl font-black">{ data.CheckStats.ChecksLast7Days }</div>
-						<div class="text-muted">Last 7 days</div>
+		<div class={ checksWidgetTransition() }>
+			switch data.Loading {
+				case LoadingStatusLoading:
+					@dashboardWidgetLoader()
+				case LoadingStatusLoaded:
+					<div class="grid grid-cols-3 gap-2 p-4">
+						<div class="border border-base-content/10 rounded flex flex-col items-center py-2">
+							<div class="text-2xl font-black">{ data.CheckStats.ChecksLast7Days }</div>
+							<div class="text-muted">Last 7 days</div>
+						</div>
+						<div class="border border-base-content/10 rounded flex flex-col items-center py-2">
+							<div class="text-2xl font-black">{ data.CheckStats.ChecksLast30Days }</div>
+							<div class="text-muted">Last 30 days</div>
+						</div>
+						<div class="border border-base-content/10 rounded flex flex-col items-center py-2">
+							<div class="text-2xl font-black">{ data.CheckStats.ChecksAllTime }</div>
+							<div class="text-muted">All time</div>
+						</div>
 					</div>
-					<div class="border border-base-content/10 rounded flex flex-col items-center py-2">
-						<div class="text-2xl font-black">{ data.CheckStats.ChecksLast30Days }</div>
-						<div class="text-muted">Last 30 days</div>
-					</div>
-					<div class="border border-base-content/10 rounded flex flex-col items-center py-2">
-						<div class="text-2xl font-black">{ data.CheckStats.ChecksAllTime }</div>
-						<div class="text-muted">All time</div>
-					</div>
-				</div>
-				@components.TimeSeriesBarChart(data.DailyCheckCountsTimeSeries(), 120)
-		}
+					@components.TimeSeriesBarChart(data.DailyCheckCountsTimeSeries(), 120)
+			}
+		</div>
 	}
 }
 
@@ -164,4 +168,12 @@ templ dashboardWidget(title string, actions templ.Component) {
 
 templ dashboardWidgetLoader() {
 	<div class="w-full h-full skeleton rounded-none bg-base-200"></div>
+}
+
+css monitorActivityWidgetTransition() {
+	view-transition-name: monitor-activity-widget;
+}
+
+css checksWidgetTransition() {
+	view-transition-name: checks-widget;
 }

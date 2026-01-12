@@ -74,7 +74,7 @@ func (h *Handlers) Events(w http.ResponseWriter, r *http.Request, user *models.U
 
 	comp := DashboardView(data)
 
-	if err := sse.PatchElementTempl(comp); err != nil {
+	if err := sse.PatchElementTempl(comp, datastar.WithViewTransitions()); err != nil {
 		h.logger.Error("error patching element", "error", err)
 	}
 }
