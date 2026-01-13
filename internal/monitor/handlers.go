@@ -403,6 +403,41 @@ func (h *Handlers) NotifierDelete(w http.ResponseWriter, r *http.Request, user *
 	}
 }
 
+// ResultFeedbackGet handles GET /app/monitors/{id}/results/{result_id}/feedback
+func (h *Handlers) ResultFeedbackGet(w http.ResponseWriter, r *http.Request, user *models.User) {
+	monitorID := monitorIDFromPath(r)
+	resultID := resultIDFromPath(r)
+
+	if monitorID == 0 || resultID == 0 {
+		http.Error(w, "Bad request", http.StatusBadRequest)
+		return
+	}
+
+	mon, err := h.service.GetMonitor(r.Context(), user.ID, monitorID)
+	if err != nil {
+		if errors.Is(err, ErrMonitorNotFound) {
+			http.NotFound(w, r)
+			return
+		}
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	result, err := h.queries.GetMonitorResult(r.Context(), h.pool, &models.GetMonitorResultParams{
+		MonitorID: mon.ID,
+		ResultID:  resultID,
+	})
+
+	sse := datastar.NewSSE(w, r)
+
+	data := monitorResultFeedbackViewData{
+		result: result,
+	}
+
+	comp := monitorResultFeedback(data)
+	sse.PatchElementTempl(comp)
+}
+
 // monitorIDFromPath extracts monitor ID from the path
 func monitorIDFromPath(r *http.Request) int64 {
 	monitorID, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
@@ -410,6 +445,15 @@ func monitorIDFromPath(r *http.Request) int64 {
 		return 0
 	}
 	return monitorID
+}
+
+// resultIDFromPath extracts result ID from the path
+func resultIDFromPath(r *http.Request) int64 {
+	resultID, err := strconv.ParseInt(r.PathValue("result_id"), 10, 64)
+	if err != nil {
+		return 0
+	}
+	return resultID
 }
 
 // Helper methods

@@ -429,6 +429,34 @@ func (q *Queries) GetMonitorCheckStats(ctx context.Context, db DBTX, userID int6
 	return &i, err
 }
 
+const getMonitorResult = `-- name: GetMonitorResult :one
+select id, monitor_id, confirming_check_ids, result, date, date_past_tense_verb, citations, latest_confirmation_at, created_at from monitor_results
+where monitor_id = $1
+and id = $2
+`
+
+type GetMonitorResultParams struct {
+	MonitorID int64
+	ResultID  int64
+}
+
+func (q *Queries) GetMonitorResult(ctx context.Context, db DBTX, arg *GetMonitorResultParams) (*MonitorResult, error) {
+	row := db.QueryRow(ctx, getMonitorResult, arg.MonitorID, arg.ResultID)
+	var i MonitorResult
+	err := row.Scan(
+		&i.ID,
+		&i.MonitorID,
+		&i.ConfirmingCheckIds,
+		&i.Result,
+		&i.Date,
+		&i.DatePastTenseVerb,
+		&i.Citations,
+		&i.LatestConfirmationAt,
+		&i.CreatedAt,
+	)
+	return &i, err
+}
+
 const getNextMonitorCheck = `-- name: GetNextMonitorCheck :one
 select id, monitor_id, status, scheduled_for, failure_reason, done_at, result from monitor_checks
 where monitor_id = $1

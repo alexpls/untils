@@ -1,0 +1,25 @@
+package monitor
+
+import "github.com/alexpls/untils/internal/db/models"
+
+type monitorResultFeedbackViewData struct {
+	result *models.MonitorResult
+}
+
+templ monitorResultFeedback(data monitorResultFeedbackViewData) {
+	<div id="feedback-modal" class="modal-box">
+		<h3 class="text-lg font-bold">Provide feedback to improve the next result</h3>
+		<div class="bg-base-300 px-6 py-4 mt-4 shadow rounded -rotate-1 scale-95">
+			@monitorResultTimelineItem(data.result, false)
+		</div>
+		<div class="mt-4">
+			<textarea class="textarea w-full" placeholder="Type here..." data-init="el.focus()"></textarea>
+		</div>
+		<div class="modal-action">
+			<form method="dialog">
+				<button class="btn btn-ghost">Close</button>
+				<button class="btn btn-primary">Submit</button>
+			</form>
+		</div>
+	</div>
+}

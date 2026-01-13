@@ -58,7 +58,7 @@ templ MonitorView(data MonitorViewData) {
 						})
 					}
 					for _, result := range data.Results {
-						@monitorResultTimelineItem(result)
+						@monitorResultTimelineItem(result, false)
 					}
 					<li>
 						@components.TimelineItem(monitorCreatedTimelineHeading(data.Monitor), nil)
@@ -187,7 +187,7 @@ templ checkInProgressTimelineItem(data checkInProgressTimelineItemViewData) {
 	}
 }
 
-templ monitorResultTimelineItem(result *models.MonitorResult) {
+templ monitorResultTimelineItem(result *models.MonitorResult, allowFeedback bool) {
 	@components.TimelineItem(monitorResultHeading(result), nil) {
 		if result.Date != nil && result.DatePastTenseVerb.Valid {
 			<div class="text-sm">
@@ -232,9 +232,36 @@ templ monitorResultTimelineItem(result *models.MonitorResult) {
 					}
 				</div>
 			</div>
+			if allowFeedback {
+				<div class="flex gap-x-2.5 flex-1 items-end justify-end">
+					<div class="tooltip" data-tip="This is a good answer">
+						<button class="mb-1 cursor-pointer transition-transform hover:scale-110 hover:-rotate-4">
+							@icons.ThumbsUp(icons.IconParams{Size: 18})
+						</button>
+					</div>
+					<div class="tooltip" data-tip="This is a bad answer, change it">
+						<button class="mb-1 cursor-pointer transition-transform hover:scale-110 hover:rotate-4">
+							@icons.ThumbsDown(icons.IconParams{Size: 18})
+						</button>
+					</div>
+				</div>
+			}
 		</div>
 	}
+	if allowFeedback {
+		@feedbackModalHandle.Once() {
+			<dialog
+				class="modal"
+				data-init="el.showModal()"
+				data-effect={ datastar.GetSSE("/app/monitors/%d/results/%d/feedback", result.MonitorID, result.ID) }
+			>
+				<div id="feedback-modal"></div>
+			</dialog>
+		}
+	}
 }
+
+var feedbackModalHandle = templ.NewOnceHandle()
 
 templ monitorResultHeading(result *models.MonitorResult) {
 	<div class="text-lg font-semibold">

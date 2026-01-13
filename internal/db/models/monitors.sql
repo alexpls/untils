@@ -126,6 +126,11 @@ select * from monitor_results
 where monitor_id = @monitor_id
 order by created_at desc;
 
+-- name: GetMonitorResult :one
+select * from monitor_results
+where monitor_id = @monitor_id
+and id = @result_id;
+
 -- name: DeleteMonitorChecks :exec
 delete from monitor_checks
 where monitor_id = @monitor_id;

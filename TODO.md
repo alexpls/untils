@@ -21,6 +21,7 @@
 - [ ] Feature: "create new monitor" quicklink on dashboard
 - [ ] Feature: handle future dates better. At the moment with the 'past tense' date requirement, release dates are referred to in the past tense, even though they haven't happened yet.
 - [ ] Feature: "fire and forget" way to set up monitors, if you don't wanna sit around waiting to confirm that the first check looks good
+- [ ] Refactor: in paths, instead of "id" for the monitor id it should always be "monitor_id". In other words, IDs in paths should be identifiable.
 
 ## Done
 
