@@ -13,11 +13,14 @@
 - [ ] Refactor: Forms should have some helpers extracted
 - [ ] Improvement: Pushover form should show a spinner while we're validating the token
 - [ ] Improvement: Triage workflow should document steps it took to get to a satisfactory answer so future workflows can do them too - possibly able to skip making new searches this way and just re-request existing URLs?
+- [ ] Improvement: The search tool should not be able to be called with the same URL multiple times in a row
+- [ ] Improvement: The click tool should emit the URL of the new page it landed on as a navigation event so it shows up on the UI
 - [ ] Fix: When restarting a check (e.g. after server restart), make sure to clear old check events for it
 - [ ] Fix: Need an anchored positioning tooltip polyfill for Firefox
 - [ ] Refactor: Cleanup unused `monitor.expert` column
 - [ ] Feature: "create new monitor" quicklink on dashboard
 - [ ] Feature: handle future dates better. At the moment with the 'past tense' date requirement, release dates are referred to in the past tense, even though they haven't happened yet.
+- [ ] Feature: "fire and forget" way to set up monitors, if you don't wanna sit around waiting to confirm that the first check looks good
 
 ## Done
 
