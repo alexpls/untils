@@ -289,7 +289,8 @@ CREATE TABLE public.monitor_results (
     date_past_tense_verb text,
     citations jsonb DEFAULT '[]'::jsonb NOT NULL,
     latest_confirmation_at timestamp with time zone NOT NULL,
-    created_at timestamp with time zone NOT NULL
+    created_at timestamp with time zone NOT NULL,
+    feedback text
 );
 
 

@@ -150,6 +150,11 @@ set confirming_check_ids = array_append(confirming_check_ids, @confirming_check_
     latest_confirmation_at = now()
 where id = @monitor_result_id;
 
+-- name: UpdateMonitorResultWithFeedback :exec
+update monitor_results
+set feedback = @feedback
+where id = @monitor_result_id;
+
 -- name: ListMonitorActivity :many
 select
     mon.id::bigint as monitor_id,

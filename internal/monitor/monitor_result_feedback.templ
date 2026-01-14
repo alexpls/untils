@@ -1,25 +1,61 @@
 package monitor
 
-import "github.com/alexpls/untils/internal/db/models"
+import (
+	"fmt"
+	"github.com/alexpls/untils/internal/components"
+	"github.com/alexpls/untils/internal/db/models"
+	"github.com/alexpls/untils/internal/validation"
+)
 
 type monitorResultFeedbackViewData struct {
-	result *models.MonitorResult
+	result           *models.MonitorResult
+	formValues       CreateMonitorResultFeedbackParams
+	validationErrors validation.ValidationErrors
+}
+
+func (d monitorResultFeedbackViewData) GetValidationErrors() validation.ValidationErrors {
+	return d.validationErrors
 }
 
 templ monitorResultFeedback(data monitorResultFeedbackViewData) {
-	<div id="feedback-modal" class="modal-box">
+	<dialog id="feedback-modal" class="modal" data-init="el.showModal()" data-on:close="setTimeout(() => el.remove(), 500)">
+		@monitorResultFeedbackForm(data)
+	</dialog>
+}
+
+templ monitorResultFeedbackForm(data monitorResultFeedbackViewData) {
+	<form
+		id="feedback-form"
+		class="modal-box"
+		data-on:submit={ fmt.Sprintf("@post('/app/monitors/%d/results/%d/feedback')", data.result.MonitorID, data.result.ID) }
+	>
 		<h3 class="text-lg font-bold">Provide feedback to improve the next result</h3>
 		<div class="bg-base-300 px-6 py-4 mt-4 shadow rounded -rotate-1 scale-95">
-			@monitorResultTimelineItem(data.result, false)
+			<ul>
+				@monitorResultTimelineItem(data.result, false)
+			</ul>
 		</div>
 		<div class="mt-4">
-			<textarea class="textarea w-full" placeholder="Type here..." data-init="el.focus()"></textarea>
+			<fieldset class="fieldset">
+				<legend class="fieldset-legend">How do you want this result to change?</legend>
+			</fieldset>
+			<textarea
+				name="feedback"
+				class={ "textarea", "w-full", templ.KV("textarea-error", components.ValidationError(data, "Feedback") != "") }
+				placeholder="Type here..."
+				data-init="el.focus()"
+				data-bind:feedback
+			>{ data.formValues.Feedback }</textarea>
+			if errStr := components.ValidationError(data, "Feedback"); errStr != "" {
+				<p class="text-sm label text-error mt-1">{ errStr }</p>
+			}
 		</div>
 		<div class="modal-action">
-			<form method="dialog">
-				<button class="btn btn-ghost">Close</button>
-				<button class="btn btn-primary">Submit</button>
-			</form>
+			<button
+				class="btn btn-ghost"
+				data-on:click="evt.preventDefault(); el.closest('dialog').close()"
+			>Close</button>
+			<button class="btn btn-primary">Submit</button>
 		</div>
-	</div>
+	</form>
 }

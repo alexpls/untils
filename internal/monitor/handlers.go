@@ -2,6 +2,7 @@ package monitor
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -12,6 +13,7 @@ import (
 	"github.com/a-h/templ"
 	"github.com/alexpls/untils/internal/db/models"
 	"github.com/alexpls/untils/internal/validation"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/starfederation/datastar-go/datastar"
 )
@@ -427,6 +429,12 @@ func (h *Handlers) ResultFeedbackGet(w http.ResponseWriter, r *http.Request, use
 		MonitorID: mon.ID,
 		ResultID:  resultID,
 	})
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			http.NotFound(w, r)
+			return
+		}
+	}
 
 	sse := datastar.NewSSE(w, r)
 
@@ -435,7 +443,70 @@ func (h *Handlers) ResultFeedbackGet(w http.ResponseWriter, r *http.Request, use
 	}
 
 	comp := monitorResultFeedback(data)
-	sse.PatchElementTempl(comp)
+	sse.PatchElementTempl(comp, datastar.WithSelector("body"), datastar.WithModeAppend())
+}
+
+// ResultFeedbackPost handles POST /app/monitors/{id}/results/{result_id}/feedback
+func (h *Handlers) ResultFeedbackPost(w http.ResponseWriter, r *http.Request, user *models.User) {
+	// TODO: consolidate this and ResultFeedbackGet - so much of the handler is duplicated
+
+	monitorID := monitorIDFromPath(r)
+	resultID := resultIDFromPath(r)
+
+	if monitorID == 0 || resultID == 0 {
+		http.Error(w, "Bad request", http.StatusBadRequest)
+		return
+	}
+
+	mon, err := h.service.GetMonitor(r.Context(), user.ID, monitorID)
+	if err != nil {
+		if errors.Is(err, ErrMonitorNotFound) {
+			http.NotFound(w, r)
+			return
+		}
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	result, err := h.queries.GetMonitorResult(r.Context(), h.pool, &models.GetMonitorResultParams{
+		MonitorID: mon.ID,
+		ResultID:  resultID,
+	})
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			http.NotFound(w, r)
+			return
+		}
+	}
+
+	var params CreateMonitorResultFeedbackParams
+	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	err = h.service.CreateMonitorResultFeedback(r.Context(), result, params)
+	if err != nil {
+		if valErrs := validation.MapValidationErrors(err); valErrs != nil {
+			sse := datastar.NewSSE(w, r)
+			data := monitorResultFeedbackViewData{
+				result:           result,
+				formValues:       params,
+				validationErrors: valErrs,
+			}
+
+			comp := monitorResultFeedbackForm(data)
+			sse.PatchElementTempl(comp)
+
+			return
+		}
+
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	sse := datastar.NewSSE(w, r)
+	sse.Redirect(fmt.Sprintf("/app/monitors/%d", mon.ID))
 }
 
 // monitorIDFromPath extracts monitor ID from the path

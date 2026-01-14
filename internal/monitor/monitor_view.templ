@@ -233,14 +233,12 @@ templ monitorResultTimelineItem(result *models.MonitorResult, allowFeedback bool
 				</div>
 			</div>
 			if allowFeedback {
-				<div class="flex gap-x-2.5 flex-1 items-end justify-end">
-					<div class="tooltip" data-tip="This is a good answer">
-						<button class="mb-1 cursor-pointer transition-transform hover:scale-110 hover:-rotate-4">
-							@icons.ThumbsUp(icons.IconParams{Size: 18})
-						</button>
-					</div>
+				<div class="flex flex-1 items-end justify-end">
 					<div class="tooltip" data-tip="This is a bad answer, change it">
-						<button class="mb-1 cursor-pointer transition-transform hover:scale-110 hover:rotate-4">
+						<button
+							class="mb-1 cursor-pointer transition-transform hover:scale-110 hover:rotate-4"
+							data-on:click={ datastar.GetSSE("/app/monitors/%d/results/%d/feedback", result.MonitorID, result.ID) }
+						>
 							@icons.ThumbsDown(icons.IconParams{Size: 18})
 						</button>
 					</div>
@@ -248,20 +246,7 @@ templ monitorResultTimelineItem(result *models.MonitorResult, allowFeedback bool
 			}
 		</div>
 	}
-	if allowFeedback {
-		@feedbackModalHandle.Once() {
-			<dialog
-				class="modal"
-				data-init="el.showModal()"
-				data-effect={ datastar.GetSSE("/app/monitors/%d/results/%d/feedback", result.MonitorID, result.ID) }
-			>
-				<div id="feedback-modal"></div>
-			</dialog>
-		}
-	}
 }
-
-var feedbackModalHandle = templ.NewOnceHandle()
 
 templ monitorResultHeading(result *models.MonitorResult) {
 	<div class="text-lg font-semibold">

@@ -284,6 +284,7 @@ type MonitorResult struct {
 	Citations            *Citations
 	LatestConfirmationAt time.Time
 	CreatedAt            time.Time
+	Feedback             pgtype.Text
 }
 
 type PushoverUserToken struct {

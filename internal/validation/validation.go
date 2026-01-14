@@ -17,6 +17,10 @@ type HasValidationErrors interface {
 	GetValidationErrors() ValidationErrors
 }
 
+// MapValidationErrors maps the error passed in to domain ValidationErrors
+// that are ready for display to users.
+//
+// [nil] is returned if the error is not a [validator.ValidationErrors].
 func MapValidationErrors(err error) ValidationErrors {
 	validationErrs, ok := err.(validator.ValidationErrors)
 	if !ok {
