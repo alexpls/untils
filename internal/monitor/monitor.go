@@ -31,8 +31,7 @@ func (s *Service) GetMonitor(ctx context.Context, userID, monitorID int64) (*mod
 }
 
 type CommonParams struct {
-	Subject      string `validate:"required,min=10,max=5000"`
-	Instructions string `validate:"omitempty,min=10,max=10000"`
+	Subject string `validate:"required,min=10,max=5000"`
 }
 
 type CreateMonitorParams struct {
@@ -87,24 +86,39 @@ func (s *Service) ValidateMonitor(ctx context.Context, monitor *models.Monitor) 
 		return fmt.Errorf("can't validate an active monitor")
 	}
 
-	if err := db.WithTx(s.pool, ctx, func(tx pgx.Tx) error {
-		var err error
+	monitor, err := s.updateMonitorStatus(ctx, s.pool, monitor, models.MonitorStatusValidating)
+	if err != nil {
+		return fmt.Errorf("updating monitor status: %w", err)
+	}
 
-		if err = s.deleteMonitorRelations(ctx, tx, monitor.ID); err != nil {
-			return err
+	// Get the latest result for feedback
+	var userFeedback string
+	latestResult, err := s.queries.GetLatestMonitorResult(ctx, s.pool, monitor.ID)
+	if err != nil {
+		if !errors.Is(err, pgx.ErrNoRows) {
+			return fmt.Errorf("getting latest monitor result: %w", err)
 		}
+	} else if latestResult.Feedback.Valid {
+		userFeedback = latestResult.Feedback.String
+	}
 
-		monitor, err = s.updateMonitorStatus(ctx, tx, monitor, models.MonitorStatusValidating)
-		return err
-	}); err != nil {
-		return err
+	// Get previous results with checks for the triager
+	prevs, err := s.queries.GetPreviousResultsWithCheck(ctx, s.pool, monitor.ID)
+	if err != nil {
+		return fmt.Errorf("getting previous results: %w", err)
+	}
+
+	var prevResult *models.CheckResult
+	if len(prevs) > 0 {
+		prevResult = prevs[0].MonitorCheck.Result
 	}
 
 	triage := llm.NewTriageWorkflow(s.llm)
 
 	trigageRes, err := triage.Run(ctx, &llm.TriageParams{
-		Subject:      monitor.Subject.String,
-		Instructions: monitor.Instructions.String,
+		Subject:        monitor.Subject.String,
+		PreviousResult: prevResult,
+		UserFeedback:   userFeedback,
 	})
 	if err != nil {
 		return fmt.Errorf("triage workflow: %w", err)
@@ -126,6 +140,11 @@ func (s *Service) ValidateMonitor(ctx context.Context, monitor *models.Monitor) 
 	if err := db.WithTx(s.pool, ctx, func(tx pgx.Tx) error {
 		if err := s.validateMonitorsSameVersion(ctx, tx, monitor); err != nil {
 			return err
+		}
+
+		// Delete old relations before creating a new check
+		if err := s.deleteMonitorRelations(ctx, tx, monitor.ID); err != nil {
+			return fmt.Errorf("deleting monitor relations: %w", err)
 		}
 
 		monitor, err = s.queries.UpdateMonitorStatus(ctx, tx, &models.UpdateMonitorStatusParams{
@@ -152,8 +171,8 @@ func (s *Service) ValidateMonitor(ctx context.Context, monitor *models.Monitor) 
 	}
 
 	// TODO: go back to the triager if the check fails
-	err = s.PerformMonitorCheck(ctx, monitor.UserID, check, false)
-	if err != nil {
+
+	if err = s.PerformMonitorCheck(ctx, monitor.UserID, check, false, userFeedback); err != nil {
 		return fmt.Errorf("performing monitor check: %w", err)
 	}
 
@@ -230,19 +249,18 @@ type UpdateMonitorDraftParams struct {
 func NewUpdateMonitorDraftParams(mon *models.Monitor) UpdateMonitorDraftParams {
 	return UpdateMonitorDraftParams{
 		CommonParams: CommonParams{
-			Subject:      mon.Subject.String,
-			Instructions: mon.Instructions.String,
+			Subject: mon.Subject.String,
 		},
 	}
 }
 
-func (s *Service) UpdateMonitorDraft(ctx context.Context, userID, monitorID int64, params UpdateMonitorDraftParams) (*models.Monitor, error) {
-	if err := s.validate.Struct(params); err != nil {
-		return nil, err
-	}
-
-	mon, err := db.WithTxV(s.pool, ctx, func(tx pgx.Tx) (*models.Monitor, error) {
-		mon, err := s.queries.GetMonitor(ctx, tx, &models.GetMonitorParams{
+func (s *Service) updateMonitorDraftAndRevalidate(
+	ctx context.Context,
+	userID, monitorID int64,
+	updater func(ctx context.Context, tx pgx.Tx, mon *models.Monitor) (*models.Monitor, error),
+) (*models.Monitor, error) {
+	return db.WithTxV(s.pool, ctx, func(tx pgx.Tx) (mon *models.Monitor, err error) {
+		mon, err = s.queries.GetMonitor(ctx, tx, &models.GetMonitorParams{
 			UserID: userID,
 			ID:     monitorID,
 		})
@@ -250,24 +268,12 @@ func (s *Service) UpdateMonitorDraft(ctx context.Context, userID, monitorID int6
 			return nil, fmt.Errorf("getting monitor: %w", err)
 		}
 
-		if mon.Subject.String == params.Subject && mon.Instructions.String == params.Instructions {
-			// don't bother updating if the monitor is similar
-			return mon, nil
-		}
-
-		mon, err = s.updateMonitorStatus(ctx, tx, mon, models.MonitorStatusValidating)
-		if err != nil {
+		if mon, err = updater(ctx, tx, mon); err != nil {
 			return nil, err
 		}
 
-		mon, err = s.queries.UpdateMonitorDraft(ctx, tx, &models.UpdateMonitorDraftParams{
-			UserID:       mon.UserID,
-			ID:           mon.ID,
-			Subject:      pgtype.Text{String: params.Subject, Valid: true},
-			Instructions: pgtype.Text{String: params.Instructions, Valid: true},
-		})
-		if err != nil {
-			return nil, fmt.Errorf("updating monitor draft: %w", err)
+		if mon, err = s.updateMonitorStatus(ctx, tx, mon, models.MonitorStatusValidating); err != nil {
+			return nil, err
 		}
 
 		if _, err = s.river.InsertTx(ctx, tx, ValidateMonitorArgs{
@@ -277,14 +283,34 @@ func (s *Service) UpdateMonitorDraft(ctx context.Context, userID, monitorID int6
 			return nil, fmt.Errorf("enqueuing validate monitor job: %w", err)
 		}
 
-		return mon, nil
+		return mon, err
 	})
+}
 
-	if err != nil {
+func (s *Service) UpdateMonitorDraft(ctx context.Context, userID, monitorID int64, params UpdateMonitorDraftParams) (*models.Monitor, error) {
+	if err := s.validate.Struct(params); err != nil {
 		return nil, err
 	}
 
-	return mon, nil
+	return s.updateMonitorDraftAndRevalidate(ctx, userID, monitorID, func(ctx context.Context, tx pgx.Tx, mon *models.Monitor) (*models.Monitor, error) {
+		var err error
+
+		if mon.Subject.String == params.Subject {
+			// don't bother updating if the monitor is similar
+			return mon, nil
+		}
+
+		if mon, err = s.queries.UpdateMonitorDraft(ctx, tx, &models.UpdateMonitorDraftParams{
+			UserID:       mon.UserID,
+			ID:           mon.ID,
+			Subject:      pgtype.Text{String: params.Subject, Valid: true},
+			Instructions: pgtype.Text{String: "", Valid: true},
+		}); err != nil {
+			return nil, fmt.Errorf("updating monitor draft: %w", err)
+		}
+
+		return mon, nil
+	})
 }
 
 func (s *Service) deleteMonitorRelations(ctx context.Context, tx models.DBTX, monitorID int64) error {

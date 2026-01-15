@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/alexpls/untils/internal/db/models"
 	"github.com/openai/openai-go/v3/responses"
 )
 
@@ -16,17 +17,33 @@ type Triager struct {
 }
 
 func NewTriager(service *Service, params *TriageParams) *Triager {
+	msg := "Subject: " + params.Subject
+
+	if params.PreviousResult != nil {
+		d, err := json.Marshal(params.PreviousResult)
+		if err != nil {
+			service.logger.Error("failed to marshal previous result", "error", err)
+		} else {
+			msg += "\n\nPrevious result:\n" + string(d)
+		}
+	}
+
+	if params.UserFeedback != "" {
+		msg += "\n\nUser feedback on the previous result:\n" + params.UserFeedback
+	}
+
 	messages := inputItems(
 		systemMessage(triagerPrompt),
-		userMessage(params.Subject),
+		userMessage(msg),
 	)
 
 	return &Triager{service: service, messages: messages}
 }
 
 type TriageParams struct {
-	Subject      string
-	Instructions string
+	Subject        string
+	PreviousResult *models.CheckResult
+	UserFeedback   string
 }
 
 //go:embed triager_prompt.md

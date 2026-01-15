@@ -10,8 +10,8 @@ import (
 
 type CheckParams struct {
 	Subject         string
-	Instructions    string
 	PreviousResults []models.CheckResult
+	UserFeedback    string
 }
 
 func (c CheckParams) PreviousResultsString() (string, error) {

@@ -486,7 +486,7 @@ func (q *Queries) GetNextMonitorCheck(ctx context.Context, db DBTX, monitorID in
 const getPreviousResultsWithCheck = `-- name: GetPreviousResultsWithCheck :many
 select mr.id, mr.monitor_id, mr.confirming_check_ids, mr.result, mr.date, mr.date_past_tense_verb, mr.citations, mr.latest_confirmation_at, mr.created_at, mr.feedback, mc.id, mc.monitor_id, mc.status, mc.scheduled_for, mc.failure_reason, mc.done_at, mc.result
 from monitor_results mr
-left join monitor_checks mc on mc.id = mr.confirming_check_ids[array_length(mr.confirming_check_ids, 1)]
+inner join monitor_checks mc on mc.id = mr.confirming_check_ids[array_length(mr.confirming_check_ids, 1)]
 where mr.monitor_id = $1
 order by mr.created_at desc
 limit 10

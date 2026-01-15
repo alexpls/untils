@@ -7,7 +7,6 @@
 - [ ] Improvement: Request ID on all logs (context logger?)
 - [ ] Improvement: Better use of context. Should pass it all the way down and rely less on closer functions during app startup/shutdown
 - [ ] Improvement: Pass the user's timezone as context to all prompts
-- [ ] Improvement: Provide additional instructions to a monitor's check (do something with the ones we're already saving from LLM)
 - [ ] Refactor: Put river into its own db schema?
 - [ ] Feature: Checks should be able to have multiple results
 - [ ] Refactor: Forms should have some helpers extracted
@@ -17,11 +16,14 @@
 - [ ] Improvement: The click tool should emit the URL of the new page it landed on as a navigation event so it shows up on the UI
 - [ ] Fix: When restarting a check (e.g. after server restart), make sure to clear old check events for it
 - [ ] Fix: Need an anchored positioning tooltip polyfill for Firefox
-- [ ] Refactor: Cleanup unused `monitor.expert` column
+- [ ] Refactor: Cleanup unused `monitor.expert` column, also `monitor.instructions`.
 - [ ] Feature: "create new monitor" quicklink on dashboard
 - [ ] Feature: handle future dates better. At the moment with the 'past tense' date requirement, release dates are referred to in the past tense, even though they haven't happened yet.
 - [ ] Feature: "fire and forget" way to set up monitors, if you don't wanna sit around waiting to confirm that the first check looks good
 - [ ] Refactor: in paths, instead of "id" for the monitor id it should always be "monitor_id". In other words, IDs in paths should be identifiable.
+- [ ] Fix: bump validator timeout, it's at 1 minute at the moment
+- [ ] Fix: Refreshing the monitor draft page while a monitor is in 'previewing' status returns 500 (page refresh triggers a POST that attempts invalid transition from 'previewing' to 'validating')
+- [ ] Fix: don't allow changing the subject while monitor is previewing. That's an invalid status transition.
 
 ## Done
 

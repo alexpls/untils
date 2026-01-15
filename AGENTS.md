@@ -20,10 +20,12 @@ Frontend:
 - Daisy UI
 - Datastar (ref: https://data-star.dev/reference/attributes)
 
-## Database schema
+## Database
 
 You can view the database schema in ./internal/db/models/schema.sql - if you modify
 one of the queries, you can get SQLc to regenerate it with `mise run sqlc-generate`.
+
+To connect to the database, use `psql postgresql://root:root@localhost:54324/untils_dev`
 
 ## Development server
 

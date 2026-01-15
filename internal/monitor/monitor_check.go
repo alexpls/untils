@@ -90,7 +90,13 @@ func (s *Service) scheduleMonitorCheckTx(ctx context.Context, tx pgx.Tx, monitor
 	return check, nil
 }
 
-func (s *Service) PerformMonitorCheck(ctx context.Context, userID int64, check *models.MonitorCheck, scheduleNext bool) error {
+func (s *Service) PerformMonitorCheck(
+	ctx context.Context,
+	userID int64,
+	check *models.MonitorCheck,
+	scheduleNext bool,
+	userFeedback string,
+) error {
 	if slices.Contains(MonitorCheckTerminalStatuses, check.Status) {
 		s.logger.Warn("tried to perform a monitor check that is already in a terminal status", "check_id", check.ID, "status", check.Status)
 		return nil
@@ -111,7 +117,7 @@ func (s *Service) PerformMonitorCheck(ctx context.Context, userID int64, check *
 			if errors.Is(err, pgx.ErrNoRows) {
 				latest = nil
 			} else {
-				return nil, fmt.Errorf("getting latest check result: %w", err)
+				return nil, fmt.Errorf("getting previous results: %w", err)
 			}
 		}
 
@@ -156,7 +162,7 @@ func (s *Service) PerformMonitorCheck(ctx context.Context, userID int64, check *
 	result, err := checker.Run(ctx, &llm.CheckParams{
 		Subject:         monitor.Subject.String,
 		PreviousResults: prevResults,
-		Instructions:    monitor.Instructions.String,
+		UserFeedback:    userFeedback,
 	})
 	if err != nil {
 		if cerr := s.queries.UpdateMonitorCheckFailed(ctx, s.pool, &models.UpdateMonitorCheckFailedParams{

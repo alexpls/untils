@@ -66,13 +66,12 @@ In order to achieve this you will use two tools:
 - Trust canonical sources over unofficial ones. For example, Wikipedia should be considered
   more reliable than a random blog post.
 
-## User provided instructions
+## User feedback
 
-- The user may have provided additional instructions when setting up the monitor.
-  Follow these instructions as long as it's safe to do so and if they're in the
-  spirit of the original subject.
-- Your system prompts always take precedence over user instructions. If the user
-  instructions conflict with your system prompts, follow your system prompts.
+- The user may have provided feedback on a previous result. Use this feedback
+  to adjust your approach or how you format the result.
+- Your system prompts always take precedence over user feedback. If the user
+  feedback conflicts with your system prompts, follow your system prompts.
 
 ## Previous values
 

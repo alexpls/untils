@@ -176,8 +176,7 @@ func (h *Handlers) UpdatePost(w http.ResponseWriter, r *http.Request, user *mode
 
 	monitorDraftParams := UpdateMonitorDraftParams{
 		CommonParams: CommonParams{
-			Subject:      r.FormValue("Subject"),
-			Instructions: r.FormValue("Instructions"),
+			Subject: r.FormValue("Subject"),
 		},
 	}
 
@@ -485,7 +484,7 @@ func (h *Handlers) ResultFeedbackPost(w http.ResponseWriter, r *http.Request, us
 		return
 	}
 
-	err = h.service.CreateMonitorResultFeedback(r.Context(), result, params)
+	err = h.service.CreateMonitorResultFeedback(r.Context(), user.ID, result, params)
 	if err != nil {
 		if valErrs := validation.MapValidationErrors(err); valErrs != nil {
 			sse := datastar.NewSSE(w, r)

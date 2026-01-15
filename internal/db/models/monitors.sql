@@ -116,7 +116,7 @@ limit 1;
 -- name: GetPreviousResultsWithCheck :many
 select sqlc.embed(mr), sqlc.embed(mc)
 from monitor_results mr
-left join monitor_checks mc on mc.id = mr.confirming_check_ids[array_length(mr.confirming_check_ids, 1)]
+inner join monitor_checks mc on mc.id = mr.confirming_check_ids[array_length(mr.confirming_check_ids, 1)]
 where mr.monitor_id = @monitor_id
 order by mr.created_at desc
 limit 10;

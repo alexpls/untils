@@ -30,8 +30,7 @@ func TestCheckerEasySubject(t *testing.T) {
 	defer llmEvent.finish()
 
 	res, err := checker.perform(ctx, &CheckParams{
-		Subject:      "Latest album by Tool",
-		Instructions: "Use https://en.wikipedia.org/wiki/Tool_discography",
+		Subject: "Latest album by Tool",
 	})
 	require.NoError(t, err)
 

@@ -13,8 +13,7 @@ func TestTriageWorkflow(t *testing.T) {
 
 	triage := NewTriageWorkflow(svc)
 	_, err := triage.Run(t.Context(), &TriageParams{
-		Subject:      "Latest game that IGN has given a 10/10 rating",
-		Instructions: "Hardware doesn't count.",
+		Subject: "Latest game that IGN has given a 10/10 rating",
 	})
 	require.NoError(t, err)
 }
