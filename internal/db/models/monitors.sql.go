@@ -40,19 +40,18 @@ func (q *Queries) BumpMonitorVersion(ctx context.Context, db DBTX, monitorID int
 }
 
 const createMonitor = `-- name: CreateMonitor :one
-insert into monitors (user_id, subject, instructions, status, updated_at, created_at)
-values ($1, $2, $3, 'validating', now(), now())
+insert into monitors (user_id, subject, status, updated_at, created_at)
+values ($1, $2, 'validating', now(), now())
 returning id, user_id, status, subject, instructions, rejected_reason, updated_at, created_at, expert
 `
 
 type CreateMonitorParams struct {
-	UserID       int64
-	Subject      pgtype.Text
-	Instructions pgtype.Text
+	UserID  int64
+	Subject pgtype.Text
 }
 
 func (q *Queries) CreateMonitor(ctx context.Context, db DBTX, arg *CreateMonitorParams) (*Monitor, error) {
-	row := db.QueryRow(ctx, createMonitor, arg.UserID, arg.Subject, arg.Instructions)
+	row := db.QueryRow(ctx, createMonitor, arg.UserID, arg.Subject)
 	var i Monitor
 	err := row.Scan(
 		&i.ID,
@@ -803,25 +802,19 @@ func (q *Queries) UpdateMonitorCheckSuccess(ctx context.Context, db DBTX, arg *U
 
 const updateMonitorDraft = `-- name: UpdateMonitorDraft :one
 update monitors
-set subject = $1, instructions = $2, updated_at = now()
-where user_id = $3 and id = $4 and status != 'active'
+set subject = $1, updated_at = now()
+where user_id = $2 and id = $3 and status != 'active'
 returning id, user_id, status, subject, instructions, rejected_reason, updated_at, created_at, expert
 `
 
 type UpdateMonitorDraftParams struct {
-	Subject      pgtype.Text
-	Instructions pgtype.Text
-	UserID       int64
-	ID           int64
+	Subject pgtype.Text
+	UserID  int64
+	ID      int64
 }
 
 func (q *Queries) UpdateMonitorDraft(ctx context.Context, db DBTX, arg *UpdateMonitorDraftParams) (*Monitor, error) {
-	row := db.QueryRow(ctx, updateMonitorDraft,
-		arg.Subject,
-		arg.Instructions,
-		arg.UserID,
-		arg.ID,
-	)
+	row := db.QueryRow(ctx, updateMonitorDraft, arg.Subject, arg.UserID, arg.ID)
 	var i Monitor
 	err := row.Scan(
 		&i.ID,
@@ -885,25 +878,19 @@ func (q *Queries) UpdateMonitorStatus(ctx context.Context, db DBTX, arg *UpdateM
 
 const updateMonitorToReady = `-- name: UpdateMonitorToReady :one
 update monitors
-set expert = $1, status = 'ready', subject = $2, updated_at = now()
-where user_id = $3 and id = $4
+set status = 'ready', subject = $1, updated_at = now()
+where user_id = $2 and id = $3
 returning id, user_id, status, subject, instructions, rejected_reason, updated_at, created_at, expert
 `
 
 type UpdateMonitorToReadyParams struct {
-	Expert    pgtype.Text
 	Subject   pgtype.Text
 	UserID    int64
 	MonitorID int64
 }
 
 func (q *Queries) UpdateMonitorToReady(ctx context.Context, db DBTX, arg *UpdateMonitorToReadyParams) (*Monitor, error) {
-	row := db.QueryRow(ctx, updateMonitorToReady,
-		arg.Expert,
-		arg.Subject,
-		arg.UserID,
-		arg.MonitorID,
-	)
+	row := db.QueryRow(ctx, updateMonitorToReady, arg.Subject, arg.UserID, arg.MonitorID)
 	var i Monitor
 	err := row.Scan(
 		&i.ID,

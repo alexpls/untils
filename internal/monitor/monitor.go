@@ -46,9 +46,8 @@ func (s *Service) CreateMonitor(ctx context.Context, params CreateMonitorParams)
 
 	return db.WithTxV(s.pool, ctx, func(tx pgx.Tx) (*models.Monitor, error) {
 		created, err := s.queries.CreateMonitor(ctx, tx, &models.CreateMonitorParams{
-			UserID:       params.UserID,
-			Subject:      pgtype.Text{String: params.Subject, Valid: true},
-			Instructions: pgtype.Text{String: "", Valid: true},
+			UserID:  params.UserID,
+			Subject: pgtype.Text{String: params.Subject, Valid: true},
 		})
 		if err != nil {
 			return nil, fmt.Errorf("creating monitor: %w", err)
@@ -180,7 +179,6 @@ func (s *Service) ValidateMonitor(ctx context.Context, monitor *models.Monitor) 
 		MonitorID: monitor.ID,
 		UserID:    monitor.UserID,
 		Subject:   monitor.Subject,
-		Expert:    pgtype.Text{String: "default", Valid: true},
 	})
 
 	return err
@@ -301,10 +299,9 @@ func (s *Service) UpdateMonitorDraft(ctx context.Context, userID, monitorID int6
 		}
 
 		if mon, err = s.queries.UpdateMonitorDraft(ctx, tx, &models.UpdateMonitorDraftParams{
-			UserID:       mon.UserID,
-			ID:           mon.ID,
-			Subject:      pgtype.Text{String: params.Subject, Valid: true},
-			Instructions: pgtype.Text{String: "", Valid: true},
+			UserID:  mon.UserID,
+			ID:      mon.ID,
+			Subject: pgtype.Text{String: params.Subject, Valid: true},
 		}); err != nil {
 			return nil, fmt.Errorf("updating monitor draft: %w", err)
 		}

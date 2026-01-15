@@ -8,8 +8,8 @@ select * from monitors
 where user_id = @user_id and id = @id;
 
 -- name: CreateMonitor :one
-insert into monitors (user_id, subject, instructions, status, updated_at, created_at)
-values (@user_id, @subject, @instructions, 'validating', now(), now())
+insert into monitors (user_id, subject, status, updated_at, created_at)
+values (@user_id, @subject, 'validating', now(), now())
 returning *;
 
 -- name: DeleteMonitor :exec
@@ -31,13 +31,13 @@ returning *;
 
 -- name: UpdateMonitorToReady :one
 update monitors
-set expert = @expert, status = 'ready', subject = @subject, updated_at = now()
+set status = 'ready', subject = @subject, updated_at = now()
 where user_id = @user_id and id = @monitor_id
 returning *;
 
 -- name: UpdateMonitorDraft :one
 update monitors
-set subject = @subject, instructions = @instructions, updated_at = now()
+set subject = @subject, updated_at = now()
 where user_id = @user_id and id = @id and status != 'active'
 returning *;
 

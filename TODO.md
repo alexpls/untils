@@ -16,7 +16,6 @@
 - [ ] Improvement: The click tool should emit the URL of the new page it landed on as a navigation event so it shows up on the UI
 - [ ] Fix: When restarting a check (e.g. after server restart), make sure to clear old check events for it
 - [ ] Fix: Need an anchored positioning tooltip polyfill for Firefox
-- [ ] Refactor: Cleanup unused `monitor.expert` column, also `monitor.instructions`.
 - [ ] Feature: "create new monitor" quicklink on dashboard
 - [ ] Feature: handle future dates better. At the moment with the 'past tense' date requirement, release dates are referred to in the past tense, even though they haven't happened yet.
 - [ ] Feature: "fire and forget" way to set up monitors, if you don't wanna sit around waiting to confirm that the first check looks good
@@ -27,6 +26,7 @@
 
 ## Done
 
+- [x] Refactor: Cleanup unused `monitor.expert` column, also `monitor.instructions`.
 - [x] Refactor: Breadcrumbs and page titles should be coupled somehow so they don't need to be redeclared everywhere
 - [x] Refactor: Integration should not be "Active" but "Configured". This would disambiguate it from the notifiers set up on monitors, which are also "active" when a user has enabled them.
 - [x] Improvement: Check should return favicon location of the sites it's visiting
