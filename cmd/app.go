@@ -110,7 +110,7 @@ func createApp(c *config) (*app, func()) {
 			func() (river.JobArgs, *river.InsertOpts) {
 				return session.TrimArgs{}, nil
 			},
-			&river.PeriodicJobOpts{RunOnStart: true},
+			&river.PeriodicJobOpts{RunOnStart: false},
 		),
 	}
 
