@@ -232,19 +232,19 @@ templ monitorResultTimelineItem(result *models.MonitorResult, allowFeedback bool
 					}
 				</div>
 			</div>
-			if allowFeedback {
-				<div class="flex flex-1 items-end justify-end">
-					<div class="tooltip" data-tip="This is a bad answer, change it">
-						<button
-							class="mb-1 cursor-pointer transition-transform hover:scale-110 hover:rotate-4"
-							data-on:click={ datastar.GetSSE("/app/monitors/%d/results/%d/feedback", result.MonitorID, result.ID) }
-						>
-							@icons.ThumbsDown(icons.IconParams{Size: 18})
-						</button>
-					</div>
-				</div>
-			}
 		</div>
+		if allowFeedback {
+			<div class="mt-2 border py-1 px-2 rounded border-base-content/10 shadow flex items-center text-sm">
+				@icons.Info(icons.IconParams{Size: 16})
+				<div class="ml-2">
+					Not what you expected to see?
+					<button
+						class="link font-bold"
+						data-on:click={ datastar.GetSSE("/app/monitors/%d/results/%d/feedback", result.MonitorID, result.ID) }
+					>Change it</button>.
+				</div>
+			</div>
+		}
 	}
 }
 
