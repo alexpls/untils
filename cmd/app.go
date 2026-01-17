@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"os"
 	"time"
@@ -171,7 +172,9 @@ func createApp(c *config) (*app, func()) {
 
 	go func() {
 		if err := a.dbListener.Listen(ctx); err != nil {
-			a.logger.Error("db listener error", "error", err)
+			if !errors.Is(err, context.Canceled) {
+				a.logger.Error("db listener error", "error", err)
+			}
 		}
 	}()
 
@@ -187,7 +190,6 @@ func createApp(c *config) (*app, func()) {
 		// wait on others in the future we'll need to handle that in a more scalable way.
 		select {
 		case <-a.river.Stopped():
-			a.logger.Info("river stopped cleanly")
 		case <-ctxTimeout.Done():
 			a.logger.Error("timeout out while waiting for app context cancellation")
 		}
