@@ -14,6 +14,9 @@ import (
 func main() {
 	switch subcommand() {
 	case "serve":
+		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+		defer stop()
+
 		globalCfg, c := parseServe()
 		a, appCloser := createApp(globalCfg)
 		defer appCloser()
@@ -30,20 +33,17 @@ func main() {
 			srvErrs <- srv.ListenAndServe()
 		}()
 
-		shutdown := make(chan os.Signal, 1)
-		signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
-
 		select {
 		case err := <-srvErrs:
 			a.logger.Error("http server error", "error", err)
 			return
-		case sig := <-shutdown:
-			a.logger.Info("http server received shutdown signal", "signal", sig)
+		case <-ctx.Done():
+			a.logger.Info("http server received shutdown signal")
 
-			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			tctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 			defer cancel()
 
-			if err := srv.Shutdown(ctx); err != nil {
+			if err := srv.Shutdown(tctx); err != nil {
 				a.logger.Error("graceful http shutdown failed", "error", err)
 				if err := srv.Close(); err != nil {
 					a.logger.Error("forcing http server close failed", "error", err)
