@@ -20,12 +20,16 @@
 - [ ] Feature: handle future dates better. At the moment with the 'past tense' date requirement, release dates are referred to in the past tense, even though they haven't happened yet.
 - [ ] Feature: "fire and forget" way to set up monitors, if you don't wanna sit around waiting to confirm that the first check looks good
 - [ ] Refactor: in paths, instead of "id" for the monitor id it should always be "monitor_id". In other words, IDs in paths should be identifiable.
-- [ ] Fix: bump validator timeout, it's at 1 minute at the moment
 - [ ] Fix: Refreshing the monitor draft page while a monitor is in 'previewing' status returns 500 (page refresh triggers a POST that attempts invalid transition from 'previewing' to 'validating')
 - [ ] Fix: don't allow changing the subject while monitor is previewing. That's an invalid status transition.
 
+## Watching
+
+- [ ] Should stop jobs being considered "stuck" prematurely: https://github.com/riverqueue/river/issues/1125
+
 ## Done
 
+- [x] Fix: bump validator timeout, it's at 1 minute at the moment
 - [x] Refactor: Cleanup unused `monitor.expert` column, also `monitor.instructions`.
 - [x] Refactor: Breadcrumbs and page titles should be coupled somehow so they don't need to be redeclared everywhere
 - [x] Refactor: Integration should not be "Active" but "Configured". This would disambiguate it from the notifiers set up on monitors, which are also "active" when a user has enabled them.
