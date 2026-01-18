@@ -121,14 +121,12 @@ DECLARE
   payload_monitor_id bigint;
   rec record;
 BEGIN
-  -- Use NEW for INSERT/UPDATE, OLD for DELETE
   IF TG_OP = 'DELETE' THEN
     rec := OLD;
   ELSE
     rec := NEW;
   END IF;
 
-  -- Get monitor_id and user_id based on which table triggered
   IF TG_TABLE_NAME = 'monitors' THEN
     payload_monitor_id := rec.id;
     payload_user_id := rec.user_id;
@@ -322,11 +320,9 @@ CREATE TABLE public.monitors (
     user_id bigint NOT NULL,
     status public.monitor_status NOT NULL,
     subject text,
-    instructions text,
     rejected_reason text,
     updated_at timestamp with time zone NOT NULL,
-    created_at timestamp with time zone NOT NULL,
-    expert text
+    created_at timestamp with time zone NOT NULL
 );
 
 

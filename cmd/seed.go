@@ -30,7 +30,7 @@ func (a *app) seedMonitors(ctx context.Context, userID int64) {
 	now := time.Now()
 
 	// Monitor 1: Latest Go version
-	monitor1ID := a.seedMonitor(ctx, userID, "Latest Go version", "Check the official Go website for the latest stable release")
+	monitor1ID := a.seedMonitor(ctx, userID, "Latest Go version")
 
 	// Add some completed checks and results for monitor 1
 	check1Time := now.Add(-48 * time.Hour)
@@ -48,7 +48,7 @@ func (a *app) seedMonitors(ctx context.Context, userID int64) {
 	a.seedResult(ctx, monitor1ID, []int64{check2ID}, "Go 1.23.0", "2024-08-13", "Released", check2Time)
 
 	// Monitor 2: Taylor Swift next album
-	monitor2ID := a.seedMonitor(ctx, userID, "Taylor Swift next album", "Look for official announcements about upcoming Taylor Swift albums")
+	monitor2ID := a.seedMonitor(ctx, userID, "Taylor Swift next album")
 
 	// Add checks for monitor 2
 	check3Time := now.Add(-72 * time.Hour)
@@ -69,13 +69,13 @@ func (a *app) seedMonitors(ctx context.Context, userID int64) {
 	a.seedResult(ctx, monitor2ID, []int64{check3ID, check4ID}, "The Tortured Poets Department", "2024-04-19", "Released", check3Time)
 }
 
-func (a *app) seedMonitor(ctx context.Context, userID int64, subject, instructions string) int64 {
+func (a *app) seedMonitor(ctx context.Context, userID int64, subject string) int64 {
 	var id int64
 	err := a.db.QueryRow(ctx, `
-		INSERT INTO monitors (user_id, subject, instructions, status, updated_at, created_at)
-		VALUES ($1, $2, $3, 'active', now(), now())
+		INSERT INTO monitors (user_id, subject, status, updated_at, created_at)
+		VALUES ($1, $2, 'active', now(), now())
 		RETURNING id
-	`, userID, subject, instructions).Scan(&id)
+	`, userID, subject).Scan(&id)
 	if err != nil {
 		panic(err)
 	}

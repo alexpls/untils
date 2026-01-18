@@ -241,11 +241,9 @@ type Monitor struct {
 	UserID         int64
 	Status         MonitorStatus
 	Subject        pgtype.Text
-	Instructions   pgtype.Text
 	RejectedReason pgtype.Text
 	UpdatedAt      time.Time
 	CreatedAt      time.Time
-	Expert         pgtype.Text
 }
 
 type MonitorCheck struct {
