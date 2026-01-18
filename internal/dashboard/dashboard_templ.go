@@ -390,7 +390,7 @@ func monitorActivityWidgetActions() templ.Component {
 			templ_7745c5c3_Var16 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<a href=\"/app/monitors\" class=\"flex items-center btn btn-sm\">Monitors")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<a href=\"/app/monitors\" class=\"flex items-center btn btn-sm\">Go to Monitors")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
