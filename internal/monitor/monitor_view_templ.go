@@ -157,7 +157,7 @@ func MonitorView(data MonitorViewData) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"grid grid-cols-12\"><div class=\"col-span-8\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"grid grid-cols-1 lg:grid-cols-12\"><div class=\"lg:col-span-8 m-4 p-4 bg-base-100 rounded border border-base-content/10\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -206,7 +206,7 @@ func MonitorView(data MonitorViewData) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div><div class=\"col-span-4 m-4 p-4 border border-base-content/10 rounded\"><div><div class=\"mb-4\"><div class=\"font-semibold uppercase text-xs\">Notifications</div><div class=\"mt-2\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div><div class=\"lg:col-span-4 m-4 p-4 border border-base-content/10 rounded\"><div><div class=\"mb-4\"><div class=\"font-semibold uppercase text-xs\">Notifications</div><div class=\"mt-2\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -214,7 +214,7 @@ func MonitorView(data MonitorViewData) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</div></div><div><div class=\"font-semibold uppercase text-xs\">Next check scheduled at</div><div class=\"text-sm text-base-content/60 mt-1\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</div></div><div><div class=\"font-semibold uppercase text-xs\">Next checking at</div><div class=\"text-sm text-base-content/60 mt-1\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

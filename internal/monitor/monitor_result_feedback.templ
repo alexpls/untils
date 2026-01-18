@@ -18,7 +18,7 @@ func (d monitorResultFeedbackViewData) GetValidationErrors() validation.Validati
 }
 
 templ monitorResultFeedback(data monitorResultFeedbackViewData) {
-	<dialog id="feedback-modal" class="modal" data-init="el.showModal()" data-on:close="setTimeout(() => el.remove(), 500)">
+	<dialog id="feedback-modal" class="modal backdrop-blur-sm" data-init="el.showModal()" data-on:close="setTimeout(() => el.remove(), 500)">
 		@monitorResultFeedbackForm(data)
 	</dialog>
 }

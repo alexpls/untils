@@ -40,7 +40,7 @@ templ MonitorDraftPage(data MonitorDraftData) {
 }
 
 templ MonitorDraftView(data MonitorDraftData) {
-	<div class="max-w-120 mx-auto" id="monitor-draft-view" data-effect={ datastar.GetSSE("/app/monitors/%d/events", data.Monitor.ID) }>
+	<div class="max-w-120 mx-6" id="monitor-draft-view" data-effect={ datastar.GetSSE("/app/monitors/%d/events", data.Monitor.ID) }>
 		<div class="mt-8">
 			<form method="POST" action={ fmt.Sprintf("/app/monitors/%d", data.Monitor.ID) }>
 				<fieldset class="fieldset">

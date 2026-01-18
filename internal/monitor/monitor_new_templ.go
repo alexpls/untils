@@ -59,7 +59,7 @@ func MonitorNewPage(data MonitorNewData) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"flex flex-col h-full\"><div class=\"flex-1 flex items-center justify-center\"><div class=\"text-center w-full\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"flex flex-col h-full mx-6\"><div class=\"flex-1 flex md:items-center justify-center\"><div class=\"text-center w-full\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

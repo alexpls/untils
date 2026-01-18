@@ -53,7 +53,7 @@ func AppLayout(breadcrumbs []Breadcrumb) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, " <header class=\"sticky top-0 z-0\" data-signals:_header.scroll-y=\"0\" data-init=\"$_header.height = el.offsetHeight\" data-on:scroll__window=\"$_header.scrollY = window.scrollY\" data-style:opacity=\"Math.max(0, 1 - $_header.scrollY / ($_header.height/1.5))\"><div class=\"container flex mx-auto justify-between items-center py-2.5 text-muted\"><div class=\"flex items-center\"><a href=\"/app\" class=\"font-stretch-expanded hover:bg-base-200 rounded p-2 px-3 transition-colors\">untils</a> ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, " <header class=\"sticky top-0 z-0\" data-signals:_header.scroll-y=\"0\" data-init=\"$_header.height = el.offsetHeight\" data-on:scroll__window=\"$_header.scrollY = window.scrollY\" data-style:opacity=\"Math.max(0, 1 - $_header.scrollY / ($_header.height/1.5))\"><div class=\"container flex mx-auto justify-between items-center py-2.5 text-muted\"><div class=\"flex items-center\"><a href=\"/app\" class=\"font-stretch-expanded hover:bg-base-200 rounded p-2 pl-3 pr-1 md:px-3 transition-colors\">untils</a> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -415,7 +415,7 @@ func BreadcrumbView(b Breadcrumb) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "\" class=\"hover:bg-base-200 rounded p-2 px-3 transition-colors\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "\" class=\"hover:bg-base-200 rounded p-2 px-1 md:px-3 transition-colors\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

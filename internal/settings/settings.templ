@@ -15,6 +15,7 @@ type SettingsViewModel struct {
 templ Settings(data *SettingsViewModel) {
 	@app.AppLayout([]app.Breadcrumb{
 		{Title: "Dashboard", Href: "/app"},
+		{Title: "Settings", Href: "/app/settings"},
 	}) {
 		@app.HeaderCentered("Settings")
 		<div class="mx-auto max-w-160 p-4 space-y-4">
@@ -75,56 +76,59 @@ func (m PushoverSettingsViewModel) GetValidationErrors() validation.ValidationEr
 templ PushoverSettings(data *PushoverSettingsViewModel) {
 	@app.AppLayout([]app.Breadcrumb{
 		{Title: "Dashboard", Href: "/app"},
+		{Title: "Settings", Href: "/app/settings"},
 	}) {
-		<div class="py-2 px-4 breadcrumbs text-sm border-b border-base-content/10">
-			<ul>
-				<li>
-					<a href="/app/settings" class="link link-hover">Settings</a>
-				</li>
-				<li>Pushover</li>
-			</ul>
-		</div>
 		@app.HeaderCentered("Configure Pushover")
 		<div class="max-w-160 mx-auto p-4 space-y-4">
+			<div>
+				<p class="mb-2">
+					<a href="https://pushover.net" target="_blank" class="link">Pushover</a> is a service that delivers real-time notifications to your iOS, Android, or desktop devices.
+				</p>
+				<p class="text-sm text-muted mb-2">To set up Pushover notifications:</p>
+				<ol class="list-decimal list-outside text-sm text-muted space-y-1 mb-2 ml-5">
+					<li>Create a <a href="https://pushover.net" target="_blank" class="link">Pushover account</a> and install their app on your device</li>
+					<li>Create an application in the <a href="https://pushover.net/apps/build" target="_blank" class="link">Pushover dashboard</a> to get an API token</li>
+					<li>Find your user key on your Pushover dashboard</li>
+					<li>Enter your user key and API token below to start receiving notifications</li>
+				</ol>
+			</div>
 			@settingsPanel("") {
-				<ul class="list">
-					<li class="list-row">
-						if data.Token != nil {
-							<div role="alert" class="alert alert-info">
-								<span>
-									Your Pushover integration is configured with
-									token: { components.MaskSecret(data.Token.Token) }.
-								</span>
-							</div>
-							<button
-								class="btn btn-error"
-								data-on:click={ datastar.DeleteSSE("/app/settings/pushover") }
-							>
-								Reset token
-							</button>
-						} else {
-							<form method="post" action="/app/settings/pushover">
-								<fieldset class="fieldset">
-									<legend class="fieldset-legend">Pushover token</legend>
-									<input
-										class={ "input", templ.KV("input-error", components.ValidationError(data, "Token") != "") }
-										type="text"
-										autocomplete="off"
-										placeholder="Enter token here"
-										name="Token"
-										value={ data.Values.Token }
-									/>
-									if err := components.ValidationError(data, "Token"); err != "" {
-										<p class="label text-error">{ err }</p>
-									} else {
-										<p class="label text-error">&nbsp;</p>
-									}
-								</fieldset>
-								<button class="btn btn-primary" type="submit">Set token</button>
-							</form>
-						}
-					</li>
-				</ul>
+				<div class="p-4">
+					if data.Token != nil {
+						<div role="alert" class="alert alert-info">
+							<span>
+								Your Pushover integration is configured with
+								token: { components.MaskSecret(data.Token.Token) }.
+							</span>
+						</div>
+						<button
+							class="btn btn-error mt-3"
+							data-on:click={ datastar.DeleteSSE("/app/settings/pushover") }
+						>
+							Reset token
+						</button>
+					} else {
+						<form method="post" action="/app/settings/pushover">
+							<fieldset class="fieldset">
+								<legend class="fieldset-legend">Pushover token</legend>
+								<input
+									class={ "input", "w-full", templ.KV("input-error", components.ValidationError(data, "Token") != "") }
+									type="text"
+									autocomplete="off"
+									placeholder="Enter token here"
+									name="Token"
+									value={ data.Values.Token }
+								/>
+								if err := components.ValidationError(data, "Token"); err != "" {
+									<p class="label text-error">{ err }</p>
+								} else {
+									<p class="label text-error">&nbsp;</p>
+								}
+							</fieldset>
+							<button class="btn btn-primary" type="submit">Set token</button>
+						</form>
+					}
+				</div>
 			}
 		</div>
 	}
@@ -137,21 +141,14 @@ type EmailSettingsViewModel struct {
 templ EmailSettings(data *EmailSettingsViewModel) {
 	@app.AppLayout([]app.Breadcrumb{
 		{Title: "Dashboard", Href: "/app"},
+		{Title: "Settings", Href: "/app/settings"},
 	}) {
-		<div class="py-2 px-4 breadcrumbs text-sm border-b border-base-content/10">
-			<ul>
-				<li>
-					<a href="/app/settings" class="link link-hover">Settings</a>
-				</li>
-				<li>Email</li>
-			</ul>
-		</div>
 		@app.HeaderCentered("Configure Email")
 		<div class="max-w-160 mx-auto p-4 space-y-4">
 			@settingsPanel("") {
 				<div role="alert" class="alert alert-info">
 					<span>
-						Nothing to configure. Emails will be sent to your
+						Emails will be sent to your
 						email address: <strong>{ data.Email }</strong>.
 					</span>
 				</div>

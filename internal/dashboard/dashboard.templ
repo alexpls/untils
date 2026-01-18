@@ -37,10 +37,10 @@ templ DashboardView(data DashboardViewData) {
 		class="grid grid-cols-12 gap-4 p-4"
 		data-effect={ datastar.GetSSE("/app/dashboard/events") }
 	>
-		<div class="col-span-6">
+		<div class="col-span-12 md:col-span-6">
 			@monitorActivityWidget(data.MonitorActivity)
 		</div>
-		<div class="col-span-6">
+		<div class="col-span-12 md:col-span-6">
 			@checksWidget(data.CheckStats)
 		</div>
 	</div>
@@ -52,7 +52,7 @@ type MonitorActivityWidgetData struct {
 }
 
 templ monitorActivityWidget(data MonitorActivityWidgetData) {
-	@dashboardWidget("Activity across your monitors", monitorActivityWidgetActions()) {
+	@dashboardWidget("Monitor activity", monitorActivityWidgetActions()) {
 		<div class={ monitorActivityWidgetTransition() }>
 			switch data.Loading {
 				case LoadingStatusLoading:
@@ -61,23 +61,25 @@ templ monitorActivityWidget(data MonitorActivityWidgetData) {
 					if len(data.Items) == 0 {
 						<div class="min-h-50 flex items-center justify-center">
 							<div class="text-center">
-								<p class="text-muted">No activity to show.</p>
+								<p class="text-muted">No activities to show.</p>
 								<p class="mt-5">
 									<a href="/app/monitors/new" class="btn btn-primary btn-lg">Start by creating a monitor</a>
 								</p>
 							</div>
 						</div>
 					} else {
-						@components.Timeline() {
-							for _, item := range data.Items {
-								@components.TimelineItem(
-									monitorActivityWidgetTimelineItemHeading(item),
-									monitorActivityWidgetTimelineItemSide(item),
-								) {
-									{ item.Result }
+						<div class="p-2 md:px-4">
+							@components.Timeline() {
+								for _, item := range data.Items {
+									@components.TimelineItem(
+										monitorActivityWidgetTimelineItemHeading(item),
+										monitorActivityWidgetTimelineItemSide(item),
+									) {
+										{ item.Result }
+									}
 								}
 							}
-						}
+						</div>
 					}
 			}
 		</div>

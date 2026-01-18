@@ -7,11 +7,9 @@ import (
 )
 
 templ Timeline() {
-	<div class="m-4 p-4 bg-base-100 rounded border border-base-content/10">
-		<ul>
-			{ children... }
-		</ul>
-	</div>
+	<ul>
+		{ children... }
+	</ul>
 }
 
 templ TimelineItem(heading templ.Component, side templ.Component) {
