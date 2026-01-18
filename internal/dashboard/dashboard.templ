@@ -37,10 +37,11 @@ templ DashboardView(data DashboardViewData) {
 		class="grid grid-cols-12 gap-4 p-4"
 		data-effect={ datastar.GetSSE("/app/dashboard/events") }
 	>
-		<div class="col-span-12 md:col-span-6">
+		<div class="col-span-12 md:col-span-6 space-y-4">
+			@quickLinksWidget()
 			@monitorActivityWidget(data.MonitorActivity)
 		</div>
-		<div class="col-span-12 md:col-span-6">
+		<div class="col-span-12 md:col-span-6 space-y-4">
 			@checksWidget(data.CheckStats)
 		</div>
 	</div>
@@ -52,7 +53,7 @@ type MonitorActivityWidgetData struct {
 }
 
 templ monitorActivityWidget(data MonitorActivityWidgetData) {
-	@dashboardWidget("Monitor activity", monitorActivityWidgetActions()) {
+	@dashboardWidget("Monitor activity", nil) {
 		<div class={ monitorActivityWidgetTransition() }>
 			switch data.Loading {
 				case LoadingStatusLoading:
@@ -99,13 +100,6 @@ templ monitorActivityWidgetTimelineItemHeading(item *models.ListMonitorActivityR
 
 templ monitorActivityWidgetTimelineItemSide(item *models.ListMonitorActivityRow) {
 	@components.TimeAgo(fmt.Sprintf("result%d", item.ResultID), item.CreatedAt)
-}
-
-templ monitorActivityWidgetActions() {
-	<a href="/app/monitors" class="flex items-center btn btn-sm">
-		Go to Monitors
-		@icons.ArrowRight(icons.IconParams{Size: 16, Classes: templ.Classes("")})
-	</a>
 }
 
 type CheckStatsWidgetData struct {
@@ -158,21 +152,38 @@ templ checksWidget(data CheckStatsWidgetData) {
 	}
 }
 
+templ quickLinksWidget() {
+	@dashboardWidget("", nil) {
+		<div class="p-4 space-y-3">
+			<a href="/app/monitors" class="btn w-full justify-between">
+				<span>View all monitors</span>
+				@icons.ArrowRight(icons.IconParams{Size: 16, Classes: templ.Classes("")})
+			</a>
+			<a href="/app/monitors/new" class="btn w-full justify-between">
+				<span>Create a monitor</span>
+				@icons.ArrowRight(icons.IconParams{Size: 16, Classes: templ.Classes("")})
+			</a>
+		</div>
+	}
+}
+
 templ dashboardWidget(title string, actions templ.Component) {
 	<div class="bg-base-100 rounded border border-base-content/10">
-		<div class="border-b border-base-content/10 p-4 py-3 flex items-center justify-between">
-			<h2 class="text-lg font-black">
-				{ title }
-			</h2>
-			<div>
-				if actions != nil {
-					@actions
-				} else {
-					<!-- TODO: spacer to keep layout alignment, must be another way? -->
-					<a href="#" class="btn btn-sm invisible pointer-events-none"></a>
-				}
+		if title != "" {
+			<div class="border-b border-base-content/10 p-4 py-3 flex items-center justify-between">
+				<h2 class="text-lg font-black">
+					{ title }
+				</h2>
+				<div>
+					if actions != nil {
+						@actions
+					} else {
+						<!-- TODO: spacer to keep layout alignment, must be another way? -->
+						<a href="#" class="btn btn-sm invisible pointer-events-none"></a>
+					}
+				</div>
 			</div>
-		</div>
+		}
 		<div>
 			{ children... }
 		</div>
