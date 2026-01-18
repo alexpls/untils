@@ -58,13 +58,24 @@ templ monitorActivityWidget(data MonitorActivityWidgetData) {
 				case LoadingStatusLoading:
 					@dashboardWidgetLoader()
 				case LoadingStatusLoaded:
-					@components.Timeline() {
-						for _, item := range data.Items {
-							@components.TimelineItem(
-								monitorActivityWidgetTimelineItemHeading(item),
-								monitorActivityWidgetTimelineItemSide(item),
-							) {
-								{ item.Result }
+					if len(data.Items) == 0 {
+						<div class="min-h-50 flex items-center justify-center">
+							<div class="text-center">
+								<p class="text-muted">No activity to show.</p>
+								<p class="mt-5">
+									<a href="/app/monitors/new" class="btn btn-primary btn-lg">Start by creating a monitor</a>
+								</p>
+							</div>
+						</div>
+					} else {
+						@components.Timeline() {
+							for _, item := range data.Items {
+								@components.TimelineItem(
+									monitorActivityWidgetTimelineItemHeading(item),
+									monitorActivityWidgetTimelineItemSide(item),
+								) {
+									{ item.Result }
+								}
 							}
 						}
 					}
@@ -119,7 +130,7 @@ func (d CheckStatsWidgetData) DailyCheckCountsTimeSeries() components.TimeSeries
 }
 
 templ checksWidget(data CheckStatsWidgetData) {
-	@dashboardWidget("Check stats", nil) {
+	@dashboardWidget("Check statistics", nil) {
 		<div class={ checksWidgetTransition() }>
 			switch data.Loading {
 				case LoadingStatusLoading:

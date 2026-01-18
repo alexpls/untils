@@ -86,7 +86,7 @@ func Settings(data *SettingsViewModel) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div></div></li><li class=\"text-base list-row justify-between flex items-center\"><div><div>Timezone</div><small>(Set based on your browser settings)</small></div><div><div data-signals=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div></div></li><li class=\"text-base list-row justify-between flex items-center\"><div><div>Timezone</div><small class=\"text-muted\">(based on your browser settings)</small></div><div><div data-signals=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
