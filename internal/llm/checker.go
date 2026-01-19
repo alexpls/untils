@@ -5,6 +5,7 @@ import (
 	_ "embed"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/alexpls/untils/internal/browser"
 	"github.com/alexpls/untils/internal/db/models"
@@ -28,6 +29,11 @@ func newChecker(service *Service, c EventsChan) *checker {
 var checkerPrompt string
 
 func (c *checker) perform(ctx context.Context, params *CheckParams) (*models.CheckResult, error) {
+	var previousResult *models.GetPreviousResultsWithCheckRow
+	if len(params.PreviousResults) > 0 {
+		previousResult = params.PreviousResults[0]
+	}
+
 	defer func() {
 		if c.browserCancel != nil {
 			c.browserCancel()
@@ -72,6 +78,16 @@ func (c *checker) perform(ctx context.Context, params *CheckParams) (*models.Che
 		if err := json.Unmarshal([]byte(sanitized), res); err != nil {
 			c.messages = append(c.messages, systemMessage("error: invalid response format"))
 			continue
+		}
+
+		if previousResult != nil {
+			if res.DifferentToPrevious && sameResultStr(res.ResultPlaintext, previousResult.MonitorResult.Result) {
+				c.messages = append(
+					c.messages,
+					systemMessage("error: different_to_previous is true but result_plaintext is the same as the previous result"),
+				)
+				continue
+			}
 		}
 
 		return res, nil
@@ -119,4 +135,11 @@ func (c *checker) callTool(ctx context.Context, name string, args string) (strin
 	}
 
 	return tool.call()
+}
+
+func sameResultStr(a, b string) bool {
+	san := func(s string) string {
+		return strings.ToLower(strings.Trim(s, " "))
+	}
+	return san(a) == san(b)
 }
