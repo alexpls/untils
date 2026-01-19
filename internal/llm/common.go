@@ -1,8 +1,6 @@
 package llm
 
 import (
-	"encoding/json"
-	"fmt"
 	"strings"
 
 	"github.com/alexpls/untils/internal/db/models"
@@ -10,22 +8,20 @@ import (
 
 type CheckParams struct {
 	Subject         string
-	PreviousResults []models.CheckResult
-	UserFeedback    string
+	PreviousResults []*models.GetPreviousResultsWithCheckRow
 }
 
-func (c CheckParams) PreviousResultsString() (string, error) {
+func (c CheckParams) UserMessageString() string {
+	return "## Subject:\n" + c.Subject + "\n\n## Previous results: \n" + c.PreviousResultsString()
+}
+
+func (c CheckParams) PreviousResultsString() string {
 	var prevs strings.Builder
 	for _, pr := range c.PreviousResults {
-		d, err := json.Marshal(pr)
-		if err != nil {
-			return "", fmt.Errorf("marshaling previous results: %w", err)
-		} else {
-			prevs.Write(d)
-			prevs.WriteString("\n")
-		}
+		prevs.WriteString(pr.MonitorResult.Markdown())
+		prevs.WriteString("\n")
 	}
-	return prevs.String(), nil
+	return prevs.String()
 }
 
 func sanitizeXAIOutput(in string) string {

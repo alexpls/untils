@@ -14,7 +14,7 @@ func NewTriageWorkflow(service *Service) *TriageWorkflow {
 	return &TriageWorkflow{service: service}
 }
 
-func (w *TriageWorkflow) Run(ctx context.Context, params *TriageParams) (*TriagerResponse, error) {
+func (w *TriageWorkflow) Run(ctx context.Context, params *CheckParams) (*TriagerResponse, error) {
 	llmEvent, _ := wideevents.GetOrCreateFromContext(ctx, newLLMEvent)
 	defer llmEvent.finish()
 

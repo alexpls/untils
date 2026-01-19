@@ -138,11 +138,6 @@ func (s *Service) PerformMonitorCheck(
 		return err
 	}
 
-	prevResults := make([]models.CheckResult, len(latest))
-	for i, r := range latest {
-		prevResults[i] = *r.MonitorCheck.Result
-	}
-
 	ch := make(llm.EventsChan)
 	defer close(ch)
 
@@ -161,8 +156,7 @@ func (s *Service) PerformMonitorCheck(
 
 	result, err := checker.Run(ctx, &llm.CheckParams{
 		Subject:         monitor.Subject.String,
-		PreviousResults: prevResults,
-		UserFeedback:    userFeedback,
+		PreviousResults: latest,
 	})
 	if err != nil {
 		if cerr := s.queries.UpdateMonitorCheckFailed(ctx, s.pool, &models.UpdateMonitorCheckFailedParams{

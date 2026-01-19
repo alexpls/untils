@@ -15,7 +15,7 @@ func TestTriager(t *testing.T) {
 	events := make(wideevents.Events)
 	ctx := wideevents.ContextWithEvents(t.Context(), events)
 
-	prompt := NewTriager(svc, &TriageParams{
+	prompt := NewTriager(svc, &CheckParams{
 		Subject: "Who is a good boy?",
 	})
 	res, err := prompt.Run(ctx)

@@ -35,19 +35,9 @@ func (c *checker) perform(ctx context.Context, params *CheckParams) (*models.Che
 	}()
 	var err error
 
-	prevs, err := params.PreviousResultsString()
-	if err != nil {
-		return nil, err
-	}
-
-	msg := "Subject: " + params.Subject + "\n\nPrevious results: \n" + prevs
-	if params.UserFeedback != "" {
-		msg += "\n\nUser feedback on the previous result:\n" + params.UserFeedback
-	}
-
 	c.messages = []responses.ResponseInputItemUnionParam{
 		systemMessage(checkerPrompt),
-		userMessage(msg),
+		userMessage(params.UserMessageString()),
 	}
 
 	var resp *responseResult
