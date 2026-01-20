@@ -46,6 +46,7 @@ templ MonitorDraftView(data MonitorDraftData) {
 						if monitorLoading(data.Monitor) {
 							disabled
 						}
+						name="Subject"
 						class={ templ.Classes(
 								monitorSubjectTextareaViewTransition(),
 								"textarea", "textarea-xl",
