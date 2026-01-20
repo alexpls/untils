@@ -46,7 +46,7 @@ func (p *Triager) Run(ctx context.Context) (*TriagerResponse, error) {
 		try++
 
 		resp, err = p.service.response(ctx, responses.ResponseNewParams{
-			Model: model,
+			Model: modelNonReasoning,
 			Input: p.messages,
 			Text:  jsonSchemaResponse(TriagerResponse{}),
 		})

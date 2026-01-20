@@ -11,7 +11,8 @@ import (
 	"github.com/openai/openai-go/v3/responses"
 )
 
-var model = "grok-4-1-fast-non-reasoning"
+var modelNonReasoning = "grok-4-1-fast-non-reasoning"
+var modelReasoning = "grok-4-1-fast-reasoning"
 
 type Service struct {
 	client      *openai.Client
@@ -45,7 +46,7 @@ func (s *Service) response(ctx context.Context, params responses.ResponseNewPara
 		return nil, fmt.Errorf("fetching llm response: %w", err)
 	}
 
-	cost, err := calculateCost(model, resp)
+	cost, err := calculateCost(modelNonReasoning, resp)
 	if err != nil {
 		s.logger.Error("failed to calculate cost", "error", err)
 	} else {

@@ -65,7 +65,7 @@ func (c *checker) perform(ctx context.Context, params *CheckParams) (*models.Che
 
 		llmStart := time.Now()
 		resp, err = c.service.response(ctx, responses.ResponseNewParams{
-			Model: model,
+			Model: modelReasoning,
 			Input: inputItems(c.messages...),
 			Text:  jsonSchemaResponse(models.CheckResult{}),
 			Tools: []responses.ToolUnionParam{
