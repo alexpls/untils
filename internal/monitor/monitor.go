@@ -30,13 +30,13 @@ func (s *Service) GetMonitor(ctx context.Context, userID, monitorID int64) (*mod
 	return monitor, nil
 }
 
-type CommonParams struct {
-	Subject string `validate:"required,min=10,max=5000"`
+type MonitorCommonParams struct {
+	Subject string `json:"subject" validate:"required,min=10,max=5000"`
 }
 
 type CreateMonitorParams struct {
 	UserID int64 `validate:"required"`
-	CommonParams
+	MonitorCommonParams
 }
 
 func (s *Service) CreateMonitor(ctx context.Context, params CreateMonitorParams) (*models.Monitor, error) {
@@ -235,12 +235,12 @@ func (s *Service) ActivateMonitorFromPreview(ctx context.Context, userID, monito
 }
 
 type UpdateMonitorDraftParams struct {
-	CommonParams
+	MonitorCommonParams
 }
 
 func NewUpdateMonitorDraftParams(mon *models.Monitor) UpdateMonitorDraftParams {
 	return UpdateMonitorDraftParams{
-		CommonParams: CommonParams{
+		MonitorCommonParams: MonitorCommonParams{
 			Subject: mon.Subject.String,
 		},
 	}

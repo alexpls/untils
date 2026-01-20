@@ -1,8 +1,6 @@
 package monitor
 
 import (
-	"fmt"
-
 	"github.com/alexpls/untils/internal/components"
 	"github.com/alexpls/untils/internal/components/app"
 	"github.com/alexpls/untils/internal/components/icons"
@@ -42,21 +40,25 @@ templ MonitorDraftPage(data MonitorDraftData) {
 templ MonitorDraftView(data MonitorDraftData) {
 	<div class="max-w-lg px-6 mx-auto" id="monitor-draft-view" data-effect={ datastar.GetSSE("/app/monitors/%d/events", data.Monitor.ID) }>
 		<div class="mt-8">
-			<form method="POST" action={ fmt.Sprintf("/app/monitors/%d", data.Monitor.ID) }>
+			<form data-on:submit={ datastar.PostSSE("/app/monitors/%d", data.Monitor.ID) }>
 				<fieldset class="fieldset">
 					<textarea
+						if monitorLoading(data.Monitor) {
+							disabled
+						}
 						class={ templ.Classes(
 								monitorSubjectTextareaViewTransition(),
 								"textarea", "textarea-xl",
 								templ.KV("textarea-error", components.ValidationError(data, "Subject") != ""),
 								"field-sizing-content", "resize-none",
 								"w-full", "min-h-lh", "max-h-[4lh]",
+								"disabled:border-base-content/20",
 							) }
 						placeholder="Type here..."
-						name="Subject"
 						data-bind:_subject.current
 						data-signals:_subject.initial={ templ.JSONString(data.Monitor.Subject.String) }
 						data-computed:_subject.changed="$_subject.current !== $_subject.initial"
+						data-computed:subject="$_subject.current"
 						data-on:focus="$_subject.updating = true"
 						data-on:blur="$_subject.updating = false"
 						data-on:keydown="

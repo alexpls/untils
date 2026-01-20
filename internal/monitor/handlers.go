@@ -215,8 +215,9 @@ func (h *Handlers) UpdatePost(w http.ResponseWriter, r *http.Request, user *mode
 		return
 	}
 
-	if err := r.ParseForm(); err != nil {
-		h.logger.Error("error parsing form", "error", err)
+	var params MonitorCommonParams
+	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
+		h.logger.Error("error decoding json", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -232,40 +233,40 @@ func (h *Handlers) UpdatePost(w http.ResponseWriter, r *http.Request, user *mode
 		return
 	}
 
+	sse := datastar.NewSSE(w, r)
+
 	monitorDraftParams := UpdateMonitorDraftParams{
-		CommonParams: CommonParams{
-			Subject: r.FormValue("Subject"),
-		},
+		MonitorCommonParams: params,
+	}
+	viewData, err := h.monitorDraftViewData(sse.Context(), mon, user.ID, monitorDraftParams, nil)
+	if err != nil {
+		h.logger.Error("error making monitor draft view data", "error", err)
+		return
 	}
 
 	updatedMon, err := h.service.UpdateMonitorDraft(r.Context(), user.ID, mon.ID, monitorDraftParams)
 	if err != nil {
 		if validationErrs := validation.MapValidationErrors(err); validationErrs != nil {
 			h.logger.Warn("failed validation when updating monitor", "validation_errors", validationErrs)
-			comp, err := h.renderMonitorDraft(r.Context(), mon, user.ID, monitorDraftParams, validationErrs)
-			if err != nil {
-				h.logger.Error("error rendering monitor draft", "error", err)
-				http.Error(w, "Internal server error", http.StatusInternalServerError)
-				return
+
+			viewData.ValidationErrors = validationErrs
+
+			if err := sse.PatchElementTempl(MonitorDraftView(viewData)); err != nil {
+				h.logger.Error("error sending monitor draft view events SSE patch", "error", err)
 			}
-			if err := comp.Render(r.Context(), w); err != nil {
-				h.logger.Error("error rendering monitor draft component", "error", err)
-			}
+
 			return
 		}
+
 		h.logger.Error("error updating monitor", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
-	comp, err := h.renderMonitorDraft(r.Context(), updatedMon, user.ID, NewUpdateMonitorDraftParams(updatedMon), nil)
-	if err != nil {
-		h.logger.Error("error rendering monitor draft", "error", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
-	if err := comp.Render(r.Context(), w); err != nil {
-		h.logger.Error("error rendering monitor draft component", "error", err)
+	viewData.Monitor = updatedMon
+
+	if err := sse.PatchElementTempl(MonitorDraftView(viewData)); err != nil {
+		h.logger.Error("error sending monitor draft view events SSE patch", "error", err)
 	}
 }
 
@@ -301,7 +302,7 @@ func (h *Handlers) CreatePost(w http.ResponseWriter, r *http.Request, user *mode
 
 	newMonitor := CreateMonitorParams{
 		UserID: user.ID,
-		CommonParams: CommonParams{
+		MonitorCommonParams: MonitorCommonParams{
 			Subject: r.FormValue("Subject"),
 		},
 	}
