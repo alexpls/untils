@@ -36,7 +36,9 @@ func (h *Handlers) SignInGet(w http.ResponseWriter, r *http.Request) {
 	data := SignInData{
 		Return: ret,
 	}
-	SignInPage(data).Render(r.Context(), w)
+	if err := SignInPage(data).Render(r.Context(), w); err != nil {
+		h.logger.Error("error rendering sign in page", "error", err)
+	}
 }
 
 // SignOutGet handles GET /sign_out
@@ -67,7 +69,9 @@ func (h *Handlers) SignInPost(w http.ResponseWriter, r *http.Request) {
 
 	user, err := h.auth.GetUserByEmailPassword(r.Context(), email, password)
 	if errors.Is(err, ErrNoUser) {
-		SignInPage(SignInData{Failed: true, Email: email, Return: ret}).Render(r.Context(), w)
+		if err := SignInPage(SignInData{Failed: true, Email: email, Return: ret}).Render(r.Context(), w); err != nil {
+			h.logger.Error("error rendering sign in page", "error", err)
+		}
 		return
 	}
 	if err != nil {

@@ -43,6 +43,7 @@ templ TimelineItem(heading templ.Component, side templ.Component) {
 templ TimeAgo(id string, t time.Time) {
 	{{ uni := strconv.FormatInt(t.UnixMilli(), 10) }}
 	<span
+		title={ FormatDateTime(ctx, t) }
 		data-signals__ifmissing={ fmt.Sprintf("{_timeago%s: timeAgo(%s)}", id, uni) }
 		data-on-interval__duration.1s={ fmt.Sprintf("$_timeago%s = timeAgo(%s)", id, uni) }
 		data-text={ fmt.Sprintf("$_timeago%s", id) }

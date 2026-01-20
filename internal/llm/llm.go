@@ -91,12 +91,6 @@ func inputItems(messages ...responses.ResponseInputItemUnionParam) responses.Res
 	}
 }
 
-func webSearchTools() []responses.ToolUnionParam {
-	return []responses.ToolUnionParam{
-		responses.ToolParamOfWebSearch("web_search"),
-	}
-}
-
 func extractToolCalls(outputs []responses.ResponseOutputItemUnion) (out []responses.ResponseFunctionToolCall) {
 	for _, item := range outputs {
 		switch item.AsAny().(type) {

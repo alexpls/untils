@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/alexpls/untils/internal/db/models"
+	"github.com/alexpls/untils/internal/models"
 )
 
 var validMonitorStatusTransitions = map[models.MonitorStatus][]models.MonitorStatus{

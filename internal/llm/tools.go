@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/alexpls/untils/internal/browser"
-	"github.com/alexpls/untils/internal/db/models"
+	"github.com/alexpls/untils/internal/models"
 	"github.com/alexpls/untils/internal/search"
 	"github.com/alexpls/untils/internal/wideevents"
 	"github.com/openai/openai-go/v3"

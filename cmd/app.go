@@ -10,9 +10,9 @@ import (
 	"github.com/alexpls/untils/internal/auth"
 	"github.com/alexpls/untils/internal/dashboard"
 	"github.com/alexpls/untils/internal/db"
-	"github.com/alexpls/untils/internal/db/models"
 	"github.com/alexpls/untils/internal/email"
 	"github.com/alexpls/untils/internal/llm"
+	"github.com/alexpls/untils/internal/models"
 	"github.com/alexpls/untils/internal/monitor"
 	"github.com/alexpls/untils/internal/must"
 	"github.com/alexpls/untils/internal/pages"
@@ -159,7 +159,7 @@ func createApp(c *config) (*app, func()) {
 
 	a.dashboardHandlers = dashboard.NewHandlers(a.queries, a.db, a.monitorEvents, a.logger.With("source", "dashboard.handlers"))
 
-	a.pagesHandlers = pages.NewHandlers()
+	a.pagesHandlers = pages.NewHandlers(a.logger.With("source", "pages.handlers"))
 
 	a.authHandlers = auth.NewHandlers(a.auth, a.sessionManager, a.logger.With("source", "auth.handlers"))
 

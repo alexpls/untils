@@ -7,7 +7,7 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/alexpls/untils/internal/db/models"
+	"github.com/alexpls/untils/internal/models"
 	"github.com/alexpls/untils/internal/reqcontext"
 	"github.com/alexpls/untils/internal/session"
 	"github.com/alexpls/untils/internal/wideevents"

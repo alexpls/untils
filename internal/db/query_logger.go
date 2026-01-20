@@ -11,6 +11,14 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
+type contextKey int
+
+const (
+	_ contextKey = iota
+	queryStartTimeCtxKey
+	querySQLCtxKey
+)
+
 type DBLogEvent struct {
 	QueriesCount         int
 	QueriesTotalDuration time.Duration
@@ -42,18 +50,18 @@ func (t loggingTracer) TraceQueryStart(ctx context.Context, conn *pgx.Conn, data
 	}
 	sql = strings.TrimSpace(sql)
 
-	ctx = context.WithValue(ctx, "queryStartTime", time.Now())
-	ctx = context.WithValue(ctx, "querySQL", sql)
+	ctx = context.WithValue(ctx, queryStartTimeCtxKey, time.Now())
+	ctx = context.WithValue(ctx, querySQLCtxKey, sql)
 
 	return ctx
 }
 
 func (t loggingTracer) TraceQueryEnd(ctx context.Context, conn *pgx.Conn, data pgx.TraceQueryEndData) {
-	start, ok := ctx.Value("queryStartTime").(time.Time)
+	start, ok := ctx.Value(queryStartTimeCtxKey).(time.Time)
 	if !ok {
 		return
 	}
-	sql, ok := ctx.Value("querySQL").(string)
+	sql, ok := ctx.Value(querySQLCtxKey).(string)
 	if !ok {
 		return
 	}

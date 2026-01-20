@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/alexpls/untils/internal/auth"
-	"github.com/alexpls/untils/internal/db/models"
+	"github.com/alexpls/untils/internal/models"
 	"github.com/alexpls/untils/internal/pushover"
 	"github.com/alexpls/untils/internal/validation"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -59,9 +59,11 @@ func (h *Handlers) SettingsGet(w http.ResponseWriter, r *http.Request, user *mod
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
-	Settings(&SettingsViewModel{
+	if err := Settings(&SettingsViewModel{
 		ConfiguredIntegrations: integrations,
-	}).Render(r.Context(), w)
+	}).Render(r.Context(), w); err != nil {
+		h.logger.Error("error rendering settings component", "error", err)
+	}
 }
 
 // PushoverSettingsGet handles GET /app/settings/pushover
@@ -87,7 +89,9 @@ func (h *Handlers) PushoverSettingsGet(w http.ResponseWriter, r *http.Request, u
 		data.Values.Token = tok.Token
 	}
 
-	PushoverSettings(&data).Render(r.Context(), w)
+	if err := PushoverSettings(&data).Render(r.Context(), w); err != nil {
+		h.logger.Error("error rendering pushover settings component", "error", err)
+	}
 }
 
 // PushoverSettingsPost handles POST /app/settings/pushover
@@ -110,10 +114,12 @@ func (h *Handlers) PushoverSettingsPost(w http.ResponseWriter, r *http.Request, 
 				Field:   "Token",
 				Message: fmt.Sprintf("Failed to validate with Pushover: %s", strings.Join(validationErr.Reasons, ", ")),
 			}
-			PushoverSettings(&PushoverSettingsViewModel{
+			if err := PushoverSettings(&PushoverSettingsViewModel{
 				Values:           params,
 				ValidationErrors: validation.ValidationErrors{mapped},
-			}).Render(r.Context(), w)
+			}).Render(r.Context(), w); err != nil {
+				h.logger.Error("error rendering pushover settings component", "error", err)
+			}
 			return
 		}
 	}
@@ -122,10 +128,12 @@ func (h *Handlers) PushoverSettingsPost(w http.ResponseWriter, r *http.Request, 
 	if err != nil {
 		if validationErrs := validation.MapValidationErrors(err); validationErrs != nil {
 			h.logger.Warn("failed validation when creating pushover token", "validation_errors", validationErrs)
-			PushoverSettings(&PushoverSettingsViewModel{
+			if err := PushoverSettings(&PushoverSettingsViewModel{
 				Values:           params,
 				ValidationErrors: validationErrs,
-			}).Render(r.Context(), w)
+			}).Render(r.Context(), w); err != nil {
+				h.logger.Error("error rendering pushover settings component", "error", err)
+			}
 			return
 		}
 		h.logger.Error("error creating pushover token", "error", err)
@@ -147,14 +155,18 @@ func (h *Handlers) PushoverSettingsDelete(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	sse.Redirect("/app/settings/pushover")
+	if err = sse.Redirect("/app/settings/pushover"); err != nil {
+		h.logger.Error("error redirecting after deleting pushover user token", "error", err)
+	}
 }
 
 // EmailSettingsGet handles GET /app/settings/email
 func (h *Handlers) EmailSettingsGet(w http.ResponseWriter, r *http.Request, user *models.User) {
-	EmailSettings(&EmailSettingsViewModel{
+	if err := EmailSettings(&EmailSettingsViewModel{
 		Email: user.Email,
-	}).Render(r.Context(), w)
+	}).Render(r.Context(), w); err != nil {
+		h.logger.Error("error rendering email settings component", "error", err)
+	}
 }
 
 type timezoneUpdate struct {

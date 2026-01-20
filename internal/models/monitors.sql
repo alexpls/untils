@@ -1,7 +1,38 @@
--- name: ListMonitors :many
-select * from monitors
-where user_id = @user_id and status = 'active'
-order by created_at desc;
+-- name: ListMonitorsWithResults :many
+with latest_result as (
+    select distinct on (monitor_id) monitor_id, result, date, date_past_tense_verb, created_at
+    from monitor_results
+    order by monitor_id, created_at desc
+),
+next_check as (
+    select distinct on (monitor_id) monitor_id, scheduled_for
+    from monitor_checks
+    where status in ('scheduled')
+    order by monitor_id, scheduled_for desc
+),
+current_check as (
+    select distinct on (monitor_id) monitor_id
+    from monitor_checks
+    where status = 'checking'
+    order by monitor_id, scheduled_for desc
+)
+select
+    m.id as monitor_id,
+    m.subject::text as subject,
+    m.created_at,
+    coalesce(mr.result, '') as latest_result,
+    coalesce(mr.date, '0001-01-01 00:00:00 +0000') as latest_result_date,
+    coalesce(mr.date_past_tense_verb, '') as latest_result_date_past_tense_verb,
+    coalesce(mr.created_at, '0001-01-01 00:00:00 +0000') as latest_result_created_at,
+    coalesce(mc.scheduled_for, '0001-01-01 00:00:00 +0000') as next_check_scheduled_for,
+    (cc.monitor_id is not null)::boolean as currently_checking
+from monitors m
+left join latest_result mr on mr.monitor_id = m.id
+left join next_check mc on mc.monitor_id = m.id
+left join current_check cc on cc.monitor_id = m.id
+where m.user_id = @user_id and m.status = 'active'
+order by mr.created_at desc
+limit @page_size offset @row_offset;
 
 -- name: GetMonitor :one
 select * from monitors

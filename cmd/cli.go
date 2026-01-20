@@ -36,7 +36,7 @@ func parseServe() (*config, *serveConfig) {
 	sc := serveConfig{}
 	serveFlags(&sc, f)
 
-	f.Parse(os.Args[2:])
+	_ = f.Parse(os.Args[2:])
 
 	validateGlobalConfig(&gc)
 	validateServeConfig(&sc)
@@ -52,7 +52,7 @@ func parseSeed() *config {
 	gc := config{}
 	globalFlags(&gc, f)
 
-	f.Parse(os.Args[2:])
+	_ = f.Parse(os.Args[2:])
 
 	validateGlobalConfig(&gc)
 
@@ -98,7 +98,7 @@ func parseMigrate() *migrateConfig {
 	mc := migrateConfig{}
 	f.StringVar(&mc.dbUrl, "db", "", "postgresql connection url")
 
-	f.Parse(os.Args[2:])
+	_ = f.Parse(os.Args[2:])
 
 	if mc.dbUrl == "" {
 		panic("db url is required")

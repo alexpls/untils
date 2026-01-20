@@ -2,11 +2,12 @@ package faviconproxy
 
 import (
 	"io"
+	"log/slog"
 	"net/http"
 	"time"
 )
 
-func Handler() http.Handler {
+func Handler(logger *slog.Logger) http.Handler {
 	h := newHttpClient()
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -17,12 +18,15 @@ func Handler() http.Handler {
 			http.Error(w, "Failed to fetch URL", http.StatusBadRequest)
 			return
 		}
-		defer res.Body.Close()
+		defer res.Body.Close() // nolint:errcheck
 
 		w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
 		w.Header().Set("Content-Type", res.Header.Get("Content-Type"))
 
 		_, err = io.Copy(w, res.Body)
+		if err != nil {
+			logger.Error("error writing favicon response", "error", err)
+		}
 	})
 }
 

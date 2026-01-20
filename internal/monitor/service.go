@@ -3,9 +3,9 @@ package monitor
 import (
 	"log/slog"
 
-	"github.com/alexpls/untils/internal/db/models"
 	"github.com/alexpls/untils/internal/email"
 	"github.com/alexpls/untils/internal/llm"
+	"github.com/alexpls/untils/internal/models"
 	"github.com/alexpls/untils/internal/pushover"
 	"github.com/go-playground/validator/v10"
 	"github.com/jackc/pgx/v5"

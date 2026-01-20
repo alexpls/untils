@@ -83,9 +83,8 @@ func fingerprintFile(path string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer f.Close()
-	_, err = io.Copy(h, f)
-	if err != nil {
+	defer f.Close() // nolint:errcheck
+	if _, err = io.Copy(h, f); err != nil {
 		return "", err
 	}
 

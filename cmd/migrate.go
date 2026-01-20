@@ -20,7 +20,7 @@ func runMigrations(logger *slog.Logger, dbURL string) error {
 	if err != nil {
 		return err
 	}
-	defer m.Close()
+	defer m.Close() // nolint:errcheck
 
 	version, dirty, err := m.Version()
 	if err != nil && !errors.Is(err, migrate.ErrNilVersion) {

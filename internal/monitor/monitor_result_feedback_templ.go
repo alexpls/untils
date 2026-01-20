@@ -11,7 +11,7 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"fmt"
 	"github.com/alexpls/untils/internal/components"
-	"github.com/alexpls/untils/internal/db/models"
+	"github.com/alexpls/untils/internal/models"
 	"github.com/alexpls/untils/internal/validation"
 )
 

@@ -4,7 +4,7 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/alexpls/untils/internal/db/models"
+	"github.com/alexpls/untils/internal/models"
 	"github.com/alexpls/untils/internal/monitor"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/starfederation/datastar-go/datastar"
@@ -38,7 +38,9 @@ func (h *Handlers) Get(w http.ResponseWriter, r *http.Request, user *models.User
 			Loading: LoadingStatusLoading,
 		},
 	}
-	DashboardPage(data).Render(r.Context(), w)
+	if err := DashboardPage(data).Render(r.Context(), w); err != nil {
+		h.logger.Error("error rendering dashboard page", "error", err)
+	}
 }
 
 // Events handles GET /app/dashboard/events (SSE)

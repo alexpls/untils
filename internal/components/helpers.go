@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/alexpls/untils/internal/db/models"
+	"github.com/alexpls/untils/internal/models"
 	"github.com/alexpls/untils/internal/reqcontext"
 	"github.com/alexpls/untils/internal/validation"
 	"github.com/alexpls/untils/public"

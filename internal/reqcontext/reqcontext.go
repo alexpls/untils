@@ -3,7 +3,7 @@ package reqcontext
 import (
 	"context"
 
-	"github.com/alexpls/untils/internal/db/models"
+	"github.com/alexpls/untils/internal/models"
 )
 
 type contextKey int

@@ -17,11 +17,9 @@ window.timezoneName = timezoneName
 function timeAgo(isoTimestamp) {
   const date = new Date(isoTimestamp)
   const now = new Date()
-  const seconds = Math.floor((now - date) / 1000)
-
-  if (seconds < 0) {
-    return "just now"
-  }
+  const diff = now - date
+  const seconds = Math.floor(Math.abs(diff) / 1000)
+  const isFuture = diff < 0
 
   const intervals = [
     { label: "year", seconds: 31536000 },
@@ -36,9 +34,8 @@ function timeAgo(isoTimestamp) {
   for (const interval of intervals) {
     const count = Math.floor(seconds / interval.seconds)
     if (count >= 1) {
-      return count === 1
-        ? `${count} ${interval.label} ago`
-        : `${count} ${interval.label}s ago`
+      const label = count === 1 ? interval.label : `${interval.label}s`
+      return isFuture ? `in ${count} ${label}` : `${count} ${label} ago`
     }
   }
 

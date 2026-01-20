@@ -75,7 +75,7 @@ func (c *BraveClient) Search(params *SearchParams) (*SearchResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer res.Body.Close() // nolint:errcheck
 
 	var apiRes braveSearchAPIResponse
 	if err = json.NewDecoder(res.Body).Decode(&apiRes); err != nil {

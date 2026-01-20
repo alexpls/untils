@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/alexedwards/argon2id"
-	"github.com/alexpls/untils/internal/db/models"
+	"github.com/alexpls/untils/internal/models"
 	"github.com/go-playground/validator/v10"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5"

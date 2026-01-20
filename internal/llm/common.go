@@ -3,7 +3,7 @@ package llm
 import (
 	"strings"
 
-	"github.com/alexpls/untils/internal/db/models"
+	"github.com/alexpls/untils/internal/models"
 )
 
 type CheckParams struct {

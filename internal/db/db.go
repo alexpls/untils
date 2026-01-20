@@ -33,7 +33,7 @@ func WithTxV[T any](pool *pgxpool.Pool, ctx context.Context, fn func(pgx.Tx) (T,
 	if err != nil {
 		return zero, fmt.Errorf("beginning transaction: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer tx.Rollback(ctx) // nolint:errcheck
 
 	res, err := fn(tx)
 	if err != nil {

@@ -6,8 +6,8 @@ import (
 	"fmt"
 
 	"github.com/alexpls/untils/internal/db"
-	"github.com/alexpls/untils/internal/db/models"
 	"github.com/alexpls/untils/internal/email"
+	"github.com/alexpls/untils/internal/models"
 	"github.com/alexpls/untils/internal/pushover"
 	"github.com/jackc/pgx/v5"
 	"golang.org/x/sync/errgroup"

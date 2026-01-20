@@ -10,7 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import "github.com/alexpls/untils/internal/validation"
 import "github.com/alexpls/untils/internal/pushover"
-import "github.com/alexpls/untils/internal/db/models"
+import "github.com/alexpls/untils/internal/models"
 import "github.com/alexpls/untils/internal/components"
 import "github.com/alexpls/untils/internal/components/app"
 import "fmt"

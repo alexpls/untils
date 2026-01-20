@@ -6,12 +6,18 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/alexpls/untils/internal/db/models"
+	"github.com/alexpls/untils/internal/models"
 	"github.com/jackc/pgx/v5"
 )
 
+type contextKey int
+
+const (
+	_ contextKey = iota
+	sessionCtxKey
+)
+
 const cookieName = "sid"
-const sessionCtxKey = "sessionCtxKey"
 
 type Manager struct {
 	store  *store

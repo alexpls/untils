@@ -1,6 +1,7 @@
 package monitor
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -11,7 +12,8 @@ import (
 	"time"
 
 	"github.com/a-h/templ"
-	"github.com/alexpls/untils/internal/db/models"
+	"github.com/alexpls/untils/internal/models"
+	"github.com/alexpls/untils/internal/pagination"
 	"github.com/alexpls/untils/internal/validation"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -40,16 +42,68 @@ func NewHandlers(service *Service, events *DBEventHandler, queries *models.Queri
 
 // ListGet handles GET /app/monitors
 func (h *Handlers) ListGet(w http.ResponseWriter, r *http.Request, user *models.User) {
-	monitors, err := h.queries.ListMonitors(r.Context(), h.pool, user.ID)
+	comp, err := h.renderMonitorList(r, user)
 	if err != nil {
-		h.logger.Error("error listing monitors", "error", err)
+		h.logger.Error("error rendering monitor list", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
-	MonitorsListPage(MonitorsListData{
-		Monitors: monitors,
-	}).Render(r.Context(), w)
+	if err := comp.Render(r.Context(), w); err != nil {
+		h.logger.Error("error rendering monitors list", "error", err)
+	}
+}
+
+// ListEventsGet handles GET /app/monitors/events (SSE)
+func (h *Handlers) ListEventsGet(w http.ResponseWriter, r *http.Request, user *models.User) {
+	sse := datastar.NewSSE(w, r)
+	ch := h.events.SubscribeUser(sse.Context(), user.ID)
+
+	for {
+		comp, err := h.renderMonitorList(r, user)
+		if err != nil {
+			h.logger.Error("error rendering monitor list", "error", err)
+			return
+		}
+		if err := patchElementTemplFragment(sse, comp, monitorListFragment); err != nil {
+			h.logger.Error("error sending monitors list SSE patch", "error", err)
+			return
+		}
+
+		select {
+		case <-ch:
+		case <-sse.Context().Done():
+			return
+		}
+	}
+}
+
+func (h *Handlers) renderMonitorList(r *http.Request, user *models.User) (templ.Component, error) {
+	pag := pagination.PaginationFromRequest(r, 30)
+
+	monitors, err := h.queries.ListMonitorsWithResults(
+		r.Context(),
+		h.pool,
+		&models.ListMonitorsWithResultsParams{
+			UserID:    user.ID,
+			PageSize:  int32(pag.PageSizeWithPeek()),
+			RowOffset: int32(pag.Offset()),
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO: move this peeking logic to something more generic in pagination package
+	if len(monitors) == pag.PageSizeWithPeek() {
+		monitors = monitors[:pag.PageSize]
+		pag.HasMore = true
+	}
+
+	return MonitorsListPage(MonitorsListData{
+		Monitors:   monitors,
+		Pagination: pag,
+	}), nil
 }
 
 // ViewGet handles GET /app/monitors/{id}
@@ -82,7 +136,9 @@ func (h *Handlers) ViewGet(w http.ResponseWriter, r *http.Request, user *models.
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
-	comp.Render(r.Context(), w)
+	if err := comp.Render(r.Context(), w); err != nil {
+		h.logger.Error("error rendering monitor component", "error", err)
+	}
 }
 
 // ViewEventsGet handles GET /app/monitors/{id}/events (SSE)
@@ -146,7 +202,9 @@ func (h *Handlers) ViewEventsGet(w http.ResponseWriter, r *http.Request, user *m
 
 // NewGet handles GET /app/monitors/new
 func (h *Handlers) NewGet(w http.ResponseWriter, r *http.Request, user *models.User) {
-	MonitorNewPage(MonitorNewData{}).Render(r.Context(), w)
+	if err := MonitorNewPage(MonitorNewData{}).Render(r.Context(), w); err != nil {
+		h.logger.Error("error rendering monitor new page", "error", err)
+	}
 }
 
 // UpdatePost handles POST /app/monitors/{id}
@@ -190,7 +248,9 @@ func (h *Handlers) UpdatePost(w http.ResponseWriter, r *http.Request, user *mode
 				http.Error(w, "Internal server error", http.StatusInternalServerError)
 				return
 			}
-			comp.Render(r.Context(), w)
+			if err := comp.Render(r.Context(), w); err != nil {
+				h.logger.Error("error rendering monitor draft component", "error", err)
+			}
 			return
 		}
 		h.logger.Error("error updating monitor", "error", err)
@@ -204,7 +264,9 @@ func (h *Handlers) UpdatePost(w http.ResponseWriter, r *http.Request, user *mode
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
-	comp.Render(r.Context(), w)
+	if err := comp.Render(r.Context(), w); err != nil {
+		h.logger.Error("error rendering monitor draft component", "error", err)
+	}
 }
 
 // ActivatePost handles POST /app/monitors/{id}/activate
@@ -224,7 +286,9 @@ func (h *Handlers) ActivatePost(w http.ResponseWriter, r *http.Request, user *mo
 		return
 	}
 
-	sse.Redirectf("/app/monitors/%d", activatedMonitor.ID)
+	if err := sse.Redirectf("/app/monitors/%d", activatedMonitor.ID); err != nil {
+		h.logger.Error("error redirecting after activating monitor", "error", err)
+	}
 }
 
 // CreatePost handles POST /app/monitors/new
@@ -246,10 +310,12 @@ func (h *Handlers) CreatePost(w http.ResponseWriter, r *http.Request, user *mode
 	if err != nil {
 		if validationErrs := validation.MapValidationErrors(err); validationErrs != nil {
 			h.logger.Info("failed validation when creating monitor", "validation_errors", validationErrs)
-			MonitorNewPage(MonitorNewData{
+			if err := MonitorNewPage(MonitorNewData{
 				ValidationErrors: validationErrs,
 				Values:           newMonitor,
-			}).Render(r.Context(), w)
+			}).Render(r.Context(), w); err != nil {
+				h.logger.Error("error rendering monitor new page", "error", err)
+			}
 			return
 		}
 		h.logger.Error("error creating monitor", "error", err)
@@ -317,7 +383,9 @@ func (h *Handlers) Delete(w http.ResponseWriter, r *http.Request, user *models.U
 		return
 	}
 
-	sse.Redirect("/app/monitors")
+	if err := sse.Redirect("/app/monitors"); err != nil {
+		h.logger.Error("error redirecting", "error", err)
+	}
 }
 
 // NotifierPost handles POST /app/monitors/{id}/notifiers/{type}
@@ -442,7 +510,9 @@ func (h *Handlers) ResultFeedbackGet(w http.ResponseWriter, r *http.Request, use
 	}
 
 	comp := monitorResultFeedback(data)
-	sse.PatchElementTempl(comp, datastar.WithSelector("body"), datastar.WithModeAppend())
+	if err := sse.PatchElementTempl(comp, datastar.WithSelector("body"), datastar.WithModeAppend()); err != nil {
+		h.logger.Error("error patching element", "error", err)
+	}
 }
 
 // ResultFeedbackPost handles POST /app/monitors/{id}/results/{result_id}/feedback
@@ -495,7 +565,9 @@ func (h *Handlers) ResultFeedbackPost(w http.ResponseWriter, r *http.Request, us
 			}
 
 			comp := monitorResultFeedbackForm(data)
-			sse.PatchElementTempl(comp)
+			if err := sse.PatchElementTempl(comp); err != nil {
+				h.logger.Error("error patching element", "error", err)
+			}
 
 			return
 		}
@@ -505,28 +577,29 @@ func (h *Handlers) ResultFeedbackPost(w http.ResponseWriter, r *http.Request, us
 	}
 
 	sse := datastar.NewSSE(w, r)
-	sse.Redirect(fmt.Sprintf("/app/monitors/%d", mon.ID))
+	if err := sse.Redirect(fmt.Sprintf("/app/monitors/%d", mon.ID)); err != nil {
+		h.logger.Error("error redirecting", "error", err)
+	}
 }
 
 // monitorIDFromPath extracts monitor ID from the path
 func monitorIDFromPath(r *http.Request) int64 {
-	monitorID, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
-	if err != nil {
-		return 0
-	}
-	return monitorID
+	return idFromPath(r, "monitor_id")
 }
 
 // resultIDFromPath extracts result ID from the path
 func resultIDFromPath(r *http.Request) int64 {
-	resultID, err := strconv.ParseInt(r.PathValue("result_id"), 10, 64)
+	return idFromPath(r, "result_id")
+}
+
+// idFromPath extracts an int64 ID from the path of the request
+func idFromPath(r *http.Request, name string) int64 {
+	id, err := strconv.ParseInt(r.PathValue(name), 10, 64)
 	if err != nil {
 		return 0
 	}
-	return resultID
+	return id
 }
-
-// Helper methods
 
 func (h *Handlers) renderMonitorDraft(
 	ctx context.Context,
@@ -678,4 +751,18 @@ func (h *Handlers) monitorNotifierViewData(ctx context.Context, mon *models.Moni
 	}
 
 	return notifiers, nil
+}
+
+// patchElementTemplFragment sends HTML to the sse stream for the given templ component and fragment
+// TODO: propose upstreaming this to datastar's SDK
+func patchElementTemplFragment(sse *datastar.ServerSentEventGenerator, c templ.Component, fragmentIDs ...any) error {
+	var buf bytes.Buffer
+	err := templ.RenderFragments(sse.Context(), &buf, c, fragmentIDs...)
+	if err != nil {
+		return fmt.Errorf("failed to patch element: %w", err)
+	}
+	if err := sse.PatchElements(buf.String()); err != nil {
+		return fmt.Errorf("failed to patch element: %w", err)
+	}
+	return nil
 }

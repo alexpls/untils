@@ -27,18 +27,19 @@ func (a *app) routes() http.Handler {
 
 	// monitors
 	mux.HandleFunc("GET /app/monitors", a.requireAuth(a.monitorHandlers.ListGet))
+	mux.HandleFunc("GET /app/monitors/events", a.requireAuth(a.monitorHandlers.ListEventsGet))
 	mux.HandleFunc("GET /app/monitors/new", a.requireAuth(a.monitorHandlers.NewGet))
 	mux.HandleFunc("POST /app/monitors/new", a.requireAuth(a.monitorHandlers.CreatePost))
-	mux.HandleFunc("GET /app/monitors/{id}", a.requireAuth(a.monitorHandlers.ViewGet))
-	mux.HandleFunc("GET /app/monitors/{id}/events", a.requireAuth(a.monitorHandlers.ViewEventsGet))
-	mux.HandleFunc("POST /app/monitors/{id}", a.requireAuth(a.monitorHandlers.UpdatePost))
-	mux.HandleFunc("DELETE /app/monitors/{id}", a.requireAuth(a.monitorHandlers.Delete))
-	mux.HandleFunc("POST /app/monitors/{id}/check", a.requireAuth(a.monitorHandlers.CheckPost))
-	mux.HandleFunc("POST /app/monitors/{id}/activate", a.requireAuth(a.monitorHandlers.ActivatePost))
-	mux.HandleFunc("POST /app/monitors/{id}/notifiers/{type}", a.requireAuth(a.monitorHandlers.NotifierPost))
-	mux.HandleFunc("DELETE /app/monitors/{id}/notifiers/{type}", a.requireAuth(a.monitorHandlers.NotifierDelete))
-	mux.HandleFunc("GET /app/monitors/{id}/results/{result_id}/feedback", a.requireAuth(a.monitorHandlers.ResultFeedbackGet))
-	mux.HandleFunc("POST /app/monitors/{id}/results/{result_id}/feedback", a.requireAuth(a.monitorHandlers.ResultFeedbackPost))
+	mux.HandleFunc("GET /app/monitors/{monitor_id}", a.requireAuth(a.monitorHandlers.ViewGet))
+	mux.HandleFunc("GET /app/monitors/{monitor_id}/events", a.requireAuth(a.monitorHandlers.ViewEventsGet))
+	mux.HandleFunc("POST /app/monitors/{monitor_id}", a.requireAuth(a.monitorHandlers.UpdatePost))
+	mux.HandleFunc("DELETE /app/monitors/{monitor_id}", a.requireAuth(a.monitorHandlers.Delete))
+	mux.HandleFunc("POST /app/monitors/{monitor_id}/check", a.requireAuth(a.monitorHandlers.CheckPost))
+	mux.HandleFunc("POST /app/monitors/{monitor_id}/activate", a.requireAuth(a.monitorHandlers.ActivatePost))
+	mux.HandleFunc("POST /app/monitors/{monitor_id}/notifiers/{type}", a.requireAuth(a.monitorHandlers.NotifierPost))
+	mux.HandleFunc("DELETE /app/monitors/{monitor_id}/notifiers/{type}", a.requireAuth(a.monitorHandlers.NotifierDelete))
+	mux.HandleFunc("GET /app/monitors/{monitor_id}/results/{result_id}/feedback", a.requireAuth(a.monitorHandlers.ResultFeedbackGet))
+	mux.HandleFunc("POST /app/monitors/{monitor_id}/results/{result_id}/feedback", a.requireAuth(a.monitorHandlers.ResultFeedbackPost))
 
 	// settings
 	mux.HandleFunc("GET /app/settings", a.requireAuth(a.settingsHandlers.SettingsGet))
@@ -49,7 +50,7 @@ func (a *app) routes() http.Handler {
 	mux.HandleFunc("GET /app/settings/email", a.requireAuth(a.settingsHandlers.EmailSettingsGet))
 
 	// favicon
-	mux.Handle("GET /app/favicon", a.requireAuth2(faviconproxy.Handler()))
+	mux.Handle("GET /app/favicon", a.requireAuth2(faviconproxy.Handler(a.logger.With("source", "faviconproxy"))))
 
 	// middleware
 	csrf := http.NewCrossOriginProtection()

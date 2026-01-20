@@ -3,12 +3,23 @@ package monitor
 import (
 	"fmt"
 
+	"github.com/alexpls/untils/internal/components"
 	"github.com/alexpls/untils/internal/components/app"
-	"github.com/alexpls/untils/internal/db/models"
+	"github.com/alexpls/untils/internal/components/icons"
+	"github.com/alexpls/untils/internal/models"
+	"github.com/alexpls/untils/internal/pagination"
+)
+
+type fragmentName int
+
+const (
+	_ fragmentName = iota
+	monitorListFragment
 )
 
 type MonitorsListData struct {
-	Monitors []*models.Monitor
+	Monitors   []*models.ListMonitorsWithResultsRow
+	Pagination pagination.Pagination
 }
 
 templ monitorListPageActions() {
@@ -23,22 +34,116 @@ templ MonitorsListPage(data MonitorsListData) {
 		{Title: "Monitors", Href: "/app/monitors"},
 	}) {
 		@app.Header("Monitors", monitorListPageActions())
+		@templ.Fragment(monitorListFragment) {
+			@MonitorsList(data)
+		}
+	}
+}
+
+templ MonitorsList(data MonitorsListData) {
+	<div id="monitors-list" data-effect="@get('/app/monitors/events')">
 		if len(data.Monitors) > 0 {
-			<ul class="list px-0 mx-0">
-				for _, mon := range data.Monitors {
-					<li class="list-row">
-						<div>
-							<a class="link link-hover font-semibold" href={ fmt.Sprintf("/app/monitors/%d", mon.ID) }>
-								{ mon.Subject.String }
-							</a>
-						</div>
-					</li>
-				}
-			</ul>
+			<div class="overflow-x-auto">
+				<table class="table">
+					<thead>
+						<tr>
+							<th>Status</th>
+							<th>Subject</th>
+							<th>Result</th>
+							<th>Last change</th>
+							<th>Next check</th>
+							<th>Created</th>
+						</tr>
+					</thead>
+					<tbody>
+						for _, mon := range data.Monitors {
+							<tr class="hover:bg-base-300">
+								<td class="min-w-30">
+									<div class="badge badge-soft badge-success">
+										<div aria-label="success" class="status status-success"></div>
+										Monitoring
+									</div>
+								</td>
+								<td class="min-w-70">
+									<a class="link link-hover font-semibold line-clamp-2" href={ fmt.Sprintf("/app/monitors/%d", mon.MonitorID) }>
+										{ mon.Subject }
+									</a>
+								</td>
+								<td class="min-w-70">
+									if mon.LatestResult != "" {
+										<div class="line-clamp-2">
+											{ mon.LatestResult }
+										</div>
+										if !mon.LatestResultDate.IsZero() {
+											<div class="text-muted">
+												if mon.LatestResultDatePastTenseVerb != "" {
+													{ mon.LatestResultDatePastTenseVerb }
+												}
+												{ components.FormatDate(ctx, mon.LatestResultDate) }
+											</div>
+										}
+									} else {
+										@noneSpan()
+									}
+								</td>
+								<td class="text-muted min-w-38">
+									if !mon.LatestResultCreatedAt.IsZero() {
+										@components.TimeAgo(fmt.Sprintf("latestResultCreatedAt%d", mon.MonitorID), mon.LatestResultCreatedAt)
+									} else {
+										@noneSpan()
+									}
+								</td>
+								<td class="text-muted min-w-38">
+									if mon.CurrentlyChecking {
+										<div class="flex items-center">
+											@icons.Loader(icons.IconParams{
+												Size:    15,
+												Classes: templ.Classes("animate-spin mr-1"),
+											})
+											Checking&hellip;
+										</div>
+									} else {
+										if !mon.NextCheckScheduledFor.IsZero() {
+											@components.TimeAgo(fmt.Sprintf("monitorNextCheckScheduledFor%d", mon.MonitorID), mon.NextCheckScheduledFor)
+										} else {
+											@noneSpan()
+										}
+									}
+								</td>
+								<td class="text-muted min-w-38">
+									@components.TimeAgo(fmt.Sprintf("monitorCreatedAt%d", mon.MonitorID), mon.CreatedAt)
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+			<div class="flex items-center py-12">
+				<div class="join mx-auto">
+					<a
+						class={ "join-item", "btn", templ.KV("btn-disabled", !data.Pagination.HasPrev()) }
+						href={ "?" + data.Pagination.PrevPageParams().Encode() }
+					>
+						@icons.ArrowLeft(icons.IconParams{Size: 15})
+						Prev page
+					</a>
+					<a
+						class={ "join-item", "btn", templ.KV("btn-disabled", !data.Pagination.HasNext()) }
+						href={ "?" + data.Pagination.NextPageParams().Encode() }
+					>
+						Next page
+						@icons.ArrowRight(icons.IconParams{Size: 15})
+					</a>
+				</div>
+			</div>
 		} else {
 			<div class="p-4">
 				No monitors to show.
 			</div>
 		}
-	}
+	</div>
+}
+
+templ noneSpan() {
+	<span class="text-muted">(none)</span>
 }

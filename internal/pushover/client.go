@@ -121,7 +121,7 @@ func (c *Client) sendRequest(url string, payload any) (*PushoverResponse, error)
 	if err != nil {
 		return nil, fmt.Errorf("sending request: %w", err)
 	}
-	defer res.Body.Close()
+	defer res.Body.Close() // nolint:errcheck
 
 	c.logger.Info("pushover: request sent",
 		"duration_ms", time.Since(start).Milliseconds(),

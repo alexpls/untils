@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/alexpls/untils/internal/browser"
-	"github.com/alexpls/untils/internal/db/models"
+	"github.com/alexpls/untils/internal/models"
 	"github.com/openai/openai-go/v3"
 	"github.com/openai/openai-go/v3/responses"
 )

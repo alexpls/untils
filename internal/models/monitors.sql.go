@@ -686,29 +686,80 @@ func (q *Queries) ListMonitorResults(ctx context.Context, db DBTX, monitorID int
 	return items, nil
 }
 
-const listMonitors = `-- name: ListMonitors :many
-select id, user_id, status, subject, rejected_reason, updated_at, created_at from monitors
-where user_id = $1 and status = 'active'
-order by created_at desc
+const listMonitorsWithResults = `-- name: ListMonitorsWithResults :many
+with latest_result as (
+    select distinct on (monitor_id) monitor_id, result, date, date_past_tense_verb, created_at
+    from monitor_results
+    order by monitor_id, created_at desc
+),
+next_check as (
+    select distinct on (monitor_id) monitor_id, scheduled_for
+    from monitor_checks
+    where status in ('scheduled')
+    order by monitor_id, scheduled_for desc
+),
+current_check as (
+    select distinct on (monitor_id) monitor_id
+    from monitor_checks
+    where status = 'checking'
+    order by monitor_id, scheduled_for desc
+)
+select
+    m.id as monitor_id,
+    m.subject::text as subject,
+    m.created_at,
+    coalesce(mr.result, '') as latest_result,
+    coalesce(mr.date, '0001-01-01 00:00:00 +0000') as latest_result_date,
+    coalesce(mr.date_past_tense_verb, '') as latest_result_date_past_tense_verb,
+    coalesce(mr.created_at, '0001-01-01 00:00:00 +0000') as latest_result_created_at,
+    coalesce(mc.scheduled_for, '0001-01-01 00:00:00 +0000') as next_check_scheduled_for,
+    (cc.monitor_id is not null)::boolean as currently_checking
+from monitors m
+left join latest_result mr on mr.monitor_id = m.id
+left join next_check mc on mc.monitor_id = m.id
+left join current_check cc on cc.monitor_id = m.id
+where m.user_id = $1 and m.status = 'active'
+order by mr.created_at desc
+limit $3 offset $2
 `
 
-func (q *Queries) ListMonitors(ctx context.Context, db DBTX, userID int64) ([]*Monitor, error) {
-	rows, err := db.Query(ctx, listMonitors, userID)
+type ListMonitorsWithResultsParams struct {
+	UserID    int64
+	RowOffset int32
+	PageSize  int32
+}
+
+type ListMonitorsWithResultsRow struct {
+	MonitorID                     int64
+	Subject                       string
+	CreatedAt                     time.Time
+	LatestResult                  string
+	LatestResultDate              time.Time
+	LatestResultDatePastTenseVerb string
+	LatestResultCreatedAt         time.Time
+	NextCheckScheduledFor         time.Time
+	CurrentlyChecking             bool
+}
+
+func (q *Queries) ListMonitorsWithResults(ctx context.Context, db DBTX, arg *ListMonitorsWithResultsParams) ([]*ListMonitorsWithResultsRow, error) {
+	rows, err := db.Query(ctx, listMonitorsWithResults, arg.UserID, arg.RowOffset, arg.PageSize)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []*Monitor
+	var items []*ListMonitorsWithResultsRow
 	for rows.Next() {
-		var i Monitor
+		var i ListMonitorsWithResultsRow
 		if err := rows.Scan(
-			&i.ID,
-			&i.UserID,
-			&i.Status,
+			&i.MonitorID,
 			&i.Subject,
-			&i.RejectedReason,
-			&i.UpdatedAt,
 			&i.CreatedAt,
+			&i.LatestResult,
+			&i.LatestResultDate,
+			&i.LatestResultDatePastTenseVerb,
+			&i.LatestResultCreatedAt,
+			&i.NextCheckScheduledFor,
+			&i.CurrentlyChecking,
 		); err != nil {
 			return nil, err
 		}

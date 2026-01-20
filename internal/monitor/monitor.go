@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/alexpls/untils/internal/db"
-	"github.com/alexpls/untils/internal/db/models"
 	"github.com/alexpls/untils/internal/llm"
+	"github.com/alexpls/untils/internal/models"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 )
