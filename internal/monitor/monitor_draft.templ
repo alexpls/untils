@@ -1,6 +1,7 @@
 package monitor
 
 import (
+	"fmt"
 	"github.com/alexpls/untils/internal/components"
 	"github.com/alexpls/untils/internal/components/app"
 	"github.com/alexpls/untils/internal/components/icons"
@@ -62,12 +63,12 @@ templ MonitorDraftView(data MonitorDraftData) {
 						data-computed:subject="$_subject.current"
 						data-on:focus="$_subject.updating = true"
 						data-on:blur="$_subject.updating = false"
-						data-on:keydown="
-								if (evt.key === 'Enter') {
-									evt.preventDefault();
-									el.form.submit();
-								}
-							"
+						data-on:keydown={ fmt.Sprintf(`
+							if (evt.key === 'Enter') {
+								evt.preventDefault();
+								@post('/app/monitors/%d')
+							}
+						`, data.Monitor.ID) }
 					>{ data.Monitor.Subject.String }</textarea>
 					if err := components.ValidationError(data, "Subject"); err != "" {
 						<p class="label text-error mt-1">{ err }</p>

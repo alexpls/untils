@@ -20,7 +20,6 @@
 - [ ] Fix: all pages responding with SSE events should send an event as soon as a connection occurs, this is to support people refreshing page or navigating back to the page.
 - [ ] Fix: Did i break feedback?
 - [ ] Fix: when timeago is "5 hours 59 minutes in the future" it will return "in 5 hours", when it should really round to the nearest hour and return "in 6 hours"
-- [ ] Fix: hitting "enter" when correcting a rejection reason resets the input
 - [ ] Fix: draft monitors should show up on monitor page as drafts
 - [ ] Improvement: should be able to checkpoint progress in conversation with LLM and resume it on server restart
 
@@ -28,6 +27,7 @@
 
 ## Done
 
+- [x] Fix: hitting "enter" when correcting a rejection reason resets the input
 - [x] Should stop jobs being considered "stuck" prematurely: https://github.com/riverqueue/river/issues/1125
 - [x] Fix: Refreshing the monitor draft page while a monitor is in 'previewing' status returns 500 (page refresh triggers a POST that attempts invalid transition from 'previewing' to 'validating')
 - [x] Fix: why does it take so long to browse sites? Doesn't seem right...
