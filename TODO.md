@@ -23,10 +23,9 @@
 
 ## Watching
 
-- [ ] Should stop jobs being considered "stuck" prematurely: https://github.com/riverqueue/river/issues/1125
-
 ## Done
 
+- [x] Should stop jobs being considered "stuck" prematurely: https://github.com/riverqueue/river/issues/1125
 - [x] Fix: Refreshing the monitor draft page while a monitor is in 'previewing' status returns 500 (page refresh triggers a POST that attempts invalid transition from 'previewing' to 'validating')
 - [x] Fix: why does it take so long to browse sites? Doesn't seem right...
 - [x] Feature: Monitors list page pagination
