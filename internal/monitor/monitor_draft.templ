@@ -222,6 +222,14 @@ templ MonitorDraftView(data MonitorDraftData) {
 				</button>
 			</div>
 		}
+		<div class="py-12 text-center">
+			<button
+				data-on:click={ datastar.DeleteSSE("/app/monitors/%d", data.Monitor.ID) }
+				class="text-sm link link-hover"
+			>
+				Discard this draft
+			</button>
+		</div>
 	</div>
 }
 

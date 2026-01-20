@@ -706,6 +706,7 @@ current_check as (
 )
 select
     m.id as monitor_id,
+    m.status,
     m.subject::text as subject,
     m.created_at,
     coalesce(mr.result, '') as latest_result,
@@ -718,7 +719,7 @@ from monitors m
 left join latest_result mr on mr.monitor_id = m.id
 left join next_check mc on mc.monitor_id = m.id
 left join current_check cc on cc.monitor_id = m.id
-where m.user_id = $1 and m.status = 'active'
+where m.user_id = $1
 order by mr.created_at desc
 limit $3 offset $2
 `
@@ -731,6 +732,7 @@ type ListMonitorsWithResultsParams struct {
 
 type ListMonitorsWithResultsRow struct {
 	MonitorID                     int64
+	Status                        MonitorStatus
 	Subject                       string
 	CreatedAt                     time.Time
 	LatestResult                  string
@@ -752,6 +754,7 @@ func (q *Queries) ListMonitorsWithResults(ctx context.Context, db DBTX, arg *Lis
 		var i ListMonitorsWithResultsRow
 		if err := rows.Scan(
 			&i.MonitorID,
+			&i.Status,
 			&i.Subject,
 			&i.CreatedAt,
 			&i.LatestResult,

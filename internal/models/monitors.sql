@@ -18,6 +18,7 @@ current_check as (
 )
 select
     m.id as monitor_id,
+    m.status,
     m.subject::text as subject,
     m.created_at,
     coalesce(mr.result, '') as latest_result,
@@ -30,7 +31,7 @@ from monitors m
 left join latest_result mr on mr.monitor_id = m.id
 left join next_check mc on mc.monitor_id = m.id
 left join current_check cc on cc.monitor_id = m.id
-where m.user_id = @user_id and m.status = 'active'
+where m.user_id = @user_id
 order by mr.created_at desc
 limit @page_size offset @row_offset;
 
