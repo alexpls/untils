@@ -79,6 +79,8 @@ In order to achieve this you will use two tools:
   establish the format that you should respond in, and whether the value has changed.
 - If the previous value and the current value of your check are the same, then
   there has been no change. Respond with exactly the same value as before.
+- DO NOT respond with answers like "No change detected" if there is already a previous
+  result. When there has been no change, just return the previous result again.
 
 ## Response output rules
 

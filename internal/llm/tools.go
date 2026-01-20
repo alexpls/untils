@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/alexpls/untils/internal/browser"
 	"github.com/alexpls/untils/internal/models"
@@ -78,14 +79,25 @@ var browserNavigateTool = tool[browserNavigateParams]{
 	name:        "browser_navigate",
 	description: "Use a web browser to navigate to the given URL and retrieve the page contents",
 	execute: func(tc *toolContext, p browserNavigateParams) (string, error) {
+		tc.service.logger.Debug("browser_navigate started", "url", p.URL)
+		start := time.Now()
+
 		llmEvent, _ := wideevents.GetOrCreateFromContext(tc.ctx, newLLMEvent)
 		llmEvent.addSiteVisited(p.URL)
 
+		getBrowserStart := time.Now()
 		b := tc.browser()
+		tc.service.logger.Debug("browser_navigate got browser context", "duration", time.Since(getBrowserStart))
+
+		navigateStart := time.Now()
 		res, err := b.Navigate(p.URL)
+		tc.service.logger.Debug("browser_navigate navigation completed", "duration", time.Since(navigateStart))
+
 		if err != nil {
 			return "", err
 		}
+
+		tc.service.logger.Debug("browser_navigate completed", "url", p.URL, "total_duration", time.Since(start))
 		return res.String(), nil
 	},
 	checkEvent: func(tc *toolContext, params browserNavigateParams) CheckEvent {
@@ -106,12 +118,20 @@ var browserClickTool = tool[browserClickParams]{
 	name:        "browser_click",
 	description: "Use a web browser to click on an element on the current page, identified by its unique ID (e.g. [learn more](click:123) - the ID is 123)",
 	execute: func(tc *toolContext, p browserClickParams) (string, error) {
+		tc.service.logger.Debug("browser_click started", "node_id", p.NodeID)
+		start := time.Now()
+
 		b := tc.browser()
+		clickStart := time.Now()
 		page, err := b.Click(p.NodeID)
+		tc.service.logger.Debug("browser_click click completed", "duration", time.Since(clickStart))
+
 		if err != nil {
 			tc.service.logger.Error("error performing click", "node_id", p.NodeID, "error", err)
 			return "", err
 		}
+
+		tc.service.logger.Debug("browser_click completed", "node_id", p.NodeID, "total_duration", time.Since(start))
 		return page.String(), nil
 	},
 	checkEvent: func(tc *toolContext, params browserClickParams) CheckEvent {
@@ -130,7 +150,12 @@ var searchTool = tool[searchParams]{
 	name:        "search_request",
 	description: "Use a web search engine to search for the given query and retrieve relevant results",
 	execute: func(tc *toolContext, p searchParams) (string, error) {
+		tc.service.logger.Debug("search_request started", "query", p.Query)
+		start := time.Now()
+
 		res, err := tc.service.webSearcher.Search(search.NewSearchParams(p.Query))
+		tc.service.logger.Debug("search_request search completed", "duration", time.Since(start))
+
 		if err != nil {
 			return "", fmt.Errorf("performing search: %w", err)
 		}
@@ -141,6 +166,7 @@ var searchTool = tool[searchParams]{
 			sb.WriteString("- " + result.String() + "\n")
 		}
 
+		tc.service.logger.Debug("search_request completed", "query", p.Query, "total_duration", time.Since(start))
 		return sb.String(), nil
 	},
 	checkEvent: func(tc *toolContext, params searchParams) CheckEvent {

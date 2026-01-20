@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/alexpls/untils/internal/browser"
 	"github.com/alexpls/untils/internal/models"
@@ -29,12 +30,16 @@ func newChecker(service *Service, c EventsChan) *checker {
 var checkerPrompt string
 
 func (c *checker) perform(ctx context.Context, params *CheckParams) (*models.CheckResult, error) {
+	workflowStart := time.Now()
+	c.service.logger.Debug("checker workflow started")
+
 	var previousResult *models.GetPreviousResultsWithCheckRow
 	if len(params.PreviousResults) > 0 {
 		previousResult = params.PreviousResults[0]
 	}
 
 	defer func() {
+		c.service.logger.Debug("checker workflow completed", "total_duration", time.Since(workflowStart))
 		if c.browserCancel != nil {
 			c.browserCancel()
 		}
@@ -55,9 +60,12 @@ func (c *checker) perform(ctx context.Context, params *CheckParams) (*models.Che
 			return nil, fmt.Errorf("exceeded max turns: %w", err)
 		}
 		turn++
+		turnStart := time.Now()
+		c.service.logger.Debug("starting turn", "turn", turn)
 
+		llmStart := time.Now()
 		resp, err = c.service.response(ctx, responses.ResponseNewParams{
-			Model: "grok-4-1-fast-reasoning",
+			Model: model,
 			Input: inputItems(c.messages...),
 			Text:  jsonSchemaResponse(models.CheckResult{}),
 			Tools: []responses.ToolUnionParam{
@@ -67,9 +75,12 @@ func (c *checker) perform(ctx context.Context, params *CheckParams) (*models.Che
 			},
 			ParallelToolCalls: openai.Bool(false),
 		})
+		c.service.logger.Debug("LLM response received", "turn", turn, "duration", time.Since(llmStart))
 
 		if len(resp.toolCalls) > 0 {
+			toolsStart := time.Now()
 			c.callTools(ctx, resp.toolCalls)
+			c.service.logger.Debug("turn completed with tool calls", "turn", turn, "tools_duration", time.Since(toolsStart), "turn_duration", time.Since(turnStart))
 			continue
 		}
 
@@ -107,13 +118,18 @@ func (c *checker) callTools(ctx context.Context, toolCalls []responses.ResponseF
 }
 
 func (c *checker) callTool(ctx context.Context, name string, args string) (string, error) {
+	toolStart := time.Now()
+	c.service.logger.Debug("tool call started", "tool", name)
+
 	tc := &toolContext{
 		ctx:     ctx,
 		service: c.service,
 		browser: func() *browser.BrowserCtx {
 			if c.browserCtx == nil {
+				browserInitStart := time.Now()
 				bctx, bcancel := browser.NewBrowser(ctx, c.service.logger)
 				c.browserCtx, c.browserCancel = &bctx, bcancel
+				c.service.logger.Debug("browser context initialized", "duration", time.Since(browserInitStart))
 			}
 			return c.browserCtx
 		},
@@ -134,7 +150,9 @@ func (c *checker) callTool(ctx context.Context, name string, args string) (strin
 	default:
 	}
 
-	return tool.call()
+	result, err := tool.call()
+	c.service.logger.Debug("tool call completed", "tool", name, "duration", time.Since(toolStart))
+	return result, err
 }
 
 func sameResultStr(a, b string) bool {

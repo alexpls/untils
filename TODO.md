@@ -21,7 +21,6 @@
 - [ ] Fix: all pages responding with SSE events should send an event as soon as a connection occurs, this is to support people refreshing page or navigating back to the page.
 - [ ] Fix: Did i break feedback?
 - [ ] Fix: when timeago is "5 hours 59 minutes in the future" it will return "in 5 hours", when it should really round to the nearest hour and return "in 6 hours"
-- [ ] Fix: why does it take so long to browse sites? Doesn't seem right...
 
 ## Watching
 
@@ -29,6 +28,7 @@
 
 ## Done
 
+- [x] Fix: why does it take so long to browse sites? Doesn't seem right...
 - [x] Feature: Monitors list page pagination
 - [x] Refactor: in paths, instead of "id" for the monitor id it should always be "monitor_id". In other words, IDs in paths should be identifiable.
 - [x] Feature: "create new monitor" quicklink on dashboard

@@ -56,6 +56,7 @@ func NewBrowser(parentCtx context.Context, logger *slog.Logger) (BrowserCtx, con
 }
 
 func (ctx *BrowserCtx) Click(idStr string) (*Page, error) {
+	start := time.Now()
 	ctx.logger.Debug("clicking node", slog.String("id", idStr))
 
 	id, err := strconv.ParseInt(idStr, 10, 64)
@@ -68,6 +69,7 @@ func (ctx *BrowserCtx) Click(idStr string) (*Page, error) {
 	// Other approaches would mean pushing the node into the frontend, which
 	// is more complex.
 	// Still, there must be an easier way?
+	clickActionStart := time.Now()
 	if err := chromedp.Run(ctx,
 		chromedp.ActionFunc(func(ctx context.Context) error {
 			remoteObj, err := dom.ResolveNode().WithBackendNodeID(backendNodeID).Do(ctx)
@@ -84,20 +86,25 @@ func (ctx *BrowserCtx) Click(idStr string) (*Page, error) {
 	); err != nil {
 		return nil, fmt.Errorf("clicking node: %w", err)
 	}
+	ctx.logger.Debug("click action and network idle completed", "duration", time.Since(clickActionStart))
 
+	pageResultStart := time.Now()
 	page, err := pageResult(ctx)
 	if err != nil {
 		return nil, err
 	}
+	ctx.logger.Debug("page result extracted after click", "duration", time.Since(pageResultStart))
 
-	ctx.logger.Debug("clicked node", slog.String("id", idStr), slog.String("new_url", page.URL))
+	ctx.logger.Debug("clicked node", slog.String("id", idStr), slog.String("new_url", page.URL), "total_duration", time.Since(start))
 
 	return page, nil
 }
 
 func (ctx *BrowserCtx) Navigate(path string) (*Page, error) {
+	start := time.Now()
 	ctx.logger.Debug("navigating to page", slog.String("url", path))
 
+	navigateStart := time.Now()
 	if err := chromedp.Run(ctx,
 		accessibility.Enable(),
 		emulation.SetEmulatedMedia().WithMedia("print"),
@@ -106,18 +113,29 @@ func (ctx *BrowserCtx) Navigate(path string) (*Page, error) {
 	); err != nil {
 		return nil, err
 	}
+	ctx.logger.Debug("navigation and network idle completed", "duration", time.Since(navigateStart))
 
-	return pageResult(ctx)
+	pageResultStart := time.Now()
+	page, err := pageResult(ctx)
+	if err != nil {
+		return nil, err
+	}
+	ctx.logger.Debug("page result extracted", "duration", time.Since(pageResultStart), "total_duration", time.Since(start))
+
+	return page, nil
 }
 
 func pageResult(ctx *BrowserCtx) (*Page, error) {
+	start := time.Now()
 	var urlStr string
 
+	locationStart := time.Now()
 	if err := chromedp.Run(ctx,
 		chromedp.Location(&urlStr),
 	); err != nil {
 		return nil, err
 	}
+	ctx.logger.Debug("got page location", "duration", time.Since(locationStart))
 
 	u, err := url.Parse(urlStr)
 	if err != nil {
@@ -128,6 +146,7 @@ func pageResult(ctx *BrowserCtx) (*Page, error) {
 	var tree axTree
 	var f string
 
+	pageDataStart := time.Now()
 	if err := chromedp.Run(ctx,
 		tidyHTML(u),
 		chromedp.Title(&title),
@@ -136,8 +155,13 @@ func pageResult(ctx *BrowserCtx) (*Page, error) {
 	); err != nil {
 		return nil, err
 	}
+	ctx.logger.Debug("got page data (tidy, title, favicon, accessibility tree)", "duration", time.Since(pageDataStart))
 
+	treeStringStart := time.Now()
 	pageContents := tree.String()
+	ctx.logger.Debug("accessibility tree stringified", "duration", time.Since(treeStringStart), "content_length", len(pageContents))
+
+	ctx.logger.Debug("page result completed", "total_duration", time.Since(start))
 
 	return &Page{
 		URL:        urlStr,
