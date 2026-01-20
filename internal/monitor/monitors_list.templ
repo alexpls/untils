@@ -86,14 +86,14 @@ templ MonitorsList(data MonitorsListData) {
 										@noneSpan()
 									}
 								</td>
-								<td class="text-muted min-w-38">
+								<td class="text-muted min-w-38 tabular-nums">
 									if !mon.LatestResultCreatedAt.IsZero() {
 										@components.TimeAgo(fmt.Sprintf("latestResultCreatedAt%d", mon.MonitorID), mon.LatestResultCreatedAt)
 									} else {
 										@noneSpan()
 									}
 								</td>
-								<td class="text-muted min-w-38">
+								<td class="text-muted min-w-38 tabular-nums">
 									if mon.CurrentlyChecking {
 										<div class="flex items-center">
 											@icons.Loader(icons.IconParams{
@@ -110,7 +110,7 @@ templ MonitorsList(data MonitorsListData) {
 										}
 									}
 								</td>
-								<td class="text-muted min-w-38">
+								<td class="text-muted min-w-38 tabular-nums">
 									@components.TimeAgo(fmt.Sprintf("monitorCreatedAt%d", mon.MonitorID), mon.CreatedAt)
 								</td>
 							</tr>
