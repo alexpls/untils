@@ -160,40 +160,40 @@ func (h *Handlers) ViewEventsGet(w http.ResponseWriter, r *http.Request, user *m
 	ch := h.events.SubscribeMonitor(sse.Context(), mon.ID)
 
 	for {
-		select {
-		case <-ch:
-			mon, err = h.service.GetMonitor(sse.Context(), user.ID, monitorID)
+		mon, err = h.service.GetMonitor(sse.Context(), user.ID, monitorID)
+		if err != nil {
+			h.logger.Error("error refreshing monitor", "error", err)
+			return
+		}
+
+		var comp templ.Component
+
+		switch mon.Status {
+		case models.MonitorStatusActive:
+			data, err := h.monitorViewData(sse.Context(), mon, user.ID)
 			if err != nil {
-				h.logger.Error("error refreshing monitor", "error", err)
+				h.logger.Error("error rendering monitor view", "error", err)
 				return
 			}
 
-			var comp templ.Component
+			comp = MonitorView(data)
 
-			switch mon.Status {
-			case models.MonitorStatusActive:
-				data, err := h.monitorViewData(sse.Context(), mon, user.ID)
-				if err != nil {
-					h.logger.Error("error rendering monitor view", "error", err)
-					return
-				}
-
-				comp = MonitorView(data)
-
-			default:
-				data, err := h.monitorDraftViewData(sse.Context(), mon, user.ID, NewUpdateMonitorDraftParams(mon), nil)
-				if err != nil {
-					h.logger.Error("error rendering monitor draft view", "error", err)
-					return
-				}
-
-				comp = MonitorDraftView(data)
+		default:
+			data, err := h.monitorDraftViewData(sse.Context(), mon, user.ID, NewUpdateMonitorDraftParams(mon), nil)
+			if err != nil {
+				h.logger.Error("error rendering monitor draft view", "error", err)
+				return
 			}
 
-			if err := sse.PatchElementTempl(comp); err != nil {
-				h.logger.Error("error sending monitor view events SSE patch", "error", err)
-			}
+			comp = MonitorDraftView(data)
+		}
 
+		if err := sse.PatchElementTempl(comp); err != nil {
+			h.logger.Error("error sending monitor view events SSE patch", "error", err)
+		}
+
+		select {
+		case <-ch:
 		case <-sse.Context().Done():
 			return
 		}

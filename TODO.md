@@ -17,7 +17,6 @@
 - [ ] Feature: handle future dates better. At the moment with the 'past tense' date requirement, release dates are referred to in the past tense, even though they haven't happened yet.
 - [ ] Feature: "fire and forget" way to set up monitors, if you don't wanna sit around waiting to confirm that the first check looks good
 - [ ] Fix: don't allow changing the subject while monitor is previewing. That's an invalid status transition.
-- [ ] Fix: all pages responding with SSE events should send an event as soon as a connection occurs, this is to support people refreshing page or navigating back to the page.
 - [ ] Fix: Did i break feedback?
 - [ ] Fix: when timeago is "5 hours 59 minutes in the future" it will return "in 5 hours", when it should really round to the nearest hour and return "in 6 hours"
 - [ ] Fix: draft monitors should show up on monitor page as drafts
@@ -27,6 +26,7 @@
 
 ## Done
 
+- [x] Fix: all pages responding with SSE events should send an event as soon as a connection occurs, this is to support people refreshing page or navigating back to the page.
 - [x] Fix: hitting "enter" when correcting a rejection reason resets the input
 - [x] Should stop jobs being considered "stuck" prematurely: https://github.com/riverqueue/river/issues/1125
 - [x] Fix: Refreshing the monitor draft page while a monitor is in 'previewing' status returns 500 (page refresh triggers a POST that attempts invalid transition from 'previewing' to 'validating')
