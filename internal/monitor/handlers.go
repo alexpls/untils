@@ -755,11 +755,10 @@ func (h *Handlers) monitorNotifierViewData(ctx context.Context, mon *models.Moni
 }
 
 // patchElementTemplFragment sends HTML to the sse stream for the given templ component and fragment
-// TODO: propose upstreaming this to datastar's SDK
+// TODO: trying to upstream: https://github.com/starfederation/datastar-go/issues/14
 func patchElementTemplFragment(sse *datastar.ServerSentEventGenerator, c templ.Component, fragmentIDs ...any) error {
 	var buf bytes.Buffer
-	err := templ.RenderFragments(sse.Context(), &buf, c, fragmentIDs...)
-	if err != nil {
+	if err := templ.RenderFragments(sse.Context(), &buf, c, fragmentIDs...); err != nil {
 		return fmt.Errorf("failed to patch element: %w", err)
 	}
 	if err := sse.PatchElements(buf.String()); err != nil {
