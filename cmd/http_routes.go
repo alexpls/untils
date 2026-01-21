@@ -41,6 +41,10 @@ func (a *app) routes() http.Handler {
 	mux.HandleFunc("GET /app/monitors/{monitor_id}/results/{result_id}/feedback", a.requireAuth(a.monitorHandlers.ResultFeedbackGet))
 	mux.HandleFunc("POST /app/monitors/{monitor_id}/results/{result_id}/feedback", a.requireAuth(a.monitorHandlers.ResultFeedbackPost))
 
+	// checks
+	mux.HandleFunc("GET /app/checks", a.requireAuth(a.monitorHandlers.ChecksListGet))
+	mux.HandleFunc("GET /app/checks/events", a.requireAuth(a.monitorHandlers.ChecksListEventsGet))
+
 	// settings
 	mux.HandleFunc("GET /app/settings", a.requireAuth(a.settingsHandlers.SettingsGet))
 	mux.HandleFunc("POST /app/settings/timezone", a.requireAuth(a.settingsHandlers.UpdateTimezonePost))

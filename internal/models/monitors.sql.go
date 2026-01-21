@@ -530,6 +530,63 @@ func (q *Queries) GetPreviousResultsWithCheck(ctx context.Context, db DBTX, moni
 	return items, nil
 }
 
+const listChecksWithMonitor = `-- name: ListChecksWithMonitor :many
+select
+    mc.id as check_id,
+    mc.monitor_id,
+    mc.status,
+    mc.scheduled_for,
+    mc.done_at,
+    m.subject::text as monitor_subject
+from monitor_checks mc
+join monitors m on m.id = mc.monitor_id
+where m.user_id = $1
+order by mc.scheduled_for desc
+limit $3 offset $2
+`
+
+type ListChecksWithMonitorParams struct {
+	UserID    int64
+	RowOffset int32
+	PageSize  int32
+}
+
+type ListChecksWithMonitorRow struct {
+	CheckID        int64
+	MonitorID      int64
+	Status         MonitorCheckStatus
+	ScheduledFor   time.Time
+	DoneAt         *time.Time
+	MonitorSubject string
+}
+
+func (q *Queries) ListChecksWithMonitor(ctx context.Context, db DBTX, arg *ListChecksWithMonitorParams) ([]*ListChecksWithMonitorRow, error) {
+	rows, err := db.Query(ctx, listChecksWithMonitor, arg.UserID, arg.RowOffset, arg.PageSize)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []*ListChecksWithMonitorRow
+	for rows.Next() {
+		var i ListChecksWithMonitorRow
+		if err := rows.Scan(
+			&i.CheckID,
+			&i.MonitorID,
+			&i.Status,
+			&i.ScheduledFor,
+			&i.DoneAt,
+			&i.MonitorSubject,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listMonitorActivity = `-- name: ListMonitorActivity :many
 select
     mon.id::bigint as monitor_id,

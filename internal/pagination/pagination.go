@@ -35,6 +35,12 @@ func (p Pagination) PrevPageParams() url.Values {
 	return u
 }
 
+func (p Pagination) CurrentPageParams() url.Values {
+	u := url.Values{}
+	u.Set("page", strconv.Itoa(p.CurrentPage))
+	return u
+}
+
 func (p Pagination) Offset() int {
 	return p.PageSize * p.CurrentPage
 }

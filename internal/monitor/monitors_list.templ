@@ -41,7 +41,7 @@ templ MonitorsListPage(data MonitorsListData) {
 }
 
 templ MonitorsList(data MonitorsListData) {
-	<div id="monitors-list" data-effect="@get('/app/monitors/events')">
+	<div id="monitors-list" data-effect={ fmt.Sprintf("@get('/app/monitors/events?%s')", data.Pagination.CurrentPageParams().Encode()) }>
 		if len(data.Monitors) > 0 {
 			<div class="overflow-x-auto">
 				<table class="table">

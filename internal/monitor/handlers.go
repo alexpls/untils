@@ -106,6 +106,71 @@ func (h *Handlers) renderMonitorList(r *http.Request, user *models.User) (templ.
 	}), nil
 }
 
+// ChecksListGet handles GET /app/checks
+func (h *Handlers) ChecksListGet(w http.ResponseWriter, r *http.Request, user *models.User) {
+	comp, err := h.renderChecksList(r, user)
+	if err != nil {
+		h.logger.Error("error rendering checks list", "error", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	if err := comp.Render(r.Context(), w); err != nil {
+		h.logger.Error("error rendering checks list", "error", err)
+	}
+}
+
+// ChecksListEventsGet handles GET /app/checks/events (SSE)
+func (h *Handlers) ChecksListEventsGet(w http.ResponseWriter, r *http.Request, user *models.User) {
+	sse := datastar.NewSSE(w, r)
+	ch := h.events.SubscribeUser(sse.Context(), user.ID)
+
+	for {
+		comp, err := h.renderChecksList(r, user)
+		if err != nil {
+			h.logger.Error("error rendering checks list", "error", err)
+			return
+		}
+		if err := patchElementTemplFragment(sse, comp, checksListFragment); err != nil {
+			h.logger.Error("error sending checks list SSE patch", "error", err)
+			return
+		}
+
+		select {
+		case <-ch:
+		case <-sse.Context().Done():
+			return
+		}
+	}
+}
+
+func (h *Handlers) renderChecksList(r *http.Request, user *models.User) (templ.Component, error) {
+	pag := pagination.PaginationFromRequest(r, 30)
+
+	checks, err := h.queries.ListChecksWithMonitor(
+		r.Context(),
+		h.pool,
+		&models.ListChecksWithMonitorParams{
+			UserID:    user.ID,
+			PageSize:  int32(pag.PageSizeWithPeek()),
+			RowOffset: int32(pag.Offset()),
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(checks) == pag.PageSizeWithPeek() {
+		checks = checks[:pag.PageSize]
+		pag.HasMore = true
+	}
+
+	return ChecksListPage(ChecksListData{
+		Checks:     checks,
+		Pagination: pag,
+	}), nil
+}
+
 // ViewGet handles GET /app/monitors/{id}
 func (h *Handlers) ViewGet(w http.ResponseWriter, r *http.Request, user *models.User) {
 	monitorID := monitorIDFromPath(r)

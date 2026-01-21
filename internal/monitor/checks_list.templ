@@ -1,0 +1,129 @@
+package monitor
+
+import (
+	"fmt"
+
+	"github.com/alexpls/untils/internal/components"
+	"github.com/alexpls/untils/internal/components/app"
+	"github.com/alexpls/untils/internal/components/icons"
+	"github.com/alexpls/untils/internal/models"
+	"github.com/alexpls/untils/internal/pagination"
+)
+
+const (
+	checksListFragment fragmentName = iota + 100
+)
+
+type ChecksListData struct {
+	Checks     []*models.ListChecksWithMonitorRow
+	Pagination pagination.Pagination
+}
+
+templ ChecksListPage(data ChecksListData) {
+	@app.AppLayout([]app.Breadcrumb{
+		{Title: "Dashboard", Href: "/app"},
+		{Title: "Checks", Href: "/app/checks"},
+	}) {
+		@app.Header("Checks", nil)
+		@templ.Fragment(checksListFragment) {
+			@ChecksList(data)
+		}
+	}
+}
+
+templ ChecksList(data ChecksListData) {
+	<div id="checks-list" data-effect={ fmt.Sprintf("@get('/app/checks/events?%s')", data.Pagination.CurrentPageParams().Encode()) }>
+		if len(data.Checks) > 0 {
+			<div class="overflow-x-auto">
+				<table class="table">
+					<thead>
+						<tr>
+							<th>Status</th>
+							<th>Monitor</th>
+							<th>Scheduled for</th>
+							<th>Done at</th>
+						</tr>
+					</thead>
+					<tbody>
+						for _, check := range data.Checks {
+							<tr class="hover:bg-base-300">
+								<td class="min-w-30">
+									@checkStatusBadge(check.Status)
+								</td>
+								<td class="min-w-70">
+									<a class="link link-hover font-semibold line-clamp-2" href={ fmt.Sprintf("/app/monitors/%d", check.MonitorID) }>
+										{ check.MonitorSubject }
+									</a>
+								</td>
+								<td class="text-muted min-w-38 tabular-nums">
+									@components.TimeAgo(fmt.Sprintf("checkScheduledFor%d", check.CheckID), check.ScheduledFor)
+								</td>
+								<td class="text-muted min-w-38 tabular-nums">
+									if check.DoneAt != nil {
+										@components.TimeAgo(fmt.Sprintf("checkDoneAt%d", check.CheckID), *check.DoneAt)
+									} else {
+										<span class="text-muted">(pending)</span>
+									}
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+			<div class="flex items-center py-12">
+				<div class="join mx-auto">
+					<a
+						class={ "join-item", "btn", templ.KV("btn-disabled", !data.Pagination.HasPrev()) }
+						href={ "?" + data.Pagination.PrevPageParams().Encode() }
+					>
+						@icons.ArrowLeft(icons.IconParams{Size: 15})
+						Prev page
+					</a>
+					<a
+						class={ "join-item", "btn", templ.KV("btn-disabled", !data.Pagination.HasNext()) }
+						href={ "?" + data.Pagination.NextPageParams().Encode() }
+					>
+						Next page
+						@icons.ArrowRight(icons.IconParams{Size: 15})
+					</a>
+				</div>
+			</div>
+		} else {
+			<div class="p-4">
+				No checks to show.
+			</div>
+		}
+	</div>
+}
+
+templ checkStatusBadge(status models.MonitorCheckStatus) {
+	switch status {
+		case models.MonitorCheckStatusSuccess:
+			<div class="badge badge-soft badge-success">
+				<div aria-label="success" class="status status-success"></div>
+				Success
+			</div>
+		case models.MonitorCheckStatusChecking:
+			<div class="badge badge-soft badge-warning">
+				@icons.Loader(icons.IconParams{
+					Size:    12,
+					Classes: templ.Classes("animate-spin mr-1"),
+				})
+				Checking
+			</div>
+		case models.MonitorCheckStatusFailed:
+			<div class="badge badge-soft badge-error">
+				<div aria-label="error" class="status status-error"></div>
+				Failed
+			</div>
+		case models.MonitorCheckStatusScheduled:
+			<div class="badge badge-soft badge-info">
+				<div aria-label="info" class="status status-info"></div>
+				Scheduled
+			</div>
+		case models.MonitorCheckStatusSkipped:
+			<div class="badge badge-soft">
+				Skipped
+			</div>
+	}
+}

@@ -238,3 +238,17 @@ returning *;
 -- name: DeleteMonitorCheckEventsForMonitor :exec
 delete from monitor_check_events
 where monitor_id = @monitor_id;
+
+-- name: ListChecksWithMonitor :many
+select
+    mc.id as check_id,
+    mc.monitor_id,
+    mc.status,
+    mc.scheduled_for,
+    mc.done_at,
+    m.subject::text as monitor_subject
+from monitor_checks mc
+join monitors m on m.id = mc.monitor_id
+where m.user_id = @user_id
+order by mc.scheduled_for desc
+limit @page_size offset @row_offset;
