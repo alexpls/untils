@@ -21,6 +21,7 @@
 - [ ] Fix: when timeago is "5 hours 59 minutes in the future" it will return "in 5 hours", when it should really round to the nearest hour and return "in 6 hours"
 - [ ] Fix: draft monitors should show up on monitor page as drafts
 - [ ] Improvement: should be able to checkpoint progress in conversation with LLM and resume it on server restart
+- [ ] Fix: why did a panic happen during job checks where previewing tried to transition to validating?
 
 ## Watching
 

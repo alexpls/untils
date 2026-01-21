@@ -14,6 +14,7 @@ var validMonitorStatusTransitions = map[models.MonitorStatus][]models.MonitorSta
 		models.MonitorStatusRejected,
 	},
 	models.MonitorStatusPreviewing: {
+		models.MonitorStatusValidating,
 		models.MonitorStatusReady,
 		models.MonitorStatusRejected,
 	},
