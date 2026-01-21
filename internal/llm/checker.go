@@ -52,7 +52,7 @@ func (c *checker) perform(ctx context.Context, params *CheckParams) (*models.Che
 	}
 
 	var resp *responseResult
-	maxTurns := 30
+	maxTurns := 99
 	turn := 0
 
 	for {
