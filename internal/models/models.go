@@ -13,6 +13,47 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type LLMConversationsSource string
+
+const (
+	LlmConversationsSourceCheck LLMConversationsSource = "check"
+)
+
+func (e *LLMConversationsSource) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = LLMConversationsSource(s)
+	case string:
+		*e = LLMConversationsSource(s)
+	default:
+		return fmt.Errorf("unsupported scan type for LLMConversationsSource: %T", src)
+	}
+	return nil
+}
+
+type NullLLMConversationsSource struct {
+	LLMConversationsSource LLMConversationsSource
+	Valid                  bool // Valid is true if LLMConversationsSource is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullLLMConversationsSource) Scan(value interface{}) error {
+	if value == nil {
+		ns.LLMConversationsSource, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.LLMConversationsSource.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullLLMConversationsSource) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.LLMConversationsSource), nil
+}
+
 type MonitorCheckEventKind string
 
 const (
@@ -234,6 +275,16 @@ func (ns NullRiverJobState) Value() (driver.Value, error) {
 		return nil, nil
 	}
 	return string(ns.RiverJobState), nil
+}
+
+type LlmConversation struct {
+	ID         int64
+	UserID     int64
+	SourceType LLMConversationsSource
+	SourceID   int64
+	Messages   LLMConversationMessages
+	CreatedAt  pgtype.Timestamp
+	UpdatedAt  pgtype.Timestamp
 }
 
 type Monitor struct {

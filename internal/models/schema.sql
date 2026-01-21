@@ -47,6 +47,15 @@ COMMENT ON EXTENSION pgcrypto IS 'cryptographic functions';
 
 
 --
+-- Name: llm_conversations_source; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.llm_conversations_source AS ENUM (
+    'check'
+);
+
+
+--
 -- Name: monitor_check_event_kind; Type: TYPE; Schema: public; Owner: -
 --
 
@@ -175,6 +184,40 @@ $$;
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
+
+--
+-- Name: llm_conversations; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.llm_conversations (
+    id bigint NOT NULL,
+    user_id bigint NOT NULL,
+    source_type public.llm_conversations_source NOT NULL,
+    source_id bigint NOT NULL,
+    messages jsonb DEFAULT '[]'::jsonb NOT NULL,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: llm_conversations_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.llm_conversations_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: llm_conversations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.llm_conversations_id_seq OWNED BY public.llm_conversations.id;
+
 
 --
 -- Name: monitor_check_events; Type: TABLE; Schema: public; Owner: -
@@ -535,6 +578,13 @@ ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
 
 
 --
+-- Name: llm_conversations id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.llm_conversations ALTER COLUMN id SET DEFAULT nextval('public.llm_conversations_id_seq'::regclass);
+
+
+--
 -- Name: monitor_check_events id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -581,6 +631,14 @@ ALTER TABLE ONLY public.river_job ALTER COLUMN id SET DEFAULT nextval('public.ri
 --
 
 ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
+
+
+--
+-- Name: llm_conversations llm_conversations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.llm_conversations
+    ADD CONSTRAINT llm_conversations_pkey PRIMARY KEY (id);
 
 
 --
@@ -720,6 +778,13 @@ ALTER TABLE ONLY public.users
 
 
 --
+-- Name: idx_llm_conversations_user_id_source_type_source_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_llm_conversations_user_id_source_type_source_id ON public.llm_conversations USING btree (user_id, source_type, source_id);
+
+
+--
 -- Name: idx_monitor_check_events_monitor_check_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -829,6 +894,14 @@ CREATE TRIGGER monitor_results_notify_trigger AFTER INSERT OR DELETE OR UPDATE O
 --
 
 CREATE TRIGGER monitors_notify_trigger AFTER INSERT OR DELETE OR UPDATE ON public.monitors FOR EACH ROW EXECUTE FUNCTION public.monitor_events_notify();
+
+
+--
+-- Name: llm_conversations llm_conversations_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.llm_conversations
+    ADD CONSTRAINT llm_conversations_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
 
 
 --

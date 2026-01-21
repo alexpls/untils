@@ -50,9 +50,11 @@ func cleanTables(t *testing.T, pool *pgxpool.Pool) {
 	t.Helper()
 
 	tables := []string{
-		"sessions", // Add other tables here as needed
-		// "users",
-		// "other_table",
+		"llm_conversations",
+		"monitor_checks",
+		"monitors",
+		"sessions",
+		"users",
 	}
 
 	ctx := context.Background()

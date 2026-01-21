@@ -141,7 +141,7 @@ func (s *Service) PerformMonitorCheck(
 	ch := make(llm.EventsChan)
 	defer close(ch)
 
-	checker := llm.NewCheckWorkflow(s.llm, ch)
+	checker := llm.NewCheckWorkflow(s.llm, ch, s.pool, s.queries)
 
 	go func() {
 		for event := range ch {
@@ -155,6 +155,8 @@ func (s *Service) PerformMonitorCheck(
 	}()
 
 	result, err := checker.Run(ctx, &llm.CheckParams{
+		UserID:          userID,
+		MonitorCheckID:  check.ID,
 		Subject:         monitor.Subject.String,
 		PreviousResults: latest,
 	})

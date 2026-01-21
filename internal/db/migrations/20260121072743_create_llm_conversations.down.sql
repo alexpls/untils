@@ -1,0 +1,3 @@
+drop index idx_llm_conversations_user_id_source_type_source_id;
+drop table llm_conversations;
+drop type llm_conversations_source;

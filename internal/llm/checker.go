@@ -10,20 +10,44 @@ import (
 
 	"github.com/alexpls/untils/internal/browser"
 	"github.com/alexpls/untils/internal/models"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/openai/openai-go/v3"
 	"github.com/openai/openai-go/v3/responses"
 )
 
 type checker struct {
-	service       *Service
-	messages      []responses.ResponseInputItemUnionParam
-	browserCtx    *browser.BrowserCtx
-	browserCancel context.CancelFunc
-	c             EventsChan
+	service        *Service
+	messages       []responses.ResponseInputItemUnionParam
+	browserCtx     *browser.BrowserCtx
+	browserCancel  context.CancelFunc
+	c              EventsChan
+	pool           *pgxpool.Pool
+	queries        *models.Queries
+	conversationID int64
+	turn           int
 }
 
-func newChecker(service *Service, c EventsChan) *checker {
-	return &checker{service: service, c: c}
+func newChecker(service *Service, c EventsChan, pool *pgxpool.Pool, queries *models.Queries) *checker {
+	return &checker{service: service, c: c, pool: pool, queries: queries}
+}
+
+func (c *checker) logMessage(ctx context.Context, role models.LLMMessageRole, body any, duration time.Duration) error {
+	bodyJSON, err := json.Marshal(body)
+	if err != nil {
+		return fmt.Errorf("marshalling message body: %w", err)
+	}
+	return c.queries.AddMessageToLLMConversation(ctx, c.pool, &models.AddMessageToLLMConversationParams{
+		LlmConversationID: c.conversationID,
+		Message: models.LLMConversationMessages{
+			{
+				Turn:     c.turn,
+				Role:     role,
+				At:       time.Now(),
+				Duration: duration,
+				Body:     bodyJSON,
+			},
+		},
+	})
 }
 
 //go:embed checker_prompt.md
@@ -38,30 +62,48 @@ func (c *checker) perform(ctx context.Context, params *CheckParams) (*models.Che
 		previousResult = params.PreviousResults[0]
 	}
 
+	conversation, err := c.queries.CreateLLMConversation(ctx, c.pool, &models.CreateLLMConversationParams{
+		UserID:     params.UserID,
+		SourceType: models.LlmConversationsSourceCheck,
+		SourceID:   params.MonitorCheckID,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("creating llm conversation: %w", err)
+	}
+	c.conversationID = conversation.ID
+
 	defer func() {
 		c.service.logger.Debug("checker workflow completed", "total_duration", time.Since(workflowStart))
 		if c.browserCancel != nil {
 			c.browserCancel()
 		}
 	}()
-	var err error
+
+	systemMsg := checkerPrompt
+	userMsg := params.UserMessageString()
 
 	c.messages = []responses.ResponseInputItemUnionParam{
-		systemMessage(checkerPrompt),
-		userMessage(params.UserMessageString()),
+		systemMessage(systemMsg),
+		userMessage(userMsg),
+	}
+
+	if logErr := c.logMessage(ctx, models.LLMMessageRoleSystem, map[string]string{"content": systemMsg}, 0); logErr != nil {
+		return nil, fmt.Errorf("failed to log system message: %w", logErr)
+	}
+	if logErr := c.logMessage(ctx, models.LLMMessageRoleUser, map[string]string{"content": userMsg}, 0); logErr != nil {
+		return nil, fmt.Errorf("failed to log user message: %w", logErr)
 	}
 
 	var resp *responseResult
 	maxTurns := 99
-	turn := 0
 
 	for {
-		if turn >= maxTurns {
+		if c.turn >= maxTurns {
 			return nil, fmt.Errorf("exceeded max turns: %w", err)
 		}
-		turn++
+		c.turn++
 		turnStart := time.Now()
-		c.service.logger.Debug("starting turn", "turn", turn)
+		c.service.logger.Debug("starting turn", "turn", c.turn)
 
 		llmStart := time.Now()
 		resp, err = c.service.response(ctx, responses.ResponseNewParams{
@@ -75,28 +117,49 @@ func (c *checker) perform(ctx context.Context, params *CheckParams) (*models.Che
 			},
 			ParallelToolCalls: openai.Bool(false),
 		})
-		c.service.logger.Debug("LLM response received", "turn", turn, "duration", time.Since(llmStart))
+		llmDuration := time.Since(llmStart)
+		c.service.logger.Debug("LLM response received", "turn", c.turn, "duration", llmDuration)
+
+		if resp != nil {
+			if logErr := c.logMessage(ctx, models.LLMMessageRoleAssistant, json.RawMessage(resp.RawJSON()), llmDuration); logErr != nil {
+				return nil, fmt.Errorf("failed to log assistant message: %w", logErr)
+			}
+		}
+
+		if err != nil {
+			return nil, err
+		}
 
 		if len(resp.toolCalls) > 0 {
 			toolsStart := time.Now()
-			c.callTools(ctx, resp.toolCalls)
-			c.service.logger.Debug("turn completed with tool calls", "turn", turn, "tools_duration", time.Since(toolsStart), "turn_duration", time.Since(turnStart))
+			if err := c.callTools(ctx, resp.toolCalls); err != nil {
+				return nil, err
+			}
+			c.service.logger.Debug("turn completed with tool calls", "turn", c.turn, "tools_duration", time.Since(toolsStart), "turn_duration", time.Since(turnStart))
 			continue
 		}
 
 		sanitized := sanitizeXAIOutput(resp.OutputText())
 		res := &models.CheckResult{}
 		if err := json.Unmarshal([]byte(sanitized), res); err != nil {
-			c.messages = append(c.messages, systemMessage("error: invalid response format"))
+			errorMsg := "error: invalid response format"
+			c.messages = append(c.messages, systemMessage(errorMsg))
+			if logErr := c.logMessage(ctx, models.LLMMessageRoleSystem, map[string]string{"content": errorMsg}, 0); logErr != nil {
+				return nil, fmt.Errorf("failed to log error message: %w", logErr)
+			}
 			continue
 		}
 
 		if previousResult != nil {
 			if res.DifferentToPrevious && sameResultStr(res.ResultPlaintext, previousResult.MonitorResult.Result) {
+				errorMsg := "error: different_to_previous is true but result_plaintext is the same as the previous result"
 				c.messages = append(
 					c.messages,
-					systemMessage("error: different_to_previous is true but result_plaintext is the same as the previous result"),
+					systemMessage(errorMsg),
 				)
+				if logErr := c.logMessage(ctx, models.LLMMessageRoleSystem, map[string]string{"content": errorMsg}, 0); logErr != nil {
+					return nil, fmt.Errorf("failed to log error message: %w", logErr)
+				}
 				continue
 			}
 		}
@@ -105,16 +168,28 @@ func (c *checker) perform(ctx context.Context, params *CheckParams) (*models.Che
 	}
 }
 
-func (c *checker) callTools(ctx context.Context, toolCalls []responses.ResponseFunctionToolCall) {
+func (c *checker) callTools(ctx context.Context, toolCalls []responses.ResponseFunctionToolCall) error {
 	for _, call := range toolCalls {
 		result, err := c.callTool(ctx, call.Name, call.Arguments)
 		if err != nil {
 			c.service.logger.Error("error executing tool call", "tool", call.Name, "error", err)
-			c.messages = append(c.messages, systemMessage("error executing tool call: "+err.Error()))
+			errorMsg := "error executing tool call: " + err.Error()
+			c.messages = append(c.messages, systemMessage(errorMsg))
+			if logErr := c.logMessage(ctx, models.LLMMessageRoleSystem, map[string]string{"content": errorMsg}, 0); logErr != nil {
+				return fmt.Errorf("failed to log tool error message: %w", logErr)
+			}
 			continue
 		}
 		c.messages = append(c.messages, toolOutputMessage(call.ID, result))
+		if logErr := c.logMessage(ctx, models.LLMMessageRoleTool, map[string]any{
+			"call_id": call.ID,
+			"name":    call.Name,
+			"output":  result,
+		}, 0); logErr != nil {
+			return fmt.Errorf("failed to log tool output message: %w", logErr)
+		}
 	}
+	return nil
 }
 
 func (c *checker) callTool(ctx context.Context, name string, args string) (string, error) {

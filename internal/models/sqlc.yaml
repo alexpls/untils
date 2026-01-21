@@ -12,6 +12,9 @@ sql:
         emit_params_struct_pointers: true
         emit_methods_with_db_argument: true
 
+        rename:
+          llm_conversations_source: LLMConversationsSource
+
         overrides:
           - db_type: "pg_catalog.timestamptz"
             go_type: "time.Time"
@@ -39,3 +42,7 @@ sql:
             go_type:
               import: "encoding/json"
               type: "RawMessage"
+
+          - column: "llm_conversations.messages"
+            go_type:
+              type: "LLMConversationMessages"
