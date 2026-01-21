@@ -1,0 +1,285 @@
+package monitor
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+
+	"github.com/alexpls/untils/internal/components"
+	"github.com/alexpls/untils/internal/components/app"
+	"github.com/alexpls/untils/internal/components/icons"
+	"github.com/alexpls/untils/internal/models"
+	"github.com/starfederation/datastar-go/datastar"
+)
+
+type CheckViewData struct {
+	Check        *models.GetCheckWithMonitorRow
+	Events       []*models.MonitorCheckEvent
+	Conversation *models.LlmConversation
+}
+
+templ CheckViewPage(data CheckViewData) {
+	@app.AppLayout([]app.Breadcrumb{
+		{Title: "Dashboard", Href: "/app"},
+		{Title: "Checks", Href: "/app/checks"},
+		{Title: fmt.Sprintf("Check #%d", data.Check.CheckID), Href: fmt.Sprintf("/app/checks/%d", data.Check.CheckID)},
+	}) {
+		@CheckView(data)
+	}
+}
+
+templ CheckView(data CheckViewData) {
+	<div id="check-view" data-effect={ datastar.GetSSE("/app/checks/%d/events", data.Check.CheckID) }>
+		@app.Header(fmt.Sprintf("Check #%d", data.Check.CheckID), nil)
+		<div class="grid grid-cols-1 lg:grid-cols-12">
+			<div class="lg:col-span-8 m-4 space-y-4">
+				<div class="p-4 bg-base-100 rounded border border-base-content/10">
+					<div class="font-semibold uppercase text-xs mb-3">Check Details</div>
+					<div class="space-y-2 text-sm">
+						<div class="flex justify-between">
+							<span class="text-muted">Status</span>
+							<span>
+								@checkStatusBadge(data.Check.Status)
+							</span>
+						</div>
+						<div class="flex justify-between">
+							<span class="text-muted">Scheduled for</span>
+							<span>{ components.FormatDateTime(ctx, data.Check.ScheduledFor) }</span>
+						</div>
+						if data.Check.DoneAt != nil {
+							<div class="flex justify-between">
+								<span class="text-muted">Completed at</span>
+								<span>{ components.FormatDateTime(ctx, *data.Check.DoneAt) }</span>
+							</div>
+						}
+						if data.Check.FailureReason.Valid {
+							<div class="mt-2 p-2 bg-error/10 rounded border border-error/20">
+								<div class="font-semibold text-error text-xs uppercase">Failure Reason</div>
+								<div class="text-error mt-1">{ data.Check.FailureReason.String }</div>
+							</div>
+						}
+						if data.Check.Result != nil && data.Check.Result.Success {
+							<div class="mt-2 p-2 bg-success/10 rounded border border-success/20">
+								<div class="font-semibold text-success text-xs uppercase">Result</div>
+								<div class="mt-1">{ data.Check.Result.ResultPlaintext }</div>
+								if data.Check.Result.Reason != "" {
+									<div class="text-muted mt-1 text-xs">{ data.Check.Result.Reason }</div>
+								}
+							</div>
+						}
+					</div>
+				</div>
+				if len(data.Events) > 0 {
+					<div class="p-4 bg-base-100 rounded border border-base-content/10">
+						<div class="font-semibold uppercase text-xs mb-3">Check Events</div>
+						<ul class="text-sm text-base-content/70 space-y-1">
+							for _, event := range data.Events {
+								@checkEventItem(event)
+							}
+						</ul>
+					</div>
+				}
+				if data.Conversation != nil && len(data.Conversation.Messages) > 0 {
+					<div class="p-4 bg-base-100 rounded border border-base-content/10">
+						<div class="font-semibold uppercase text-xs mb-3">LLM Conversation Log</div>
+						<div class="space-y-3">
+							for _, msg := range data.Conversation.Messages {
+								@conversationTurnItem(msg)
+							}
+						</div>
+					</div>
+				}
+			</div>
+			<div class="lg:col-span-4 m-4 p-4 border border-base-content/10 rounded h-fit">
+				<div>
+					<div class="mb-4">
+						<div class="font-semibold uppercase text-xs">
+							Monitor
+						</div>
+						<div class="mt-1">
+							<a class="link link-hover font-semibold" href={ templ.SafeURL(fmt.Sprintf("/app/monitors/%d", data.Check.MonitorID)) }>
+								{ data.Check.MonitorSubject }
+							</a>
+						</div>
+					</div>
+					if data.Check.Result != nil && len(data.Check.Result.Citations) > 0 {
+						<div class="mb-4">
+							<div class="font-semibold uppercase text-xs">
+								Sources
+							</div>
+							<div class="mt-1 flex flex-wrap gap-1">
+								for _, citation := range data.Check.Result.Citations {
+									<a
+										href={ templ.SafeURL(citation.URL) }
+										title={ citation.PageTitle + " | " + citation.WebsiteTitle }
+										target="_blank"
+										rel="noref noopener"
+										class="relative w-6 h-6 rounded bg-base-content/10 border border-base-content/40 overflow-hidden flex items-center justify-center"
+									>
+										if citation.FaviconURL != "" {
+											<img src={ citationFaviconProxiedURL(citation) } alt={ citation.WebsiteTitle } class="w-full h-full object-contain"/>
+										} else {
+											<span class="absolute text-xs font-semibold">{ citation.WebsiteTitle[0:1] }</span>
+										}
+									</a>
+								}
+							</div>
+						</div>
+					}
+					<div>
+						<div class="font-semibold uppercase text-xs">
+							Actions
+						</div>
+						<ul class="mt-1">
+							<li>
+								<a
+									href={ templ.SafeURL(fmt.Sprintf("/app/checks")) }
+									class="text-sm link"
+								>
+									Back to checks
+								</a>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+templ checkEventItem(event *models.MonitorCheckEvent) {
+	<li class="flex py-0.5 items-center justify-start">
+		<div class="text-base-content/30 mr-2">
+			@icons.CircleCheck(icons.IconParams{Size: 16})
+		</div>
+		<div>
+			switch d := event.DetailsStruct().(type) {
+				case *models.MonitorCheckEventWebSearchDetails:
+					<span>Searched for &ldquo;{ d.Query }&rdquo;</span>
+				case *models.MonitorCheckEventBrowserNavigateDetails:
+					<span>
+						Browsed &ldquo;<a href={ templ.SafeURL(d.URL) } target="_blank" rel="noref noopener" class="link">{ components.URLHost(d.URL) }</a>&rdquo;
+					</span>
+				case *models.MonitorCheckEventBrowserClickDetails:
+					<span>Clicked on a link</span>
+				default:
+					<span>Unknown event</span>
+			}
+		</div>
+		<div class="ml-auto text-xs text-base-content/40 tabular-nums">
+			{ components.FormatTime(ctx, event.CreatedAt) }
+		</div>
+	</li>
+}
+
+templ conversationTurnItem(msg *models.LLMConversationMessage) {
+	<div class="border border-base-content/10 rounded p-3">
+		<div class="flex items-center justify-between text-xs text-base-content/50 mb-2">
+			<div class="flex items-center gap-2">
+				<span class={ "font-semibold px-1.5 py-0.5 rounded", templ.KV("bg-info/20 text-info", msg.Role == models.LLMMessageRoleSystem), templ.KV("bg-success/20 text-success", msg.Role == models.LLMMessageRoleUser), templ.KV("bg-primary/20 text-primary", msg.Role == models.LLMMessageRoleAssistant), templ.KV("bg-warning/20 text-warning", msg.Role == models.LLMMessageRoleTool) }>
+					{ string(msg.Role) }
+				</span>
+				<span class="text-base-content/40">Turn { fmt.Sprintf("%d", msg.Turn) }</span>
+			</div>
+			<div class="flex items-center gap-2">
+				if msg.Duration > 0 {
+					<span class="tabular-nums">{ fmt.Sprintf("%dms", msg.Duration.Milliseconds()) }</span>
+				}
+				<span class="tabular-nums text-base-content/40">{ components.FormatTime(ctx, msg.At) }</span>
+			</div>
+		</div>
+		<div class="text-sm">
+			@conversationMessageContent(msg)
+		</div>
+	</div>
+}
+
+templ conversationMessageContent(msg *models.LLMConversationMessage) {
+	switch msg.Role {
+		case models.LLMMessageRoleSystem, models.LLMMessageRoleUser:
+			if content := extractContent(msg.Body); content != "" {
+				<div class="whitespace-pre-wrap text-base-content/80 bg-base-200/50 p-2 rounded max-h-48 overflow-y-auto">{ content }</div>
+			} else {
+				@rawJSONCollapse(msg.Body)
+			}
+		case models.LLMMessageRoleTool:
+			if toolInfo := extractToolInfo(msg.Body); toolInfo != nil {
+				<div class="space-y-1">
+					<div class="flex items-center gap-2">
+						<span class="font-mono text-xs bg-base-300 px-1.5 py-0.5 rounded">{ toolInfo.Name }</span>
+						<span class="text-xs text-base-content/40 font-mono truncate">{ toolInfo.CallID }</span>
+					</div>
+					<details class="collapse collapse-arrow bg-base-200/50">
+						<summary class="collapse-title text-sm min-h-0 py-2 px-3">
+							<span class="text-base-content/70">Output</span>
+							<span class="text-xs text-base-content/40 ml-2">({ fmt.Sprintf("%d chars", len(toolInfo.Output)) })</span>
+						</summary>
+						<div class="collapse-content">
+							<pre class="text-xs overflow-x-auto whitespace-pre-wrap break-all bg-base-300/50 p-2 rounded max-h-64 overflow-y-auto"><code>{ toolInfo.Output }</code></pre>
+						</div>
+					</details>
+				</div>
+			} else {
+				@rawJSONCollapse(msg.Body)
+			}
+		case models.LLMMessageRoleAssistant:
+			@rawJSONCollapse(msg.Body)
+		default:
+			@rawJSONCollapse(msg.Body)
+	}
+}
+
+templ rawJSONCollapse(body json.RawMessage) {
+	<details class="collapse collapse-arrow bg-base-200/50">
+		<summary class="collapse-title text-sm min-h-0 py-2 px-3">
+			<span class="text-base-content/70">Raw JSON</span>
+			<span class="text-xs text-base-content/40 ml-2">({ fmt.Sprintf("%d bytes", len(body)) })</span>
+		</summary>
+		<div class="collapse-content">
+			<pre class="text-xs overflow-x-auto whitespace-pre-wrap break-all bg-base-300/50 p-2 rounded max-h-96 overflow-y-auto"><code>{ formatJSON(body) }</code></pre>
+		</div>
+	</details>
+}
+
+func formatJSON(data json.RawMessage) string {
+	var buf bytes.Buffer
+	if err := json.Indent(&buf, data, "", "  "); err != nil {
+		return string(data)
+	}
+	return buf.String()
+}
+
+func extractContent(body json.RawMessage) string {
+	var data struct {
+		Content string `json:"content"`
+	}
+	if err := json.Unmarshal(body, &data); err != nil {
+		return ""
+	}
+	return data.Content
+}
+
+type toolInfoResult struct {
+	CallID string
+	Name   string
+	Output string
+}
+
+func extractToolInfo(body json.RawMessage) *toolInfoResult {
+	var data struct {
+		CallID string `json:"call_id"`
+		Name   string `json:"name"`
+		Output string `json:"output"`
+	}
+	if err := json.Unmarshal(body, &data); err != nil {
+		return nil
+	}
+	if data.Name == "" {
+		return nil
+	}
+	return &toolInfoResult{
+		CallID: data.CallID,
+		Name:   data.Name,
+		Output: data.Output,
+	}
+}

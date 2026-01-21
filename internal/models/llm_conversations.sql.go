@@ -51,3 +51,28 @@ func (q *Queries) CreateLLMConversation(ctx context.Context, db DBTX, arg *Creat
 	)
 	return &i, err
 }
+
+const getLLMConversationBySourceID = `-- name: GetLLMConversationBySourceID :one
+select id, user_id, source_type, source_id, messages, created_at, updated_at from llm_conversations
+where source_type = $1 and source_id = $2
+`
+
+type GetLLMConversationBySourceIDParams struct {
+	SourceType LLMConversationsSource
+	SourceID   int64
+}
+
+func (q *Queries) GetLLMConversationBySourceID(ctx context.Context, db DBTX, arg *GetLLMConversationBySourceIDParams) (*LlmConversation, error) {
+	row := db.QueryRow(ctx, getLLMConversationBySourceID, arg.SourceType, arg.SourceID)
+	var i LlmConversation
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.SourceType,
+		&i.SourceID,
+		&i.Messages,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return &i, err
+}

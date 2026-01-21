@@ -7,3 +7,7 @@ returning *;
 update llm_conversations
 set messages = messages || @message, updated_at = now()
 where id = @llm_conversation_id;
+
+-- name: GetLLMConversationBySourceID :one
+select * from llm_conversations
+where source_type = @source_type and source_id = @source_id;

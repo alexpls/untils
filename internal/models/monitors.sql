@@ -252,3 +252,18 @@ join monitors m on m.id = mc.monitor_id
 where m.user_id = @user_id
 order by mc.scheduled_for desc
 limit @page_size offset @row_offset;
+
+-- name: GetCheckWithMonitor :one
+select
+    mc.id as check_id,
+    mc.monitor_id,
+    mc.status,
+    mc.scheduled_for,
+    mc.done_at,
+    mc.failure_reason,
+    mc.result,
+    m.subject::text as monitor_subject,
+    m.user_id
+from monitor_checks mc
+join monitors m on m.id = mc.monitor_id
+where mc.id = @check_id;

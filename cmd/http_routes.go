@@ -44,6 +44,8 @@ func (a *app) routes() http.Handler {
 	// checks
 	mux.HandleFunc("GET /app/checks", a.requireAuth(a.monitorHandlers.ChecksListGet))
 	mux.HandleFunc("GET /app/checks/events", a.requireAuth(a.monitorHandlers.ChecksListEventsGet))
+	mux.HandleFunc("GET /app/checks/{check_id}", a.requireAuth(a.monitorHandlers.CheckViewGet))
+	mux.HandleFunc("GET /app/checks/{check_id}/events", a.requireAuth(a.monitorHandlers.CheckViewEventsGet))
 
 	// settings
 	mux.HandleFunc("GET /app/settings", a.requireAuth(a.settingsHandlers.SettingsGet))

@@ -171,6 +171,94 @@ func (h *Handlers) renderChecksList(r *http.Request, user *models.User) (templ.C
 	}), nil
 }
 
+// CheckViewGet handles GET /app/checks/{check_id}
+func (h *Handlers) CheckViewGet(w http.ResponseWriter, r *http.Request, user *models.User) {
+	checkID := checkIDFromPath(r)
+	if checkID == 0 {
+		http.Error(w, "Bad request", http.StatusBadRequest)
+		return
+	}
+
+	comp, err := h.renderCheckView(r.Context(), checkID, user.ID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			http.Error(w, "Not found", http.StatusNotFound)
+			return
+		}
+		h.logger.Error("error rendering check view", "error", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	if err := comp.Render(r.Context(), w); err != nil {
+		h.logger.Error("error rendering check view component", "error", err)
+	}
+}
+
+// CheckViewEventsGet handles GET /app/checks/{check_id}/events (SSE)
+func (h *Handlers) CheckViewEventsGet(w http.ResponseWriter, r *http.Request, user *models.User) {
+	checkID := checkIDFromPath(r)
+	if checkID == 0 {
+		http.Error(w, "Bad request", http.StatusBadRequest)
+		return
+	}
+
+	sse := datastar.NewSSE(w, r)
+	ch := h.events.SubscribeUser(sse.Context(), user.ID)
+
+	for {
+		comp, err := h.renderCheckView(sse.Context(), checkID, user.ID)
+		if err != nil {
+			h.logger.Error("error rendering check view", "error", err)
+			return
+		}
+		if err := sse.PatchElementTempl(comp); err != nil {
+			h.logger.Error("error sending check view SSE patch", "error", err)
+			return
+		}
+
+		select {
+		case <-ch:
+		case <-sse.Context().Done():
+			return
+		}
+	}
+}
+
+func (h *Handlers) renderCheckView(ctx context.Context, checkID int64, userID int64) (templ.Component, error) {
+	check, err := h.queries.GetCheckWithMonitor(ctx, h.pool, checkID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Verify the user owns the monitor that this check belongs to
+	if check.UserID != userID {
+		return nil, pgx.ErrNoRows
+	}
+
+	events, err := h.queries.ListMonitorCheckEvents(ctx, h.pool, checkID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Fetch the LLM conversation for this check (may not exist)
+	var conversation *models.LlmConversation
+	conv, err := h.queries.GetLLMConversationBySourceID(ctx, h.pool, &models.GetLLMConversationBySourceIDParams{
+		SourceType: models.LlmConversationsSourceCheck,
+		SourceID:   checkID,
+	})
+	if err == nil {
+		conversation = conv
+	}
+	// Ignore pgx.ErrNoRows - conversation is optional
+
+	return CheckViewPage(CheckViewData{
+		Check:        check,
+		Events:       events,
+		Conversation: conversation,
+	}), nil
+}
+
 // ViewGet handles GET /app/monitors/{id}
 func (h *Handlers) ViewGet(w http.ResponseWriter, r *http.Request, user *models.User) {
 	monitorID := monitorIDFromPath(r)
@@ -656,6 +744,11 @@ func monitorIDFromPath(r *http.Request) int64 {
 // resultIDFromPath extracts result ID from the path
 func resultIDFromPath(r *http.Request) int64 {
 	return idFromPath(r, "result_id")
+}
+
+// checkIDFromPath extracts check ID from the path
+func checkIDFromPath(r *http.Request) int64 {
+	return idFromPath(r, "check_id")
 }
 
 // idFromPath extracts an int64 ID from the path of the request

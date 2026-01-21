@@ -55,6 +55,18 @@ func FormatDate(ctx context.Context, t time.Time) string {
 	return localTime.Format("Jan 2, 2006")
 }
 
+func FormatTime(ctx context.Context, t time.Time) string {
+	user, ok := reqcontext.UserFromContext(ctx)
+	timezone := time.UTC
+	if ok {
+		if loc, err := time.LoadLocation(user.Timezone); err == nil {
+			timezone = loc
+		}
+	}
+	localTime := t.In(timezone)
+	return localTime.Format("3:04:05 PM")
+}
+
 func ValidationError(data validation.HasValidationErrors, field string) string {
 	for _, val := range data.GetValidationErrors() {
 		if val.Field == field {

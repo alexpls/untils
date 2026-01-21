@@ -271,6 +271,51 @@ func (q *Queries) DeleteMonitorResults(ctx context.Context, db DBTX, monitorID i
 	return err
 }
 
+const getCheckWithMonitor = `-- name: GetCheckWithMonitor :one
+select
+    mc.id as check_id,
+    mc.monitor_id,
+    mc.status,
+    mc.scheduled_for,
+    mc.done_at,
+    mc.failure_reason,
+    mc.result,
+    m.subject::text as monitor_subject,
+    m.user_id
+from monitor_checks mc
+join monitors m on m.id = mc.monitor_id
+where mc.id = $1
+`
+
+type GetCheckWithMonitorRow struct {
+	CheckID        int64
+	MonitorID      int64
+	Status         MonitorCheckStatus
+	ScheduledFor   time.Time
+	DoneAt         *time.Time
+	FailureReason  pgtype.Text
+	Result         *CheckResult
+	MonitorSubject string
+	UserID         int64
+}
+
+func (q *Queries) GetCheckWithMonitor(ctx context.Context, db DBTX, checkID int64) (*GetCheckWithMonitorRow, error) {
+	row := db.QueryRow(ctx, getCheckWithMonitor, checkID)
+	var i GetCheckWithMonitorRow
+	err := row.Scan(
+		&i.CheckID,
+		&i.MonitorID,
+		&i.Status,
+		&i.ScheduledFor,
+		&i.DoneAt,
+		&i.FailureReason,
+		&i.Result,
+		&i.MonitorSubject,
+		&i.UserID,
+	)
+	return &i, err
+}
+
 const getDailyMonitorCheckCounts = `-- name: GetDailyMonitorCheckCounts :many
 select
     cast(calendar.day as date) as day,

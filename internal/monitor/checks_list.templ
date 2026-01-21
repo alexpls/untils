@@ -48,10 +48,12 @@ templ ChecksList(data ChecksListData) {
 						for _, check := range data.Checks {
 							<tr class="hover:bg-base-300">
 								<td class="min-w-30">
-									@checkStatusBadge(check.Status)
+									<a href={ fmt.Sprintf("/app/checks/%d", check.CheckID) } class="hover:opacity-80">
+										@checkStatusBadge(check.Status)
+									</a>
 								</td>
 								<td class="min-w-70">
-									<a class="link link-hover font-semibold line-clamp-2" href={ fmt.Sprintf("/app/monitors/%d", check.MonitorID) }>
+									<a class="link link-hover font-semibold line-clamp-2" href={ fmt.Sprintf("/app/checks/%d", check.CheckID) }>
 										{ check.MonitorSubject }
 									</a>
 								</td>
