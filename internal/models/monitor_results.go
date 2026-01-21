@@ -10,7 +10,7 @@ func (mr MonitorResult) Markdown() string {
 
 	_, _ = fmt.Fprintf(&sb, "**Result:** %s\n\n", mr.Result)
 
-	if mr.Date != nil {
+	if mr.Date != nil && !mr.Date.IsZero() {
 		if mr.DatePastTenseVerb.Valid && mr.DatePastTenseVerb.String != "" {
 			_, _ = fmt.Fprintf(&sb, "**Result date:** %s %s\n\n", mr.DatePastTenseVerb.String, mr.Date.Format("January 2, 2006"))
 		} else {
