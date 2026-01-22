@@ -250,7 +250,7 @@ func CheckView(data CheckViewData) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if data.Conversation != nil && len(data.Conversation.Messages) > 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<div class=\"p-4 bg-base-100 rounded border border-base-content/10\"><div class=\"font-semibold uppercase text-xs mb-3\">LLM Conversation Log</div><div class=\"space-y-3\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<div class=\"p-4 bg-base-100 rounded border border-base-content/10\"><div class=\"font-semibold uppercase text-xs mb-3\">Debug log</div><div class=\"space-y-3\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

@@ -171,6 +171,20 @@ func pageResult(ctx *BrowserCtx) (*Page, error) {
 	}, nil
 }
 
+// CurrentPage returns the current page contents without navigating
+func (ctx *BrowserCtx) CurrentPage() (*Page, error) {
+	ctx.logger.Debug("getting current page")
+	start := time.Now()
+
+	page, err := pageResult(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	ctx.logger.Debug("current page retrieved", "url", page.URL, "total_duration", time.Since(start))
+	return page, nil
+}
+
 // waitForNetworkIdle waits until the event networkIdle is fired or the
 // timeout is reached
 func waitForNetworkIdle(timeout time.Duration) chromedp.ActionFunc {

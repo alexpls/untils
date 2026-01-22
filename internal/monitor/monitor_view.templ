@@ -158,6 +158,10 @@ templ checkInProgressEvent(event *models.MonitorCheckEvent, latest bool) {
 					<div>
 						Browsing &ldquo;<a href={ d.URL } target="_blank" rel="noref noopener" class="link">{ components.URLHost(d.URL) }</a>&rdquo;&hellip;
 					</div>
+				case *models.MonitorCheckEventBrowserWaitDetails:
+					<div>
+						Waiting for the page to load&hellip;
+					</div>
 				case *models.MonitorCheckEventBrowserClickDetails:
 					<div>
 						Clicking on a link&hellip;

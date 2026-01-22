@@ -62,7 +62,8 @@ CREATE TYPE public.llm_conversations_source AS ENUM (
 CREATE TYPE public.monitor_check_event_kind AS ENUM (
     'web_search',
     'browser_navigate',
-    'browser_click'
+    'browser_click',
+    'browser_wait'
 );
 
 

@@ -54,6 +54,11 @@ type MonitorCheckEventBrowserNavigateDetails struct {
 
 func (d MonitorCheckEventBrowserNavigateDetails) isMonitorCheckEventDetails() {}
 
+type MonitorCheckEventBrowserWaitDetails struct {
+}
+
+func (d MonitorCheckEventBrowserWaitDetails) isMonitorCheckEventDetails() {}
+
 func (e *MonitorCheckEvent) DetailsStruct() MonitorCheckEventDetails {
 	switch e.Kind {
 	case MonitorCheckEventKindWebSearch:
@@ -64,6 +69,9 @@ func (e *MonitorCheckEvent) DetailsStruct() MonitorCheckEventDetails {
 
 	case MonitorCheckEventKindBrowserNavigate:
 		return unmarshalMonitorCheckEventDetails[MonitorCheckEventBrowserNavigateDetails](e.Details)
+
+	case MonitorCheckEventKindBrowserWait:
+		return unmarshalMonitorCheckEventDetails[MonitorCheckEventBrowserWaitDetails](e.Details)
 
 	default:
 		panic("unhandled monitor check event kind")

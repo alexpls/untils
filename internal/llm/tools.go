@@ -18,6 +18,7 @@ import (
 var toolRegistry = map[string]toolBuilder{
 	browserNavigateTool.name: browserNavigateTool.build,
 	browserClickTool.name:    browserClickTool.build,
+	browserWaitTool.name:     browserWaitTool.build,
 	searchTool.name:          searchTool.build,
 }
 
@@ -138,6 +139,35 @@ var browserClickTool = tool[browserClickParams]{
 		return CheckEvent{
 			Kind:    models.MonitorCheckEventKindBrowserClick,
 			Details: models.MonitorCheckEventBrowserClickDetails{},
+		}
+	},
+}
+
+type browserWaitParams struct{}
+
+var browserWaitTool = tool[browserWaitParams]{
+	name:        "browser_wait",
+	description: "Wait for the current page to finish loading. Use this when you suspect dynamic content may not have loaded yet. Returns the updated page contents after waiting.",
+	execute: func(tc *toolContext, p browserWaitParams) (string, error) {
+		tc.service.logger.Debug("browser_wait started")
+		start := time.Now()
+
+		time.Sleep(3 * time.Second)
+
+		b := tc.browser()
+		page, err := b.CurrentPage()
+		if err != nil {
+			tc.service.logger.Error("error getting current page after wait", "error", err)
+			return "", err
+		}
+
+		tc.service.logger.Debug("browser_wait completed", "total_duration", time.Since(start))
+		return page.String(), nil
+	},
+	checkEvent: func(tc *toolContext, params browserWaitParams) CheckEvent {
+		return CheckEvent{
+			Kind:    models.MonitorCheckEventKindBrowserWait,
+			Details: models.MonitorCheckEventBrowserWaitDetails{},
 		}
 	},
 }

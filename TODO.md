@@ -16,17 +16,19 @@
 - [ ] Fix: Need an anchored positioning tooltip polyfill for Firefox
 - [ ] Feature: handle future dates better. At the moment with the 'past tense' date requirement, release dates are referred to in the past tense, even though they haven't happened yet.
 - [ ] Feature: "fire and forget" way to set up monitors, if you don't wanna sit around waiting to confirm that the first check looks good
-- [ ] Fix: don't allow changing the subject while monitor is previewing. That's an invalid status transition.
-- [ ] Fix: Did i break feedback?
 - [ ] Fix: when timeago is "5 hours 59 minutes in the future" it will return "in 5 hours", when it should really round to the nearest hour and return "in 6 hours"
-- [ ] Fix: draft monitors should show up on monitor page as drafts
 - [ ] Improvement: should be able to checkpoint progress in conversation with LLM and resume it on server restart
 - [ ] Fix: why did a panic happen during job checks where previewing tried to transition to validating?
+- [ ] Improvement: page titles
+- [ ] Refactor: make new tool creation less of a trek through various parts of the codebase
 
 ## Watching
 
 ## Done
 
+- [x] Fix: don't allow changing the subject while monitor is previewing. That's an invalid status transition.
+- [x] Fix: Did i break feedback?
+- [x] Fix: draft monitors should show up on monitor page as drafts
 - [x] Fix: all pages responding with SSE events should send an event as soon as a connection occurs, this is to support people refreshing page or navigating back to the page.
 - [x] Fix: hitting "enter" when correcting a rejection reason resets the input
 - [x] Should stop jobs being considered "stuck" prematurely: https://github.com/riverqueue/river/issues/1125

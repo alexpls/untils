@@ -60,6 +60,7 @@ const (
 	MonitorCheckEventKindWebSearch       MonitorCheckEventKind = "web_search"
 	MonitorCheckEventKindBrowserNavigate MonitorCheckEventKind = "browser_navigate"
 	MonitorCheckEventKindBrowserClick    MonitorCheckEventKind = "browser_click"
+	MonitorCheckEventKindBrowserWait     MonitorCheckEventKind = "browser_wait"
 )
 
 func (e *MonitorCheckEventKind) Scan(src interface{}) error {
