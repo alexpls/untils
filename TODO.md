@@ -21,6 +21,7 @@
 - [ ] Fix: why did a panic happen during job checks where previewing tried to transition to validating?
 - [ ] Improvement: page titles
 - [ ] Refactor: make new tool creation less of a trek through various parts of the codebase
+- [ ] Fix: should be able to visit check pages for incomplete checks - but right now that errors
 
 ## Watching
 

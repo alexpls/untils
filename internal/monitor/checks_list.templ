@@ -65,7 +65,9 @@ templ ChecksList(data ChecksListData) {
 									}
 								</td>
 								<td class="min-w-30">
-									<a class="btn btn-sm btn-soft" href={ fmt.Sprintf("/app/checks/%d", check.CheckID) }>Details</a>
+									if check.Status == models.MonitorCheckStatusSuccess {
+										<a class="btn btn-sm btn-soft" href={ fmt.Sprintf("/app/checks/%d", check.CheckID) }>Details</a>
+									}
 								</td>
 							</tr>
 						}
