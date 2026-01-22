@@ -145,7 +145,7 @@ func (h *Handlers) ChecksListEventsGet(w http.ResponseWriter, r *http.Request, u
 }
 
 func (h *Handlers) renderChecksList(r *http.Request, user *models.User) (templ.Component, error) {
-	pag := pagination.PaginationFromRequest(r, 30)
+	pag := pagination.PaginationFromRequest(r, 50)
 
 	checks, err := h.queries.ListChecksWithMonitor(
 		r.Context(),
@@ -252,10 +252,19 @@ func (h *Handlers) renderCheckView(ctx context.Context, checkID int64, userID in
 	}
 	// Ignore pgx.ErrNoRows - conversation is optional
 
+	// Fetch the MonitorResult for this check (may not exist)
+	var result *models.MonitorResult
+	res, err := h.queries.GetMonitorResultByCheckID(ctx, h.pool, checkID)
+	if err == nil {
+		result = res
+	}
+	// Ignore pgx.ErrNoRows - result is optional
+
 	return CheckViewPage(CheckViewData{
 		Check:        check,
 		Events:       events,
 		Conversation: conversation,
+		Result:       result,
 	}), nil
 }
 
@@ -661,6 +670,9 @@ func (h *Handlers) ResultFeedbackGet(w http.ResponseWriter, r *http.Request, use
 
 	data := monitorResultFeedbackViewData{
 		result: result,
+		formValues: CreateMonitorResultFeedbackParams{
+			Feedback: result.Feedback.String,
+		},
 	}
 
 	comp := monitorResultFeedback(data)

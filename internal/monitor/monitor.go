@@ -249,7 +249,7 @@ func NewUpdateMonitorDraftParams(mon *models.Monitor) UpdateMonitorDraftParams {
 func (s *Service) updateMonitorDraftAndRevalidate(
 	ctx context.Context,
 	userID, monitorID int64,
-	updater func(ctx context.Context, tx pgx.Tx, mon *models.Monitor) (*models.Monitor, error),
+	updater func(ctx context.Context, tx models.DBTX, mon *models.Monitor) (*models.Monitor, error),
 ) (*models.Monitor, error) {
 	return db.WithTxV(s.pool, ctx, func(tx pgx.Tx) (mon *models.Monitor, err error) {
 		mon, err = s.queries.GetMonitor(ctx, tx, &models.GetMonitorParams{
@@ -284,7 +284,7 @@ func (s *Service) UpdateMonitorDraft(ctx context.Context, userID, monitorID int6
 		return nil, err
 	}
 
-	return s.updateMonitorDraftAndRevalidate(ctx, userID, monitorID, func(ctx context.Context, tx pgx.Tx, mon *models.Monitor) (*models.Monitor, error) {
+	return s.updateMonitorDraftAndRevalidate(ctx, userID, monitorID, func(ctx context.Context, tx models.DBTX, mon *models.Monitor) (*models.Monitor, error) {
 		var err error
 
 		if mon.Subject.String == params.Subject {

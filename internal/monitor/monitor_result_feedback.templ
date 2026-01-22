@@ -42,6 +42,7 @@ templ monitorResultFeedbackForm(data monitorResultFeedbackViewData) {
 			<textarea
 				name="feedback"
 				class={ "textarea", "w-full", templ.KV("textarea-error", components.ValidationError(data, "Feedback") != "") }
+				data-effect="el.selectionStart = el.value.length"
 				placeholder="Type here..."
 				data-init="el.focus()"
 				data-bind:feedback

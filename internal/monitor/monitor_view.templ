@@ -139,8 +139,8 @@ templ checkInProgressTimelineHeading() {
 }
 
 templ checkInProgressEvent(event *models.MonitorCheckEvent, latest bool) {
-	<li class="flex py-0.5 items-center justify-start">
-		<div class="text-base-content/30 mr-1">
+	<li class="flex py-0.5 items-start justify-start">
+		<div class="text-base-content/30 mr-2 mt-0.5">
 			if latest {
 				@icons.Loader(icons.IconParams{Size: 16, Classes: templ.Classes("animate-spin")})
 			} else {
@@ -166,6 +166,9 @@ templ checkInProgressEvent(event *models.MonitorCheckEvent, latest bool) {
 						Checking&hellip;
 					</div>
 			}
+		</div>
+		<div class="shrink-0 ml-auto text-xs text-muted tabular-nums">
+			{ components.FormatTime(ctx, event.CreatedAt) }
 		</div>
 	</li>
 }
@@ -234,14 +237,22 @@ templ monitorResultTimelineItem(result *models.MonitorResult, allowFeedback bool
 			</div>
 		</div>
 		if allowFeedback {
+			<div class="mt-2 text-muted">
+				<div class="font-semibold uppercase text-xs">
+					Feedback
+				</div>
+				<div class="text-sm">
+					{ result.Feedback.String }
+				</div>
+			</div>
 			<div class="mt-2 border py-1 px-2 rounded border-base-content/10 shadow flex items-center text-sm">
 				@icons.Info(icons.IconParams{Size: 16})
 				<div class="ml-2">
-					Not what you expected to see?
+					Not the result you expected?
 					<button
 						class="link font-bold"
 						data-on:click={ datastar.GetSSE("/app/monitors/%d/results/%d/feedback", result.MonitorID, result.ID) }
-					>Change it</button>.
+					>Provide feedback to improve it</button>.
 				</div>
 			</div>
 		}

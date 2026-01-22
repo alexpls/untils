@@ -42,20 +42,17 @@ templ ChecksList(data ChecksListData) {
 							<th>Monitor</th>
 							<th>Scheduled for</th>
 							<th>Done at</th>
+							<th></th>
 						</tr>
 					</thead>
 					<tbody>
 						for _, check := range data.Checks {
 							<tr class="hover:bg-base-300">
 								<td class="min-w-30">
-									<a href={ fmt.Sprintf("/app/checks/%d", check.CheckID) } class="hover:opacity-80">
-										@checkStatusBadge(check.Status)
-									</a>
+									@checkStatusBadge(check.Status)
 								</td>
 								<td class="min-w-70">
-									<a class="link link-hover font-semibold line-clamp-2" href={ fmt.Sprintf("/app/checks/%d", check.CheckID) }>
-										{ check.MonitorSubject }
-									</a>
+									<span class="text-muted">{ check.MonitorSubject }</span>
 								</td>
 								<td class="text-muted min-w-38 tabular-nums">
 									@components.TimeAgo(fmt.Sprintf("checkScheduledFor%d", check.CheckID), check.ScheduledFor)
@@ -64,8 +61,11 @@ templ ChecksList(data ChecksListData) {
 									if check.DoneAt != nil {
 										@components.TimeAgo(fmt.Sprintf("checkDoneAt%d", check.CheckID), *check.DoneAt)
 									} else {
-										<span class="text-muted">(pending)</span>
+										<span class="text-muted">-</span>
 									}
+								</td>
+								<td class="min-w-30">
+									<a class="btn btn-sm btn-soft" href={ fmt.Sprintf("/app/checks/%d", check.CheckID) }>Details</a>
 								</td>
 							</tr>
 						}
@@ -102,7 +102,6 @@ templ checkStatusBadge(status models.MonitorCheckStatus) {
 	switch status {
 		case models.MonitorCheckStatusSuccess:
 			<div class="badge badge-soft badge-success">
-				<div aria-label="success" class="status status-success"></div>
 				Success
 			</div>
 		case models.MonitorCheckStatusChecking:
@@ -115,12 +114,10 @@ templ checkStatusBadge(status models.MonitorCheckStatus) {
 			</div>
 		case models.MonitorCheckStatusFailed:
 			<div class="badge badge-soft badge-error">
-				<div aria-label="error" class="status status-error"></div>
 				Failed
 			</div>
 		case models.MonitorCheckStatusScheduled:
 			<div class="badge badge-soft badge-info">
-				<div aria-label="info" class="status status-info"></div>
 				Scheduled
 			</div>
 		case models.MonitorCheckStatusSkipped:

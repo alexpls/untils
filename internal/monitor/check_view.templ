@@ -7,7 +7,6 @@ import (
 
 	"github.com/alexpls/untils/internal/components"
 	"github.com/alexpls/untils/internal/components/app"
-	"github.com/alexpls/untils/internal/components/icons"
 	"github.com/alexpls/untils/internal/models"
 	"github.com/starfederation/datastar-go/datastar"
 )
@@ -16,6 +15,7 @@ type CheckViewData struct {
 	Check        *models.GetCheckWithMonitorRow
 	Events       []*models.MonitorCheckEvent
 	Conversation *models.LlmConversation
+	Result       *models.MonitorResult
 }
 
 templ CheckViewPage(data CheckViewData) {
@@ -43,6 +43,10 @@ templ CheckView(data CheckViewData) {
 							</span>
 						</div>
 						<div class="flex justify-between">
+							<span class="text-muted">Monitor</span>
+							<a class="link" href={ fmt.Sprintf("/app/monitors/%d", data.Check.MonitorID) }>{ data.Check.MonitorSubject }</a>
+						</div>
+						<div class="flex justify-between">
 							<span class="text-muted">Scheduled for</span>
 							<span>{ components.FormatDateTime(ctx, data.Check.ScheduledFor) }</span>
 						</div>
@@ -58,27 +62,16 @@ templ CheckView(data CheckViewData) {
 								<div class="text-error mt-1">{ data.Check.FailureReason.String }</div>
 							</div>
 						}
-						if data.Check.Result != nil && data.Check.Result.Success {
-							<div class="mt-2 p-2 bg-success/10 rounded border border-success/20">
-								<div class="font-semibold text-success text-xs uppercase">Result</div>
-								<div class="mt-1">{ data.Check.Result.ResultPlaintext }</div>
-								if data.Check.Result.Reason != "" {
-									<div class="text-muted mt-1 text-xs">{ data.Check.Result.Reason }</div>
-								}
-							</div>
-						}
 					</div>
 				</div>
-				if len(data.Events) > 0 {
-					<div class="p-4 bg-base-100 rounded border border-base-content/10">
-						<div class="font-semibold uppercase text-xs mb-3">Check Events</div>
-						<ul class="text-sm text-base-content/70 space-y-1">
-							for _, event := range data.Events {
-								@checkEventItem(event)
-							}
+				<div class="p-4 bg-base-100 rounded border border-base-content/10">
+					<div class="font-semibold uppercase text-xs mb-3">Result</div>
+					if data.Result != nil {
+						<ul>
+							@monitorResultTimelineItem(data.Result, true)
 						</ul>
-					</div>
-				}
+					}
+				</div>
 				if data.Conversation != nil && len(data.Conversation.Messages) > 0 {
 					<div class="p-4 bg-base-100 rounded border border-base-content/10">
 						<div class="font-semibold uppercase text-xs mb-3">LLM Conversation Log</div>
@@ -92,84 +85,18 @@ templ CheckView(data CheckViewData) {
 			</div>
 			<div class="lg:col-span-4 m-4 p-4 border border-base-content/10 rounded h-fit">
 				<div>
-					<div class="mb-4">
-						<div class="font-semibold uppercase text-xs">
-							Monitor
-						</div>
-						<div class="mt-1">
-							<a class="link link-hover font-semibold" href={ templ.SafeURL(fmt.Sprintf("/app/monitors/%d", data.Check.MonitorID)) }>
-								{ data.Check.MonitorSubject }
-							</a>
-						</div>
-					</div>
-					if data.Check.Result != nil && len(data.Check.Result.Citations) > 0 {
-						<div class="mb-4">
-							<div class="font-semibold uppercase text-xs">
-								Sources
-							</div>
-							<div class="mt-1 flex flex-wrap gap-1">
-								for _, citation := range data.Check.Result.Citations {
-									<a
-										href={ templ.SafeURL(citation.URL) }
-										title={ citation.PageTitle + " | " + citation.WebsiteTitle }
-										target="_blank"
-										rel="noref noopener"
-										class="relative w-6 h-6 rounded bg-base-content/10 border border-base-content/40 overflow-hidden flex items-center justify-center"
-									>
-										if citation.FaviconURL != "" {
-											<img src={ citationFaviconProxiedURL(citation) } alt={ citation.WebsiteTitle } class="w-full h-full object-contain"/>
-										} else {
-											<span class="absolute text-xs font-semibold">{ citation.WebsiteTitle[0:1] }</span>
-										}
-									</a>
-								}
-							</div>
-						</div>
-					}
-					<div>
-						<div class="font-semibold uppercase text-xs">
-							Actions
-						</div>
-						<ul class="mt-1">
-							<li>
-								<a
-									href={ templ.SafeURL(fmt.Sprintf("/app/checks")) }
-									class="text-sm link"
-								>
-									Back to checks
-								</a>
-							</li>
+					<div class="font-semibold uppercase text-xs mb-3">Check timeline</div>
+					if len(data.Events) > 0 {
+						<ul class="text-sm text-base-content/70 space-y-1">
+							for _, event := range data.Events {
+								@checkInProgressEvent(event, false)
+							}
 						</ul>
-					</div>
+					}
 				</div>
 			</div>
 		</div>
 	</div>
-}
-
-templ checkEventItem(event *models.MonitorCheckEvent) {
-	<li class="flex py-0.5 items-center justify-start">
-		<div class="text-base-content/30 mr-2">
-			@icons.CircleCheck(icons.IconParams{Size: 16})
-		</div>
-		<div>
-			switch d := event.DetailsStruct().(type) {
-				case *models.MonitorCheckEventWebSearchDetails:
-					<span>Searched for &ldquo;{ d.Query }&rdquo;</span>
-				case *models.MonitorCheckEventBrowserNavigateDetails:
-					<span>
-						Browsed &ldquo;<a href={ templ.SafeURL(d.URL) } target="_blank" rel="noref noopener" class="link">{ components.URLHost(d.URL) }</a>&rdquo;
-					</span>
-				case *models.MonitorCheckEventBrowserClickDetails:
-					<span>Clicked on a link</span>
-				default:
-					<span>Unknown event</span>
-			}
-		</div>
-		<div class="ml-auto text-xs text-base-content/40 tabular-nums">
-			{ components.FormatTime(ctx, event.CreatedAt) }
-		</div>
-	</li>
 }
 
 templ conversationTurnItem(msg *models.LLMConversationMessage) {
@@ -179,7 +106,6 @@ templ conversationTurnItem(msg *models.LLMConversationMessage) {
 				<span class={ "font-semibold px-1.5 py-0.5 rounded", templ.KV("bg-info/20 text-info", msg.Role == models.LLMMessageRoleSystem), templ.KV("bg-success/20 text-success", msg.Role == models.LLMMessageRoleUser), templ.KV("bg-primary/20 text-primary", msg.Role == models.LLMMessageRoleAssistant), templ.KV("bg-warning/20 text-warning", msg.Role == models.LLMMessageRoleTool) }>
 					{ string(msg.Role) }
 				</span>
-				<span class="text-base-content/40">Turn { fmt.Sprintf("%d", msg.Turn) }</span>
 			</div>
 			<div class="flex items-center gap-2">
 				if msg.Duration > 0 {

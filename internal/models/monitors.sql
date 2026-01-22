@@ -163,6 +163,11 @@ select * from monitor_results
 where monitor_id = @monitor_id
 and id = @result_id;
 
+-- name: GetMonitorResultByCheckID :one
+select * from monitor_results
+where @check_id::bigint = any(confirming_check_ids)
+limit 1;
+
 -- name: DeleteMonitorChecks :exec
 delete from monitor_checks
 where monitor_id = @monitor_id;

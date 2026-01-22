@@ -500,6 +500,30 @@ func (q *Queries) GetMonitorResult(ctx context.Context, db DBTX, arg *GetMonitor
 	return &i, err
 }
 
+const getMonitorResultByCheckID = `-- name: GetMonitorResultByCheckID :one
+select id, monitor_id, confirming_check_ids, result, date, date_past_tense_verb, citations, latest_confirmation_at, created_at, feedback from monitor_results
+where $1::bigint = any(confirming_check_ids)
+limit 1
+`
+
+func (q *Queries) GetMonitorResultByCheckID(ctx context.Context, db DBTX, checkID int64) (*MonitorResult, error) {
+	row := db.QueryRow(ctx, getMonitorResultByCheckID, checkID)
+	var i MonitorResult
+	err := row.Scan(
+		&i.ID,
+		&i.MonitorID,
+		&i.ConfirmingCheckIds,
+		&i.Result,
+		&i.Date,
+		&i.DatePastTenseVerb,
+		&i.Citations,
+		&i.LatestConfirmationAt,
+		&i.CreatedAt,
+		&i.Feedback,
+	)
+	return &i, err
+}
+
 const getNextMonitorCheck = `-- name: GetNextMonitorCheck :one
 select id, monitor_id, status, scheduled_for, failure_reason, done_at, result from monitor_checks
 where monitor_id = $1
