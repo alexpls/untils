@@ -12,16 +12,16 @@ func (mr MonitorResult) Markdown() string {
 
 	if mr.Date != nil && !mr.Date.IsZero() {
 		if mr.DatePastTenseVerb.Valid && mr.DatePastTenseVerb.String != "" {
-			_, _ = fmt.Fprintf(&sb, "**Result date:** %s %s\n\n", mr.DatePastTenseVerb.String, mr.Date.Format("January 2, 2006"))
+			_, _ = fmt.Fprintf(&sb, "**Result date:** %s %s\n", mr.DatePastTenseVerb.String, mr.Date.Format("January 2, 2006"))
 		} else {
-			_, _ = fmt.Fprintf(&sb, "**Result date:** %s\n\n", mr.Date.Format("January 2, 2006"))
+			_, _ = fmt.Fprintf(&sb, "**Result date:** %s\n", mr.Date.Format("January 2, 2006"))
 		}
 	}
 
-	_, _ = fmt.Fprintf(&sb, "**Latest check ran at:** %s\n\n", mr.LatestConfirmationAt.Format("January 2, 2006 at 3:04 PM"))
+	_, _ = fmt.Fprintf(&sb, "**Latest check ran at:** %s\n", mr.LatestConfirmationAt.Format("January 2, 2006 at 3:04 PM"))
 
 	if mr.Feedback.Valid && mr.Feedback.String != "" {
-		_, _ = fmt.Fprintf(&sb, "**User feedback:** %s\n\n", mr.Feedback.String)
+		_, _ = fmt.Fprintf(&sb, "**User feedback:** %s\n", mr.Feedback.String)
 	}
 
 	if mr.Citations != nil && len(*mr.Citations) > 0 {

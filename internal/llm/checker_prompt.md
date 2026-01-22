@@ -65,6 +65,9 @@ In order to achieve this you will use two tools:
   when there is a valid answer you could give about something that has already happened.
 - Trust canonical sources over unofficial ones. For example, Wikipedia should be considered
   more reliable than a random blog post.
+- If you're looking at a list of things, focus on the items at the top of the list, as they're
+  likely to be the most recent. If items have dates next to them, use those to help determine
+  which is the most recent.
 
 ## User feedback
 

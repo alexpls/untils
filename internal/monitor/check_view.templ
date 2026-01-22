@@ -71,6 +71,12 @@ templ CheckView(data CheckViewData) {
 							@monitorResultTimelineItem(data.Result, true)
 						</ul>
 					}
+					if data.Check.Result.Reason != "" {
+						<div class="mt-4 p-2 bg-info/10 rounded border border-info/20 text-xs">
+							<div class="font-semibold text-info uppercase">Reasoning</div>
+							<div class="text-info mt-1">{ data.Check.Result.Reason }</div>
+						</div>
+					}
 				</div>
 				if data.Conversation != nil && len(data.Conversation.Messages) > 0 {
 					<div class="p-4 bg-base-100 rounded border border-base-content/10">

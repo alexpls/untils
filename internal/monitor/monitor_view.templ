@@ -3,6 +3,7 @@ package monitor
 import (
 	"net/url"
 
+	"fmt"
 	"github.com/alexpls/untils/internal/components"
 	"github.com/alexpls/untils/internal/components/app"
 	"github.com/alexpls/untils/internal/components/icons"
@@ -58,7 +59,7 @@ templ MonitorView(data MonitorViewData) {
 						})
 					}
 					for _, result := range data.Results {
-						@monitorResultTimelineItem(result, false)
+						@monitorResultTimelineItem(result, true)
 					}
 					<li>
 						@components.TimelineItem(monitorCreatedTimelineHeading(data.Monitor), nil)
@@ -204,7 +205,9 @@ templ monitorResultTimelineItem(result *models.MonitorResult, allowFeedback bool
 					Latest check
 				</div>
 				<div>
-					{ components.FormatDateTime(ctx, result.LatestConfirmationAt) }
+					<a href={ fmt.Sprintf("/app/checks/%d", result.ConfirmingCheckIds[len(result.ConfirmingCheckIds)-1]) } class="link-hover">
+						{ components.FormatDateTime(ctx, result.LatestConfirmationAt) }
+					</a>
 				</div>
 			</div>
 			<div>
@@ -237,24 +240,31 @@ templ monitorResultTimelineItem(result *models.MonitorResult, allowFeedback bool
 			</div>
 		</div>
 		if allowFeedback {
-			<div class="mt-2 text-muted">
-				<div class="font-semibold uppercase text-xs">
-					Feedback
+			if result.Feedback.String == "" {
+				<div class="mt-2 border py-1 px-2 rounded border-base-content/10 shadow flex items-center text-sm">
+					@icons.Info(icons.IconParams{Size: 16})
+					<div class="ml-2">
+						Not the result you expected?
+						<button
+							class="link font-bold"
+							data-on:click={ datastar.GetSSE("/app/monitors/%d/results/%d/feedback", result.MonitorID, result.ID) }
+						>Provide feedback to improve it</button>.
+					</div>
 				</div>
-				<div class="text-sm">
-					{ result.Feedback.String }
+			} else {
+				<div class="mt-2 text-muted">
+					<div class="font-semibold uppercase text-xs">
+						Feedback
+					</div>
+					<div class="text-sm">
+						<span>{ result.Feedback.String }</span>
+						<button
+							class="link-hover cursor-pointer font-bold"
+							data-on:click={ datastar.GetSSE("/app/monitors/%d/results/%d/feedback", result.MonitorID, result.ID) }
+						>Edit</button>.
+					</div>
 				</div>
-			</div>
-			<div class="mt-2 border py-1 px-2 rounded border-base-content/10 shadow flex items-center text-sm">
-				@icons.Info(icons.IconParams{Size: 16})
-				<div class="ml-2">
-					Not the result you expected?
-					<button
-						class="link font-bold"
-						data-on:click={ datastar.GetSSE("/app/monitors/%d/results/%d/feedback", result.MonitorID, result.ID) }
-					>Provide feedback to improve it</button>.
-				</div>
-			</div>
+			}
 		}
 	}
 }

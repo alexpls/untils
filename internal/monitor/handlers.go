@@ -65,7 +65,7 @@ func (h *Handlers) ListEventsGet(w http.ResponseWriter, r *http.Request, user *m
 			h.logger.Error("error rendering monitor list", "error", err)
 			return
 		}
-		if err := patchElementTemplFragment(sse, comp, monitorListFragment); err != nil {
+		if err := ssePatchElementTemplFragment(sse, comp, monitorListFragment); err != nil {
 			h.logger.Error("error sending monitors list SSE patch", "error", err)
 			return
 		}
@@ -131,7 +131,7 @@ func (h *Handlers) ChecksListEventsGet(w http.ResponseWriter, r *http.Request, u
 			h.logger.Error("error rendering checks list", "error", err)
 			return
 		}
-		if err := patchElementTemplFragment(sse, comp, checksListFragment); err != nil {
+		if err := ssePatchElementTemplFragment(sse, comp, checksListFragment); err != nil {
 			h.logger.Error("error sending checks list SSE patch", "error", err)
 			return
 		}
@@ -743,8 +743,8 @@ func (h *Handlers) ResultFeedbackPost(w http.ResponseWriter, r *http.Request, us
 	}
 
 	sse := datastar.NewSSE(w, r)
-	if err := sse.Redirect(fmt.Sprintf("/app/monitors/%d", mon.ID)); err != nil {
-		h.logger.Error("error redirecting", "error", err)
+	if err := sseReload(sse); err != nil {
+		h.logger.Error("error reloading", "error", err)
 	}
 }
 
@@ -924,9 +924,8 @@ func (h *Handlers) monitorNotifierViewData(ctx context.Context, mon *models.Moni
 	return notifiers, nil
 }
 
-// patchElementTemplFragment sends HTML to the sse stream for the given templ component and fragment
-// TODO: trying to upstream: https://github.com/starfederation/datastar-go/issues/14
-func patchElementTemplFragment(sse *datastar.ServerSentEventGenerator, c templ.Component, fragmentIDs ...any) error {
+// ssePatchElementTemplFragment sends HTML to the sse stream for the given templ component and fragment
+func ssePatchElementTemplFragment(sse *datastar.ServerSentEventGenerator, c templ.Component, fragmentIDs ...any) error {
 	var buf bytes.Buffer
 	if err := templ.RenderFragments(sse.Context(), &buf, c, fragmentIDs...); err != nil {
 		return fmt.Errorf("failed to patch element: %w", err)
@@ -935,4 +934,10 @@ func patchElementTemplFragment(sse *datastar.ServerSentEventGenerator, c templ.C
 		return fmt.Errorf("failed to patch element: %w", err)
 	}
 	return nil
+}
+
+// sseReload sends javascript to the sse stream to reload the page
+func sseReload(sse *datastar.ServerSentEventGenerator) error {
+	js := "setTimeout(() => window.location.reload())"
+	return sse.ExecuteScript(js)
 }
