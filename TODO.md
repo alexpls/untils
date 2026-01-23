@@ -5,8 +5,7 @@
 - [ ] Improvement: Request ID on all logs (context logger?)
 - [ ] Improvement: Better use of context. Should pass it all the way down and rely less on closer functions during app startup/shutdown
 - [ ] Improvement: Pass the user's timezone as context to all prompts
-- [ ] Refactor: Put river into its own db schema?
-- [ ] Feature: Checks should be able to have multiple results
+- [ ] Feature: Checks should be able to produce multiple results
 - [ ] Refactor: Forms should have some helpers extracted
 - [ ] Improvement: Pushover form should show a spinner while we're validating the token
 - [ ] Improvement: Triage workflow should document steps it took to get to a satisfactory answer so future workflows can do them too - possibly able to skip making new searches this way and just re-request existing URLs?
@@ -22,8 +21,8 @@
 - [ ] Improvement: page titles
 - [ ] Refactor: make new tool creation less of a trek through various parts of the codebase
 - [ ] Fix: should be able to visit check pages for incomplete checks - but right now that errors
-
-## Watching
+- [ ] Improvement: special logic when checking prices for things, should include things like finding the cheapest price and reporting on it. Not including multiple store names.
+- [ ] Refactor: could check_events and llm_conversation concepts be rolled into one? They have some crossover currently
 
 ## Done
 
