@@ -16,7 +16,6 @@
 - [ ] Feature: "fire and forget" way to set up monitors, if you don't wanna sit around waiting to confirm that the first check looks good
 - [ ] Fix: when timeago is "5 hours 59 minutes in the future" it will return "in 5 hours", when it should really round to the nearest hour and return "in 6 hours"
 - [ ] Improvement: should be able to checkpoint progress in conversation with LLM and resume it on server restart
-- [ ] Fix: why did a panic happen during job checks where previewing tried to transition to validating?
 - [ ] Improvement: page titles
 - [ ] Refactor: make new tool creation less of a trek through various parts of the codebase
 - [ ] Fix: should be able to visit check pages for incomplete checks - but right now that errors
@@ -25,6 +24,7 @@
 
 ## Done
 
+- [x] Fix: why did a panic happen during job checks where previewing tried to transition to validating?
 - [x] Improvement: The search tool should not be able to be called with the same URL multiple times in a row
 - [x] Fix: don't allow changing the subject while monitor is previewing. That's an invalid status transition.
 - [x] Fix: Did i break feedback?
