@@ -9,7 +9,6 @@
 - [ ] Refactor: Forms should have some helpers extracted
 - [ ] Improvement: Pushover form should show a spinner while we're validating the token
 - [ ] Improvement: Triage workflow should document steps it took to get to a satisfactory answer so future workflows can do them too - possibly able to skip making new searches this way and just re-request existing URLs?
-- [ ] Improvement: The search tool should not be able to be called with the same URL multiple times in a row
 - [ ] Improvement: The click tool should emit the URL of the new page it landed on as a navigation event so it shows up on the UI
 - [ ] Fix: When restarting a check (e.g. after server restart), make sure to clear old check events for it
 - [ ] Fix: Need an anchored positioning tooltip polyfill for Firefox
@@ -26,6 +25,7 @@
 
 ## Done
 
+- [x] Improvement: The search tool should not be able to be called with the same URL multiple times in a row
 - [x] Fix: don't allow changing the subject while monitor is previewing. That's an invalid status transition.
 - [x] Fix: Did i break feedback?
 - [x] Fix: draft monitors should show up on monitor page as drafts

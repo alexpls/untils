@@ -25,6 +25,7 @@ type checker struct {
 	queries        *models.Queries
 	conversationID int64
 	turn           int
+	priorCalls     []toolCall
 }
 
 func newChecker(service *Service, c EventsChan, pool *pgxpool.Pool, queries *models.Queries) *checker {
@@ -170,19 +171,25 @@ func (c *checker) perform(ctx context.Context, params *CheckParams) (*models.Che
 
 func (c *checker) callTools(ctx context.Context, toolCalls []responses.ResponseFunctionToolCall) error {
 	for _, call := range toolCalls {
+		c.messages = append(c.messages, toolCallMessage(call))
+
 		result, err := c.callTool(ctx, call.Name, call.Arguments)
 		if err != nil {
 			c.service.logger.Error("error executing tool call", "tool", call.Name, "error", err)
-			errorMsg := "error executing tool call: " + err.Error()
-			c.messages = append(c.messages, systemMessage(errorMsg))
-			if logErr := c.logMessage(ctx, models.LLMMessageRoleSystem, map[string]string{"content": errorMsg}, 0); logErr != nil {
+			errorMsg := "error: " + err.Error()
+			c.messages = append(c.messages, toolOutputMessage(call.CallID, errorMsg))
+			if logErr := c.logMessage(ctx, models.LLMMessageRoleTool, map[string]any{
+				"call_id": call.CallID,
+				"name":    call.Name,
+				"output":  errorMsg,
+			}, 0); logErr != nil {
 				return fmt.Errorf("failed to log tool error message: %w", logErr)
 			}
 			continue
 		}
-		c.messages = append(c.messages, toolOutputMessage(call.ID, result))
+		c.messages = append(c.messages, toolOutputMessage(call.CallID, result))
 		if logErr := c.logMessage(ctx, models.LLMMessageRoleTool, map[string]any{
-			"call_id": call.ID,
+			"call_id": call.CallID,
 			"name":    call.Name,
 			"output":  result,
 		}, 0); logErr != nil {
@@ -194,11 +201,12 @@ func (c *checker) callTools(ctx context.Context, toolCalls []responses.ResponseF
 
 func (c *checker) callTool(ctx context.Context, name string, args string) (string, error) {
 	toolStart := time.Now()
-	c.service.logger.Debug("tool call started", "tool", name)
+	c.service.logger.Debug("tool call started", "tool", name, "args", args)
 
 	tc := &toolContext{
-		ctx:     ctx,
-		service: c.service,
+		ctx:        ctx,
+		service:    c.service,
+		priorCalls: &c.priorCalls,
 		browser: func() *browser.BrowserCtx {
 			if c.browserCtx == nil {
 				browserInitStart := time.Now()
@@ -220,12 +228,19 @@ func (c *checker) callTool(ctx context.Context, name string, args string) (strin
 		return "", err
 	}
 
+	if validation := tool.validate(); validation != "" {
+		return "", fmt.Errorf("error: %s", validation)
+	}
+
 	select {
 	case c.c <- tool.checkEvent():
 	default:
 	}
 
 	result, err := tool.call()
+	if err == nil {
+		c.priorCalls = append(c.priorCalls, *tool)
+	}
 	c.service.logger.Debug("tool call completed", "tool", name, "duration", time.Since(toolStart))
 	return result, err
 }

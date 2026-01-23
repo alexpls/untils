@@ -25,15 +25,18 @@ var toolRegistry = map[string]toolBuilder{
 // toolContext provides dependencies that tools need for execution.
 // It must be created per tool call.
 type toolContext struct {
-	ctx     context.Context
-	service *Service
-	browser func() *browser.BrowserCtx
+	ctx        context.Context
+	service    *Service
+	browser    func() *browser.BrowserCtx
+	priorCalls *[]toolCall
 }
 
 // toolCall holds a tool call ready for execution with pre-parsed params.
 type toolCall struct {
 	call       func() (string, error)
+	validate   func() string
 	checkEvent func() CheckEvent
+	params     any
 }
 
 // toolBuilder builds a prepared tool call from raw JSON args.
@@ -44,6 +47,7 @@ type tool[P any] struct {
 	description string
 	execute     func(tc *toolContext, params P) (string, error)
 	checkEvent  func(tc *toolContext, params P) CheckEvent
+	validate    func(tc *toolContext, params P) string
 }
 
 // toOpenAIParam returns the tool definition as expected by the OpenAI API.
@@ -67,6 +71,8 @@ func (t tool[P]) build(tc *toolContext, args string) (*toolCall, error) {
 	return &toolCall{
 		call:       func() (string, error) { return t.execute(tc, params) },
 		checkEvent: func() CheckEvent { return t.checkEvent(tc, params) },
+		validate:   func() string { return t.validate(tc, params) },
+		params:     params,
 	}, nil
 }
 
@@ -74,6 +80,13 @@ func (t tool[P]) build(tc *toolContext, args string) (*toolCall, error) {
 
 type browserNavigateParams struct {
 	URL string `json:"url"`
+}
+
+func (p browserNavigateParams) equalTo(other any) bool {
+	if o, ok := other.(browserNavigateParams); ok {
+		return p.URL == o.URL
+	}
+	return false
 }
 
 var browserNavigateTool = tool[browserNavigateParams]{
@@ -109,6 +122,14 @@ var browserNavigateTool = tool[browserNavigateParams]{
 			},
 		}
 	},
+	validate: func(tc *toolContext, params browserNavigateParams) string {
+		for _, prior := range *tc.priorCalls {
+			if params.equalTo(prior.params) {
+				return "navigating to the same url multiple times is not allowed. try browsing to a different url"
+			}
+		}
+		return ""
+	},
 }
 
 type browserClickParams struct {
@@ -141,9 +162,17 @@ var browserClickTool = tool[browserClickParams]{
 			Details: models.MonitorCheckEventBrowserClickDetails{},
 		}
 	},
+	validate: func(tc *toolContext, params browserClickParams) string {
+		return ""
+	},
 }
 
 type browserWaitParams struct{}
+
+func (p browserWaitParams) equalTo(other any) bool {
+	_, ok := other.(browserWaitParams)
+	return ok
+}
 
 var browserWaitTool = tool[browserWaitParams]{
 	name:        "browser_wait",
@@ -170,10 +199,28 @@ var browserWaitTool = tool[browserWaitParams]{
 			Details: models.MonitorCheckEventBrowserWaitDetails{},
 		}
 	},
+	validate: func(tc *toolContext, params browserWaitParams) string {
+		l := len(*tc.priorCalls)
+		if l > 0 {
+			last := (*tc.priorCalls)[l-1]
+			if params.equalTo(last) {
+				return "can't wait multiple times consecutively. try using another tool " +
+					"to navigate to a new page."
+			}
+		}
+		return ""
+	},
 }
 
 type searchParams struct {
 	Query string `json:"query"`
+}
+
+func (p searchParams) equalTo(other any) bool {
+	if o, ok := other.(searchParams); ok {
+		return p.Query == o.Query
+	}
+	return false
 }
 
 var searchTool = tool[searchParams]{
@@ -207,6 +254,15 @@ var searchTool = tool[searchParams]{
 			},
 		}
 	},
+	validate: func(tc *toolContext, params searchParams) string {
+		for _, prior := range *tc.priorCalls {
+			if params.equalTo(prior.params) {
+				return "searching with the same query twice is not allowed. " +
+					"try adjusting the query or using an existing result from a previous search"
+			}
+		}
+		return ""
+	},
 }
 
 func toolOutputMessage(callID, output string) responses.ResponseInputItemUnionParam {
@@ -216,6 +272,16 @@ func toolOutputMessage(callID, output string) responses.ResponseInputItemUnionPa
 			Output: responses.ResponseInputItemFunctionCallOutputOutputUnionParam{
 				OfString: openai.String(output),
 			},
+		},
+	}
+}
+
+func toolCallMessage(call responses.ResponseFunctionToolCall) responses.ResponseInputItemUnionParam {
+	return responses.ResponseInputItemUnionParam{
+		OfFunctionCall: &responses.ResponseFunctionToolCallParam{
+			CallID:    call.CallID,
+			Name:      call.Name,
+			Arguments: call.Arguments,
 		},
 	}
 }
