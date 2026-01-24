@@ -1,22 +1,19 @@
 package monitor
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
-	"net/url"
 
 	"github.com/alexpls/untils/internal/components"
 	"github.com/alexpls/untils/internal/components/app"
-	"github.com/alexpls/untils/internal/components/icons"
 	"github.com/alexpls/untils/internal/models"
 	"github.com/starfederation/datastar-go/datastar"
 )
 
 type CheckViewData struct {
-	Check        *models.GetCheckWithMonitorRow
-	Conversation *models.LlmConversation
-	Result       *models.MonitorResult
+	Check     *models.GetCheckWithMonitorRow
+	Messages  []*models.LLMParsedMessage
+	ToolCalls []models.LLMToolCall
+	Result    *models.MonitorResult
 }
 
 templ CheckViewPage(data CheckViewData) {
@@ -80,11 +77,11 @@ templ CheckView(data CheckViewData) {
 						</div>
 					}
 				</div>
-				if data.Conversation != nil && len(data.Conversation.Messages) > 0 {
+				if len(data.Messages) > 0 {
 					<div class="p-4 bg-base-100 rounded border border-base-content/10">
 						<div class="font-semibold uppercase text-xs mb-3">Debug log</div>
 						<div class="space-y-3">
-							for _, msg := range data.Conversation.Messages {
+							for _, msg := range data.Messages {
 								@conversationTurnItem(msg)
 							}
 						</div>
@@ -94,15 +91,12 @@ templ CheckView(data CheckViewData) {
 			<div class="lg:col-span-4 m-4 p-4 border border-base-content/10 rounded h-fit">
 				<div>
 					<div class="font-semibold uppercase text-xs mb-3">Check timeline</div>
-					if data.Conversation != nil {
-						{{ toolCalls := data.Conversation.Messages.ExtractToolCalls() }}
-						if len(toolCalls) > 0 {
-							<ul class="text-sm text-base-content/70 space-y-1">
-								for _, call := range toolCalls {
-									@toolCallTimelineItem(call, false)
-								}
-							</ul>
-						}
+					if len(data.ToolCalls) > 0 {
+						<ul class="text-sm text-base-content/70 space-y-1">
+							for _, call := range data.ToolCalls {
+								@toolCallTimelineItem(call, false)
+							}
+						</ul>
 					}
 				</div>
 			</div>
@@ -110,7 +104,7 @@ templ CheckView(data CheckViewData) {
 	</div>
 }
 
-templ conversationTurnItem(msg *models.LLMConversationMessage) {
+templ conversationTurnItem(msg *models.LLMParsedMessage) {
 	<div class="border border-base-content/10 rounded p-3">
 		<div class="flex items-center justify-between text-xs text-base-content/50 mb-2">
 			<div class="flex items-center gap-2">
@@ -131,141 +125,30 @@ templ conversationTurnItem(msg *models.LLMConversationMessage) {
 	</div>
 }
 
-templ conversationMessageContent(msg *models.LLMConversationMessage) {
-	switch msg.Role {
-		case models.LLMMessageRoleSystem, models.LLMMessageRoleUser:
-			if content := extractContent(msg.Body); content != "" {
-				<div class="whitespace-pre-wrap text-base-content/80 bg-base-200/50 p-2 rounded max-h-48 overflow-y-auto">{ content }</div>
-			} else {
-				@rawJSONCollapse(msg.Body)
-			}
-		case models.LLMMessageRoleTool:
-			if toolInfo := extractToolInfo(msg.Body); toolInfo != nil {
-				<div class="space-y-1">
-					<div class="flex items-center gap-2">
-						<span class="font-mono text-xs bg-base-300 px-1.5 py-0.5 rounded">{ toolInfo.Name }</span>
-						<span class="text-xs text-base-content/40 font-mono truncate">{ toolInfo.CallID }</span>
+templ conversationMessageContent(msg *models.LLMParsedMessage) {
+	if msg.TextContent != "" {
+		<div class="whitespace-pre-wrap text-base-content/80 bg-base-200/50 p-2 rounded max-h-48 overflow-y-auto">{ msg.TextContent }</div>
+	} else if msg.ToolResult != nil {
+		<div class="space-y-1">
+			<div class="flex items-center gap-2">
+				<span class="font-mono text-xs bg-base-300 px-1.5 py-0.5 rounded">{ msg.ToolResult.Name }</span>
+				<span class="text-xs text-base-content/40 font-mono truncate">{ msg.ToolResult.CallID }</span>
+			</div>
+			<pre class="text-xs overflow-x-auto whitespace-pre-wrap break-all bg-base-200/50 p-2 rounded max-h-64 overflow-y-auto"><code>{ msg.ToolResult.Output }</code></pre>
+		</div>
+	} else if msg.AssistantContent != nil {
+		if len(msg.AssistantContent.ToolCalls) > 0 {
+			<div class="space-y-2">
+				for _, call := range msg.AssistantContent.ToolCalls {
+					<div class="bg-base-200/50 p-2 rounded text-sm text-base-content/80">
+						@toolCallDisplay(call)
 					</div>
-					<details class="collapse collapse-arrow bg-base-200/50">
-						<summary class="collapse-title text-sm min-h-0 py-2 px-3">
-							<span class="text-base-content/70">Output</span>
-							<span class="text-xs text-base-content/40 ml-2">({ fmt.Sprintf("%d chars", len(toolInfo.Output)) })</span>
-						</summary>
-						<div class="collapse-content">
-							<pre class="text-xs overflow-x-auto whitespace-pre-wrap break-all bg-base-300/50 p-2 rounded max-h-64 overflow-y-auto"><code>{ toolInfo.Output }</code></pre>
-						</div>
-					</details>
-				</div>
-			} else {
-				@rawJSONCollapse(msg.Body)
-			}
-		case models.LLMMessageRoleAssistant:
-			@rawJSONCollapse(msg.Body)
-		default:
-			@rawJSONCollapse(msg.Body)
-	}
-}
-
-templ rawJSONCollapse(body json.RawMessage) {
-	<details class="collapse collapse-arrow bg-base-200/50">
-		<summary class="collapse-title text-sm min-h-0 py-2 px-3">
-			<span class="text-base-content/70">Raw JSON</span>
-			<span class="text-xs text-base-content/40 ml-2">({ fmt.Sprintf("%d bytes", len(body)) })</span>
-		</summary>
-		<div class="collapse-content">
-			<pre class="text-xs overflow-x-auto whitespace-pre-wrap break-all bg-base-300/50 p-2 rounded max-h-96 overflow-y-auto"><code>{ formatJSON(body) }</code></pre>
-		</div>
-	</details>
-}
-
-func formatJSON(data json.RawMessage) string {
-	var buf bytes.Buffer
-	if err := json.Indent(&buf, data, "", "  "); err != nil {
-		return string(data)
-	}
-	return buf.String()
-}
-
-func extractContent(body json.RawMessage) string {
-	var data struct {
-		Content string `json:"content"`
-	}
-	if err := json.Unmarshal(body, &data); err != nil {
-		return ""
-	}
-	return data.Content
-}
-
-type toolInfoResult struct {
-	CallID string
-	Name   string
-	Output string
-}
-
-func extractToolInfo(body json.RawMessage) *toolInfoResult {
-	var data struct {
-		CallID string `json:"call_id"`
-		Name   string `json:"name"`
-		Output string `json:"output"`
-	}
-	if err := json.Unmarshal(body, &data); err != nil {
-		return nil
-	}
-	if data.Name == "" {
-		return nil
-	}
-	return &toolInfoResult{
-		CallID: data.CallID,
-		Name:   data.Name,
-		Output: data.Output,
-	}
-}
-
-templ toolCallTimelineItem(call models.LLMToolCall, latest bool) {
-	<li class="flex py-0.5 items-start justify-start">
-		<div class="text-base-content/30 mr-2 mt-0.5">
-			if latest {
-				@icons.Loader(icons.IconParams{Size: 16, Classes: templ.Classes("animate-spin")})
-			} else {
-				@icons.CircleCheck(icons.IconParams{Size: 16})
-			}
-		</div>
-		<div class={ templ.KV("animate-pulse", latest) }>
-			{ toolDisplayText(call) }&hellip;
-		</div>
-		<div class="shrink-0 ml-auto text-xs text-muted tabular-nums">
-			{ components.FormatTime(ctx, call.At) }
-		</div>
-	</li>
-}
-
-// toolDisplayText returns a human-readable description of a tool call for display in the UI.
-func toolDisplayText(call models.LLMToolCall) string {
-	switch call.Name {
-	case "browser_navigate":
-		var params struct {
-			URL string `json:"url"`
+				}
+			</div>
+		} else if msg.AssistantContent.TextOutput != "" {
+			<div class="whitespace-pre-wrap text-base-content/80 bg-base-200/50 p-2 rounded max-h-64 overflow-y-auto text-xs font-mono">{ msg.AssistantContent.TextOutput }</div>
 		}
-		if err := json.Unmarshal([]byte(call.Arguments), &params); err == nil {
-			if u, err := url.Parse(params.URL); err == nil {
-				return fmt.Sprintf("Browsing %q", u.Host)
-			}
-			return fmt.Sprintf("Browsing %q", params.URL)
-		}
-		return "Browsing"
-	case "browser_click":
-		return "Clicking on a link"
-	case "browser_wait":
-		return "Waiting for the page to load"
-	case "search_request":
-		var params struct {
-			Query string `json:"query"`
-		}
-		if err := json.Unmarshal([]byte(call.Arguments), &params); err == nil {
-			return fmt.Sprintf("Searching for %q", params.Query)
-		}
-		return "Searching"
-	default:
-		return fmt.Sprintf("Running %s", call.Name)
+	} else if msg.RawJSON != "" {
+		<pre class="text-xs overflow-x-auto whitespace-pre-wrap break-all bg-base-200/50 p-2 rounded max-h-96 overflow-y-auto"><code>{ msg.RawJSON }</code></pre>
 	}
 }

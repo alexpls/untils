@@ -1,9 +1,9 @@
 package monitor
 
 import (
+	"fmt"
 	"net/url"
 
-	"fmt"
 	"github.com/alexpls/untils/internal/components"
 	"github.com/alexpls/untils/internal/components/app"
 	"github.com/alexpls/untils/internal/components/icons"
@@ -150,31 +150,12 @@ templ inProgressCheckTimelineItem(data inProgressCheckTimelineItemViewData) {
 			if len(data.TimelineEvents) > 0 {
 				<ul class="text-sm text-base-content/50">
 					for i, event := range data.TimelineEvents {
-						@timelineEventInProgressItem(event, i == len(data.TimelineEvents)-1)
+						@toolCallTimelineItem(event.ToLLMToolCall(), i == len(data.TimelineEvents)-1)
 					}
 				</ul>
 			}
 		</div>
 	}
-}
-
-templ timelineEventInProgressItem(row *models.GetTimelineEventsBySourceIDRow, latest bool) {
-	{{ call := row.ToLLMToolCall() }}
-	<li class="flex py-0.5 items-start justify-start">
-		<div class="text-base-content/30 mr-2 mt-0.5">
-			if latest {
-				@icons.Loader(icons.IconParams{Size: 16, Classes: templ.Classes("animate-spin")})
-			} else {
-				@icons.CircleCheck(icons.IconParams{Size: 16})
-			}
-		</div>
-		<div class={ templ.KV("animate-pulse", latest) }>
-			{ toolDisplayText(call) }&hellip;
-		</div>
-		<div class="shrink-0 ml-auto text-xs text-muted tabular-nums">
-			{ components.FormatTime(ctx, call.At) }
-		</div>
-	</li>
 }
 
 templ monitorResultTimelineItem(result *models.MonitorResult, allowFeedback bool) {

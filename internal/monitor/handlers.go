@@ -237,13 +237,15 @@ func (h *Handlers) renderCheckView(ctx context.Context, checkID int64, userID in
 	}
 
 	// Fetch the LLM conversation for this check (may not exist)
-	var conversation *models.LlmConversation
+	var messages []*models.LLMParsedMessage
+	var toolCalls []models.LLMToolCall
 	conv, err := h.queries.GetLLMConversationBySourceID(ctx, h.pool, &models.GetLLMConversationBySourceIDParams{
 		SourceType: models.LlmConversationsSourceCheck,
 		SourceID:   checkID,
 	})
 	if err == nil {
-		conversation = conv
+		messages = conv.Messages.Parse()
+		toolCalls = conv.Messages.ExtractToolCalls()
 	}
 	// Ignore pgx.ErrNoRows - conversation is optional
 
@@ -256,9 +258,10 @@ func (h *Handlers) renderCheckView(ctx context.Context, checkID int64, userID in
 	// Ignore pgx.ErrNoRows - result is optional
 
 	return CheckViewPage(CheckViewData{
-		Check:        check,
-		Conversation: conversation,
-		Result:       result,
+		Check:     check,
+		Messages:  messages,
+		ToolCalls: toolCalls,
+		Result:    result,
 	}), nil
 }
 

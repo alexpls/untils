@@ -1,0 +1,74 @@
+package monitor
+
+import (
+	"fmt"
+	"net/url"
+
+	"github.com/alexpls/untils/internal/components"
+	"github.com/alexpls/untils/internal/components/icons"
+	"github.com/alexpls/untils/internal/models"
+)
+
+// toolCallTimelineItem renders a tool call as a timeline item, with optional
+// "latest" styling to indicate the most recent item (shows spinner vs checkmark).
+templ toolCallTimelineItem(call models.LLMToolCall, latest bool) {
+	<li class="flex py-0.5 items-start justify-start">
+		<div class="text-base-content/30 mr-2 mt-0.5">
+			if latest {
+				@icons.Loader(icons.IconParams{Size: 16, Classes: templ.Classes("animate-spin")})
+			} else {
+				@icons.CircleCheck(icons.IconParams{Size: 16})
+			}
+		</div>
+		<div class={ templ.KV("animate-pulse", latest) }>
+			@toolCallDisplay(call)
+			&hellip;
+		</div>
+		<div class="shrink-0 ml-auto text-xs text-muted tabular-nums">
+			{ components.FormatTime(ctx, call.At) }
+		</div>
+	</li>
+}
+
+// toolCallDisplay renders the display text for a tool call, including links where appropriate.
+templ toolCallDisplay(call models.LLMToolCall) {
+	if params := call.BrowserNavigateParams(); params != nil {
+		{{ host := urlHost(params.URL) }}
+		Browsing <a href={ templ.SafeURL(params.URL) } target="_blank" rel="noreferrer noopener" class="link">{ host }</a>
+	} else if params := call.SearchRequestParams(); params != nil {
+		Searching for "{ params.Query }"
+	} else if call.Name == "browser_click" {
+		Clicking on a link
+	} else if call.Name == "browser_wait" {
+		Waiting for the page to load
+	} else {
+		Running { call.Name }
+	}
+}
+
+// urlHost extracts the host from a URL, returning the original string if parsing fails.
+func urlHost(rawURL string) string {
+	if u, err := url.Parse(rawURL); err == nil && u.Host != "" {
+		return u.Host
+	}
+	return rawURL
+}
+
+// toolCallDisplayText returns a plain text description of the tool call.
+// Used in contexts where HTML is not appropriate.
+func toolCallDisplayText(call models.LLMToolCall) string {
+	if params := call.BrowserNavigateParams(); params != nil {
+		return fmt.Sprintf("Browsing %q", urlHost(params.URL))
+	}
+	if params := call.SearchRequestParams(); params != nil {
+		return fmt.Sprintf("Searching for %q", params.Query)
+	}
+	switch call.Name {
+	case "browser_click":
+		return "Clicking on a link"
+	case "browser_wait":
+		return "Waiting for the page to load"
+	default:
+		return fmt.Sprintf("Running %s", call.Name)
+	}
+}

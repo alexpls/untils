@@ -9,6 +9,7 @@ import (
 
 	"github.com/alexpls/untils/internal/browser"
 	"github.com/alexpls/untils/internal/logging"
+	"github.com/alexpls/untils/internal/models"
 	"github.com/alexpls/untils/internal/search"
 	"github.com/openai/openai-go/v3"
 	"github.com/openai/openai-go/v3/responses"
@@ -74,21 +75,10 @@ func (t tool[P]) build(tc *toolContext, args string) (*toolCall, error) {
 
 // tool definitions
 
-type browserNavigateParams struct {
-	URL string `json:"url"`
-}
-
-func (p browserNavigateParams) equalTo(other any) bool {
-	if o, ok := other.(browserNavigateParams); ok {
-		return p.URL == o.URL
-	}
-	return false
-}
-
-var browserNavigateTool = tool[browserNavigateParams]{
+var browserNavigateTool = tool[models.BrowserNavigateParams]{
 	name:        "browser_navigate",
 	description: "Use a web browser to navigate to the given URL and retrieve the page contents",
-	execute: func(tc *toolContext, p browserNavigateParams) (string, error) {
+	execute: func(tc *toolContext, p models.BrowserNavigateParams) (string, error) {
 		tc.service.logger.DebugContext(tc.ctx, "browser_navigate started", "url", p.URL)
 		start := time.Now()
 
@@ -110,13 +100,8 @@ var browserNavigateTool = tool[browserNavigateParams]{
 		tc.service.logger.DebugContext(tc.ctx, "browser_navigate completed", "url", p.URL, "total_duration", time.Since(start))
 		return res.String(), nil
 	},
-	validate: func(tc *toolContext, params browserNavigateParams) string {
-		for _, prior := range *tc.priorCalls {
-			if params.equalTo(prior.params) {
-				return "navigating to the same url multiple times is not allowed. try browsing to a different url"
-			}
-		}
-		return ""
+	validate: func(tc *toolContext, params models.BrowserNavigateParams) string {
+		return noDuplicateCallsValidator(tc, params, "navigating to the same url multiple times is not allowed. try browsing to a different url")
 	},
 }
 
@@ -188,21 +173,10 @@ var browserWaitTool = tool[browserWaitParams]{
 	},
 }
 
-type searchParams struct {
-	Query string `json:"query"`
-}
-
-func (p searchParams) equalTo(other any) bool {
-	if o, ok := other.(searchParams); ok {
-		return p.Query == o.Query
-	}
-	return false
-}
-
-var searchTool = tool[searchParams]{
+var searchTool = tool[models.SearchRequestParams]{
 	name:        "search_request",
 	description: "Use a web search engine to search for the given query and retrieve relevant results",
-	execute: func(tc *toolContext, p searchParams) (string, error) {
+	execute: func(tc *toolContext, p models.SearchRequestParams) (string, error) {
 		tc.service.logger.DebugContext(tc.ctx, "search_request started", "query", p.Query)
 		start := time.Now()
 
@@ -222,14 +196,9 @@ var searchTool = tool[searchParams]{
 		tc.service.logger.DebugContext(tc.ctx, "search_request completed", "query", p.Query, "total_duration", time.Since(start))
 		return sb.String(), nil
 	},
-	validate: func(tc *toolContext, params searchParams) string {
-		for _, prior := range *tc.priorCalls {
-			if params.equalTo(prior.params) {
-				return "searching with the same query twice is not allowed. " +
-					"try adjusting the query or using an existing result from a previous search"
-			}
-		}
-		return ""
+	validate: func(tc *toolContext, params models.SearchRequestParams) string {
+		return noDuplicateCallsValidator(tc, params, "searching with the same query twice is not allowed. "+
+			"try adjusting the query or using an existing result from a previous search")
 	},
 }
 
@@ -252,4 +221,14 @@ func toolCallMessage(call responses.ResponseFunctionToolCall) responses.Response
 			Arguments: call.Arguments,
 		},
 	}
+}
+
+// noDuplicateCallsValidator returns a validation error if params matches any prior call.
+func noDuplicateCallsValidator[P models.ToolParams](tc *toolContext, params P, errMsg string) string {
+	for _, prior := range *tc.priorCalls {
+		if params.Equal(prior.params) {
+			return errMsg
+		}
+	}
+	return ""
 }
