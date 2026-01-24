@@ -12,6 +12,7 @@ import (
 	"github.com/alexpls/untils/internal/db"
 	"github.com/alexpls/untils/internal/email"
 	"github.com/alexpls/untils/internal/llm"
+	"github.com/alexpls/untils/internal/logging"
 	"github.com/alexpls/untils/internal/models"
 	"github.com/alexpls/untils/internal/monitor"
 	"github.com/alexpls/untils/internal/must"
@@ -73,21 +74,29 @@ func createApp(c *config) (*app, func()) {
 
 	switch c.env {
 	case "dev":
-		slogHandler = tint.NewHandler(os.Stdout, &tint.Options{
-			Level:      slog.LevelDebug,
-			TimeFormat: time.Kitchen,
-		})
-		slogRiverHandler = tint.NewHandler(os.Stdout, &tint.Options{
-			Level:      slog.LevelInfo,
-			TimeFormat: time.Kitchen,
-		})
+		slogHandler = logging.ContextHandler{
+			Handler: tint.NewHandler(os.Stdout, &tint.Options{
+				Level:      slog.LevelDebug,
+				TimeFormat: time.Kitchen,
+			}),
+		}
+		slogRiverHandler = logging.ContextHandler{
+			Handler: tint.NewHandler(os.Stdout, &tint.Options{
+				Level:      slog.LevelInfo,
+				TimeFormat: time.Kitchen,
+			}),
+		}
 	default:
-		slogHandler = slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
-			Level: slog.LevelInfo,
-		})
-		slogRiverHandler = slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
-			Level: slog.LevelInfo,
-		})
+		slogHandler = logging.ContextHandler{
+			Handler: slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+				Level: slog.LevelInfo,
+			}),
+		}
+		slogRiverHandler = logging.ContextHandler{
+			Handler: slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+				Level: slog.LevelInfo,
+			}),
+		}
 	}
 
 	a.logger = slog.New(slogHandler).With("source", "server")
@@ -173,15 +182,14 @@ func createApp(c *config) (*app, func()) {
 	go func() {
 		if err := a.dbListener.Listen(ctx); err != nil {
 			if !errors.Is(err, context.Canceled) {
-				a.logger.Error("db listener error", "error", err)
+				a.logger.ErrorContext(ctx, "db listener error", "error", err)
 			}
 		}
 	}()
 
 	closer := func() {
-		a.logger.Info("gracefully shutting down...")
-
 		ctxTimeout, ctxTimeoutCancel := context.WithTimeout(context.Background(), 5*time.Second)
+		a.logger.InfoContext(ctxTimeout, "gracefully shutting down...")
 		defer ctxTimeoutCancel()
 
 		cancelFn()
@@ -191,7 +199,7 @@ func createApp(c *config) (*app, func()) {
 		select {
 		case <-a.river.Stopped():
 		case <-ctxTimeout.Done():
-			a.logger.Error("timeout out while waiting for app context cancellation")
+			a.logger.ErrorContext(ctxTimeout, "timeout out while waiting for app context cancellation")
 		}
 
 		dbCloser()

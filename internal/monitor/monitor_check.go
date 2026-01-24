@@ -98,14 +98,14 @@ func (s *Service) PerformMonitorCheck(
 	userFeedback string,
 ) error {
 	if slices.Contains(MonitorCheckTerminalStatuses, check.Status) {
-		s.logger.Warn("tried to perform a monitor check that is already in a terminal status", "check_id", check.ID, "status", check.Status)
+		s.logger.WarnContext(ctx, "tried to perform a monitor check that is already in a terminal status", "check_id", check.ID, "status", check.Status)
 		return nil
 	}
 
 	monitor, err := s.GetMonitor(ctx, userID, check.MonitorID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			s.logger.Warn("tried to perform a check on a non-existent monitor", "monitor_id", check.MonitorID)
+			s.logger.WarnContext(ctx, "tried to perform a check on a non-existent monitor", "monitor_id", check.MonitorID)
 			return nil
 		}
 		return fmt.Errorf("getting monitor: %w", err)
@@ -149,7 +149,7 @@ func (s *Service) PerformMonitorCheck(
 				Kind:    event.Kind,
 				Details: event.Details,
 			}); err != nil {
-				s.logger.Error("error creating monitor check event", "error", err)
+				s.logger.ErrorContext(ctx, "error creating monitor check event", "error", err)
 			}
 		}
 	}()

@@ -37,7 +37,7 @@ func (h *Handlers) SignInGet(w http.ResponseWriter, r *http.Request) {
 		Return: ret,
 	}
 	if err := SignInPage(data).Render(r.Context(), w); err != nil {
-		h.logger.Error("error rendering sign in page", "error", err)
+		h.logger.ErrorContext(r.Context(), "error rendering sign in page", "error", err)
 	}
 }
 
@@ -45,7 +45,7 @@ func (h *Handlers) SignInGet(w http.ResponseWriter, r *http.Request) {
 func (h *Handlers) SignOutGet(w http.ResponseWriter, r *http.Request) {
 	err := h.sessionManager.Destroy(r, w)
 	if err != nil {
-		h.logger.Error("error destroying session", "error", err)
+		h.logger.ErrorContext(r.Context(), "error destroying session", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -56,7 +56,7 @@ func (h *Handlers) SignOutGet(w http.ResponseWriter, r *http.Request) {
 func (h *Handlers) SignInPost(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
-		h.logger.Error("error parsing sign in form", "error", err)
+		h.logger.ErrorContext(r.Context(), "error parsing sign in form", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -65,17 +65,17 @@ func (h *Handlers) SignInPost(w http.ResponseWriter, r *http.Request) {
 	password := r.Form.Get("password")
 	ret := r.Form.Get("return")
 
-	h.logger.Info("signing in", "email", email)
+	h.logger.InfoContext(r.Context(), "signing in", "email", email)
 
 	user, err := h.auth.GetUserByEmailPassword(r.Context(), email, password)
 	if errors.Is(err, ErrNoUser) {
 		if err := SignInPage(SignInData{Failed: true, Email: email, Return: ret}).Render(r.Context(), w); err != nil {
-			h.logger.Error("error rendering sign in page", "error", err)
+			h.logger.ErrorContext(r.Context(), "error rendering sign in page", "error", err)
 		}
 		return
 	}
 	if err != nil {
-		h.logger.Error("error processing sign in", "error", err)
+		h.logger.ErrorContext(r.Context(), "error processing sign in", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -83,7 +83,7 @@ func (h *Handlers) SignInPost(w http.ResponseWriter, r *http.Request) {
 	sess := h.sessionManager.New(r, w)
 	sess.Data.UserID = user.ID
 	if err = h.sessionManager.Save(r); err != nil {
-		h.logger.Error("error saving session", "error", err)
+		h.logger.ErrorContext(r.Context(), "error saving session", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}

@@ -29,28 +29,28 @@ func main() {
 		srvErrs := make(chan error, 1)
 
 		go func() {
-			a.logger.Info("starting http server", "port", c.port)
+			a.logger.InfoContext(ctx, "starting http server", "port", c.port)
 			srvErrs <- srv.ListenAndServe()
 		}()
 
 		select {
 		case err := <-srvErrs:
-			a.logger.Error("http server error", "error", err)
+			a.logger.ErrorContext(ctx, "http server error", "error", err)
 			return
 		case <-ctx.Done():
-			a.logger.Info("http server received shutdown signal")
+			a.logger.InfoContext(ctx, "http server received shutdown signal")
 
 			tctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 			defer cancel()
 
 			if err := srv.Shutdown(tctx); err != nil {
-				a.logger.Error("graceful http shutdown failed", "error", err)
+				a.logger.ErrorContext(tctx, "graceful http shutdown failed", "error", err)
 				if err := srv.Close(); err != nil {
-					a.logger.Error("forcing http server close failed", "error", err)
+					a.logger.ErrorContext(tctx, "forcing http server close failed", "error", err)
 				}
 			}
 
-			a.logger.Info("http server stopped")
+			a.logger.InfoContext(tctx, "http server stopped")
 		}
 	case "seed":
 		globalCfg := parseSeed()

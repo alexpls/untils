@@ -2,7 +2,6 @@
 
 - [ ] Feature: Allow switching API providers between x.ai and OpenAI on startup
 - [ ] Feature: User signup
-- [ ] Improvement: Request ID on all logs (context logger?)
 - [ ] Improvement: Better use of context. Should pass it all the way down and rely less on closer functions during app startup/shutdown
 - [ ] Improvement: Pass the user's timezone as context to all prompts
 - [ ] Feature: Checks should be able to produce multiple results
@@ -24,6 +23,7 @@
 
 ## Done
 
+- [x] Improvement: Request ID on all logs (context logger?)
 - [x] Fix: why did a panic happen during job checks where previewing tried to transition to validating?
 - [x] Improvement: The search tool should not be able to be called with the same URL multiple times in a row
 - [x] Fix: don't allow changing the subject while monitor is previewing. That's an invalid status transition.

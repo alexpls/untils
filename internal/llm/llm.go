@@ -48,7 +48,7 @@ func (s *Service) response(ctx context.Context, params responses.ResponseNewPara
 
 	cost, err := calculateCost(modelNonReasoning, resp)
 	if err != nil {
-		s.logger.Error("failed to calculate cost", "error", err)
+		s.logger.ErrorContext(ctx, "failed to calculate cost", "error", err)
 	} else {
 		turn.addCost(cost)
 	}

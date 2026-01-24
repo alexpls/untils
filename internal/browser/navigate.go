@@ -57,7 +57,7 @@ func NewBrowser(parentCtx context.Context, logger *slog.Logger) (BrowserCtx, con
 
 func (ctx *BrowserCtx) Click(idStr string) (*Page, error) {
 	start := time.Now()
-	ctx.logger.Debug("clicking node", slog.String("id", idStr))
+	ctx.logger.DebugContext(ctx.Context, "clicking node", slog.String("id", idStr))
 
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
@@ -86,23 +86,23 @@ func (ctx *BrowserCtx) Click(idStr string) (*Page, error) {
 	); err != nil {
 		return nil, fmt.Errorf("clicking node: %w", err)
 	}
-	ctx.logger.Debug("click action and network idle completed", "duration", time.Since(clickActionStart))
+	ctx.logger.DebugContext(ctx.Context, "click action and network idle completed", "duration", time.Since(clickActionStart))
 
 	pageResultStart := time.Now()
 	page, err := pageResult(ctx)
 	if err != nil {
 		return nil, err
 	}
-	ctx.logger.Debug("page result extracted after click", "duration", time.Since(pageResultStart))
+	ctx.logger.DebugContext(ctx.Context, "page result extracted after click", "duration", time.Since(pageResultStart))
 
-	ctx.logger.Debug("clicked node", slog.String("id", idStr), slog.String("new_url", page.URL), "total_duration", time.Since(start))
+	ctx.logger.DebugContext(ctx.Context, "clicked node", slog.String("id", idStr), slog.String("new_url", page.URL), "total_duration", time.Since(start))
 
 	return page, nil
 }
 
 func (ctx *BrowserCtx) Navigate(path string) (*Page, error) {
 	start := time.Now()
-	ctx.logger.Debug("navigating to page", slog.String("url", path))
+	ctx.logger.DebugContext(ctx.Context, "navigating to page", slog.String("url", path))
 
 	navigateStart := time.Now()
 	if err := chromedp.Run(ctx,
@@ -113,14 +113,14 @@ func (ctx *BrowserCtx) Navigate(path string) (*Page, error) {
 	); err != nil {
 		return nil, err
 	}
-	ctx.logger.Debug("navigation and network idle completed", "duration", time.Since(navigateStart))
+	ctx.logger.DebugContext(ctx.Context, "navigation and network idle completed", "duration", time.Since(navigateStart))
 
 	pageResultStart := time.Now()
 	page, err := pageResult(ctx)
 	if err != nil {
 		return nil, err
 	}
-	ctx.logger.Debug("page result extracted", "duration", time.Since(pageResultStart), "total_duration", time.Since(start))
+	ctx.logger.DebugContext(ctx.Context, "page result extracted", "duration", time.Since(pageResultStart), "total_duration", time.Since(start))
 
 	return page, nil
 }
@@ -135,7 +135,7 @@ func pageResult(ctx *BrowserCtx) (*Page, error) {
 	); err != nil {
 		return nil, err
 	}
-	ctx.logger.Debug("got page location", "duration", time.Since(locationStart))
+	ctx.logger.DebugContext(ctx.Context, "got page location", "duration", time.Since(locationStart))
 
 	u, err := url.Parse(urlStr)
 	if err != nil {
@@ -155,13 +155,13 @@ func pageResult(ctx *BrowserCtx) (*Page, error) {
 	); err != nil {
 		return nil, err
 	}
-	ctx.logger.Debug("got page data (tidy, title, favicon, accessibility tree)", "duration", time.Since(pageDataStart))
+	ctx.logger.DebugContext(ctx.Context, "got page data (tidy, title, favicon, accessibility tree)", "duration", time.Since(pageDataStart))
 
 	treeStringStart := time.Now()
 	pageContents := tree.String()
-	ctx.logger.Debug("accessibility tree stringified", "duration", time.Since(treeStringStart), "content_length", len(pageContents))
+	ctx.logger.DebugContext(ctx.Context, "accessibility tree stringified", "duration", time.Since(treeStringStart), "content_length", len(pageContents))
 
-	ctx.logger.Debug("page result completed", "total_duration", time.Since(start))
+	ctx.logger.DebugContext(ctx.Context, "page result completed", "total_duration", time.Since(start))
 
 	return &Page{
 		URL:        urlStr,
@@ -173,7 +173,7 @@ func pageResult(ctx *BrowserCtx) (*Page, error) {
 
 // CurrentPage returns the current page contents without navigating
 func (ctx *BrowserCtx) CurrentPage() (*Page, error) {
-	ctx.logger.Debug("getting current page")
+	ctx.logger.DebugContext(ctx.Context, "getting current page")
 	start := time.Now()
 
 	page, err := pageResult(ctx)
@@ -181,7 +181,7 @@ func (ctx *BrowserCtx) CurrentPage() (*Page, error) {
 		return nil, err
 	}
 
-	ctx.logger.Debug("current page retrieved", "url", page.URL, "total_duration", time.Since(start))
+	ctx.logger.DebugContext(ctx.Context, "current page retrieved", "url", page.URL, "total_duration", time.Since(start))
 	return page, nil
 }
 

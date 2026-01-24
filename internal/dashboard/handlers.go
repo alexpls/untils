@@ -39,7 +39,7 @@ func (h *Handlers) Get(w http.ResponseWriter, r *http.Request, user *models.User
 		},
 	}
 	if err := DashboardPage(data).Render(r.Context(), w); err != nil {
-		h.logger.Error("error rendering dashboard page", "error", err)
+		h.logger.ErrorContext(r.Context(), "error rendering dashboard page", "error", err)
 	}
 }
 
@@ -57,19 +57,19 @@ func (h *Handlers) Events(w http.ResponseWriter, r *http.Request, user *models.U
 	for {
 		activity, err := h.queries.ListMonitorActivity(r.Context(), h.pool, user.ID)
 		if err != nil {
-			h.logger.Error("error listing monitor activity", "error", err)
+			h.logger.ErrorContext(r.Context(), "error listing monitor activity", "error", err)
 			return
 		}
 
 		checkStats, err := h.queries.GetMonitorCheckStats(r.Context(), h.pool, user.ID)
 		if err != nil {
-			h.logger.Error("error getting monitor check stats", "error", err)
+			h.logger.ErrorContext(r.Context(), "error getting monitor check stats", "error", err)
 			return
 		}
 
 		dailyCheckCounts, err := h.queries.GetDailyMonitorCheckCounts(r.Context(), h.pool, user.ID)
 		if err != nil {
-			h.logger.Error("error getting daily monitor check counts", "error", err)
+			h.logger.ErrorContext(r.Context(), "error getting daily monitor check counts", "error", err)
 			return
 		}
 
@@ -95,7 +95,7 @@ func (h *Handlers) Events(w http.ResponseWriter, r *http.Request, user *models.U
 		}
 
 		if err := sse.PatchElementTempl(comp, viewTransitionOpt); err != nil {
-			h.logger.Error("error patching element", "error", err)
+			h.logger.ErrorContext(sse.Context(), "error patching element", "error", err)
 		}
 
 		select {

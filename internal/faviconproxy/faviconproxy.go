@@ -25,7 +25,7 @@ func Handler(logger *slog.Logger) http.Handler {
 
 		_, err = io.Copy(w, res.Body)
 		if err != nil {
-			logger.Error("error writing favicon response", "error", err)
+			logger.ErrorContext(r.Context(), "error writing favicon response", "error", err)
 		}
 	})
 }

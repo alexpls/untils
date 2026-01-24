@@ -44,13 +44,13 @@ func NewHandlers(service *Service, events *DBEventHandler, queries *models.Queri
 func (h *Handlers) ListGet(w http.ResponseWriter, r *http.Request, user *models.User) {
 	comp, err := h.renderMonitorList(r, user)
 	if err != nil {
-		h.logger.Error("error rendering monitor list", "error", err)
+		h.logger.ErrorContext(r.Context(), "error rendering monitor list", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
 	if err := comp.Render(r.Context(), w); err != nil {
-		h.logger.Error("error rendering monitors list", "error", err)
+		h.logger.ErrorContext(r.Context(), "error rendering monitors list", "error", err)
 	}
 }
 
@@ -62,11 +62,11 @@ func (h *Handlers) ListEventsGet(w http.ResponseWriter, r *http.Request, user *m
 	for {
 		comp, err := h.renderMonitorList(r, user)
 		if err != nil {
-			h.logger.Error("error rendering monitor list", "error", err)
+			h.logger.ErrorContext(sse.Context(), "error rendering monitor list", "error", err)
 			return
 		}
 		if err := ssePatchElementTemplFragment(sse, comp, monitorListFragment); err != nil {
-			h.logger.Error("error sending monitors list SSE patch", "error", err)
+			h.logger.ErrorContext(sse.Context(), "error sending monitors list SSE patch", "error", err)
 			return
 		}
 
@@ -110,13 +110,13 @@ func (h *Handlers) renderMonitorList(r *http.Request, user *models.User) (templ.
 func (h *Handlers) ChecksListGet(w http.ResponseWriter, r *http.Request, user *models.User) {
 	comp, err := h.renderChecksList(r, user)
 	if err != nil {
-		h.logger.Error("error rendering checks list", "error", err)
+		h.logger.ErrorContext(r.Context(), "error rendering checks list", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
 	if err := comp.Render(r.Context(), w); err != nil {
-		h.logger.Error("error rendering checks list", "error", err)
+		h.logger.ErrorContext(r.Context(), "error rendering checks list", "error", err)
 	}
 }
 
@@ -128,11 +128,11 @@ func (h *Handlers) ChecksListEventsGet(w http.ResponseWriter, r *http.Request, u
 	for {
 		comp, err := h.renderChecksList(r, user)
 		if err != nil {
-			h.logger.Error("error rendering checks list", "error", err)
+			h.logger.ErrorContext(sse.Context(), "error rendering checks list", "error", err)
 			return
 		}
 		if err := ssePatchElementTemplFragment(sse, comp, checksListFragment); err != nil {
-			h.logger.Error("error sending checks list SSE patch", "error", err)
+			h.logger.ErrorContext(sse.Context(), "error sending checks list SSE patch", "error", err)
 			return
 		}
 
@@ -185,13 +185,13 @@ func (h *Handlers) CheckViewGet(w http.ResponseWriter, r *http.Request, user *mo
 			http.Error(w, "Not found", http.StatusNotFound)
 			return
 		}
-		h.logger.Error("error rendering check view", "error", err)
+		h.logger.ErrorContext(r.Context(), "error rendering check view", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
 	if err := comp.Render(r.Context(), w); err != nil {
-		h.logger.Error("error rendering check view component", "error", err)
+		h.logger.ErrorContext(r.Context(), "error rendering check view component", "error", err)
 	}
 }
 
@@ -209,11 +209,11 @@ func (h *Handlers) CheckViewEventsGet(w http.ResponseWriter, r *http.Request, us
 	for {
 		comp, err := h.renderCheckView(sse.Context(), checkID, user.ID)
 		if err != nil {
-			h.logger.Error("error rendering check view", "error", err)
+			h.logger.ErrorContext(sse.Context(), "error rendering check view", "error", err)
 			return
 		}
 		if err := sse.PatchElementTempl(comp); err != nil {
-			h.logger.Error("error sending check view SSE patch", "error", err)
+			h.logger.ErrorContext(sse.Context(), "error sending check view SSE patch", "error", err)
 			return
 		}
 
@@ -282,7 +282,7 @@ func (h *Handlers) ViewGet(w http.ResponseWriter, r *http.Request, user *models.
 		return
 	}
 	if err != nil {
-		h.logger.Error("error viewing monitor", "error", err)
+		h.logger.ErrorContext(r.Context(), "error viewing monitor", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -294,12 +294,12 @@ func (h *Handlers) ViewGet(w http.ResponseWriter, r *http.Request, user *models.
 		comp, err = h.monitorComponent(r.Context(), mon, user.ID)
 	}
 	if err != nil {
-		h.logger.Error("error rendering monitor", "error", err)
+		h.logger.ErrorContext(r.Context(), "error rendering monitor", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 	if err := comp.Render(r.Context(), w); err != nil {
-		h.logger.Error("error rendering monitor component", "error", err)
+		h.logger.ErrorContext(r.Context(), "error rendering monitor component", "error", err)
 	}
 }
 
@@ -313,7 +313,7 @@ func (h *Handlers) ViewEventsGet(w http.ResponseWriter, r *http.Request, user *m
 
 	mon, err := h.service.GetMonitor(r.Context(), user.ID, monitorID)
 	if err != nil {
-		h.logger.Error("error getting monitor for events", "error", err)
+		h.logger.ErrorContext(r.Context(), "error getting monitor for events", "error", err)
 		return
 	}
 
@@ -324,7 +324,7 @@ func (h *Handlers) ViewEventsGet(w http.ResponseWriter, r *http.Request, user *m
 	for {
 		mon, err = h.service.GetMonitor(sse.Context(), user.ID, monitorID)
 		if err != nil {
-			h.logger.Error("error refreshing monitor", "error", err)
+			h.logger.ErrorContext(sse.Context(), "error refreshing monitor", "error", err)
 			return
 		}
 
@@ -334,7 +334,7 @@ func (h *Handlers) ViewEventsGet(w http.ResponseWriter, r *http.Request, user *m
 		case models.MonitorStatusActive:
 			data, err := h.monitorViewData(sse.Context(), mon, user.ID)
 			if err != nil {
-				h.logger.Error("error rendering monitor view", "error", err)
+				h.logger.ErrorContext(sse.Context(), "error rendering monitor view", "error", err)
 				return
 			}
 
@@ -343,7 +343,7 @@ func (h *Handlers) ViewEventsGet(w http.ResponseWriter, r *http.Request, user *m
 		default:
 			data, err := h.monitorDraftViewData(sse.Context(), mon, user.ID, NewUpdateMonitorDraftParams(mon), nil)
 			if err != nil {
-				h.logger.Error("error rendering monitor draft view", "error", err)
+				h.logger.ErrorContext(sse.Context(), "error rendering monitor draft view", "error", err)
 				return
 			}
 
@@ -351,7 +351,7 @@ func (h *Handlers) ViewEventsGet(w http.ResponseWriter, r *http.Request, user *m
 		}
 
 		if err := sse.PatchElementTempl(comp); err != nil {
-			h.logger.Error("error sending monitor view events SSE patch", "error", err)
+			h.logger.ErrorContext(sse.Context(), "error sending monitor view events SSE patch", "error", err)
 		}
 
 		select {
@@ -365,7 +365,7 @@ func (h *Handlers) ViewEventsGet(w http.ResponseWriter, r *http.Request, user *m
 // NewGet handles GET /app/monitors/new
 func (h *Handlers) NewGet(w http.ResponseWriter, r *http.Request, user *models.User) {
 	if err := MonitorNewPage(MonitorNewData{}).Render(r.Context(), w); err != nil {
-		h.logger.Error("error rendering monitor new page", "error", err)
+		h.logger.ErrorContext(r.Context(), "error rendering monitor new page", "error", err)
 	}
 }
 
@@ -379,7 +379,7 @@ func (h *Handlers) UpdatePost(w http.ResponseWriter, r *http.Request, user *mode
 
 	var params MonitorCommonParams
 	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
-		h.logger.Error("error decoding json", "error", err)
+		h.logger.ErrorContext(r.Context(), "error decoding json", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -390,7 +390,7 @@ func (h *Handlers) UpdatePost(w http.ResponseWriter, r *http.Request, user *mode
 		return
 	}
 	if err != nil {
-		h.logger.Error("error updating monitor", "error", err)
+		h.logger.ErrorContext(r.Context(), "error updating monitor", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -402,25 +402,25 @@ func (h *Handlers) UpdatePost(w http.ResponseWriter, r *http.Request, user *mode
 	}
 	viewData, err := h.monitorDraftViewData(sse.Context(), mon, user.ID, monitorDraftParams, nil)
 	if err != nil {
-		h.logger.Error("error making monitor draft view data", "error", err)
+		h.logger.ErrorContext(sse.Context(), "error making monitor draft view data", "error", err)
 		return
 	}
 
 	updatedMon, err := h.service.UpdateMonitorDraft(r.Context(), user.ID, mon.ID, monitorDraftParams)
 	if err != nil {
 		if validationErrs := validation.MapValidationErrors(err); validationErrs != nil {
-			h.logger.Warn("failed validation when updating monitor", "validation_errors", validationErrs)
+			h.logger.WarnContext(r.Context(), "failed validation when updating monitor", "validation_errors", validationErrs)
 
 			viewData.ValidationErrors = validationErrs
 
 			if err := sse.PatchElementTempl(MonitorDraftView(viewData)); err != nil {
-				h.logger.Error("error sending monitor draft view events SSE patch", "error", err)
+				h.logger.ErrorContext(sse.Context(), "error sending monitor draft view events SSE patch", "error", err)
 			}
 
 			return
 		}
 
-		h.logger.Error("error updating monitor", "error", err)
+		h.logger.ErrorContext(r.Context(), "error updating monitor", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -428,7 +428,7 @@ func (h *Handlers) UpdatePost(w http.ResponseWriter, r *http.Request, user *mode
 	viewData.Monitor = updatedMon
 
 	if err := sse.PatchElementTempl(MonitorDraftView(viewData)); err != nil {
-		h.logger.Error("error sending monitor draft view events SSE patch", "error", err)
+		h.logger.ErrorContext(sse.Context(), "error sending monitor draft view events SSE patch", "error", err)
 	}
 }
 
@@ -444,20 +444,20 @@ func (h *Handlers) ActivatePost(w http.ResponseWriter, r *http.Request, user *mo
 
 	activatedMonitor, err := h.service.ActivateMonitorFromPreview(r.Context(), user.ID, monitorID)
 	if err != nil {
-		h.logger.Error("error activating monitor", "error", err)
+		h.logger.ErrorContext(r.Context(), "error activating monitor", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
 	if err := sse.Redirectf("/app/monitors/%d", activatedMonitor.ID); err != nil {
-		h.logger.Error("error redirecting after activating monitor", "error", err)
+		h.logger.ErrorContext(sse.Context(), "error redirecting after activating monitor", "error", err)
 	}
 }
 
 // CreatePost handles POST /app/monitors/new
 func (h *Handlers) CreatePost(w http.ResponseWriter, r *http.Request, user *models.User) {
 	if err := r.ParseForm(); err != nil {
-		h.logger.Error("error parsing form", "error", err)
+		h.logger.ErrorContext(r.Context(), "error parsing form", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -472,16 +472,16 @@ func (h *Handlers) CreatePost(w http.ResponseWriter, r *http.Request, user *mode
 	createdMonitor, err := h.service.CreateMonitor(r.Context(), newMonitor)
 	if err != nil {
 		if validationErrs := validation.MapValidationErrors(err); validationErrs != nil {
-			h.logger.Info("failed validation when creating monitor", "validation_errors", validationErrs)
+			h.logger.InfoContext(r.Context(), "failed validation when creating monitor", "validation_errors", validationErrs)
 			if err := MonitorNewPage(MonitorNewData{
 				ValidationErrors: validationErrs,
 				Values:           newMonitor,
 			}).Render(r.Context(), w); err != nil {
-				h.logger.Error("error rendering monitor new page", "error", err)
+				h.logger.ErrorContext(r.Context(), "error rendering monitor new page", "error", err)
 			}
 			return
 		}
-		h.logger.Error("error creating monitor", "error", err)
+		h.logger.ErrorContext(r.Context(), "error creating monitor", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -503,7 +503,7 @@ func (h *Handlers) CheckPost(w http.ResponseWriter, r *http.Request, user *model
 		return
 	}
 	if err != nil {
-		h.logger.Error("error checking monitor", "error", err)
+		h.logger.ErrorContext(r.Context(), "error checking monitor", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -512,20 +512,20 @@ func (h *Handlers) CheckPost(w http.ResponseWriter, r *http.Request, user *model
 
 	_, err = h.service.ScheduleMonitorCheck(r.Context(), mon, time.Now())
 	if err != nil {
-		h.logger.Error("error scheduling monitor check", "error", err)
+		h.logger.ErrorContext(r.Context(), "error scheduling monitor check", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
 	comp, err := h.monitorComponent(r.Context(), mon, user.ID)
 	if err != nil {
-		h.logger.Error("error rendering monitor component", "error", err)
+		h.logger.ErrorContext(r.Context(), "error rendering monitor component", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
 	if err := sse.PatchElementTempl(comp); err != nil {
-		h.logger.Error("error patching element", "error", err)
+		h.logger.ErrorContext(sse.Context(), "error patching element", "error", err)
 	}
 }
 
@@ -541,13 +541,13 @@ func (h *Handlers) Delete(w http.ResponseWriter, r *http.Request, user *models.U
 
 	err := h.service.DeleteMonitor(r.Context(), user.ID, monitorID)
 	if err != nil {
-		h.logger.Error("error deleting monitor", "error", err)
+		h.logger.ErrorContext(r.Context(), "error deleting monitor", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
 	if err := sse.Redirect("/app/monitors"); err != nil {
-		h.logger.Error("error redirecting", "error", err)
+		h.logger.ErrorContext(sse.Context(), "error redirecting", "error", err)
 	}
 }
 
@@ -567,7 +567,7 @@ func (h *Handlers) NotifierPost(w http.ResponseWriter, r *http.Request, user *mo
 		return
 	}
 	if err != nil {
-		h.logger.Error("error creating notifier", "error", err)
+		h.logger.ErrorContext(r.Context(), "error creating notifier", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -576,20 +576,20 @@ func (h *Handlers) NotifierPost(w http.ResponseWriter, r *http.Request, user *mo
 
 	_, err = h.service.CreateMonitorNotifier(r.Context(), mon, models.Notifier(notifierType))
 	if err != nil {
-		h.logger.Error("error creating notifier", "error", err)
+		h.logger.ErrorContext(r.Context(), "error creating notifier", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
 	comp, err := h.monitorNotifiersComponent(r.Context(), mon, user.ID)
 	if err != nil {
-		h.logger.Error("error rendering notifiers", "error", err)
+		h.logger.ErrorContext(r.Context(), "error rendering notifiers", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
 	if err := sse.PatchElementTempl(comp); err != nil {
-		h.logger.Error("error patching element", "error", err)
+		h.logger.ErrorContext(sse.Context(), "error patching element", "error", err)
 	}
 }
 
@@ -609,7 +609,7 @@ func (h *Handlers) NotifierDelete(w http.ResponseWriter, r *http.Request, user *
 		return
 	}
 	if err != nil {
-		h.logger.Error("error deleting notifier", "error", err)
+		h.logger.ErrorContext(r.Context(), "error deleting notifier", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -618,20 +618,20 @@ func (h *Handlers) NotifierDelete(w http.ResponseWriter, r *http.Request, user *
 
 	err = h.service.DeleteMonitorNotifier(r.Context(), mon, models.Notifier(notifierType))
 	if err != nil {
-		h.logger.Error("error deleting notifier", "error", err)
+		h.logger.ErrorContext(r.Context(), "error deleting notifier", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
 	comp, err := h.monitorNotifiersComponent(r.Context(), mon, user.ID)
 	if err != nil {
-		h.logger.Error("error rendering notifiers", "error", err)
+		h.logger.ErrorContext(r.Context(), "error rendering notifiers", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
 	if err := sse.PatchElementTempl(comp); err != nil {
-		h.logger.Error("error patching element", "error", err)
+		h.logger.ErrorContext(sse.Context(), "error patching element", "error", err)
 	}
 }
 
@@ -677,7 +677,7 @@ func (h *Handlers) ResultFeedbackGet(w http.ResponseWriter, r *http.Request, use
 
 	comp := monitorResultFeedback(data)
 	if err := sse.PatchElementTempl(comp, datastar.WithSelector("body"), datastar.WithModeAppend()); err != nil {
-		h.logger.Error("error patching element", "error", err)
+		h.logger.ErrorContext(sse.Context(), "error patching element", "error", err)
 	}
 }
 
@@ -732,7 +732,7 @@ func (h *Handlers) ResultFeedbackPost(w http.ResponseWriter, r *http.Request, us
 
 			comp := monitorResultFeedbackForm(data)
 			if err := sse.PatchElementTempl(comp); err != nil {
-				h.logger.Error("error patching element", "error", err)
+				h.logger.ErrorContext(sse.Context(), "error patching element", "error", err)
 			}
 
 			return
@@ -744,7 +744,7 @@ func (h *Handlers) ResultFeedbackPost(w http.ResponseWriter, r *http.Request, us
 
 	sse := datastar.NewSSE(w, r)
 	if err := sseReload(sse); err != nil {
-		h.logger.Error("error reloading", "error", err)
+		h.logger.ErrorContext(sse.Context(), "error reloading", "error", err)
 	}
 }
 

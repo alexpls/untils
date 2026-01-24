@@ -34,11 +34,11 @@ func (w *TrimWorker) Work(ctx context.Context, job *river.Job[TrimArgs]) error {
 
 	numTrimmed, err := w.store.trim()
 	if err != nil {
-		w.logger.Error("error trimming sessions", "error", err)
+		w.logger.ErrorContext(ctx, "error trimming sessions", "error", err)
 		return err
 	}
 
-	w.logger.Info("successfully completed session trim worker",
+	w.logger.InfoContext(ctx, "successfully completed session trim worker",
 		"num_trimmed", numTrimmed,
 		"duration_ms", time.Since(start).Milliseconds())
 

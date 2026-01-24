@@ -20,6 +20,6 @@ func NewHandlers(logger *slog.Logger) *Handlers {
 // Home handles GET /
 func (h *Handlers) Home(w http.ResponseWriter, r *http.Request) {
 	if err := HomePage().Render(r.Context(), w); err != nil {
-		h.logger.Error("error rendering home page", "error", err)
+		h.logger.ErrorContext(r.Context(), "error rendering home page", "error", err)
 	}
 }

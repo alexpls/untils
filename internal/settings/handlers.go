@@ -55,14 +55,14 @@ func NewHandlers(
 func (h *Handlers) SettingsGet(w http.ResponseWriter, r *http.Request, user *models.User) {
 	integrations, err := h.queries.UserIntegrations(r.Context(), h.pool, user.ID)
 	if err != nil {
-		h.logger.Error("error listing integrations", "error", err)
+		h.logger.ErrorContext(r.Context(), "error listing integrations", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 	if err := Settings(&SettingsViewModel{
 		ConfiguredIntegrations: integrations,
 	}).Render(r.Context(), w); err != nil {
-		h.logger.Error("error rendering settings component", "error", err)
+		h.logger.ErrorContext(r.Context(), "error rendering settings component", "error", err)
 	}
 }
 
@@ -71,7 +71,7 @@ func (h *Handlers) PushoverSettingsGet(w http.ResponseWriter, r *http.Request, u
 	tok, err := h.pushoverStore.GetToken(r.Context(), user.ID)
 	if err != nil {
 		if !errors.Is(err, pushover.ErrNoPushoverUserToken) {
-			h.logger.Error("error getting pushover token", "error", err)
+			h.logger.ErrorContext(r.Context(), "error getting pushover token", "error", err)
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 			return
 		}
@@ -90,14 +90,14 @@ func (h *Handlers) PushoverSettingsGet(w http.ResponseWriter, r *http.Request, u
 	}
 
 	if err := PushoverSettings(&data).Render(r.Context(), w); err != nil {
-		h.logger.Error("error rendering pushover settings component", "error", err)
+		h.logger.ErrorContext(r.Context(), "error rendering pushover settings component", "error", err)
 	}
 }
 
 // PushoverSettingsPost handles POST /app/settings/pushover
 func (h *Handlers) PushoverSettingsPost(w http.ResponseWriter, r *http.Request, user *models.User) {
 	if err := r.ParseForm(); err != nil {
-		h.logger.Error("failed to parse form", "error", err)
+		h.logger.ErrorContext(r.Context(), "failed to parse form", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -118,7 +118,7 @@ func (h *Handlers) PushoverSettingsPost(w http.ResponseWriter, r *http.Request, 
 				Values:           params,
 				ValidationErrors: validation.ValidationErrors{mapped},
 			}).Render(r.Context(), w); err != nil {
-				h.logger.Error("error rendering pushover settings component", "error", err)
+				h.logger.ErrorContext(r.Context(), "error rendering pushover settings component", "error", err)
 			}
 			return
 		}
@@ -127,16 +127,16 @@ func (h *Handlers) PushoverSettingsPost(w http.ResponseWriter, r *http.Request, 
 	_, err = h.pushoverStore.CreateOrUpdateToken(r.Context(), user.ID, params)
 	if err != nil {
 		if validationErrs := validation.MapValidationErrors(err); validationErrs != nil {
-			h.logger.Warn("failed validation when creating pushover token", "validation_errors", validationErrs)
+			h.logger.WarnContext(r.Context(), "failed validation when creating pushover token", "validation_errors", validationErrs)
 			if err := PushoverSettings(&PushoverSettingsViewModel{
 				Values:           params,
 				ValidationErrors: validationErrs,
 			}).Render(r.Context(), w); err != nil {
-				h.logger.Error("error rendering pushover settings component", "error", err)
+				h.logger.ErrorContext(r.Context(), "error rendering pushover settings component", "error", err)
 			}
 			return
 		}
-		h.logger.Error("error creating pushover token", "error", err)
+		h.logger.ErrorContext(r.Context(), "error creating pushover token", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -150,13 +150,13 @@ func (h *Handlers) PushoverSettingsDelete(w http.ResponseWriter, r *http.Request
 
 	err := h.pushoverStore.DeleteToken(r.Context(), user.ID)
 	if err != nil {
-		h.logger.Error("error deleting pushover user token", "error", err)
+		h.logger.ErrorContext(r.Context(), "error deleting pushover user token", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
 	if err = sse.Redirect("/app/settings/pushover"); err != nil {
-		h.logger.Error("error redirecting after deleting pushover user token", "error", err)
+		h.logger.ErrorContext(sse.Context(), "error redirecting after deleting pushover user token", "error", err)
 	}
 }
 
@@ -165,7 +165,7 @@ func (h *Handlers) EmailSettingsGet(w http.ResponseWriter, r *http.Request, user
 	if err := EmailSettings(&EmailSettingsViewModel{
 		Email: user.Email,
 	}).Render(r.Context(), w); err != nil {
-		h.logger.Error("error rendering email settings component", "error", err)
+		h.logger.ErrorContext(r.Context(), "error rendering email settings component", "error", err)
 	}
 }
 
@@ -178,7 +178,7 @@ func (h *Handlers) UpdateTimezonePost(w http.ResponseWriter, r *http.Request, us
 	var params timezoneUpdate
 	err := json.NewDecoder(r.Body).Decode(&params)
 	if err != nil {
-		h.logger.Error("error decoding timezone update params", "error", err)
+		h.logger.ErrorContext(r.Context(), "error decoding timezone update params", "error", err)
 		http.Error(w, "Bad request", http.StatusBadRequest)
 		return
 	}
@@ -187,7 +187,7 @@ func (h *Handlers) UpdateTimezonePost(w http.ResponseWriter, r *http.Request, us
 		Timezone: params.Timezone,
 	})
 	if err != nil {
-		h.logger.Error("error updating user timezone", "error", err)
+		h.logger.ErrorContext(r.Context(), "error updating user timezone", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}

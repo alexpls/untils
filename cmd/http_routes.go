@@ -63,7 +63,8 @@ func (a *app) routes() http.Handler {
 	sess := a.sessionManager
 
 	return applyMiddleware(mux,
-		csrf.Handler, a.logRequests, a.setTimezoneContext,
-		sess.Handler, a.setUserContext, a.setEnvContext,
+		a.setRequestID, csrf.Handler,
+		a.setTimezoneContext, sess.Handler,
+		a.setUserContext, a.logRequests, a.setEnvContext,
 	)
 }

@@ -35,14 +35,14 @@ func NewValidateMonitorWorker(monitorService *Service, logger *slog.Logger) *Val
 func (w *ValidateMonitorWorker) Work(ctx context.Context, job *river.Job[ValidateMonitorArgs]) error {
 	logger := w.logger.With("monitor_id", job.Args.MonitorID)
 
-	logger.Info("starting validate monitor worker")
+	logger.InfoContext(ctx, "starting validate monitor worker")
 
 	mon, err := w.service.GetMonitor(ctx, job.Args.UserID, job.Args.MonitorID)
 	if err != nil {
 		if errors.Is(err, ErrMonitorNotFound) {
 			return river.JobCancel(fmt.Errorf("monitor no longer exists"))
 		}
-		logger.Error("failed to get monitor", "error", err)
+		logger.ErrorContext(ctx, "failed to get monitor", "error", err)
 		return err
 	}
 
@@ -51,7 +51,7 @@ func (w *ValidateMonitorWorker) Work(ctx context.Context, job *river.Job[Validat
 		if errors.As(err, &er) {
 			return river.JobCancel(er)
 		}
-		logger.Error("failed to validate monitor", "error", err)
+		logger.ErrorContext(ctx, "failed to validate monitor", "error", err)
 		return err
 	}
 

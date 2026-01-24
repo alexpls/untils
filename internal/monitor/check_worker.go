@@ -36,7 +36,7 @@ func NewCheckWorker(monitorService *Service, logger *slog.Logger) *CheckWorker {
 func (w *CheckWorker) Work(ctx context.Context, job *river.Job[CheckArgs]) error {
 	logger := w.logger.With("monitor_check_id", job.Args.MonitorCheckID)
 
-	logger.Info("starting check worker")
+	logger.InfoContext(ctx, "starting check worker")
 
 	check, err := w.service.GetMonitorCheck(ctx, job.Args.MonitorCheckID)
 	if err != nil {
@@ -44,12 +44,12 @@ func (w *CheckWorker) Work(ctx context.Context, job *river.Job[CheckArgs]) error
 			return river.JobCancel(fmt.Errorf("monitor check no longer exists"))
 		}
 
-		logger.Error("failed to get monitor check", "error", err)
+		logger.ErrorContext(ctx, "failed to get monitor check", "error", err)
 		return err
 	}
 
 	if err = w.service.PerformMonitorCheck(ctx, job.Args.UserID, check, true, ""); err != nil {
-		logger.Error("failed to perform monitor check", "error", err)
+		logger.ErrorContext(ctx, "failed to perform monitor check", "error", err)
 		return err
 	}
 

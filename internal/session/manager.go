@@ -46,7 +46,7 @@ func (sm *Manager) Handler(next http.Handler) http.Handler {
 		sess, err := sm.store.get(ctx, sessID)
 		if err != nil {
 			if !errors.Is(err, pgx.ErrNoRows) {
-				sm.logger.Error("error getting session", "error", err)
+				sm.logger.ErrorContext(ctx, "error getting session", "error", err)
 			}
 		}
 

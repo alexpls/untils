@@ -67,7 +67,7 @@ type SendNotificationsParams struct {
 
 func (s *Service) SendNotifications(ctx context.Context, params SendNotificationsParams) error {
 	if params.Monitor.Status != models.MonitorStatusActive {
-		s.logger.Warn("skipping notifications for inactive monitor", "monitor_id", params.Monitor.ID)
+		s.logger.WarnContext(ctx, "skipping notifications for inactive monitor", "monitor_id", params.Monitor.ID)
 		return nil
 	}
 

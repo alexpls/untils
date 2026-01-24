@@ -56,7 +56,7 @@ var checkerPrompt string
 
 func (c *checker) perform(ctx context.Context, params *CheckParams) (*models.CheckResult, error) {
 	workflowStart := time.Now()
-	c.service.logger.Debug("checker workflow started")
+	c.service.logger.DebugContext(ctx, "checker workflow started")
 
 	var previousResult *models.GetPreviousResultsWithCheckRow
 	if len(params.PreviousResults) > 0 {
@@ -74,7 +74,7 @@ func (c *checker) perform(ctx context.Context, params *CheckParams) (*models.Che
 	c.conversationID = conversation.ID
 
 	defer func() {
-		c.service.logger.Debug("checker workflow completed", "total_duration", time.Since(workflowStart))
+		c.service.logger.DebugContext(ctx, "checker workflow completed", "total_duration", time.Since(workflowStart))
 		if c.browserCancel != nil {
 			c.browserCancel()
 		}
@@ -104,7 +104,7 @@ func (c *checker) perform(ctx context.Context, params *CheckParams) (*models.Che
 		}
 		c.turn++
 		turnStart := time.Now()
-		c.service.logger.Debug("starting turn", "turn", c.turn)
+		c.service.logger.DebugContext(ctx, "starting turn", "turn", c.turn)
 
 		llmStart := time.Now()
 		resp, err = c.service.response(ctx, responses.ResponseNewParams{
@@ -119,7 +119,7 @@ func (c *checker) perform(ctx context.Context, params *CheckParams) (*models.Che
 			ParallelToolCalls: openai.Bool(false),
 		})
 		llmDuration := time.Since(llmStart)
-		c.service.logger.Debug("LLM response received", "turn", c.turn, "duration", llmDuration)
+		c.service.logger.DebugContext(ctx, "LLM response received", "turn", c.turn, "duration", llmDuration)
 
 		if resp != nil {
 			if logErr := c.logMessage(ctx, models.LLMMessageRoleAssistant, json.RawMessage(resp.RawJSON()), llmDuration); logErr != nil {
@@ -136,7 +136,7 @@ func (c *checker) perform(ctx context.Context, params *CheckParams) (*models.Che
 			if err := c.callTools(ctx, resp.toolCalls); err != nil {
 				return nil, err
 			}
-			c.service.logger.Debug("turn completed with tool calls", "turn", c.turn, "tools_duration", time.Since(toolsStart), "turn_duration", time.Since(turnStart))
+			c.service.logger.DebugContext(ctx, "turn completed with tool calls", "turn", c.turn, "tools_duration", time.Since(toolsStart), "turn_duration", time.Since(turnStart))
 			continue
 		}
 
@@ -175,7 +175,7 @@ func (c *checker) callTools(ctx context.Context, toolCalls []responses.ResponseF
 
 		result, err := c.callTool(ctx, call.Name, call.Arguments)
 		if err != nil {
-			c.service.logger.Error("error executing tool call", "tool", call.Name, "error", err)
+			c.service.logger.ErrorContext(ctx, "error executing tool call", "tool", call.Name, "error", err)
 			errorMsg := "error: " + err.Error()
 			c.messages = append(c.messages, toolOutputMessage(call.CallID, errorMsg))
 			if logErr := c.logMessage(ctx, models.LLMMessageRoleTool, map[string]any{
@@ -201,7 +201,7 @@ func (c *checker) callTools(ctx context.Context, toolCalls []responses.ResponseF
 
 func (c *checker) callTool(ctx context.Context, name string, args string) (string, error) {
 	toolStart := time.Now()
-	c.service.logger.Debug("tool call started", "tool", name, "args", args)
+	c.service.logger.DebugContext(ctx, "tool call started", "tool", name, "args", args)
 
 	tc := &toolContext{
 		ctx:        ctx,
@@ -212,7 +212,7 @@ func (c *checker) callTool(ctx context.Context, name string, args string) (strin
 				browserInitStart := time.Now()
 				bctx, bcancel := browser.NewBrowser(ctx, c.service.logger)
 				c.browserCtx, c.browserCancel = &bctx, bcancel
-				c.service.logger.Debug("browser context initialized", "duration", time.Since(browserInitStart))
+				c.service.logger.DebugContext(ctx, "browser context initialized", "duration", time.Since(browserInitStart))
 			}
 			return c.browserCtx
 		},
@@ -241,7 +241,7 @@ func (c *checker) callTool(ctx context.Context, name string, args string) (strin
 	if err == nil {
 		c.priorCalls = append(c.priorCalls, *tool)
 	}
-	c.service.logger.Debug("tool call completed", "tool", name, "duration", time.Since(toolStart))
+	c.service.logger.DebugContext(ctx, "tool call completed", "tool", name, "duration", time.Since(toolStart))
 	return result, err
 }
 

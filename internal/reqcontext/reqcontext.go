@@ -10,10 +10,20 @@ type contextKey int
 
 const (
 	_ contextKey = iota
+	requestIDKey
 	userKey
 	tzKey
 	envKey
 )
+
+func ContextWithRequestID(ctx context.Context, reqID string) context.Context {
+	return context.WithValue(ctx, requestIDKey, reqID)
+}
+
+func RequestIDFromContext(ctx context.Context) (string, bool) {
+	reqID, ok := ctx.Value(requestIDKey).(string)
+	return reqID, ok
+}
 
 func ContextWithUser(ctx context.Context, user *models.User) context.Context {
 	return context.WithValue(ctx, userKey, user)

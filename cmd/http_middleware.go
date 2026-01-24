@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/rand"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -39,6 +40,18 @@ func (a *app) requireAuth2(next http.Handler) http.HandlerFunc {
 	})
 }
 
+func (a *app) setRequestID(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if _, ok := reqcontext.RequestIDFromContext(r.Context()); ok {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		reqID := rand.Text()
+		next.ServeHTTP(w, r.WithContext(reqcontext.ContextWithRequestID(r.Context(), reqID)))
+	})
+}
+
 func (a *app) setUserContext(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		s := session.FromRequest(r)
@@ -47,7 +60,7 @@ func (a *app) setUserContext(next http.Handler) http.Handler {
 		} else {
 			user, err := a.auth.GetUser(r.Context(), s.Data.UserID)
 			if a.internalServerError(err, w) {
-				a.logger.Error("tried to set user context on a missing user", "user_id", s.Data.UserID)
+				a.logger.ErrorContext(r.Context(), "tried to set user context on a missing user", "user_id", s.Data.UserID)
 				return
 			}
 			next.ServeHTTP(w, r.WithContext(reqcontext.ContextWithUser(r.Context(), user)))
@@ -64,7 +77,7 @@ func (a *app) setTimezoneContext(next http.Handler) http.Handler {
 				if loc, err := time.LoadLocation(val); err == nil {
 					tz = loc.String()
 				} else {
-					a.logger.Warn("invalid timezone in cookie", "tz", val)
+					a.logger.WarnContext(r.Context(), "invalid timezone in cookie", "tz", val)
 				}
 			}
 		}
