@@ -56,18 +56,6 @@ CREATE TYPE public.llm_conversations_source AS ENUM (
 
 
 --
--- Name: monitor_check_event_kind; Type: TYPE; Schema: public; Owner: -
---
-
-CREATE TYPE public.monitor_check_event_kind AS ENUM (
-    'web_search',
-    'browser_navigate',
-    'browser_click',
-    'browser_wait'
-);
-
-
---
 -- Name: monitor_check_status; Type: TYPE; Schema: public; Owner: -
 --
 
@@ -140,6 +128,15 @@ BEGIN
   IF TG_TABLE_NAME = 'monitors' THEN
     payload_monitor_id := rec.id;
     payload_user_id := rec.user_id;
+  ELSIF TG_TABLE_NAME = 'llm_conversations' THEN
+    -- Only emit for check source type
+    IF rec.source_type = 'check' THEN
+      payload_user_id := rec.user_id;
+      -- Look up monitor_id from monitor_checks via source_id
+      SELECT monitor_id INTO payload_monitor_id
+      FROM monitor_checks
+      WHERE id = rec.source_id;
+    END IF;
   ELSE
     payload_monitor_id := rec.monitor_id;
     SELECT user_id INTO payload_user_id
@@ -147,15 +144,18 @@ BEGIN
     WHERE id = payload_monitor_id;
   END IF;
 
-  PERFORM pg_notify(
-    'monitor_events',
-    json_build_object(
-      'table', TG_TABLE_NAME,
-      'action', TG_OP,
-      'monitor_id', payload_monitor_id,
-      'user_id', payload_user_id
-    )::text
-  );
+  -- Only notify if we have a valid monitor_id
+  IF payload_monitor_id IS NOT NULL THEN
+    PERFORM pg_notify(
+      'monitor_events',
+      json_build_object(
+        'table', TG_TABLE_NAME,
+        'action', TG_OP,
+        'monitor_id', payload_monitor_id,
+        'user_id', payload_user_id
+      )::text
+    );
+  END IF;
   RETURN NEW;
 END;
 $$;
@@ -218,39 +218,6 @@ CREATE SEQUENCE public.llm_conversations_id_seq
 --
 
 ALTER SEQUENCE public.llm_conversations_id_seq OWNED BY public.llm_conversations.id;
-
-
---
--- Name: monitor_check_events; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.monitor_check_events (
-    id bigint NOT NULL,
-    monitor_id bigint NOT NULL,
-    monitor_check_id bigint NOT NULL,
-    kind public.monitor_check_event_kind NOT NULL,
-    details jsonb NOT NULL,
-    created_at timestamp with time zone DEFAULT now() NOT NULL
-);
-
-
---
--- Name: monitor_check_events_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.monitor_check_events_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: monitor_check_events_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public.monitor_check_events_id_seq OWNED BY public.monitor_check_events.id;
 
 
 --
@@ -586,13 +553,6 @@ ALTER TABLE ONLY public.llm_conversations ALTER COLUMN id SET DEFAULT nextval('p
 
 
 --
--- Name: monitor_check_events id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.monitor_check_events ALTER COLUMN id SET DEFAULT nextval('public.monitor_check_events_id_seq'::regclass);
-
-
---
 -- Name: monitor_checks id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -640,14 +600,6 @@ ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_
 
 ALTER TABLE ONLY public.llm_conversations
     ADD CONSTRAINT llm_conversations_pkey PRIMARY KEY (id);
-
-
---
--- Name: monitor_check_events monitor_check_events_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.monitor_check_events
-    ADD CONSTRAINT monitor_check_events_pkey PRIMARY KEY (id);
 
 
 --
@@ -786,13 +738,6 @@ CREATE INDEX idx_llm_conversations_user_id_source_type_source_id ON public.llm_c
 
 
 --
--- Name: idx_monitor_check_events_monitor_check_id; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_monitor_check_events_monitor_check_id ON public.monitor_check_events USING btree (monitor_check_id);
-
-
---
 -- Name: idx_monitor_checks_monitor_id_status_scheduled_for; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -870,10 +815,10 @@ CREATE UNIQUE INDEX river_job_unique_idx ON public.river_job USING btree (unique
 
 
 --
--- Name: monitor_check_events monitor_check_events_notify_trigger; Type: TRIGGER; Schema: public; Owner: -
+-- Name: llm_conversations llm_conversations_notify_trigger; Type: TRIGGER; Schema: public; Owner: -
 --
 
-CREATE TRIGGER monitor_check_events_notify_trigger AFTER INSERT OR DELETE OR UPDATE ON public.monitor_check_events FOR EACH ROW EXECUTE FUNCTION public.monitor_events_notify();
+CREATE TRIGGER llm_conversations_notify_trigger AFTER INSERT OR UPDATE ON public.llm_conversations FOR EACH ROW EXECUTE FUNCTION public.monitor_events_notify();
 
 
 --
@@ -903,22 +848,6 @@ CREATE TRIGGER monitors_notify_trigger AFTER INSERT OR DELETE OR UPDATE ON publi
 
 ALTER TABLE ONLY public.llm_conversations
     ADD CONSTRAINT llm_conversations_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
-
-
---
--- Name: monitor_check_events monitor_check_events_monitor_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.monitor_check_events
-    ADD CONSTRAINT monitor_check_events_monitor_check_id_fkey FOREIGN KEY (monitor_check_id) REFERENCES public.monitor_checks(id) ON DELETE CASCADE;
-
-
---
--- Name: monitor_check_events monitor_check_events_monitor_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.monitor_check_events
-    ADD CONSTRAINT monitor_check_events_monitor_id_fkey FOREIGN KEY (monitor_id) REFERENCES public.monitors(id) ON DELETE CASCADE;
 
 
 --

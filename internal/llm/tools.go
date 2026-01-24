@@ -9,7 +9,6 @@ import (
 
 	"github.com/alexpls/untils/internal/browser"
 	"github.com/alexpls/untils/internal/logging"
-	"github.com/alexpls/untils/internal/models"
 	"github.com/alexpls/untils/internal/search"
 	"github.com/openai/openai-go/v3"
 	"github.com/openai/openai-go/v3/responses"
@@ -33,10 +32,9 @@ type toolContext struct {
 
 // toolCall holds a tool call ready for execution with pre-parsed params.
 type toolCall struct {
-	call       func() (string, error)
-	validate   func() string
-	checkEvent func() CheckEvent
-	params     any
+	call     func() (string, error)
+	validate func() string
+	params   any
 }
 
 // toolBuilder builds a prepared tool call from raw JSON args.
@@ -46,7 +44,6 @@ type tool[P any] struct {
 	name        string
 	description string
 	execute     func(tc *toolContext, params P) (string, error)
-	checkEvent  func(tc *toolContext, params P) CheckEvent
 	validate    func(tc *toolContext, params P) string
 }
 
@@ -69,10 +66,9 @@ func (t tool[P]) build(tc *toolContext, args string) (*toolCall, error) {
 		return nil, fmt.Errorf("unmarshaling %s params: %w", t.name, err)
 	}
 	return &toolCall{
-		call:       func() (string, error) { return t.execute(tc, params) },
-		checkEvent: func() CheckEvent { return t.checkEvent(tc, params) },
-		validate:   func() string { return t.validate(tc, params) },
-		params:     params,
+		call:     func() (string, error) { return t.execute(tc, params) },
+		validate: func() string { return t.validate(tc, params) },
+		params:   params,
 	}, nil
 }
 
@@ -114,14 +110,6 @@ var browserNavigateTool = tool[browserNavigateParams]{
 		tc.service.logger.DebugContext(tc.ctx, "browser_navigate completed", "url", p.URL, "total_duration", time.Since(start))
 		return res.String(), nil
 	},
-	checkEvent: func(tc *toolContext, params browserNavigateParams) CheckEvent {
-		return CheckEvent{
-			Kind: models.MonitorCheckEventKindBrowserNavigate,
-			Details: models.MonitorCheckEventBrowserNavigateDetails{
-				URL: params.URL,
-			},
-		}
-	},
 	validate: func(tc *toolContext, params browserNavigateParams) string {
 		for _, prior := range *tc.priorCalls {
 			if params.equalTo(prior.params) {
@@ -156,12 +144,6 @@ var browserClickTool = tool[browserClickParams]{
 		tc.service.logger.DebugContext(tc.ctx, "browser_click completed", "node_id", p.NodeID, "total_duration", time.Since(start))
 		return page.String(), nil
 	},
-	checkEvent: func(tc *toolContext, params browserClickParams) CheckEvent {
-		return CheckEvent{
-			Kind:    models.MonitorCheckEventKindBrowserClick,
-			Details: models.MonitorCheckEventBrowserClickDetails{},
-		}
-	},
 	validate: func(tc *toolContext, params browserClickParams) string {
 		return ""
 	},
@@ -192,12 +174,6 @@ var browserWaitTool = tool[browserWaitParams]{
 
 		tc.service.logger.DebugContext(tc.ctx, "browser_wait completed", "total_duration", time.Since(start))
 		return page.String(), nil
-	},
-	checkEvent: func(tc *toolContext, params browserWaitParams) CheckEvent {
-		return CheckEvent{
-			Kind:    models.MonitorCheckEventKindBrowserWait,
-			Details: models.MonitorCheckEventBrowserWaitDetails{},
-		}
 	},
 	validate: func(tc *toolContext, params browserWaitParams) string {
 		l := len(*tc.priorCalls)
@@ -245,14 +221,6 @@ var searchTool = tool[searchParams]{
 
 		tc.service.logger.DebugContext(tc.ctx, "search_request completed", "query", p.Query, "total_duration", time.Since(start))
 		return sb.String(), nil
-	},
-	checkEvent: func(tc *toolContext, params searchParams) CheckEvent {
-		return CheckEvent{
-			Kind: models.MonitorCheckEventKindWebSearch,
-			Details: models.MonitorCheckEventWebSearchDetails{
-				Query: params.Query,
-			},
-		}
 	},
 	validate: func(tc *toolContext, params searchParams) string {
 		for _, prior := range *tc.priorCalls {

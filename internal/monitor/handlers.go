@@ -236,11 +236,6 @@ func (h *Handlers) renderCheckView(ctx context.Context, checkID int64, userID in
 		return nil, pgx.ErrNoRows
 	}
 
-	events, err := h.queries.ListMonitorCheckEvents(ctx, h.pool, checkID)
-	if err != nil {
-		return nil, err
-	}
-
 	// Fetch the LLM conversation for this check (may not exist)
 	var conversation *models.LlmConversation
 	conv, err := h.queries.GetLLMConversationBySourceID(ctx, h.pool, &models.GetLLMConversationBySourceIDParams{
@@ -262,7 +257,6 @@ func (h *Handlers) renderCheckView(ctx context.Context, checkID int64, userID in
 
 	return CheckViewPage(CheckViewData{
 		Check:        check,
-		Events:       events,
 		Conversation: conversation,
 		Result:       result,
 	}), nil
@@ -826,13 +820,16 @@ func (h *Handlers) monitorDraftViewData(
 		return MonitorDraftData{}, err
 	}
 
-	var checkEvents []*models.MonitorCheckEvent
+	var timelineEvents []*models.GetTimelineEventsBySourceIDRow
 	if check != nil {
-		var err error
-		checkEvents, err = h.queries.ListMonitorCheckEvents(ctx, h.pool, check.ID)
-		if err != nil {
-			return MonitorDraftData{}, err
+		events, err := h.queries.GetTimelineEventsBySourceID(ctx, h.pool, &models.GetTimelineEventsBySourceIDParams{
+			SourceType: models.LlmConversationsSourceCheck,
+			SourceID:   check.ID,
+		})
+		if err == nil {
+			timelineEvents = events
 		}
+		// Ignore pgx.ErrNoRows - events may not exist yet
 	}
 
 	notifiers, err := h.monitorNotifierViewData(ctx, mon, userID)
@@ -841,13 +838,13 @@ func (h *Handlers) monitorDraftViewData(
 	}
 
 	return MonitorDraftData{
-		Monitor:               mon,
-		Values:                values,
-		ResultPreview:         preview,
-		CheckInProgress:       check,
-		CheckInProgressEvents: checkEvents,
-		ValidationErrors:      validationErrs,
-		Notifiers:             notifiers,
+		Monitor:                       mon,
+		Values:                        values,
+		ResultPreview:                 preview,
+		InProgressCheck:               check,
+		InProgressCheckTimelineEvents: timelineEvents,
+		ValidationErrors:              validationErrs,
+		Notifiers:                     notifiers,
 	}, nil
 }
 
@@ -867,12 +864,16 @@ func (h *Handlers) monitorViewData(ctx context.Context, mon *models.Monitor, use
 		return MonitorViewData{}, err
 	}
 
-	var events []*models.MonitorCheckEvent
+	var timelineEvents []*models.GetTimelineEventsBySourceIDRow
 	if inProgressCheck != nil {
-		events, err = h.queries.ListMonitorCheckEvents(ctx, h.pool, inProgressCheck.ID)
-		if err != nil {
-			return MonitorViewData{}, err
+		events, err := h.queries.GetTimelineEventsBySourceID(ctx, h.pool, &models.GetTimelineEventsBySourceIDParams{
+			SourceType: models.LlmConversationsSourceCheck,
+			SourceID:   inProgressCheck.ID,
+		})
+		if err == nil {
+			timelineEvents = events
 		}
+		// Ignore pgx.ErrNoRows - events may not exist yet
 	}
 
 	notifiers, err := h.monitorNotifierViewData(ctx, mon, userID)
@@ -881,12 +882,12 @@ func (h *Handlers) monitorViewData(ctx context.Context, mon *models.Monitor, use
 	}
 
 	return MonitorViewData{
-		Monitor:               mon,
-		Results:               results,
-		NextScheduledCheck:    nextScheduled,
-		InProgressCheck:       inProgressCheck,
-		InProgressCheckEvents: events,
-		Notifiers:             notifiers,
+		Monitor:                       mon,
+		Results:                       results,
+		NextScheduledCheck:            nextScheduled,
+		InProgressCheck:               inProgressCheck,
+		InProgressCheckTimelineEvents: timelineEvents,
+		Notifiers:                     notifiers,
 	}, nil
 }
 

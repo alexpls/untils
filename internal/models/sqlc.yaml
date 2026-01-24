@@ -38,11 +38,6 @@ sql:
               type: "CheckResult"
               pointer: true
 
-          - column: "monitor_check_events.details"
-            go_type:
-              import: "encoding/json"
-              type: "RawMessage"
-
           - column: "llm_conversations.messages"
             go_type:
               type: "LLMConversationMessages"

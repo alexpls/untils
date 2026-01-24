@@ -12,12 +12,12 @@ import (
 )
 
 type MonitorViewData struct {
-	Monitor               *models.Monitor
-	Results               []*models.MonitorResult
-	NextScheduledCheck    *models.MonitorCheck
-	InProgressCheck       *models.MonitorCheck
-	InProgressCheckEvents []*models.MonitorCheckEvent
-	Notifiers             []*MonitorNotifierViewData
+	Monitor                       *models.Monitor
+	Results                       []*models.MonitorResult
+	NextScheduledCheck            *models.MonitorCheck
+	InProgressCheck               *models.MonitorCheck
+	InProgressCheckTimelineEvents []*models.GetTimelineEventsBySourceIDRow
+	Notifiers                     []*MonitorNotifierViewData
 }
 
 type MonitorNotifierViewData struct {
@@ -53,9 +53,9 @@ templ MonitorView(data MonitorViewData) {
 			<div class="lg:col-span-8 m-4 p-4 bg-base-100 rounded border border-base-content/10">
 				@components.Timeline() {
 					if data.InProgressCheck != nil {
-						@checkInProgressTimelineItem(checkInProgressTimelineItemViewData{
-							Check:  data.InProgressCheck,
-							Events: data.InProgressCheckEvents,
+						@inProgressCheckTimelineItem(inProgressCheckTimelineItemViewData{
+							Check:          data.InProgressCheck,
+							TimelineEvents: data.InProgressCheckTimelineEvents,
 						})
 					}
 					for _, result := range data.Results {
@@ -133,13 +133,33 @@ templ MonitorNotifiers(monitor *models.Monitor, notifiers []*MonitorNotifierView
 	</div>
 }
 
-templ checkInProgressTimelineHeading() {
+templ inProgressCheckTimelineHeading() {
 	<div>
 		Check in progress...
 	</div>
 }
 
-templ checkInProgressEvent(event *models.MonitorCheckEvent, latest bool) {
+type inProgressCheckTimelineItemViewData struct {
+	Check          *models.MonitorCheck
+	TimelineEvents []*models.GetTimelineEventsBySourceIDRow
+}
+
+templ inProgressCheckTimelineItem(data inProgressCheckTimelineItemViewData) {
+	@components.TimelineItem(inProgressCheckTimelineHeading(), nil) {
+		<div id="check-events">
+			if len(data.TimelineEvents) > 0 {
+				<ul class="text-sm text-base-content/50">
+					for i, event := range data.TimelineEvents {
+						@timelineEventInProgressItem(event, i == len(data.TimelineEvents)-1)
+					}
+				</ul>
+			}
+		</div>
+	}
+}
+
+templ timelineEventInProgressItem(row *models.GetTimelineEventsBySourceIDRow, latest bool) {
+	{{ call := row.ToLLMToolCall() }}
 	<li class="flex py-0.5 items-start justify-start">
 		<div class="text-base-content/30 mr-2 mt-0.5">
 			if latest {
@@ -149,50 +169,12 @@ templ checkInProgressEvent(event *models.MonitorCheckEvent, latest bool) {
 			}
 		</div>
 		<div class={ templ.KV("animate-pulse", latest) }>
-			switch d := event.DetailsStruct().(type) {
-				case *models.MonitorCheckEventWebSearchDetails:
-					<div>
-						Searching for &ldquo;{ d.Query }&rdquo;&hellip;
-					</div>
-				case *models.MonitorCheckEventBrowserNavigateDetails:
-					<div>
-						Browsing &ldquo;<a href={ d.URL } target="_blank" rel="noref noopener" class="link">{ components.URLHost(d.URL) }</a>&rdquo;&hellip;
-					</div>
-				case *models.MonitorCheckEventBrowserWaitDetails:
-					<div>
-						Waiting for the page to load&hellip;
-					</div>
-				case *models.MonitorCheckEventBrowserClickDetails:
-					<div>
-						Clicking on a link&hellip;
-					</div>
-				default:
-					<div>
-						Checking&hellip;
-					</div>
-			}
+			{ toolDisplayText(call) }&hellip;
 		</div>
 		<div class="shrink-0 ml-auto text-xs text-muted tabular-nums">
-			{ components.FormatTime(ctx, event.CreatedAt) }
+			{ components.FormatTime(ctx, call.At) }
 		</div>
 	</li>
-}
-
-type checkInProgressTimelineItemViewData struct {
-	Check  *models.MonitorCheck
-	Events []*models.MonitorCheckEvent
-}
-
-templ checkInProgressTimelineItem(data checkInProgressTimelineItemViewData) {
-	@components.TimelineItem(checkInProgressTimelineHeading(), nil) {
-		<div id="check-events">
-			<ul class="text-sm text-base-content/50">
-				for i, event := range data.Events {
-					@checkInProgressEvent(event, i == len(data.Events)-1)
-				}
-			</ul>
-		</div>
-	}
 }
 
 templ monitorResultTimelineItem(result *models.MonitorResult, allowFeedback bool) {

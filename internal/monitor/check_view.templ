@@ -4,16 +4,17 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"net/url"
 
 	"github.com/alexpls/untils/internal/components"
 	"github.com/alexpls/untils/internal/components/app"
+	"github.com/alexpls/untils/internal/components/icons"
 	"github.com/alexpls/untils/internal/models"
 	"github.com/starfederation/datastar-go/datastar"
 )
 
 type CheckViewData struct {
 	Check        *models.GetCheckWithMonitorRow
-	Events       []*models.MonitorCheckEvent
 	Conversation *models.LlmConversation
 	Result       *models.MonitorResult
 }
@@ -93,12 +94,15 @@ templ CheckView(data CheckViewData) {
 			<div class="lg:col-span-4 m-4 p-4 border border-base-content/10 rounded h-fit">
 				<div>
 					<div class="font-semibold uppercase text-xs mb-3">Check timeline</div>
-					if len(data.Events) > 0 {
-						<ul class="text-sm text-base-content/70 space-y-1">
-							for _, event := range data.Events {
-								@checkInProgressEvent(event, false)
-							}
-						</ul>
+					if data.Conversation != nil {
+						{{ toolCalls := data.Conversation.Messages.ExtractToolCalls() }}
+						if len(toolCalls) > 0 {
+							<ul class="text-sm text-base-content/70 space-y-1">
+								for _, call := range toolCalls {
+									@toolCallTimelineItem(call, false)
+								}
+							</ul>
+						}
 					}
 				</div>
 			</div>
@@ -214,5 +218,54 @@ func extractToolInfo(body json.RawMessage) *toolInfoResult {
 		CallID: data.CallID,
 		Name:   data.Name,
 		Output: data.Output,
+	}
+}
+
+templ toolCallTimelineItem(call models.LLMToolCall, latest bool) {
+	<li class="flex py-0.5 items-start justify-start">
+		<div class="text-base-content/30 mr-2 mt-0.5">
+			if latest {
+				@icons.Loader(icons.IconParams{Size: 16, Classes: templ.Classes("animate-spin")})
+			} else {
+				@icons.CircleCheck(icons.IconParams{Size: 16})
+			}
+		</div>
+		<div class={ templ.KV("animate-pulse", latest) }>
+			{ toolDisplayText(call) }&hellip;
+		</div>
+		<div class="shrink-0 ml-auto text-xs text-muted tabular-nums">
+			{ components.FormatTime(ctx, call.At) }
+		</div>
+	</li>
+}
+
+// toolDisplayText returns a human-readable description of a tool call for display in the UI.
+func toolDisplayText(call models.LLMToolCall) string {
+	switch call.Name {
+	case "browser_navigate":
+		var params struct {
+			URL string `json:"url"`
+		}
+		if err := json.Unmarshal([]byte(call.Arguments), &params); err == nil {
+			if u, err := url.Parse(params.URL); err == nil {
+				return fmt.Sprintf("Browsing %q", u.Host)
+			}
+			return fmt.Sprintf("Browsing %q", params.URL)
+		}
+		return "Browsing"
+	case "browser_click":
+		return "Clicking on a link"
+	case "browser_wait":
+		return "Waiting for the page to load"
+	case "search_request":
+		var params struct {
+			Query string `json:"query"`
+		}
+		if err := json.Unmarshal([]byte(call.Arguments), &params); err == nil {
+			return fmt.Sprintf("Searching for %q", params.Query)
+		}
+		return "Searching"
+	default:
+		return fmt.Sprintf("Running %s", call.Name)
 	}
 }

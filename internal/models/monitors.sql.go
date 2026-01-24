@@ -7,7 +7,6 @@ package models
 
 import (
 	"context"
-	"encoding/json"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
@@ -100,38 +99,6 @@ func (q *Queries) CreateMonitorCheck(ctx context.Context, db DBTX, arg *CreateMo
 	return &i, err
 }
 
-const createMonitorCheckEvent = `-- name: CreateMonitorCheckEvent :one
-insert into monitor_check_events (monitor_id, monitor_check_id, kind, details, created_at)
-values ($1, $2, $3, $4, now())
-returning id, monitor_id, monitor_check_id, kind, details, created_at
-`
-
-type CreateMonitorCheckEventParams struct {
-	MonitorID      int64
-	MonitorCheckID int64
-	Kind           MonitorCheckEventKind
-	Details        json.RawMessage
-}
-
-func (q *Queries) CreateMonitorCheckEvent(ctx context.Context, db DBTX, arg *CreateMonitorCheckEventParams) (*MonitorCheckEvent, error) {
-	row := db.QueryRow(ctx, createMonitorCheckEvent,
-		arg.MonitorID,
-		arg.MonitorCheckID,
-		arg.Kind,
-		arg.Details,
-	)
-	var i MonitorCheckEvent
-	err := row.Scan(
-		&i.ID,
-		&i.MonitorID,
-		&i.MonitorCheckID,
-		&i.Kind,
-		&i.Details,
-		&i.CreatedAt,
-	)
-	return &i, err
-}
-
 const createMonitorNotifier = `-- name: CreateMonitorNotifier :one
 insert into monitor_notifiers (monitor_id, type, created_at)
 values ($1, $2, now())
@@ -207,16 +174,6 @@ type DeleteMonitorParams struct {
 
 func (q *Queries) DeleteMonitor(ctx context.Context, db DBTX, arg *DeleteMonitorParams) error {
 	_, err := db.Exec(ctx, deleteMonitor, arg.UserID, arg.MonitorID)
-	return err
-}
-
-const deleteMonitorCheckEventsForMonitor = `-- name: DeleteMonitorCheckEventsForMonitor :exec
-delete from monitor_check_events
-where monitor_id = $1
-`
-
-func (q *Queries) DeleteMonitorCheckEventsForMonitor(ctx context.Context, db DBTX, monitorID int64) error {
-	_, err := db.Exec(ctx, deleteMonitorCheckEventsForMonitor, monitorID)
 	return err
 }
 
@@ -700,39 +657,6 @@ func (q *Queries) ListMonitorActivity(ctx context.Context, db DBTX, userID int64
 			&i.CreatedAt,
 			&i.Date,
 			&i.DatePastTenseVerb,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, &i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const listMonitorCheckEvents = `-- name: ListMonitorCheckEvents :many
-select id, monitor_id, monitor_check_id, kind, details, created_at from monitor_check_events
-where monitor_check_id = $1
-order by created_at asc
-`
-
-func (q *Queries) ListMonitorCheckEvents(ctx context.Context, db DBTX, monitorCheckID int64) ([]*MonitorCheckEvent, error) {
-	rows, err := db.Query(ctx, listMonitorCheckEvents, monitorCheckID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []*MonitorCheckEvent
-	for rows.Next() {
-		var i MonitorCheckEvent
-		if err := rows.Scan(
-			&i.ID,
-			&i.MonitorID,
-			&i.MonitorCheckID,
-			&i.Kind,
-			&i.Details,
-			&i.CreatedAt,
 		); err != nil {
 			return nil, err
 		}

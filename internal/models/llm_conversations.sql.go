@@ -7,6 +7,8 @@ package models
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const addMessageToLLMConversation = `-- name: AddMessageToLLMConversation :exec
@@ -75,4 +77,52 @@ func (q *Queries) GetLLMConversationBySourceID(ctx context.Context, db DBTX, arg
 		&i.UpdatedAt,
 	)
 	return &i, err
+}
+
+const getTimelineEventsBySourceID = `-- name: GetTimelineEventsBySourceID :many
+select
+    (out->>'name')::text as name,
+    (out->>'arguments')::text as arguments,
+    (m->>'at')::timestamptz as at
+from llm_conversations c,
+    jsonb_array_elements(c.messages) as m,
+    jsonb_array_elements(m->'body'->'output') as out
+where c.source_type = $1
+  and c.source_id = $2
+  and m->>'role' = 'assistant'
+  and out->>'type' = 'function_call'
+order by (m->>'at')::timestamptz
+`
+
+type GetTimelineEventsBySourceIDParams struct {
+	SourceType LLMConversationsSource
+	SourceID   int64
+}
+
+type GetTimelineEventsBySourceIDRow struct {
+	Name      string
+	Arguments string
+	At        pgtype.Timestamptz
+}
+
+// Extracts timeline events (currently function calls) from an LLM conversation
+// without transferring the full messages JSONB to the application.
+func (q *Queries) GetTimelineEventsBySourceID(ctx context.Context, db DBTX, arg *GetTimelineEventsBySourceIDParams) ([]*GetTimelineEventsBySourceIDRow, error) {
+	rows, err := db.Query(ctx, getTimelineEventsBySourceID, arg.SourceType, arg.SourceID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []*GetTimelineEventsBySourceIDRow
+	for rows.Next() {
+		var i GetTimelineEventsBySourceIDRow
+		if err := rows.Scan(&i.Name, &i.Arguments, &i.At); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

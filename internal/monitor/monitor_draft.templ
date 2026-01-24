@@ -11,13 +11,13 @@ import (
 )
 
 type MonitorDraftData struct {
-	Monitor               *models.Monitor
-	ResultPreview         *models.MonitorResult
-	CheckInProgress       *models.MonitorCheck
-	CheckInProgressEvents []*models.MonitorCheckEvent
-	ValidationErrors      validation.ValidationErrors
-	Values                UpdateMonitorDraftParams
-	Notifiers             []*MonitorNotifierViewData
+	Monitor                       *models.Monitor
+	ResultPreview                 *models.MonitorResult
+	InProgressCheck               *models.MonitorCheck
+	InProgressCheckTimelineEvents []*models.GetTimelineEventsBySourceIDRow
+	ValidationErrors              validation.ValidationErrors
+	Values                        UpdateMonitorDraftParams
+	Notifiers                     []*MonitorNotifierViewData
 }
 
 func (m MonitorDraftData) GetValidationErrors() validation.ValidationErrors {
@@ -140,12 +140,12 @@ templ MonitorDraftView(data MonitorDraftData) {
 								})
 								<div class="ml-2">
 									<p>Previewing...</p>
-									if data.CheckInProgress != nil && data.CheckInProgressEvents != nil && len(data.CheckInProgressEvents) > 0 {
+									if data.InProgressCheck != nil && len(data.InProgressCheckTimelineEvents) > 0 {
 										<div>
 											<ul>
-												@checkInProgressTimelineItem(checkInProgressTimelineItemViewData{
-													Check:  data.CheckInProgress,
-													Events: data.CheckInProgressEvents,
+												@inProgressCheckTimelineItem(inProgressCheckTimelineItemViewData{
+													Check:          data.InProgressCheck,
+													TimelineEvents: data.InProgressCheckTimelineEvents,
 												})
 											</ul>
 										</div>

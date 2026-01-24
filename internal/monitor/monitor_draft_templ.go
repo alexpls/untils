@@ -19,13 +19,13 @@ import (
 )
 
 type MonitorDraftData struct {
-	Monitor               *models.Monitor
-	ResultPreview         *models.MonitorResult
-	CheckInProgress       *models.MonitorCheck
-	CheckInProgressEvents []*models.MonitorCheckEvent
-	ValidationErrors      validation.ValidationErrors
-	Values                UpdateMonitorDraftParams
-	Notifiers             []*MonitorNotifierViewData
+	Monitor                       *models.Monitor
+	ResultPreview                 *models.MonitorResult
+	InProgressCheck               *models.MonitorCheck
+	InProgressCheckTimelineEvents []*models.GetTimelineEventsBySourceIDRow
+	ValidationErrors              validation.ValidationErrors
+	Values                        UpdateMonitorDraftParams
+	Notifiers                     []*MonitorNotifierViewData
 }
 
 func (m MonitorDraftData) GetValidationErrors() validation.ValidationErrors {
@@ -342,14 +342,14 @@ func MonitorDraftView(data MonitorDraftData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if data.CheckInProgress != nil && data.CheckInProgressEvents != nil && len(data.CheckInProgressEvents) > 0 {
+			if data.InProgressCheck != nil && len(data.InProgressCheckTimelineEvents) > 0 {
 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "<div><ul>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = checkInProgressTimelineItem(checkInProgressTimelineItemViewData{
-					Check:  data.CheckInProgress,
-					Events: data.CheckInProgressEvents,
+				templ_7745c5c3_Err = inProgressCheckTimelineItem(inProgressCheckTimelineItemViewData{
+					Check:          data.InProgressCheck,
+					TimelineEvents: data.InProgressCheckTimelineEvents,
 				}).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err

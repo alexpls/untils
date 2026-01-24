@@ -1,9 +1,5 @@
 package models
 
-import (
-	"encoding/json"
-)
-
 type Citations []Citation
 
 type Citation struct {
@@ -31,57 +27,4 @@ type CheckResult struct {
 	ResultPlaintext     string    `json:"result_plaintext"`
 	Date                Date      `json:"date"`
 	Citations           Citations `json:"citations"` // TODO: change to Sources
-}
-
-type MonitorCheckEventDetails interface {
-	isMonitorCheckEventDetails()
-}
-
-type MonitorCheckEventWebSearchDetails struct {
-	Query string `json:"query"`
-}
-
-func (d MonitorCheckEventWebSearchDetails) isMonitorCheckEventDetails() {}
-
-type MonitorCheckEventBrowserClickDetails struct {
-}
-
-func (d MonitorCheckEventBrowserClickDetails) isMonitorCheckEventDetails() {}
-
-type MonitorCheckEventBrowserNavigateDetails struct {
-	URL string `json:"url"`
-}
-
-func (d MonitorCheckEventBrowserNavigateDetails) isMonitorCheckEventDetails() {}
-
-type MonitorCheckEventBrowserWaitDetails struct {
-}
-
-func (d MonitorCheckEventBrowserWaitDetails) isMonitorCheckEventDetails() {}
-
-func (e *MonitorCheckEvent) DetailsStruct() MonitorCheckEventDetails {
-	switch e.Kind {
-	case MonitorCheckEventKindWebSearch:
-		return unmarshalMonitorCheckEventDetails[MonitorCheckEventWebSearchDetails](e.Details)
-
-	case MonitorCheckEventKindBrowserClick:
-		return unmarshalMonitorCheckEventDetails[MonitorCheckEventBrowserClickDetails](e.Details)
-
-	case MonitorCheckEventKindBrowserNavigate:
-		return unmarshalMonitorCheckEventDetails[MonitorCheckEventBrowserNavigateDetails](e.Details)
-
-	case MonitorCheckEventKindBrowserWait:
-		return unmarshalMonitorCheckEventDetails[MonitorCheckEventBrowserWaitDetails](e.Details)
-
-	default:
-		panic("unhandled monitor check event kind")
-	}
-}
-
-func unmarshalMonitorCheckEventDetails[T MonitorCheckEventDetails](data json.RawMessage) *T {
-	var details T
-	if err := json.Unmarshal(data, &details); err != nil {
-		panic("unmarshalMonitorEventDetails: " + err.Error())
-	}
-	return &details
 }

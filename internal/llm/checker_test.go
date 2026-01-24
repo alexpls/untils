@@ -21,16 +21,7 @@ func TestCheckerEasySubject(t *testing.T) {
 	user := fixtures.user
 	check := fixtures.check
 
-	ch := make(EventsChan)
-	defer close(ch)
-
-	checker := newChecker(deps.service, ch, deps.pool, deps.queries)
-
-	go func() {
-		for range ch {
-			// draining the channel
-		}
-	}()
+	checker := newChecker(deps.service, deps.pool, deps.queries)
 
 	events := make(logging.Events)
 	ctx = logging.ContextWithEvents(ctx, events)

@@ -311,8 +311,5 @@ func (s *Service) deleteMonitorRelations(ctx context.Context, tx models.DBTX, mo
 	if err := s.queries.DeleteMonitorResults(ctx, tx, monitorID); err != nil {
 		return fmt.Errorf("deleting monitor results: %w", err)
 	}
-	if err := s.queries.DeleteMonitorCheckEventsForMonitor(ctx, tx, monitorID); err != nil {
-		return fmt.Errorf("deleting monitor check events: %w", err)
-	}
 	return nil
 }

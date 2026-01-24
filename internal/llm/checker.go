@@ -20,7 +20,6 @@ type checker struct {
 	messages       []responses.ResponseInputItemUnionParam
 	browserCtx     *browser.BrowserCtx
 	browserCancel  context.CancelFunc
-	c              EventsChan
 	pool           *pgxpool.Pool
 	queries        *models.Queries
 	conversationID int64
@@ -28,8 +27,8 @@ type checker struct {
 	priorCalls     []toolCall
 }
 
-func newChecker(service *Service, c EventsChan, pool *pgxpool.Pool, queries *models.Queries) *checker {
-	return &checker{service: service, c: c, pool: pool, queries: queries}
+func newChecker(service *Service, pool *pgxpool.Pool, queries *models.Queries) *checker {
+	return &checker{service: service, pool: pool, queries: queries}
 }
 
 func (c *checker) logMessage(ctx context.Context, role models.LLMMessageRole, body any, duration time.Duration) error {
@@ -230,11 +229,6 @@ func (c *checker) callTool(ctx context.Context, name string, args string) (strin
 
 	if validation := tool.validate(); validation != "" {
 		return "", fmt.Errorf("error: %s", validation)
-	}
-
-	select {
-	case c.c <- tool.checkEvent():
-	default:
 	}
 
 	result, err := tool.call()
