@@ -13,7 +13,7 @@ type SettingsViewModel struct {
 }
 
 templ Settings(data *SettingsViewModel) {
-	@app.AppLayout([]app.Breadcrumb{
+	@app.AppLayout("Settings", []app.Breadcrumb{
 		{Title: "Dashboard", Href: "/app"},
 		{Title: "Settings", Href: "/app/settings"},
 	}) {
@@ -74,7 +74,7 @@ func (m PushoverSettingsViewModel) GetValidationErrors() validation.ValidationEr
 }
 
 templ PushoverSettings(data *PushoverSettingsViewModel) {
-	@app.AppLayout([]app.Breadcrumb{
+	@app.AppLayout("Pushover settings", []app.Breadcrumb{
 		{Title: "Dashboard", Href: "/app"},
 		{Title: "Settings", Href: "/app/settings"},
 	}) {
@@ -139,7 +139,7 @@ type EmailSettingsViewModel struct {
 }
 
 templ EmailSettings(data *EmailSettingsViewModel) {
-	@app.AppLayout([]app.Breadcrumb{
+	@app.AppLayout("Email settings", []app.Breadcrumb{
 		{Title: "Dashboard", Href: "/app"},
 		{Title: "Settings", Href: "/app/settings"},
 	}) {

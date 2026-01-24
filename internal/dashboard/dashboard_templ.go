@@ -65,7 +65,7 @@ func DashboardPage(data DashboardViewData) templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = app.AppLayout([]app.Breadcrumb{
+		templ_7745c5c3_Err = app.AppLayout("Dashboard", []app.Breadcrumb{
 			{Title: "Dashboard", Href: "/app"},
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {

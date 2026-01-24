@@ -28,7 +28,7 @@ type MonitorNotifierViewData struct {
 }
 
 templ MonitorViewPage(data MonitorViewData) {
-	@app.AppLayout([]app.Breadcrumb{
+	@app.AppLayout(data.Monitor.Subject.String, []app.Breadcrumb{
 		{Title: "Dashboard", Href: "/app"},
 		{Title: "Monitors", Href: "/app/monitors"},
 	}) {

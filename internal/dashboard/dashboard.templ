@@ -19,7 +19,7 @@ const (
 )
 
 templ DashboardPage(data DashboardViewData) {
-	@app.AppLayout([]app.Breadcrumb{
+	@app.AppLayout("Dashboard", []app.Breadcrumb{
 		{Title: "Dashboard", Href: "/app"},
 	}) {
 		@DashboardView(data)

@@ -9,7 +9,7 @@ type SignInData struct {
 }
 
 templ SignInPage(data SignInData) {
-	@components.Page() {
+	@components.Page("Sign in") {
 		<div class="mx-auto w-100 px-4">
 			if data.Failed {
 				<div class="alert alert-error mb-8">
@@ -47,7 +47,6 @@ templ SignInPage(data SignInData) {
 					<button class="btn" type="submit">Sign in</button>
 				</div>
 			</form>
-
 			if components.IsDev(ctx) {
 				<div class="mt-3">
 					<form action="/sign_in" method="post">

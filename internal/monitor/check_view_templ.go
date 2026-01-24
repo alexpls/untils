@@ -47,6 +47,7 @@ func CheckViewPage(data CheckViewData) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
+		checkTitle := fmt.Sprintf("Check #%d", data.Check.CheckID)
 		templ_7745c5c3_Var2 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -65,10 +66,10 @@ func CheckViewPage(data CheckViewData) templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = app.AppLayout([]app.Breadcrumb{
+		templ_7745c5c3_Err = app.AppLayout(checkTitle, []app.Breadcrumb{
 			{Title: "Dashboard", Href: "/app"},
 			{Title: "Checks", Href: "/app/checks"},
-			{Title: fmt.Sprintf("Check #%d", data.Check.CheckID), Href: fmt.Sprintf("/app/checks/%d", data.Check.CheckID)},
+			{Title: checkTitle, Href: fmt.Sprintf("/app/checks/%d", data.Check.CheckID)},
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -105,7 +106,7 @@ func CheckView(data CheckViewData) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(datastar.GetSSE("/app/checks/%d/events", data.Check.CheckID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/check_view.templ`, Line: 32, Col: 96}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/check_view.templ`, Line: 33, Col: 96}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -134,7 +135,7 @@ func CheckView(data CheckViewData) templ.Component {
 		var templ_7745c5c3_Var5 templ.SafeURL
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinURLErrs(fmt.Sprintf("/app/monitors/%d", data.Check.MonitorID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/check_view.templ`, Line: 47, Col: 83}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/check_view.templ`, Line: 48, Col: 83}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -147,7 +148,7 @@ func CheckView(data CheckViewData) templ.Component {
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(data.Check.MonitorSubject)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/check_view.templ`, Line: 47, Col: 113}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/check_view.templ`, Line: 48, Col: 113}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -160,7 +161,7 @@ func CheckView(data CheckViewData) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(components.FormatDateTime(ctx, data.Check.ScheduledFor))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/check_view.templ`, Line: 51, Col: 70}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/check_view.templ`, Line: 52, Col: 70}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -178,7 +179,7 @@ func CheckView(data CheckViewData) templ.Component {
 			var templ_7745c5c3_Var8 string
 			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(components.FormatDateTime(ctx, *data.Check.DoneAt))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/check_view.templ`, Line: 56, Col: 66}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/check_view.templ`, Line: 57, Col: 66}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
@@ -197,7 +198,7 @@ func CheckView(data CheckViewData) templ.Component {
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(data.Check.FailureReason.String)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/check_view.templ`, Line: 62, Col: 70}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/check_view.templ`, Line: 63, Col: 70}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -234,7 +235,7 @@ func CheckView(data CheckViewData) templ.Component {
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(data.Check.Result.Reason)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/check_view.templ`, Line: 77, Col: 61}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/check_view.templ`, Line: 78, Col: 61}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
@@ -343,7 +344,7 @@ func conversationTurnItem(msg *models.LLMConversationMessage) templ.Component {
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(string(msg.Role))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/check_view.templ`, Line: 113, Col: 23}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/check_view.templ`, Line: 114, Col: 23}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
@@ -361,7 +362,7 @@ func conversationTurnItem(msg *models.LLMConversationMessage) templ.Component {
 			var templ_7745c5c3_Var15 string
 			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%dms", msg.Duration.Milliseconds()))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/check_view.templ`, Line: 118, Col: 82}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/check_view.templ`, Line: 119, Col: 82}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {
@@ -379,7 +380,7 @@ func conversationTurnItem(msg *models.LLMConversationMessage) templ.Component {
 		var templ_7745c5c3_Var16 string
 		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(components.FormatTime(ctx, msg.At))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/check_view.templ`, Line: 120, Col: 88}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/check_view.templ`, Line: 121, Col: 88}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 		if templ_7745c5c3_Err != nil {
@@ -432,7 +433,7 @@ func conversationMessageContent(msg *models.LLMConversationMessage) templ.Compon
 				var templ_7745c5c3_Var18 string
 				templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(content)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/check_view.templ`, Line: 133, Col: 119}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/check_view.templ`, Line: 134, Col: 119}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 				if templ_7745c5c3_Err != nil {
@@ -457,7 +458,7 @@ func conversationMessageContent(msg *models.LLMConversationMessage) templ.Compon
 				var templ_7745c5c3_Var19 string
 				templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(toolInfo.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/check_view.templ`, Line: 141, Col: 87}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/check_view.templ`, Line: 142, Col: 87}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 				if templ_7745c5c3_Err != nil {
@@ -470,7 +471,7 @@ func conversationMessageContent(msg *models.LLMConversationMessage) templ.Compon
 				var templ_7745c5c3_Var20 string
 				templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(toolInfo.CallID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/check_view.templ`, Line: 142, Col: 85}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/check_view.templ`, Line: 143, Col: 85}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 				if templ_7745c5c3_Err != nil {
@@ -483,7 +484,7 @@ func conversationMessageContent(msg *models.LLMConversationMessage) templ.Compon
 				var templ_7745c5c3_Var21 string
 				templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d chars", len(toolInfo.Output)))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/check_view.templ`, Line: 147, Col: 103}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/check_view.templ`, Line: 148, Col: 103}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 				if templ_7745c5c3_Err != nil {
@@ -496,7 +497,7 @@ func conversationMessageContent(msg *models.LLMConversationMessage) templ.Compon
 				var templ_7745c5c3_Var22 string
 				templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(toolInfo.Output)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/check_view.templ`, Line: 150, Col: 149}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/check_view.templ`, Line: 151, Col: 149}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 				if templ_7745c5c3_Err != nil {
@@ -555,7 +556,7 @@ func rawJSONCollapse(body json.RawMessage) templ.Component {
 		var templ_7745c5c3_Var24 string
 		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d bytes", len(body)))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/check_view.templ`, Line: 168, Col: 88}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/check_view.templ`, Line: 169, Col: 88}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 		if templ_7745c5c3_Err != nil {
@@ -568,7 +569,7 @@ func rawJSONCollapse(body json.RawMessage) templ.Component {
 		var templ_7745c5c3_Var25 string
 		templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(formatJSON(body))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/check_view.templ`, Line: 171, Col: 146}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/check_view.templ`, Line: 172, Col: 146}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 		if templ_7745c5c3_Err != nil {

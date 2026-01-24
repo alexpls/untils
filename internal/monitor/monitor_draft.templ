@@ -29,7 +29,7 @@ func monitorLoading(mon *models.Monitor) bool {
 }
 
 templ MonitorDraftPage(data MonitorDraftData) {
-	@app.AppLayout([]app.Breadcrumb{
+	@app.AppLayout("Draft: "+data.Monitor.Subject.String, []app.Breadcrumb{
 		{Title: "Dashboard", Href: "/app"},
 		{Title: "Monitors", Href: "/app/monitors"},
 	}) {

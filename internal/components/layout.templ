@@ -1,9 +1,13 @@
 package components
 
-templ Layout() {
+templ Layout(title string) {
 	<html>
 		<head>
-			<title>untils</title>
+			if title == "" {
+				<title>untils</title>
+			} else {
+				<title>{ title } | untils</title>
+			}
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 			<link
 				rel="stylesheet"
@@ -18,8 +22,8 @@ templ Layout() {
 	</html>
 }
 
-templ Page() {
-	@Layout() {
+templ Page(title string) {
+	@Layout(title) {
 		<header class="grid grid-cols-3 p-4">
 			<div class="text-start"></div>
 			<div class="text-center">

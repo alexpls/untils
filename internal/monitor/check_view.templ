@@ -19,10 +19,11 @@ type CheckViewData struct {
 }
 
 templ CheckViewPage(data CheckViewData) {
-	@app.AppLayout([]app.Breadcrumb{
+	{{ checkTitle := fmt.Sprintf("Check #%d", data.Check.CheckID) }}
+	@app.AppLayout(checkTitle, []app.Breadcrumb{
 		{Title: "Dashboard", Href: "/app"},
 		{Title: "Checks", Href: "/app/checks"},
-		{Title: fmt.Sprintf("Check #%d", data.Check.CheckID), Href: fmt.Sprintf("/app/checks/%d", data.Check.CheckID)},
+		{Title: checkTitle, Href: fmt.Sprintf("/app/checks/%d", data.Check.CheckID)},
 	}) {
 		@CheckView(data)
 	}

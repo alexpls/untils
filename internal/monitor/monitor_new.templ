@@ -19,7 +19,7 @@ func (m MonitorNewData) GetValidationErrors() validation.ValidationErrors {
 }
 
 templ MonitorNewPage(data MonitorNewData) {
-	@app.AppLayout([]app.Breadcrumb{
+	@app.AppLayout("New monitor", []app.Breadcrumb{
 		{Title: "Dashboard", Href: "/app"},
 		{Title: "Monitors", Href: "/app/monitors"},
 	}) {

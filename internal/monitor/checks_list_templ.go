@@ -92,7 +92,7 @@ func ChecksListPage(data ChecksListData) templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = app.AppLayout([]app.Breadcrumb{
+		templ_7745c5c3_Err = app.AppLayout("Checks", []app.Breadcrumb{
 			{Title: "Dashboard", Href: "/app"},
 			{Title: "Checks", Href: "/app/checks"},
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)

@@ -83,7 +83,7 @@ func MonitorDraftPage(data MonitorDraftData) templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = app.AppLayout([]app.Breadcrumb{
+		templ_7745c5c3_Err = app.AppLayout("Draft: "+data.Monitor.Subject.String, []app.Breadcrumb{
 			{Title: "Dashboard", Href: "/app"},
 			{Title: "Monitors", Href: "/app/monitors"},
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)

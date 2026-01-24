@@ -20,7 +20,7 @@ type ChecksListData struct {
 }
 
 templ ChecksListPage(data ChecksListData) {
-	@app.AppLayout([]app.Breadcrumb{
+	@app.AppLayout("Checks", []app.Breadcrumb{
 		{Title: "Dashboard", Href: "/app"},
 		{Title: "Checks", Href: "/app/checks"},
 	}) {

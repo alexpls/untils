@@ -183,7 +183,7 @@ func Settings(data *SettingsViewModel) templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = app.AppLayout([]app.Breadcrumb{
+		templ_7745c5c3_Err = app.AppLayout("Settings", []app.Breadcrumb{
 			{Title: "Dashboard", Href: "/app"},
 			{Title: "Settings", Href: "/app/settings"},
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
@@ -378,7 +378,7 @@ func PushoverSettings(data *PushoverSettingsViewModel) templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = app.AppLayout([]app.Breadcrumb{
+		templ_7745c5c3_Err = app.AppLayout("Pushover settings", []app.Breadcrumb{
 			{Title: "Dashboard", Href: "/app"},
 			{Title: "Settings", Href: "/app/settings"},
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var10), templ_7745c5c3_Buffer)
@@ -475,7 +475,7 @@ func EmailSettings(data *EmailSettingsViewModel) templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = app.AppLayout([]app.Breadcrumb{
+		templ_7745c5c3_Err = app.AppLayout("Email settings", []app.Breadcrumb{
 			{Title: "Dashboard", Href: "/app"},
 			{Title: "Settings", Href: "/app/settings"},
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var19), templ_7745c5c3_Buffer)

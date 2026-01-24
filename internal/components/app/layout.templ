@@ -8,8 +8,8 @@ type Breadcrumb struct {
 	Title, Href string
 }
 
-templ AppLayout(breadcrumbs []Breadcrumb) {
-	@components.Layout() {
+templ AppLayout(title string, breadcrumbs []Breadcrumb) {
+	@components.Layout(title) {
 		@TimezoneSync()
 		<header
 			class="sticky top-0 z-0"
