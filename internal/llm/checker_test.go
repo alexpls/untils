@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/alexpls/untils/internal/logging"
 	"github.com/alexpls/untils/internal/models"
-	"github.com/alexpls/untils/internal/wideevents"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -32,9 +32,9 @@ func TestCheckerEasySubject(t *testing.T) {
 		}
 	}()
 
-	events := make(wideevents.Events)
-	ctx = wideevents.ContextWithEvents(ctx, events)
-	llmEvent := wideevents.GetOrCreate(events, newLLMEvent)
+	events := make(logging.Events)
+	ctx = logging.ContextWithEvents(ctx, events)
+	llmEvent := logging.GetOrCreate(events, newLLMEvent)
 	defer llmEvent.finish()
 
 	res, err := checker.perform(ctx, &CheckParams{

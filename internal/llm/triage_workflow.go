@@ -3,7 +3,7 @@ package llm
 import (
 	"context"
 
-	"github.com/alexpls/untils/internal/wideevents"
+	"github.com/alexpls/untils/internal/logging"
 )
 
 type TriageWorkflow struct {
@@ -15,7 +15,7 @@ func NewTriageWorkflow(service *Service) *TriageWorkflow {
 }
 
 func (w *TriageWorkflow) Run(ctx context.Context, params *CheckParams) (*TriagerResponse, error) {
-	llmEvent, _ := wideevents.GetOrCreateFromContext(ctx, newLLMEvent)
+	llmEvent, _ := logging.GetOrCreateFromContext(ctx, newLLMEvent)
 	defer llmEvent.finish()
 
 	triager := NewTriager(w.service, params)

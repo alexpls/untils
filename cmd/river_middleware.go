@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/alexpls/untils/internal/wideevents"
+	"github.com/alexpls/untils/internal/logging"
 	"github.com/riverqueue/river"
 	"github.com/riverqueue/river/rivertype"
 )
@@ -40,10 +40,10 @@ func newWideEventMiddleware(logger *slog.Logger) *wideEventMiddleware {
 }
 
 func (w *wideEventMiddleware) Work(ctx context.Context, job *rivertype.JobRow, doInner func(context.Context) error) error {
-	events := make(wideevents.Events)
-	ctx = wideevents.ContextWithEvents(ctx, events)
+	events := make(logging.Events)
+	ctx = logging.ContextWithEvents(ctx, events)
 
-	ev := wideevents.GetOrCreate(events, func() *JobLogEvent {
+	ev := logging.GetOrCreate(events, func() *JobLogEvent {
 		return &JobLogEvent{}
 	})
 	start := time.Now()

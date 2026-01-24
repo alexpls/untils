@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/alexpls/untils/internal/wideevents"
+	"github.com/alexpls/untils/internal/logging"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -66,7 +66,7 @@ func (t loggingTracer) TraceQueryEnd(ctx context.Context, conn *pgx.Conn, data p
 		return
 	}
 
-	if ev, ok := wideevents.GetOrCreateFromContext(ctx, func() *DBLogEvent {
+	if ev, ok := logging.GetOrCreateFromContext(ctx, func() *DBLogEvent {
 		return &DBLogEvent{}
 	}); ok {
 		ev.QueriesCount++

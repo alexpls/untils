@@ -8,9 +8,9 @@ import (
 	"time"
 
 	"github.com/alexpls/untils/internal/browser"
+	"github.com/alexpls/untils/internal/logging"
 	"github.com/alexpls/untils/internal/models"
 	"github.com/alexpls/untils/internal/search"
-	"github.com/alexpls/untils/internal/wideevents"
 	"github.com/openai/openai-go/v3"
 	"github.com/openai/openai-go/v3/responses"
 )
@@ -96,7 +96,7 @@ var browserNavigateTool = tool[browserNavigateParams]{
 		tc.service.logger.DebugContext(tc.ctx, "browser_navigate started", "url", p.URL)
 		start := time.Now()
 
-		llmEvent, _ := wideevents.GetOrCreateFromContext(tc.ctx, newLLMEvent)
+		llmEvent, _ := logging.GetOrCreateFromContext(tc.ctx, newLLMEvent)
 		llmEvent.addSiteVisited(p.URL)
 
 		getBrowserStart := time.Now()

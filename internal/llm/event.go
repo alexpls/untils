@@ -6,11 +6,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/alexpls/untils/internal/wideevents"
+	"github.com/alexpls/untils/internal/logging"
 )
 
 // LLMEvent tracks statistics for an LLM workflow execution.
-// It implements wideevents.Event for integration with wide event logging.
+// It implements logging.Event for integration with wide event logging.
 type LLMEvent struct {
 	Start        time.Time
 	End          time.Time
@@ -18,7 +18,7 @@ type LLMEvent struct {
 	SitesVisited []string
 }
 
-var _ wideevents.Event = &LLMEvent{}
+var _ logging.Event = &LLMEvent{}
 
 // LLMTurn tracks statistics for a single LLM turn (request/response cycle).
 type LLMTurn struct {

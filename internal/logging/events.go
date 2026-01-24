@@ -1,4 +1,4 @@
-package wideevents
+package logging
 
 import (
 	"context"

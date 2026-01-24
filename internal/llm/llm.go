@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log/slog"
 
+	"github.com/alexpls/untils/internal/logging"
 	"github.com/alexpls/untils/internal/search"
-	"github.com/alexpls/untils/internal/wideevents"
 	"github.com/openai/openai-go/v3"
 	"github.com/openai/openai-go/v3/responses"
 )
@@ -34,7 +34,7 @@ type responseResult struct {
 }
 
 func (s *Service) response(ctx context.Context, params responses.ResponseNewParams) (*responseResult, error) {
-	llmEvent, _ := wideevents.GetOrCreateFromContext(ctx, newLLMEvent)
+	llmEvent, _ := logging.GetOrCreateFromContext(ctx, newLLMEvent)
 	turn := llmEvent.newTurn()
 
 	defer turn.finish()

@@ -3,8 +3,8 @@ package llm
 import (
 	"context"
 
+	"github.com/alexpls/untils/internal/logging"
 	"github.com/alexpls/untils/internal/models"
-	"github.com/alexpls/untils/internal/wideevents"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -27,7 +27,7 @@ func NewCheckWorkflow(service *Service, ch EventsChan, pool *pgxpool.Pool, queri
 }
 
 func (w *CheckWorkflow) Run(ctx context.Context, params *CheckParams) (*models.CheckResult, error) {
-	llmEvent, _ := wideevents.GetOrCreateFromContext(ctx, newLLMEvent)
+	llmEvent, _ := logging.GetOrCreateFromContext(ctx, newLLMEvent)
 	defer llmEvent.finish()
 
 	checker := newChecker(w.service, w.Chan, w.pool, w.queries)

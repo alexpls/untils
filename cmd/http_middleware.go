@@ -8,10 +8,10 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/alexpls/untils/internal/logging"
 	"github.com/alexpls/untils/internal/models"
 	"github.com/alexpls/untils/internal/reqcontext"
 	"github.com/alexpls/untils/internal/session"
-	"github.com/alexpls/untils/internal/wideevents"
 )
 
 type HandlerFuncWithUser func(http.ResponseWriter, *http.Request, *models.User)
@@ -117,10 +117,10 @@ func (a *app) logRequests(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 
-		events := wideevents.Events{}
-		ctx2 := wideevents.ContextWithEvents(r.Context(), events)
+		events := logging.Events{}
+		ctx2 := logging.ContextWithEvents(r.Context(), events)
 
-		httpEvent := wideevents.GetOrCreate(events, func() *HTTPLogEvent {
+		httpEvent := logging.GetOrCreate(events, func() *HTTPLogEvent {
 			return &HTTPLogEvent{
 				Method: r.Method,
 				URI:    r.URL.RequestURI(),
