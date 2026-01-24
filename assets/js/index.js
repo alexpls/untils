@@ -32,7 +32,7 @@ function timeAgo(isoTimestamp) {
   ]
 
   for (const interval of intervals) {
-    const count = Math.floor(seconds / interval.seconds)
+    const count = Math.round(seconds / interval.seconds)
     if (count >= 1) {
       const label = count === 1 ? interval.label : `${interval.label}s`
       return isFuture ? `in ${count} ${label}` : `${count} ${label} ago`

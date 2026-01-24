@@ -13,7 +13,6 @@
 - [ ] Fix: Need an anchored positioning tooltip polyfill for Firefox
 - [ ] Feature: handle future dates better. At the moment with the 'past tense' date requirement, release dates are referred to in the past tense, even though they haven't happened yet.
 - [ ] Feature: "fire and forget" way to set up monitors, if you don't wanna sit around waiting to confirm that the first check looks good
-- [ ] Fix: when timeago is "5 hours 59 minutes in the future" it will return "in 5 hours", when it should really round to the nearest hour and return "in 6 hours"
 - [ ] Improvement: should be able to checkpoint progress in conversation with LLM and resume it on server restart
 - [ ] Improvement: page titles
 - [ ] Refactor: make new tool creation less of a trek through various parts of the codebase
@@ -23,6 +22,7 @@
 
 ## Done
 
+- [x] Fix: when timeago is "5 hours 59 minutes in the future" it will return "in 5 hours", when it should really round to the nearest hour and return "in 6 hours"
 - [x] Improvement: Request ID on all logs (context logger?)
 - [x] Fix: why did a panic happen during job checks where previewing tried to transition to validating?
 - [x] Improvement: The search tool should not be able to be called with the same URL multiple times in a row
