@@ -17,6 +17,8 @@
 - [ ] Fix: should be able to visit check pages for incomplete checks - but right now that errors
 - [ ] Improvement: special logic when checking prices for things, should include things like finding the cheapest price and reporting on it. Not including multiple store names.
 - [ ] Improvement: The click tool should emit the URL of the new page it landed on as a navigation event so it shows up on the UI
+- [ ] Fix: sometimes a draft will get stuck on 'previewing' status and will need a page refresh to actually show the "Activate" screen
+- [ ] Fix: check timeline event timestamps aren't right aligned. they should be, and should have a small margin on their left for good measure.
 
 ## Done
 
