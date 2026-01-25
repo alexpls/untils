@@ -142,7 +142,7 @@ templ MonitorDraftView(data MonitorDraftData) {
 									if data.InProgressCheck != nil && len(data.InProgressCheckTimelineEvents) > 0 {
 										<div>
 											<ul>
-												@inProgressCheckTimelineItem(inProgressCheckTimelineItemViewData{
+												@InProgressCheckTimelineItem(InProgressCheckTimelineItemViewData{
 													Check:          data.InProgressCheck,
 													TimelineEvents: data.InProgressCheckTimelineEvents,
 												})

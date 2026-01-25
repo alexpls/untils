@@ -52,7 +52,7 @@ templ MonitorView(data MonitorViewData) {
 			<div class="lg:col-span-8 m-4 p-4 bg-base-100 rounded border border-base-content/10">
 				@components.Timeline() {
 					if data.InProgressCheck != nil {
-						@inProgressCheckTimelineItem(inProgressCheckTimelineItemViewData{
+						@InProgressCheckTimelineItem(InProgressCheckTimelineItemViewData{
 							Check:          data.InProgressCheck,
 							TimelineEvents: data.InProgressCheckTimelineEvents,
 						})
@@ -138,12 +138,12 @@ templ inProgressCheckTimelineHeading() {
 	</div>
 }
 
-type inProgressCheckTimelineItemViewData struct {
+type InProgressCheckTimelineItemViewData struct {
 	Check          *models.MonitorCheck
 	TimelineEvents []*models.GetTimelineEventsBySourceIDRow
 }
 
-templ inProgressCheckTimelineItem(data inProgressCheckTimelineItemViewData) {
+templ InProgressCheckTimelineItem(data InProgressCheckTimelineItemViewData) {
 	@components.TimelineItem(inProgressCheckTimelineHeading(), nil) {
 		<div id="check-events">
 			if len(data.TimelineEvents) > 0 {

@@ -40,7 +40,7 @@ func toolCallTimelineItem(call models.LLMToolCall, latest bool) templ.Component 
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<li class=\"flex py-0.5 items-start justify-start\"><div class=\"text-base-content/30 mr-2 mt-0.5\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<li class=\"flex py-0.5 items-baseline justify-start\"><div class=\"text-base-content/30 mr-2 self-start mt-0.5\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -85,7 +85,7 @@ func toolCallTimelineItem(call models.LLMToolCall, latest bool) templ.Component 
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "&hellip;</div><div class=\"shrink-0 ml-auto text-xs text-muted tabular-nums\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "&hellip;</div><div class=\"shrink-0 ml-auto pl-2 text-xs text-muted tabular-nums\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

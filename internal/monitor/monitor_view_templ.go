@@ -174,7 +174,7 @@ func MonitorView(data MonitorViewData) templ.Component {
 			}
 			ctx = templ.InitializeContext(ctx)
 			if data.InProgressCheck != nil {
-				templ_7745c5c3_Err = inProgressCheckTimelineItem(inProgressCheckTimelineItemViewData{
+				templ_7745c5c3_Err = InProgressCheckTimelineItem(InProgressCheckTimelineItemViewData{
 					Check:          data.InProgressCheck,
 					TimelineEvents: data.InProgressCheckTimelineEvents,
 				}).Render(ctx, templ_7745c5c3_Buffer)
@@ -402,12 +402,12 @@ func inProgressCheckTimelineHeading() templ.Component {
 	})
 }
 
-type inProgressCheckTimelineItemViewData struct {
+type InProgressCheckTimelineItemViewData struct {
 	Check          *models.MonitorCheck
 	TimelineEvents []*models.GetTimelineEventsBySourceIDRow
 }
 
-func inProgressCheckTimelineItem(data inProgressCheckTimelineItemViewData) templ.Component {
+func InProgressCheckTimelineItem(data InProgressCheckTimelineItemViewData) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {

@@ -10,6 +10,7 @@ import (
 	"github.com/alexpls/untils/internal/auth"
 	"github.com/alexpls/untils/internal/dashboard"
 	"github.com/alexpls/untils/internal/db"
+	"github.com/alexpls/untils/internal/dev"
 	"github.com/alexpls/untils/internal/email"
 	"github.com/alexpls/untils/internal/llm"
 	"github.com/alexpls/untils/internal/logging"
@@ -56,6 +57,7 @@ type app struct {
 	emailService      *email.Service
 	validate          *validator.Validate
 	webSearcher       search.WebSearcher
+	devHandlers       *dev.Handlers
 }
 
 func createApp(c *config) (*app, func()) {
@@ -173,6 +175,8 @@ func createApp(c *config) (*app, func()) {
 	a.authHandlers = auth.NewHandlers(a.auth, a.sessionManager, a.logger.With("source", "auth.handlers"))
 
 	a.settingsHandlers = settings.NewHandlers(a.queries, a.db, a.pushoverStore, a.pushoverClient, a.auth, a.logger.With("source", "settings.handlers"))
+
+	a.devHandlers = dev.NewHandlers()
 
 	river.AddWorker(workers, monitor.NewCheckWorker(a.monitor, a.logger.With("source", "monitor.check_worker")))
 	river.AddWorker(workers, monitor.NewValidateMonitorWorker(a.monitor, a.logger.With("source", "monitor.validate_monitor_worker")))

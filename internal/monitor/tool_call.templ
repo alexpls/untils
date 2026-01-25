@@ -12,8 +12,8 @@ import (
 // toolCallTimelineItem renders a tool call as a timeline item, with optional
 // "latest" styling to indicate the most recent item (shows spinner vs checkmark).
 templ toolCallTimelineItem(call models.LLMToolCall, latest bool) {
-	<li class="flex py-0.5 items-start justify-start">
-		<div class="text-base-content/30 mr-2 mt-0.5">
+	<li class="flex py-0.5 items-baseline justify-start">
+		<div class="text-base-content/30 mr-2 self-start mt-0.5">
 			if latest {
 				@icons.Loader(icons.IconParams{Size: 16, Classes: templ.Classes("animate-spin")})
 			} else {
@@ -24,7 +24,7 @@ templ toolCallTimelineItem(call models.LLMToolCall, latest bool) {
 			@toolCallDisplay(call)
 			&hellip;
 		</div>
-		<div class="shrink-0 ml-auto text-xs text-muted tabular-nums">
+		<div class="shrink-0 ml-auto pl-2 text-xs text-muted tabular-nums">
 			{ components.FormatTime(ctx, call.At) }
 		</div>
 	</li>

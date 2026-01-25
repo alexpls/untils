@@ -58,6 +58,9 @@ func (a *app) routes() http.Handler {
 	// favicon
 	mux.Handle("GET /app/favicon", a.requireAuth2(faviconproxy.Handler(a.logger.With("source", "faviconproxy"))))
 
+	// dev
+	mux.Handle("GET /app/dev/palette", a.requireAuth(a.devHandlers.PaletteGet))
+
 	// middleware
 	csrf := http.NewCrossOriginProtection()
 	sess := a.sessionManager

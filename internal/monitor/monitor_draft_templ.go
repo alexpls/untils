@@ -346,7 +346,7 @@ func MonitorDraftView(data MonitorDraftData) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = inProgressCheckTimelineItem(inProgressCheckTimelineItemViewData{
+				templ_7745c5c3_Err = InProgressCheckTimelineItem(InProgressCheckTimelineItemViewData{
 					Check:          data.InProgressCheck,
 					TimelineEvents: data.InProgressCheckTimelineEvents,
 				}).Render(ctx, templ_7745c5c3_Buffer)

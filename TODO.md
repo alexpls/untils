@@ -18,10 +18,10 @@
 - [ ] Improvement: special logic when checking prices for things, should include things like finding the cheapest price and reporting on it. Not including multiple store names.
 - [ ] Improvement: The click tool should emit the URL of the new page it landed on as a navigation event so it shows up on the UI
 - [ ] Fix: sometimes a draft will get stuck on 'previewing' status and will need a page refresh to actually show the "Activate" screen
-- [ ] Fix: check timeline event timestamps aren't right aligned. they should be, and should have a small margin on their left for good measure.
 
 ## Done
 
+- [x] Fix: check timeline event timestamps aren't right aligned. they should be, and should have a small margin on their left for good measure.
 - [x] Refactor: could check_events and llm_conversation concepts be rolled into one? They have some crossover currently
 - [x] Improvement: page titles
 - [x] Fix: when timeago is "5 hours 59 minutes in the future" it will return "in 5 hours", when it should really round to the nearest hour and return "in 6 hours"
