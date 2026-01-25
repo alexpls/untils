@@ -5,7 +5,6 @@ import (
 	"net/url"
 
 	"github.com/alexpls/untils/internal/components"
-	"github.com/alexpls/untils/internal/components/app"
 	"github.com/alexpls/untils/internal/components/icons"
 	"github.com/alexpls/untils/internal/models"
 	"github.com/starfederation/datastar-go/datastar"
@@ -28,7 +27,7 @@ type MonitorNotifierViewData struct {
 }
 
 templ MonitorViewPage(data MonitorViewData) {
-	@app.AppLayout(data.Monitor.Subject.String, []app.Breadcrumb{
+	@components.AppLayout(data.Monitor.Subject.String, []components.Breadcrumb{
 		{Title: "Dashboard", Href: "/app"},
 		{Title: "Monitors", Href: "/app/monitors"},
 	}) {
@@ -38,7 +37,7 @@ templ MonitorViewPage(data MonitorViewData) {
 
 templ MonitorView(data MonitorViewData) {
 	<div id="monitor-view" data-effect={ datastar.GetSSE("/app/monitors/%d/events", data.Monitor.ID) }>
-		@app.Header(data.Monitor.Subject.String, nil) {
+		@components.Header(data.Monitor.Subject.String, nil) {
 			<div class="text-sm flex gap-x-2 mt-2">
 				<div class="badge badge-soft badge-success">
 					<div aria-label="success" class="status status-success"></div>

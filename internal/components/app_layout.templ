@@ -1,15 +1,9 @@
-package app
+package components
 
-import "github.com/alexpls/untils/internal/components"
 import "github.com/alexpls/untils/internal/components/icons"
 
-// Breadcrumb represents a navigation breadcrumb
-type Breadcrumb struct {
-	Title, Href string
-}
-
 templ AppLayout(title string, breadcrumbs []Breadcrumb) {
-	@components.Layout(title) {
+	@Layout(title) {
 		@TimezoneSync()
 		<header
 			class="sticky top-0 z-0"
@@ -113,19 +107,12 @@ templ HeaderContainer() {
 }
 
 templ TimezoneSync() {
-	{{ tzCookie := components.TimezoneFromCookie(ctx) }}
-	if tzCookie != "" && components.CurrentUser(ctx).Timezone != tzCookie {
+	{{ tzCookie := TimezoneFromCookie(ctx) }}
+	if tzCookie != "" && CurrentUser(ctx).Timezone != tzCookie {
 		<div
 			class="hidden"
 			data-signals:timezone={ templ.JSONString(tzCookie) }
 			data-effect="@post('/app/settings/timezone')"
 		></div>
 	}
-}
-
-templ BreadcrumbView(b Breadcrumb) {
-	@icons.ChevronRight(icons.IconParams{Size: 16})
-	<a href={ b.Href } class="hover:bg-base-200 rounded p-2 px-1 md:px-3 transition-colors">
-		{ b.Title }
-	</a>
 }

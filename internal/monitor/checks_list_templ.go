@@ -12,7 +12,6 @@ import (
 	"fmt"
 
 	"github.com/alexpls/untils/internal/components"
-	"github.com/alexpls/untils/internal/components/app"
 	"github.com/alexpls/untils/internal/components/icons"
 	"github.com/alexpls/untils/internal/models"
 	"github.com/alexpls/untils/internal/pagination"
@@ -60,7 +59,7 @@ func ChecksListPage(data ChecksListData) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = app.Header("Checks", nil).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = components.Header("Checks", nil).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -92,7 +91,7 @@ func ChecksListPage(data ChecksListData) templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = app.AppLayout("Checks", []app.Breadcrumb{
+		templ_7745c5c3_Err = components.AppLayout("Checks", []components.Breadcrumb{
 			{Title: "Dashboard", Href: "/app"},
 			{Title: "Checks", Href: "/app/checks"},
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
@@ -131,7 +130,7 @@ func ChecksList(data ChecksListData) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("@get('/app/checks/events?%s')", data.Pagination.CurrentPageParams().Encode()))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/checks_list.templ`, Line: 35, Col: 127}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/checks_list.templ`, Line: 34, Col: 127}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -162,7 +161,7 @@ func ChecksList(data ChecksListData) templ.Component {
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(check.MonitorSubject)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/checks_list.templ`, Line: 55, Col: 56}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/checks_list.templ`, Line: 54, Col: 56}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -203,7 +202,7 @@ func ChecksList(data ChecksListData) templ.Component {
 					var templ_7745c5c3_Var7 templ.SafeURL
 					templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinURLErrs(fmt.Sprintf("/app/checks/%d", check.CheckID))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/checks_list.templ`, Line: 69, Col: 92}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/checks_list.templ`, Line: 68, Col: 92}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 					if templ_7745c5c3_Err != nil {
@@ -248,7 +247,7 @@ func ChecksList(data ChecksListData) templ.Component {
 			var templ_7745c5c3_Var10 templ.SafeURL
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinURLErrs("?" + data.Pagination.PrevPageParams().Encode())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/checks_list.templ`, Line: 81, Col: 60}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/checks_list.templ`, Line: 80, Col: 60}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
@@ -291,7 +290,7 @@ func ChecksList(data ChecksListData) templ.Component {
 			var templ_7745c5c3_Var13 templ.SafeURL
 			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinURLErrs("?" + data.Pagination.NextPageParams().Encode())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/checks_list.templ`, Line: 88, Col: 60}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/checks_list.templ`, Line: 87, Col: 60}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 			if templ_7745c5c3_Err != nil {

@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/alexpls/untils/internal/components"
-	"github.com/alexpls/untils/internal/components/app"
 	"github.com/alexpls/untils/internal/models"
 	"github.com/starfederation/datastar-go/datastar"
 )
@@ -18,7 +17,7 @@ type CheckViewData struct {
 
 templ CheckViewPage(data CheckViewData) {
 	{{ checkTitle := fmt.Sprintf("Check #%d", data.Check.CheckID) }}
-	@app.AppLayout(checkTitle, []app.Breadcrumb{
+	@components.AppLayout(checkTitle, []components.Breadcrumb{
 		{Title: "Dashboard", Href: "/app"},
 		{Title: "Checks", Href: "/app/checks"},
 		{Title: checkTitle, Href: fmt.Sprintf("/app/checks/%d", data.Check.CheckID)},
@@ -29,7 +28,7 @@ templ CheckViewPage(data CheckViewData) {
 
 templ CheckView(data CheckViewData) {
 	<div id="check-view" data-effect={ datastar.GetSSE("/app/checks/%d/events", data.Check.CheckID) }>
-		@app.Header(fmt.Sprintf("Check #%d", data.Check.CheckID), nil)
+		@components.Header(fmt.Sprintf("Check #%d", data.Check.CheckID), nil)
 		<div class="grid grid-cols-1 lg:grid-cols-12">
 			<div class="lg:col-span-8 m-4 space-y-4">
 				<div class="p-4 bg-base-100 rounded border border-base-content/10">

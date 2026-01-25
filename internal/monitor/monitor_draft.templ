@@ -3,7 +3,6 @@ package monitor
 import (
 	"fmt"
 	"github.com/alexpls/untils/internal/components"
-	"github.com/alexpls/untils/internal/components/app"
 	"github.com/alexpls/untils/internal/components/icons"
 	"github.com/alexpls/untils/internal/models"
 	"github.com/alexpls/untils/internal/validation"
@@ -29,7 +28,7 @@ func monitorLoading(mon *models.Monitor) bool {
 }
 
 templ MonitorDraftPage(data MonitorDraftData) {
-	@app.AppLayout("Draft: "+data.Monitor.Subject.String, []app.Breadcrumb{
+	@components.AppLayout("Draft: "+data.Monitor.Subject.String, []components.Breadcrumb{
 		{Title: "Dashboard", Href: "/app"},
 		{Title: "Monitors", Href: "/app/monitors"},
 	}) {

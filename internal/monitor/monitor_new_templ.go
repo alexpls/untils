@@ -12,7 +12,6 @@ import (
 	"math/rand/v2"
 
 	"github.com/alexpls/untils/internal/components"
-	"github.com/alexpls/untils/internal/components/app"
 	"github.com/alexpls/untils/internal/components/icons"
 	"github.com/alexpls/untils/internal/validation"
 )
@@ -103,7 +102,7 @@ func MonitorNewPage(data MonitorNewData) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(data.Values.Subject)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_new.templ`, Line: 52, Col: 30}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_new.templ`, Line: 51, Col: 30}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -121,7 +120,7 @@ func MonitorNewPage(data MonitorNewData) templ.Component {
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(components.ValidationError(data, "Subject"))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_new.templ`, Line: 55, Col: 88}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_new.templ`, Line: 54, Col: 88}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -154,7 +153,7 @@ func MonitorNewPage(data MonitorNewData) templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = app.AppLayout("New monitor", []app.Breadcrumb{
+		templ_7745c5c3_Err = components.AppLayout("New monitor", []components.Breadcrumb{
 			{Title: "Dashboard", Href: "/app"},
 			{Title: "Monitors", Href: "/app/monitors"},
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
@@ -211,7 +210,7 @@ func subjectExamplesCarousel() templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(example)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_new.templ`, Line: 102, Col: 13}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_new.templ`, Line: 101, Col: 13}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {

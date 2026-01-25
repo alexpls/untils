@@ -4,7 +4,6 @@ import (
 	"math/rand/v2"
 
 	"github.com/alexpls/untils/internal/components"
-	"github.com/alexpls/untils/internal/components/app"
 	"github.com/alexpls/untils/internal/components/icons"
 	"github.com/alexpls/untils/internal/validation"
 )
@@ -19,7 +18,7 @@ func (m MonitorNewData) GetValidationErrors() validation.ValidationErrors {
 }
 
 templ MonitorNewPage(data MonitorNewData) {
-	@app.AppLayout("New monitor", []app.Breadcrumb{
+	@components.AppLayout("New monitor", []components.Breadcrumb{
 		{Title: "Dashboard", Href: "/app"},
 		{Title: "Monitors", Href: "/app/monitors"},
 	}) {

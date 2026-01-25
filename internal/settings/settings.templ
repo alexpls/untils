@@ -4,7 +4,6 @@ import "github.com/alexpls/untils/internal/validation"
 import "github.com/alexpls/untils/internal/pushover"
 import "github.com/alexpls/untils/internal/models"
 import "github.com/alexpls/untils/internal/components"
-import "github.com/alexpls/untils/internal/components/app"
 import "fmt"
 import "github.com/starfederation/datastar-go/datastar"
 
@@ -13,11 +12,11 @@ type SettingsViewModel struct {
 }
 
 templ Settings(data *SettingsViewModel) {
-	@app.AppLayout("Settings", []app.Breadcrumb{
+	@components.AppLayout("Settings", []components.Breadcrumb{
 		{Title: "Dashboard", Href: "/app"},
 		{Title: "Settings", Href: "/app/settings"},
 	}) {
-		@app.HeaderCentered("Settings")
+		@components.HeaderCentered("Settings")
 		<div class="mx-auto max-w-160 p-4 space-y-4">
 			@settingsPanel("Account") {
 				<ul class="list">
@@ -74,11 +73,11 @@ func (m PushoverSettingsViewModel) GetValidationErrors() validation.ValidationEr
 }
 
 templ PushoverSettings(data *PushoverSettingsViewModel) {
-	@app.AppLayout("Pushover settings", []app.Breadcrumb{
+	@components.AppLayout("Pushover settings", []components.Breadcrumb{
 		{Title: "Dashboard", Href: "/app"},
 		{Title: "Settings", Href: "/app/settings"},
 	}) {
-		@app.HeaderCentered("Configure Pushover")
+		@components.HeaderCentered("Configure Pushover")
 		<div class="max-w-160 mx-auto p-4 space-y-4">
 			<div>
 				<p class="mb-2">
@@ -139,11 +138,11 @@ type EmailSettingsViewModel struct {
 }
 
 templ EmailSettings(data *EmailSettingsViewModel) {
-	@app.AppLayout("Email settings", []app.Breadcrumb{
+	@components.AppLayout("Email settings", []components.Breadcrumb{
 		{Title: "Dashboard", Href: "/app"},
 		{Title: "Settings", Href: "/app/settings"},
 	}) {
-		@app.HeaderCentered("Configure Email")
+		@components.HeaderCentered("Configure Email")
 		<div class="max-w-160 mx-auto p-4 space-y-4">
 			@settingsPanel("") {
 				<div role="alert" class="alert alert-info">

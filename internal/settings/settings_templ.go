@@ -12,7 +12,6 @@ import "github.com/alexpls/untils/internal/validation"
 import "github.com/alexpls/untils/internal/pushover"
 import "github.com/alexpls/untils/internal/models"
 import "github.com/alexpls/untils/internal/components"
-import "github.com/alexpls/untils/internal/components/app"
 import "fmt"
 import "github.com/starfederation/datastar-go/datastar"
 
@@ -53,7 +52,7 @@ func Settings(data *SettingsViewModel) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = app.HeaderCentered("Settings").Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = components.HeaderCentered("Settings").Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -80,7 +79,7 @@ func Settings(data *SettingsViewModel) templ.Component {
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(components.CurrentUser(ctx).Email)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/settings/settings.templ`, Line: 27, Col: 47}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/settings/settings.templ`, Line: 26, Col: 47}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -93,7 +92,7 @@ func Settings(data *SettingsViewModel) templ.Component {
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("$currentTimezoneName = timezoneName(%q)", components.CurrentUser(ctx).Timezone))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/settings/settings.templ`, Line: 37, Col: 115}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/settings/settings.templ`, Line: 36, Col: 115}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -133,7 +132,7 @@ func Settings(data *SettingsViewModel) templ.Component {
 					var templ_7745c5c3_Var7 string
 					templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(integration.DisplayName())
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/settings/settings.templ`, Line: 49, Col: 40}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/settings/settings.templ`, Line: 48, Col: 40}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 					if templ_7745c5c3_Err != nil {
@@ -156,7 +155,7 @@ func Settings(data *SettingsViewModel) templ.Component {
 					var templ_7745c5c3_Var8 templ.SafeURL
 					templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinURLErrs(fmt.Sprintf("/app/settings/%s", integration.Name))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/settings/settings.templ`, Line: 55, Col: 67}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/settings/settings.templ`, Line: 54, Col: 67}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 					if templ_7745c5c3_Err != nil {
@@ -183,7 +182,7 @@ func Settings(data *SettingsViewModel) templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = app.AppLayout("Settings", []app.Breadcrumb{
+		templ_7745c5c3_Err = components.AppLayout("Settings", []components.Breadcrumb{
 			{Title: "Dashboard", Href: "/app"},
 			{Title: "Settings", Href: "/app/settings"},
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
@@ -238,7 +237,7 @@ func PushoverSettings(data *PushoverSettingsViewModel) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = app.HeaderCentered("Configure Pushover").Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = components.HeaderCentered("Configure Pushover").Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -270,7 +269,7 @@ func PushoverSettings(data *PushoverSettingsViewModel) templ.Component {
 					var templ_7745c5c3_Var12 string
 					templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(components.MaskSecret(data.Token.Token))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/settings/settings.templ`, Line: 101, Col: 56}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/settings/settings.templ`, Line: 100, Col: 56}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 					if templ_7745c5c3_Err != nil {
@@ -283,7 +282,7 @@ func PushoverSettings(data *PushoverSettingsViewModel) templ.Component {
 					var templ_7745c5c3_Var13 string
 					templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(datastar.DeleteSSE("/app/settings/pushover"))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/settings/settings.templ`, Line: 106, Col: 67}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/settings/settings.templ`, Line: 105, Col: 67}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 					if templ_7745c5c3_Err != nil {
@@ -323,7 +322,7 @@ func PushoverSettings(data *PushoverSettingsViewModel) templ.Component {
 					var templ_7745c5c3_Var16 string
 					templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(data.Values.Token)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/settings/settings.templ`, Line: 120, Col: 34}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/settings/settings.templ`, Line: 119, Col: 34}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 					if templ_7745c5c3_Err != nil {
@@ -341,7 +340,7 @@ func PushoverSettings(data *PushoverSettingsViewModel) templ.Component {
 						var templ_7745c5c3_Var17 string
 						templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(err)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/settings/settings.templ`, Line: 123, Col: 42}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/settings/settings.templ`, Line: 122, Col: 42}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 						if templ_7745c5c3_Err != nil {
@@ -378,7 +377,7 @@ func PushoverSettings(data *PushoverSettingsViewModel) templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = app.AppLayout("Pushover settings", []app.Breadcrumb{
+		templ_7745c5c3_Err = components.AppLayout("Pushover settings", []components.Breadcrumb{
 			{Title: "Dashboard", Href: "/app"},
 			{Title: "Settings", Href: "/app/settings"},
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var10), templ_7745c5c3_Buffer)
@@ -426,7 +425,7 @@ func EmailSettings(data *EmailSettingsViewModel) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = app.HeaderCentered("Configure Email").Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = components.HeaderCentered("Configure Email").Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -453,7 +452,7 @@ func EmailSettings(data *EmailSettingsViewModel) templ.Component {
 				var templ_7745c5c3_Var21 string
 				templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(data.Email)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/settings/settings.templ`, Line: 152, Col: 41}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/settings/settings.templ`, Line: 151, Col: 41}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 				if templ_7745c5c3_Err != nil {
@@ -475,7 +474,7 @@ func EmailSettings(data *EmailSettingsViewModel) templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = app.AppLayout("Email settings", []app.Breadcrumb{
+		templ_7745c5c3_Err = components.AppLayout("Email settings", []components.Breadcrumb{
 			{Title: "Dashboard", Href: "/app"},
 			{Title: "Settings", Href: "/app/settings"},
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var19), templ_7745c5c3_Buffer)
@@ -519,7 +518,7 @@ func settingsPanel(title string) templ.Component {
 			var templ_7745c5c3_Var23 string
 			templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/settings/settings.templ`, Line: 163, Col: 80}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/settings/settings.templ`, Line: 162, Col: 80}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 			if templ_7745c5c3_Err != nil {

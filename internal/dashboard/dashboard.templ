@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/alexpls/untils/internal/components"
-	"github.com/alexpls/untils/internal/components/app"
 	"github.com/alexpls/untils/internal/components/icons"
 	"github.com/alexpls/untils/internal/models"
 	"github.com/starfederation/datastar-go/datastar"
@@ -19,7 +18,7 @@ const (
 )
 
 templ DashboardPage(data DashboardViewData) {
-	@app.AppLayout("Dashboard", []app.Breadcrumb{
+	@components.AppLayout("Dashboard", []components.Breadcrumb{
 		{Title: "Dashboard", Href: "/app"},
 	}) {
 		@DashboardView(data)

@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/alexpls/untils/internal/components"
-	"github.com/alexpls/untils/internal/components/app"
 	"github.com/alexpls/untils/internal/components/icons"
 	"github.com/alexpls/untils/internal/models"
 	"github.com/alexpls/untils/internal/pagination"
@@ -29,11 +28,11 @@ templ monitorListPageActions() {
 }
 
 templ MonitorsListPage(data MonitorsListData) {
-	@app.AppLayout("Monitors", []app.Breadcrumb{
+	@components.AppLayout("Monitors", []components.Breadcrumb{
 		{Title: "Dashboard", Href: "/app"},
 		{Title: "Monitors", Href: "/app/monitors"},
 	}) {
-		@app.Header("Monitors", monitorListPageActions())
+		@components.Header("Monitors", monitorListPageActions())
 		@templ.Fragment(monitorListFragment) {
 			@MonitorsList(data)
 		}
