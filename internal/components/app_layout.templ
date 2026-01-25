@@ -13,14 +13,7 @@ templ AppLayout(title string, breadcrumbs []Breadcrumb) {
 			data-style:opacity="Math.max(0, 1 - $_header.scrollY / ($_header.height/1.5))"
 		>
 			<div class="container flex mx-auto justify-between items-center py-2.5 text-muted">
-				<div class="flex items-center">
-					<a href="/app" class="font-stretch-expanded hover:bg-base-200 rounded p-2 pl-3 pr-1 md:px-3 transition-colors">
-						untils
-					</a>
-					for _, b := range breadcrumbs {
-						@BreadcrumbView(b)
-					}
-				</div>
+				@Breadcrumbs(breadcrumbs)
 				<div class="flex-end group">
 					<button
 						style="anchor-name: --header-menu"

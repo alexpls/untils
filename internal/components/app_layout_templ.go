@@ -47,17 +47,15 @@ func AppLayout(title string, breadcrumbs []Breadcrumb) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, " <header class=\"sticky top-0 z-0\" data-signals:_header.scroll-y=\"0\" data-init=\"$_header.height = el.offsetHeight\" data-on:scroll__window=\"$_header.scrollY = window.scrollY\" data-style:opacity=\"Math.max(0, 1 - $_header.scrollY / ($_header.height/1.5))\"><div class=\"container flex mx-auto justify-between items-center py-2.5 text-muted\"><div class=\"flex items-center\"><a href=\"/app\" class=\"font-stretch-expanded hover:bg-base-200 rounded p-2 pl-3 pr-1 md:px-3 transition-colors\">untils</a> ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, " <header class=\"sticky top-0 z-0\" data-signals:_header.scroll-y=\"0\" data-init=\"$_header.height = el.offsetHeight\" data-on:scroll__window=\"$_header.scrollY = window.scrollY\" data-style:opacity=\"Math.max(0, 1 - $_header.scrollY / ($_header.height/1.5))\"><div class=\"container flex mx-auto justify-between items-center py-2.5 text-muted\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			for _, b := range breadcrumbs {
-				templ_7745c5c3_Err = BreadcrumbView(b).Render(ctx, templ_7745c5c3_Buffer)
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
+			templ_7745c5c3_Err = Breadcrumbs(breadcrumbs).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</div><div class=\"flex-end group\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"flex-end group\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -187,7 +185,7 @@ func HeaderCentered(title string) templ.Component {
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app_layout.templ`, Line: 80, Col: 10}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app_layout.templ`, Line: 73, Col: 10}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -247,7 +245,7 @@ func Header(title string, actions templ.Component) templ.Component {
 			var templ_7745c5c3_Var12 string
 			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app_layout.templ`, Line: 89, Col: 11}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app_layout.templ`, Line: 82, Col: 11}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
@@ -356,7 +354,7 @@ func TimezoneSync() templ.Component {
 			var templ_7745c5c3_Var15 string
 			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(templ.JSONString(tzCookie))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app_layout.templ`, Line: 114, Col: 53}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/app_layout.templ`, Line: 107, Col: 53}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {

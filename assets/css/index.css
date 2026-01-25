@@ -13,6 +13,10 @@
     );
 }
 
+@utility scrollbar-gutter-stable {
+    scrollbar-gutter: stable;
+}
+
 /* Dashboard widget view transitions */
 ::view-transition-group(monitor-activity-widget),
 ::view-transition-group(checks-widget) {

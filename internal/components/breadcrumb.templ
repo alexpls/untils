@@ -7,9 +7,37 @@ type Breadcrumb struct {
 	Title, Href string
 }
 
-templ BreadcrumbView(b Breadcrumb) {
-	@icons.ChevronRight(icons.IconParams{Size: 16})
-	<a href={ b.Href } class="hover:bg-base-200 rounded p-2 px-1 md:px-3 transition-colors">
+templ Breadcrumbs(breadcrumbs []Breadcrumb) {
+	<div
+		class="flex items-center pl-3 md:pl-1 overflow-x-auto scrollbar-gutter-stable"
+		data-effect="el.scrollTo({ left:9999 }) && el.blur()"
+	>
+		{{ lastIndex := len(breadcrumbs) - 1 }}
+		for index, b := range breadcrumbs {
+			@BreadcrumbView(index == 0, index == lastIndex, b)
+		}
+	</div>
+}
+
+templ BreadcrumbView(first, last bool, b Breadcrumb) {
+	if !first {
+		@icons.ChevronRight(icons.IconParams{Size: 16, Classes: templ.Classes("shrink-0")})
+	}
+	<a
+		href={ b.Href }
+		class={
+			"hover:bg-base-200",
+			"rounded",
+			"p-2",
+			"px-1",
+			"md:px-3",
+			"transition-colors",
+			"inline-block",
+			"shrink-0",
+			"max-w-[25ch]",
+			"truncate",
+		}
+	>
 		{ b.Title }
 	</a>
 }

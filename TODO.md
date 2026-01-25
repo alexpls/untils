@@ -17,6 +17,7 @@
 - [ ] Fix: should be able to visit check pages for incomplete checks - but right now that errors
 - [ ] Improvement: special logic when checking prices for things, should include things like finding the cheapest price and reporting on it. Not including multiple store names.
 - [ ] Improvement: The click tool should emit the URL of the new page it landed on as a navigation event so it shows up on the UI
+- [ ] Fix: event sse should not deliver a message when subscribed to right after a visit to a page. But they should send a message when subscribed to on reentry to a page (e.g. switching back to the tab). On Dashboard page, only the first subscription should use view transitions.
 
 ## Done
 

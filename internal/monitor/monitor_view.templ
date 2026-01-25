@@ -30,6 +30,7 @@ templ MonitorViewPage(data MonitorViewData) {
 	@components.AppLayout(data.Monitor.Subject.String, []components.Breadcrumb{
 		{Title: "Dashboard", Href: "/app"},
 		{Title: "Monitors", Href: "/app/monitors"},
+		{Title: data.Monitor.Subject.String, Href: fmt.Sprintf("/app/monitors/%d", data.Monitor.ID)},
 	}) {
 		@MonitorView(data)
 	}
