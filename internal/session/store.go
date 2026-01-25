@@ -4,11 +4,12 @@ import (
 	"context"
 	"encoding/json"
 
+	"github.com/alexpls/untils/internal/db"
 	"github.com/alexpls/untils/internal/models"
 )
 
 type store struct {
-	db      models.DBTX
+	db      db.DB
 	queries *models.Queries
 }
 

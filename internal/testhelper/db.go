@@ -2,11 +2,16 @@ package testhelper
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"os"
 	"sync"
 	"testing"
 
+	"github.com/alexpls/untils/internal/db"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/stretchr/testify/require"
 )
 
 var (
@@ -14,54 +19,38 @@ var (
 	poolOnce sync.Once
 )
 
-// TestDB returns a clean database pool for testing.
-// Each call cleans all test tables to ensure test isolation.
-// The pool is shared across tests for performance - connection cleanup
-// is handled by the OS when the test process exits.
-func TestDB(t *testing.T) *pgxpool.Pool {
-	t.Helper()
-
+func getPool() *pgxpool.Pool {
 	poolOnce.Do(func() {
 		pgURL := os.Getenv("PG_TEST_URL")
 		if pgURL == "" {
-			t.Fatal("PG_TEST_URL environment variable is not set")
+			panic("PG_TEST_URL environment variable is not set")
 		}
 
 		var err error
 		pool, err = pgxpool.New(context.Background(), pgURL)
 		if err != nil {
-			t.Fatalf("failed to connect to test database: %v", err)
+			panic(fmt.Sprintf("failed to connect to test database: %v", err))
 		}
 
 		if err = pool.Ping(context.Background()); err != nil {
 			pool.Close()
-			t.Fatalf("failed to ping test database: %v", err)
+			panic(fmt.Sprintf("failed to ping test database: %v", err))
 		}
 	})
-
-	// Clean all tables for test isolation
-	cleanTables(t, pool)
 
 	return pool
 }
 
-// cleanTables removes all data from test tables to ensure test isolation
-func cleanTables(t *testing.T, pool *pgxpool.Pool) {
-	t.Helper()
+func TestTx(ctx context.Context, t *testing.T) db.DB {
+	tx, err := getPool().Begin(ctx)
+	require.NoError(t, err)
 
-	tables := []string{
-		"llm_conversations",
-		"monitor_checks",
-		"monitors",
-		"sessions",
-		"users",
-	}
-
-	ctx := context.Background()
-	for _, table := range tables {
-		_, err := pool.Exec(ctx, "DELETE FROM "+table)
-		if err != nil {
-			t.Fatalf("failed to clean %s table: %v", table, err)
+	t.Cleanup(func() {
+		err := tx.Rollback(ctx)
+		if !errors.Is(err, pgx.ErrTxClosed) {
+			require.NoError(t, err)
 		}
-	}
+	})
+
+	return tx
 }

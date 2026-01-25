@@ -7,15 +7,14 @@ import (
 
 	"github.com/alexpls/untils/internal/models"
 	"github.com/alexpls/untils/internal/testhelper"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestStore_Save(t *testing.T) {
-	pool := testhelper.TestDB(t)
-	s := &store{db: pool, queries: models.New()}
 	ctx := context.Background()
+	pool := testhelper.TestTx(ctx, t)
+	s := &store{db: pool, queries: models.New()}
 
 	t.Run("save new session", func(t *testing.T) {
 		now := time.Now()
@@ -71,9 +70,9 @@ func TestStore_Save(t *testing.T) {
 }
 
 func TestStore_Get(t *testing.T) {
-	pool := testhelper.TestDB(t)
-	s := &store{db: pool, queries: models.New()}
 	ctx := context.Background()
+	pool := testhelper.TestTx(ctx, t)
+	s := &store{db: pool, queries: models.New()}
 
 	t.Run("get existing session", func(t *testing.T) {
 		now := time.Now()
@@ -126,9 +125,9 @@ func TestStore_Get(t *testing.T) {
 }
 
 func TestStore_Destroy(t *testing.T) {
-	pool := testhelper.TestDB(t)
-	s := &store{db: pool, queries: models.New()}
 	ctx := context.Background()
+	pool := testhelper.TestTx(ctx, t)
+	s := &store{db: pool, queries: models.New()}
 
 	t.Run("destroy existing session", func(t *testing.T) {
 		now := time.Now()
@@ -159,9 +158,9 @@ func TestStore_Destroy(t *testing.T) {
 }
 
 func TestStore_Trim(t *testing.T) {
-	pool := testhelper.TestDB(t)
-	s := &store{db: pool, queries: models.New()}
 	ctx := context.Background()
+	pool := testhelper.TestTx(ctx, t)
+	s := &store{db: pool, queries: models.New()}
 
 	t.Run("trim expired sessions", func(t *testing.T) {
 		now := time.Now()
@@ -220,19 +219,19 @@ func TestStore_Trim(t *testing.T) {
 }
 
 // countSessions returns the total number of sessions in the database
-func countSessions(t *testing.T, pool *pgxpool.Pool, ctx context.Context) int {
+func countSessions(t *testing.T, tx models.DBTX, ctx context.Context) int {
 	t.Helper()
 	var count int
-	err := pool.QueryRow(ctx, "SELECT COUNT(*) FROM sessions").Scan(&count)
+	err := tx.QueryRow(ctx, "SELECT COUNT(*) FROM sessions").Scan(&count)
 	require.NoError(t, err)
 	return count
 }
 
 // countSessionsWithID returns the number of sessions with the specified ID
-func countSessionsWithID(t *testing.T, pool *pgxpool.Pool, ctx context.Context, sessionID string) int {
+func countSessionsWithID(t *testing.T, tx models.DBTX, ctx context.Context, sessionID string) int {
 	t.Helper()
 	var count int
-	err := pool.QueryRow(ctx, "SELECT COUNT(*) FROM sessions WHERE id = $1", sessionID).Scan(&count)
+	err := tx.QueryRow(ctx, "SELECT COUNT(*) FROM sessions WHERE id = $1", sessionID).Scan(&count)
 	require.NoError(t, err)
 	return count
 }

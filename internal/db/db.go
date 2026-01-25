@@ -7,8 +7,24 @@ import (
 
 	"github.com/alexpls/untils/internal/must"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
+
+type Querier interface {
+	Exec(context.Context, string, ...any) (pgconn.CommandTag, error)
+	Query(context.Context, string, ...any) (pgx.Rows, error)
+	QueryRow(context.Context, string, ...any) pgx.Row
+}
+
+type TxStarter interface {
+	Begin(ctx context.Context) (pgx.Tx, error)
+}
+
+type DB interface {
+	Querier
+	TxStarter
+}
 
 func Connect(url string, logger *slog.Logger) (pool *pgxpool.Pool, closer func()) {
 	c := context.Background()
@@ -26,7 +42,7 @@ func Connect(url string, logger *slog.Logger) (pool *pgxpool.Pool, closer func()
 	return pool, closer
 }
 
-func WithTxV[T any](pool *pgxpool.Pool, ctx context.Context, fn func(pgx.Tx) (T, error)) (T, error) {
+func WithTxV[T any](pool DB, ctx context.Context, fn func(pgx.Tx) (T, error)) (T, error) {
 	var zero T
 
 	tx, err := pool.Begin(ctx)
@@ -47,7 +63,7 @@ func WithTxV[T any](pool *pgxpool.Pool, ctx context.Context, fn func(pgx.Tx) (T,
 	return res, nil
 }
 
-func WithTx(pool *pgxpool.Pool, ctx context.Context, fn func(pgx.Tx) error) error {
+func WithTx(pool DB, ctx context.Context, fn func(pgx.Tx) error) error {
 	var dummy struct{}
 	_, err := WithTxV(pool, ctx, func(tx pgx.Tx) (struct{}, error) {
 		if err := fn(tx); err != nil {

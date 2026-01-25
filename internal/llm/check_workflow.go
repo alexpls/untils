@@ -3,26 +3,26 @@ package llm
 import (
 	"context"
 
+	"github.com/alexpls/untils/internal/db"
 	"github.com/alexpls/untils/internal/logging"
 	"github.com/alexpls/untils/internal/models"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type CheckWorkflow struct {
 	service *Service
-	pool    *pgxpool.Pool
+	db      db.DB
 	queries *models.Queries
 }
 
-func NewCheckWorkflow(service *Service, pool *pgxpool.Pool, queries *models.Queries) *CheckWorkflow {
-	return &CheckWorkflow{service: service, pool: pool, queries: queries}
+func NewCheckWorkflow(service *Service, pool db.DB, queries *models.Queries) *CheckWorkflow {
+	return &CheckWorkflow{service: service, db: pool, queries: queries}
 }
 
 func (w *CheckWorkflow) Run(ctx context.Context, params *CheckParams) (*models.CheckResult, error) {
 	llmEvent, _ := logging.GetOrCreateFromContext(ctx, newLLMEvent)
 	defer llmEvent.finish()
 
-	checker := newChecker(w.service, w.pool, w.queries)
+	checker := newChecker(w.service, w.db, w.queries)
 
 	return checker.perform(ctx, params)
 }

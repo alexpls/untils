@@ -14,6 +14,14 @@ run = "go fmt ./... && bun run format"
 [tasks.lint]
 run = "golangci-lint run"
 
+[tasks.test]
+run = '''
+psql "${PG_TEST_URL%/untils_test}" --echo-errors --quiet -c '\timing off' -c "drop database if exists untils_test with (force);"
+psql "${PG_TEST_URL%/untils_test}" --echo-errors --quiet -c '\timing off' -c "create database untils_test;"
+psql "${PG_TEST_URL}" --echo-errors --quiet -c '\timing off' -f ./internal/models/schema.sql
+go test ./...
+'''
+
 [tasks.dev-deps]
 run = '''
 go install -tags 'pgx5' github.com/golang-migrate/migrate/v4/cmd/migrate@latest

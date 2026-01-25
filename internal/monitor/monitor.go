@@ -16,7 +16,7 @@ import (
 var monitorCheckFrequency = 6 * time.Hour
 
 func (s *Service) GetMonitor(ctx context.Context, userID, monitorID int64) (*models.Monitor, error) {
-	monitor, err := s.queries.GetMonitor(ctx, s.pool, &models.GetMonitorParams{
+	monitor, err := s.queries.GetMonitor(ctx, s.db, &models.GetMonitorParams{
 		UserID: userID,
 		ID:     monitorID,
 	})
@@ -44,7 +44,7 @@ func (s *Service) CreateMonitor(ctx context.Context, params CreateMonitorParams)
 		return nil, err
 	}
 
-	return db.WithTxV(s.pool, ctx, func(tx pgx.Tx) (*models.Monitor, error) {
+	return db.WithTxV(s.db, ctx, func(tx pgx.Tx) (*models.Monitor, error) {
 		created, err := s.queries.CreateMonitor(ctx, tx, &models.CreateMonitorParams{
 			UserID:  params.UserID,
 			Subject: pgtype.Text{String: params.Subject, Valid: true},
@@ -69,7 +69,7 @@ func (s *Service) CreateMonitor(ctx context.Context, params CreateMonitorParams)
 }
 
 func (s *Service) DeleteMonitor(ctx context.Context, userID, monitorID int64) error {
-	err := s.queries.DeleteMonitor(ctx, s.pool, &models.DeleteMonitorParams{
+	err := s.queries.DeleteMonitor(ctx, s.db, &models.DeleteMonitorParams{
 		UserID:    userID,
 		MonitorID: monitorID,
 	})
@@ -85,14 +85,14 @@ func (s *Service) ValidateMonitor(ctx context.Context, monitor *models.Monitor) 
 		return fmt.Errorf("can't validate an active monitor")
 	}
 
-	monitor, err := s.updateMonitorStatus(ctx, s.pool, monitor, models.MonitorStatusValidating)
+	monitor, err := s.updateMonitorStatus(ctx, s.db, monitor, models.MonitorStatusValidating)
 	if err != nil {
 		return fmt.Errorf("updating monitor status: %w", err)
 	}
 
 	// Get the latest result for feedback
 	var userFeedback string
-	latestResult, err := s.queries.GetLatestMonitorResult(ctx, s.pool, monitor.ID)
+	latestResult, err := s.queries.GetLatestMonitorResult(ctx, s.db, monitor.ID)
 	if err != nil {
 		if !errors.Is(err, pgx.ErrNoRows) {
 			return fmt.Errorf("getting latest monitor result: %w", err)
@@ -102,7 +102,7 @@ func (s *Service) ValidateMonitor(ctx context.Context, monitor *models.Monitor) 
 	}
 
 	// Get previous results with checks for the triager
-	prevs, err := s.queries.GetPreviousResultsWithCheck(ctx, s.pool, monitor.ID)
+	prevs, err := s.queries.GetPreviousResultsWithCheck(ctx, s.db, monitor.ID)
 	if err != nil {
 		return fmt.Errorf("getting previous results: %w", err)
 	}
@@ -118,7 +118,7 @@ func (s *Service) ValidateMonitor(ctx context.Context, monitor *models.Monitor) 
 	}
 
 	if !trigageRes.Approved {
-		if err = s.queries.RejectMonitor(ctx, s.pool, &models.RejectMonitorParams{
+		if err = s.queries.RejectMonitor(ctx, s.db, &models.RejectMonitorParams{
 			ID:             monitor.ID,
 			UserID:         monitor.UserID,
 			RejectedReason: pgtype.Text{String: trigageRes.RejectedReason, Valid: true},
@@ -130,7 +130,7 @@ func (s *Service) ValidateMonitor(ctx context.Context, monitor *models.Monitor) 
 
 	var check *models.MonitorCheck
 
-	if err := db.WithTx(s.pool, ctx, func(tx pgx.Tx) error {
+	if err := db.WithTx(s.db, ctx, func(tx pgx.Tx) error {
 		if err := s.validateMonitorsSameVersion(ctx, tx, monitor); err != nil {
 			return err
 		}
@@ -169,7 +169,7 @@ func (s *Service) ValidateMonitor(ctx context.Context, monitor *models.Monitor) 
 		return fmt.Errorf("performing monitor check: %w", err)
 	}
 
-	_, err = s.queries.UpdateMonitorToReady(ctx, s.pool, &models.UpdateMonitorToReadyParams{
+	_, err = s.queries.UpdateMonitorToReady(ctx, s.db, &models.UpdateMonitorToReadyParams{
 		MonitorID: monitor.ID,
 		UserID:    monitor.UserID,
 		Subject:   monitor.Subject,
@@ -215,7 +215,7 @@ func (s *Service) ActivateMonitorFromPreview(ctx context.Context, userID, monito
 		return nil, err
 	}
 
-	return db.WithTxV(s.pool, ctx, func(tx pgx.Tx) (*models.Monitor, error) {
+	return db.WithTxV(s.db, ctx, func(tx pgx.Tx) (*models.Monitor, error) {
 		res, err := s.queries.GetLatestMonitorResult(ctx, tx, monitorID)
 		if err != nil {
 			return nil, fmt.Errorf("getting latest monitor result: %w", err)
@@ -251,7 +251,7 @@ func (s *Service) updateMonitorDraftAndRevalidate(
 	userID, monitorID int64,
 	updater func(ctx context.Context, tx models.DBTX, mon *models.Monitor) (*models.Monitor, error),
 ) (*models.Monitor, error) {
-	return db.WithTxV(s.pool, ctx, func(tx pgx.Tx) (mon *models.Monitor, err error) {
+	return db.WithTxV(s.db, ctx, func(tx pgx.Tx) (mon *models.Monitor, err error) {
 		mon, err = s.queries.GetMonitor(ctx, tx, &models.GetMonitorParams{
 			UserID: userID,
 			ID:     monitorID,

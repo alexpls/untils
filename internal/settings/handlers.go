@@ -10,10 +10,10 @@ import (
 	"strings"
 
 	"github.com/alexpls/untils/internal/auth"
+	"github.com/alexpls/untils/internal/db"
 	"github.com/alexpls/untils/internal/models"
 	"github.com/alexpls/untils/internal/pushover"
 	"github.com/alexpls/untils/internal/validation"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/starfederation/datastar-go/datastar"
 )
 
@@ -25,7 +25,7 @@ type AuthService interface {
 // Handlers contains HTTP handlers for settings routes
 type Handlers struct {
 	queries        *models.Queries
-	pool           *pgxpool.Pool
+	db             db.DB
 	pushoverStore  *pushover.Store
 	pushoverClient *pushover.Client
 	auth           AuthService
@@ -35,7 +35,7 @@ type Handlers struct {
 // NewHandlers creates a new Handlers instance
 func NewHandlers(
 	queries *models.Queries,
-	pool *pgxpool.Pool,
+	db db.DB,
 	pushoverStore *pushover.Store,
 	pushoverClient *pushover.Client,
 	auth AuthService,
@@ -43,7 +43,7 @@ func NewHandlers(
 ) *Handlers {
 	return &Handlers{
 		queries:        queries,
-		pool:           pool,
+		db:             db,
 		pushoverStore:  pushoverStore,
 		pushoverClient: pushoverClient,
 		auth:           auth,
@@ -53,7 +53,7 @@ func NewHandlers(
 
 // SettingsGet handles GET /app/settings
 func (h *Handlers) SettingsGet(w http.ResponseWriter, r *http.Request, user *models.User) {
-	integrations, err := h.queries.UserIntegrations(r.Context(), h.pool, user.ID)
+	integrations, err := h.queries.UserIntegrations(r.Context(), h.db, user.ID)
 	if err != nil {
 		h.logger.ErrorContext(r.Context(), "error listing integrations", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)

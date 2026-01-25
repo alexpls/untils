@@ -3,18 +3,18 @@ package monitor
 import (
 	"log/slog"
 
+	"github.com/alexpls/untils/internal/db"
 	"github.com/alexpls/untils/internal/email"
 	"github.com/alexpls/untils/internal/llm"
 	"github.com/alexpls/untils/internal/models"
 	"github.com/alexpls/untils/internal/pushover"
 	"github.com/go-playground/validator/v10"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/riverqueue/river"
 )
 
 type Service struct {
-	pool           *pgxpool.Pool
+	db             db.DB
 	queries        *models.Queries
 	llm            *llm.Service
 	river          *river.Client[pgx.Tx]
@@ -24,9 +24,9 @@ type Service struct {
 	validate       *validator.Validate
 }
 
-func NewService(pool *pgxpool.Pool, queries *models.Queries, llm *llm.Service, river *river.Client[pgx.Tx], logger *slog.Logger, pushoverClient *pushover.Client, emailService *email.Service, validate *validator.Validate) *Service {
+func NewService(db db.DB, queries *models.Queries, llm *llm.Service, river *river.Client[pgx.Tx], logger *slog.Logger, pushoverClient *pushover.Client, emailService *email.Service, validate *validator.Validate) *Service {
 	return &Service{
-		pool:           pool,
+		db:             db,
 		queries:        queries,
 		llm:            llm,
 		river:          river,

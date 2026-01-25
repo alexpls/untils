@@ -9,16 +9,15 @@ import (
 	"github.com/alexpls/untils/internal/models"
 	"github.com/go-playground/validator/v10"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Store struct {
-	db       *pgxpool.Pool
+	db       db.DB
 	queries  *models.Queries
 	validate *validator.Validate
 }
 
-func NewStore(db *pgxpool.Pool, queries *models.Queries, validate *validator.Validate) *Store {
+func NewStore(db db.DB, queries *models.Queries, validate *validator.Validate) *Store {
 	return &Store{db: db, queries: queries, validate: validate}
 }
 

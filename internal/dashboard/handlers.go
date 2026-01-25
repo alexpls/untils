@@ -4,25 +4,25 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/alexpls/untils/internal/db"
 	"github.com/alexpls/untils/internal/models"
 	"github.com/alexpls/untils/internal/monitor"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/starfederation/datastar-go/datastar"
 )
 
 // Handlers contains the HTTP handlers for dashboard routes
 type Handlers struct {
 	queries       *models.Queries
-	pool          *pgxpool.Pool
+	db            db.DB
 	monitorEvents *monitor.DBEventHandler
 	logger        *slog.Logger
 }
 
 // NewHandlers creates a new Handlers instance
-func NewHandlers(queries *models.Queries, pool *pgxpool.Pool, monitorEvents *monitor.DBEventHandler, logger *slog.Logger) *Handlers {
+func NewHandlers(queries *models.Queries, db db.DB, monitorEvents *monitor.DBEventHandler, logger *slog.Logger) *Handlers {
 	return &Handlers{
 		queries:       queries,
-		pool:          pool,
+		db:            db,
 		monitorEvents: monitorEvents,
 		logger:        logger,
 	}
@@ -55,19 +55,19 @@ func (h *Handlers) Events(w http.ResponseWriter, r *http.Request, user *models.U
 	useViewTransition := true
 
 	for {
-		activity, err := h.queries.ListMonitorActivity(r.Context(), h.pool, user.ID)
+		activity, err := h.queries.ListMonitorActivity(r.Context(), h.db, user.ID)
 		if err != nil {
 			h.logger.ErrorContext(r.Context(), "error listing monitor activity", "error", err)
 			return
 		}
 
-		checkStats, err := h.queries.GetMonitorCheckStats(r.Context(), h.pool, user.ID)
+		checkStats, err := h.queries.GetMonitorCheckStats(r.Context(), h.db, user.ID)
 		if err != nil {
 			h.logger.ErrorContext(r.Context(), "error getting monitor check stats", "error", err)
 			return
 		}
 
-		dailyCheckCounts, err := h.queries.GetDailyMonitorCheckCounts(r.Context(), h.pool, user.ID)
+		dailyCheckCounts, err := h.queries.GetDailyMonitorCheckCounts(r.Context(), h.db, user.ID)
 		if err != nil {
 			h.logger.ErrorContext(r.Context(), "error getting daily monitor check counts", "error", err)
 			return

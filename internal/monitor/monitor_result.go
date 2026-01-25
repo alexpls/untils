@@ -35,7 +35,7 @@ func (s *Service) CreateMonitorResultFeedback(ctx context.Context, userID int64,
 			return err
 		}
 	default:
-		if _, err := updater(ctx, s.pool, mon); err != nil {
+		if _, err := updater(ctx, s.db, mon); err != nil {
 			return err
 		}
 	}

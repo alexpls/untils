@@ -10,7 +10,6 @@ import (
 
 	"github.com/alexpls/untils/internal/browser"
 	"github.com/alexpls/untils/internal/models"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/openai/openai-go/v3"
 	"github.com/openai/openai-go/v3/responses"
 )
@@ -20,15 +19,15 @@ type checker struct {
 	messages       []responses.ResponseInputItemUnionParam
 	browserCtx     *browser.BrowserCtx
 	browserCancel  context.CancelFunc
-	pool           *pgxpool.Pool
+	db             models.DBTX
 	queries        *models.Queries
 	conversationID int64
 	turn           int
 	priorCalls     []toolCall
 }
 
-func newChecker(service *Service, pool *pgxpool.Pool, queries *models.Queries) *checker {
-	return &checker{service: service, pool: pool, queries: queries}
+func newChecker(service *Service, db models.DBTX, queries *models.Queries) *checker {
+	return &checker{service: service, db: db, queries: queries}
 }
 
 func (c *checker) logMessage(ctx context.Context, role models.LLMMessageRole, body any, duration time.Duration) error {
@@ -36,7 +35,7 @@ func (c *checker) logMessage(ctx context.Context, role models.LLMMessageRole, bo
 	if err != nil {
 		return fmt.Errorf("marshalling message body: %w", err)
 	}
-	return c.queries.AddMessageToLLMConversation(ctx, c.pool, &models.AddMessageToLLMConversationParams{
+	return c.queries.AddMessageToLLMConversation(ctx, c.db, &models.AddMessageToLLMConversationParams{
 		LlmConversationID: c.conversationID,
 		Message: models.LLMConversationMessages{
 			{
@@ -62,7 +61,7 @@ func (c *checker) perform(ctx context.Context, params *CheckParams) (*models.Che
 		previousResult = params.PreviousResults[0]
 	}
 
-	conversation, err := c.queries.CreateLLMConversation(ctx, c.pool, &models.CreateLLMConversationParams{
+	conversation, err := c.queries.CreateLLMConversation(ctx, c.db, &models.CreateLLMConversationParams{
 		UserID:     params.UserID,
 		SourceType: models.LlmConversationsSourceCheck,
 		SourceID:   params.MonitorCheckID,

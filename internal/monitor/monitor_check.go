@@ -22,7 +22,7 @@ var MonitorCheckTerminalStatuses = []models.MonitorCheckStatus{
 }
 
 func (s *Service) GetMonitorCheck(ctx context.Context, id int64) (*models.MonitorCheck, error) {
-	check, err := s.queries.GetMonitorCheck(ctx, s.pool, id)
+	check, err := s.queries.GetMonitorCheck(ctx, s.db, id)
 	if err != nil {
 		return nil, fmt.Errorf("getting monitor check: %w", err)
 	}
@@ -30,7 +30,7 @@ func (s *Service) GetMonitorCheck(ctx context.Context, id int64) (*models.Monito
 }
 
 func (s *Service) GetNextMonitorCheck(ctx context.Context, monitor *models.Monitor) (*models.MonitorCheck, error) {
-	check, err := s.queries.GetNextMonitorCheck(ctx, s.pool, monitor.ID)
+	check, err := s.queries.GetNextMonitorCheck(ctx, s.db, monitor.ID)
 	if err != nil {
 		return nil, fmt.Errorf("getting next monitor check: %w", err)
 	}
@@ -40,7 +40,7 @@ func (s *Service) GetNextMonitorCheck(ctx context.Context, monitor *models.Monit
 // GetInProgressMonitorCheck returns the in-progress monitor check for the given monitor,
 // or nil if there is no in-progress check.
 func (s *Service) GetInProgressMonitorCheck(ctx context.Context, monitor *models.Monitor) (*models.MonitorCheck, error) {
-	check, err := s.queries.GetInProgressMonitorCheck(ctx, s.pool, monitor.ID)
+	check, err := s.queries.GetInProgressMonitorCheck(ctx, s.db, monitor.ID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, nil
@@ -51,7 +51,7 @@ func (s *Service) GetInProgressMonitorCheck(ctx context.Context, monitor *models
 }
 
 func (s *Service) ScheduleMonitorCheck(ctx context.Context, monitor *models.Monitor, scheduledFor time.Time) (*models.MonitorCheck, error) {
-	return db.WithTxV(s.pool, ctx, func(tx pgx.Tx) (*models.MonitorCheck, error) {
+	return db.WithTxV(s.db, ctx, func(tx pgx.Tx) (*models.MonitorCheck, error) {
 		check, err := s.scheduleMonitorCheckTx(ctx, tx, monitor, scheduledFor)
 		if err != nil {
 			return nil, fmt.Errorf("scheduling monitor check: %w", err)
@@ -111,7 +111,7 @@ func (s *Service) PerformMonitorCheck(
 		return fmt.Errorf("getting monitor: %w", err)
 	}
 
-	latest, err := db.WithTxV(s.pool, ctx, func(tx pgx.Tx) ([]*models.GetPreviousResultsWithCheckRow, error) {
+	latest, err := db.WithTxV(s.db, ctx, func(tx pgx.Tx) ([]*models.GetPreviousResultsWithCheckRow, error) {
 		latest, err := s.queries.GetPreviousResultsWithCheck(ctx, tx, monitor.ID)
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
@@ -138,7 +138,7 @@ func (s *Service) PerformMonitorCheck(
 		return err
 	}
 
-	checker := llm.NewCheckWorkflow(s.llm, s.pool, s.queries)
+	checker := llm.NewCheckWorkflow(s.llm, s.db, s.queries)
 
 	result, err := checker.Run(ctx, &llm.CheckParams{
 		UserID:          userID,
@@ -147,7 +147,7 @@ func (s *Service) PerformMonitorCheck(
 		PreviousResults: latest,
 	})
 	if err != nil {
-		if cerr := s.queries.UpdateMonitorCheckFailed(ctx, s.pool, &models.UpdateMonitorCheckFailedParams{
+		if cerr := s.queries.UpdateMonitorCheckFailed(ctx, s.db, &models.UpdateMonitorCheckFailedParams{
 			FailureReason: pgtype.Text{String: err.Error(), Valid: true},
 			ID:            check.ID,
 		}); cerr != nil {
@@ -156,7 +156,7 @@ func (s *Service) PerformMonitorCheck(
 		return fmt.Errorf("prompting llm: %w", err)
 	}
 
-	err = db.WithTx(s.pool, ctx, func(tx pgx.Tx) error {
+	err = db.WithTx(s.db, ctx, func(tx pgx.Tx) error {
 		if err := s.validateMonitorsSameVersion(ctx, tx, monitor); err != nil {
 			return err
 		}

@@ -12,11 +12,11 @@ import (
 	"time"
 
 	"github.com/a-h/templ"
+	"github.com/alexpls/untils/internal/db"
 	"github.com/alexpls/untils/internal/models"
 	"github.com/alexpls/untils/internal/pagination"
 	"github.com/alexpls/untils/internal/validation"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/starfederation/datastar-go/datastar"
 )
 
@@ -25,17 +25,17 @@ type Handlers struct {
 	service *Service
 	events  *DBEventHandler
 	queries *models.Queries
-	pool    *pgxpool.Pool
+	db      db.DB
 	logger  *slog.Logger
 }
 
 // NewHandlers creates a new Handlers instance
-func NewHandlers(service *Service, events *DBEventHandler, queries *models.Queries, pool *pgxpool.Pool, logger *slog.Logger) *Handlers {
+func NewHandlers(service *Service, events *DBEventHandler, queries *models.Queries, db db.DB, logger *slog.Logger) *Handlers {
 	return &Handlers{
 		service: service,
 		events:  events,
 		queries: queries,
-		pool:    pool,
+		db:      db,
 		logger:  logger,
 	}
 }
@@ -83,7 +83,7 @@ func (h *Handlers) renderMonitorList(r *http.Request, user *models.User) (templ.
 
 	monitors, err := h.queries.ListMonitorsWithResults(
 		r.Context(),
-		h.pool,
+		h.db,
 		&models.ListMonitorsWithResultsParams{
 			UserID:    user.ID,
 			PageSize:  int32(pag.PageSizeWithPeek()),
@@ -149,7 +149,7 @@ func (h *Handlers) renderChecksList(r *http.Request, user *models.User) (templ.C
 
 	checks, err := h.queries.ListChecksWithMonitor(
 		r.Context(),
-		h.pool,
+		h.db,
 		&models.ListChecksWithMonitorParams{
 			UserID:    user.ID,
 			PageSize:  int32(pag.PageSizeWithPeek()),
@@ -226,7 +226,7 @@ func (h *Handlers) CheckViewEventsGet(w http.ResponseWriter, r *http.Request, us
 }
 
 func (h *Handlers) renderCheckView(ctx context.Context, checkID int64, userID int64) (templ.Component, error) {
-	check, err := h.queries.GetCheckWithMonitor(ctx, h.pool, checkID)
+	check, err := h.queries.GetCheckWithMonitor(ctx, h.db, checkID)
 	if err != nil {
 		return nil, err
 	}
@@ -239,7 +239,7 @@ func (h *Handlers) renderCheckView(ctx context.Context, checkID int64, userID in
 	// Fetch the LLM conversation for this check (may not exist)
 	var messages []*models.LLMParsedMessage
 	var toolCalls []models.LLMToolCall
-	conv, err := h.queries.GetLLMConversationBySourceID(ctx, h.pool, &models.GetLLMConversationBySourceIDParams{
+	conv, err := h.queries.GetLLMConversationBySourceID(ctx, h.db, &models.GetLLMConversationBySourceIDParams{
 		SourceType: models.LlmConversationsSourceCheck,
 		SourceID:   checkID,
 	})
@@ -251,7 +251,7 @@ func (h *Handlers) renderCheckView(ctx context.Context, checkID int64, userID in
 
 	// Fetch the MonitorResult for this check (may not exist)
 	var result *models.MonitorResult
-	res, err := h.queries.GetMonitorResultByCheckID(ctx, h.pool, checkID)
+	res, err := h.queries.GetMonitorResultByCheckID(ctx, h.db, checkID)
 	if err == nil {
 		result = res
 	}
@@ -652,7 +652,7 @@ func (h *Handlers) ResultFeedbackGet(w http.ResponseWriter, r *http.Request, use
 		return
 	}
 
-	result, err := h.queries.GetMonitorResult(r.Context(), h.pool, &models.GetMonitorResultParams{
+	result, err := h.queries.GetMonitorResult(r.Context(), h.db, &models.GetMonitorResultParams{
 		MonitorID: mon.ID,
 		ResultID:  resultID,
 	})
@@ -700,7 +700,7 @@ func (h *Handlers) ResultFeedbackPost(w http.ResponseWriter, r *http.Request, us
 		return
 	}
 
-	result, err := h.queries.GetMonitorResult(r.Context(), h.pool, &models.GetMonitorResultParams{
+	result, err := h.queries.GetMonitorResult(r.Context(), h.db, &models.GetMonitorResultParams{
 		MonitorID: mon.ID,
 		ResultID:  resultID,
 	})
@@ -808,7 +808,7 @@ func (h *Handlers) monitorDraftViewData(
 ) (MonitorDraftData, error) {
 	var preview *models.MonitorResult
 	if mon.Status == models.MonitorStatusReady {
-		res, err := h.queries.ListMonitorResults(ctx, h.pool, mon.ID)
+		res, err := h.queries.ListMonitorResults(ctx, h.db, mon.ID)
 		if err != nil {
 			return MonitorDraftData{}, err
 		}
@@ -825,7 +825,7 @@ func (h *Handlers) monitorDraftViewData(
 
 	var timelineEvents []*models.GetTimelineEventsBySourceIDRow
 	if check != nil {
-		events, err := h.queries.GetTimelineEventsBySourceID(ctx, h.pool, &models.GetTimelineEventsBySourceIDParams{
+		events, err := h.queries.GetTimelineEventsBySourceID(ctx, h.db, &models.GetTimelineEventsBySourceIDParams{
 			SourceType: models.LlmConversationsSourceCheck,
 			SourceID:   check.ID,
 		})
@@ -852,7 +852,7 @@ func (h *Handlers) monitorDraftViewData(
 }
 
 func (h *Handlers) monitorViewData(ctx context.Context, mon *models.Monitor, userID int64) (MonitorViewData, error) {
-	results, err := h.queries.ListMonitorResults(ctx, h.pool, mon.ID)
+	results, err := h.queries.ListMonitorResults(ctx, h.db, mon.ID)
 	if err != nil {
 		return MonitorViewData{}, err
 	}
@@ -869,7 +869,7 @@ func (h *Handlers) monitorViewData(ctx context.Context, mon *models.Monitor, use
 
 	var timelineEvents []*models.GetTimelineEventsBySourceIDRow
 	if inProgressCheck != nil {
-		events, err := h.queries.GetTimelineEventsBySourceID(ctx, h.pool, &models.GetTimelineEventsBySourceIDParams{
+		events, err := h.queries.GetTimelineEventsBySourceID(ctx, h.db, &models.GetTimelineEventsBySourceIDParams{
 			SourceType: models.LlmConversationsSourceCheck,
 			SourceID:   inProgressCheck.ID,
 		})
@@ -900,7 +900,7 @@ func (h *Handlers) monitorNotifierViewData(ctx context.Context, mon *models.Moni
 		return notifiers, err
 	}
 
-	integrations, err := h.queries.UserIntegrations(ctx, h.pool, userID)
+	integrations, err := h.queries.UserIntegrations(ctx, h.db, userID)
 	if err != nil {
 		return notifiers, err
 	}

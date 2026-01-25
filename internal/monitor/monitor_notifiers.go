@@ -14,7 +14,7 @@ import (
 )
 
 func (s *Service) ListMonitorNotifiers(ctx context.Context, mon *models.Monitor) ([]*models.MonitorNotifier, error) {
-	notifiers, err := s.queries.ListMonitorNotifiers(ctx, s.pool, mon.ID)
+	notifiers, err := s.queries.ListMonitorNotifiers(ctx, s.db, mon.ID)
 	if err != nil {
 		return nil, fmt.Errorf("listing monitor notifiers: %w", err)
 	}
@@ -22,7 +22,7 @@ func (s *Service) ListMonitorNotifiers(ctx context.Context, mon *models.Monitor)
 }
 
 func (s *Service) CreateMonitorNotifier(ctx context.Context, mon *models.Monitor, notifierType models.Notifier) (*models.MonitorNotifier, error) {
-	return db.WithTxV(s.pool, ctx, func(tx pgx.Tx) (*models.MonitorNotifier, error) {
+	return db.WithTxV(s.db, ctx, func(tx pgx.Tx) (*models.MonitorNotifier, error) {
 		return s.createMonitorNotifierTx(ctx, tx, mon, notifierType)
 	})
 }
@@ -50,7 +50,7 @@ func (s *Service) createMonitorNotifierTx(ctx context.Context, tx pgx.Tx, mon *m
 }
 
 func (s *Service) DeleteMonitorNotifier(ctx context.Context, mon *models.Monitor, notifierType models.Notifier) error {
-	err := s.queries.DeleteMonitorNotifier(ctx, s.pool, &models.DeleteMonitorNotifierParams{
+	err := s.queries.DeleteMonitorNotifier(ctx, s.db, &models.DeleteMonitorNotifierParams{
 		MonitorID: mon.ID,
 		Type:      notifierType,
 	})
@@ -125,7 +125,7 @@ func (s *Service) enableAllNotifiers(ctx context.Context, tx pgx.Tx, mon *models
 }
 
 func (s *Service) sendEmailNotification(ctx context.Context, params SendNotificationsParams) error {
-	u, err := s.queries.GetUser(ctx, s.pool, params.Monitor.UserID)
+	u, err := s.queries.GetUser(ctx, s.db, params.Monitor.UserID)
 	if err != nil {
 		return fmt.Errorf("getting user: %w", err)
 	}
