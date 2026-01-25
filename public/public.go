@@ -14,7 +14,7 @@ import (
 	"strings"
 )
 
-//go:embed css js
+//go:embed css js images
 var publicFs embed.FS
 
 var fingerprintRegex regexp.Regexp = *regexp.MustCompile(`(-\w{32})(\.\w+)$`)
