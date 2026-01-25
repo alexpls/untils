@@ -7,12 +7,13 @@ import (
 	"sync"
 	"time"
 
+	"github.com/alexpls/untils/internal/chans"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgxlisten"
 )
 
-const throttleWindow = 100 * time.Millisecond
+const debounceWindow = 100 * time.Millisecond
 
 type subsMap map[chan struct{}]struct{}
 type idToSubsMap map[int64]subsMap
@@ -74,11 +75,11 @@ func (d *DBEventHandler) HandleNotification(ctx context.Context, notification *p
 }
 
 func (d *DBEventHandler) SubscribeMonitor(ctx context.Context, monitorID int64) <-chan struct{} {
-	return throttle(d.subscribe(ctx, monitorID, d.monitorIDSubs), throttleWindow)
+	return chans.Debounce(d.subscribe(ctx, monitorID, d.monitorIDSubs), debounceWindow)
 }
 
 func (d *DBEventHandler) SubscribeUser(ctx context.Context, userID int64) <-chan struct{} {
-	return throttle(d.subscribe(ctx, userID, d.userIDSubs), throttleWindow)
+	return chans.Debounce(d.subscribe(ctx, userID, d.userIDSubs), debounceWindow)
 }
 
 func (d *DBEventHandler) subscribe(ctx context.Context, id int64, subs idToSubsMap) <-chan struct{} {
@@ -130,51 +131,4 @@ func rebuildSubMap(old idToSubsMap) idToSubsMap {
 		}
 	}
 	return newSubs
-}
-
-func throttle[T any](source <-chan T, timeout time.Duration) <-chan T {
-	throttled := make(chan T)
-
-	go func() {
-		defer close(throttled)
-
-		var (
-			last   T
-			have   bool
-			timer  *time.Timer
-			timerC <-chan time.Time
-		)
-
-		for {
-			select {
-			case msg, ok := <-source:
-				if !ok {
-					if have {
-						throttled <- last
-					}
-					return
-				}
-
-				last = msg
-				have = true
-
-				if timer == nil {
-					timer = time.NewTimer(timeout)
-					timerC = timer.C
-				}
-
-			case <-timerC:
-				if have {
-					throttled <- last
-					have = false
-				}
-
-				timer.Stop()
-				timer = nil
-				timerC = nil
-			}
-		}
-	}()
-
-	return throttled
 }
