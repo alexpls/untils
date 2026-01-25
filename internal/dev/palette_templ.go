@@ -64,7 +64,7 @@ func PalettePage() templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = monitor.InProgressCheckTimelineItem(*stubbedInProgressCheckTimelineItemData()).Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = monitor.InProgressCheckTimelineItem(*fixtureInProgressCheckTimelineItemData()).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -86,8 +86,12 @@ func PalettePage() templ.Component {
 		})
 		templ_7745c5c3_Err = components.AppLayout("Palette", []components.Breadcrumb{
 			components.Breadcrumb{
+				Title: "Dev",
+				Href:  "#noop",
+			},
+			components.Breadcrumb{
 				Title: "Palette",
-				Href:  "/app/palette",
+				Href:  "/app/dev/palette",
 			},
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
@@ -125,13 +129,13 @@ func example(title string) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/dev/palette.templ`, Line: 24, Col: 43}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/dev/palette.templ`, Line: 28, Col: 43}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</h2><div class=\"max-w-sm border border-base-content/20 mt-2\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</h2><div class=\"max-w-sm border border-red-500/40 border-dashed mt-2\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

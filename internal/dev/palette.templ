@@ -6,14 +6,18 @@ import "github.com/alexpls/untils/internal/monitor"
 templ PalettePage() {
 	@components.AppLayout("Palette", []components.Breadcrumb{
 		components.Breadcrumb{
+			Title: "Dev",
+			Href:  "#noop",
+		},
+		components.Breadcrumb{
 			Title: "Palette",
-			Href:  "/app/palette",
+			Href:  "/app/dev/palette",
 		},
 	}) {
 		<div class="p-4">
 			@example("InProgressCheckTimelineItem") {
 				<ul>
-					@monitor.InProgressCheckTimelineItem(*stubbedInProgressCheckTimelineItemData())
+					@monitor.InProgressCheckTimelineItem(*fixtureInProgressCheckTimelineItemData())
 				</ul>
 			}
 		</div>
@@ -22,7 +26,7 @@ templ PalettePage() {
 
 templ example(title string) {
 	<h2 class="text-xl font-bold mt-3">{ title }</h2>
-	<div class="max-w-sm border border-base-content/20 mt-2">
+	<div class="max-w-sm border border-red-500/40 border-dashed mt-2">
 		{ children... }
 	</div>
 }

@@ -8,7 +8,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func stubbedInProgressCheckTimelineItemData() *monitor.InProgressCheckTimelineItemViewData {
+func fixtureInProgressCheckTimelineItemData() *monitor.InProgressCheckTimelineItemViewData {
 	now := time.Now()
 
 	return &monitor.InProgressCheckTimelineItemViewData{
