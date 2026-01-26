@@ -18,6 +18,7 @@
 - [ ] Improvement: special logic when checking prices for things, should include things like finding the cheapest price and reporting on it. Not including multiple store names.
 - [ ] Improvement: The click tool should emit the URL of the new page it landed on as a navigation event so it shows up on the UI
 - [ ] Fix: event sse should not deliver a message when subscribed to right after a visit to a page. But they should send a message when subscribed to on reentry to a page (e.g. switching back to the tab). On Dashboard page, only the first subscription should use view transitions.
+- [ ] Improvement: 25% of the produced binary is OpenAI's bloated SDK. I only use one endpoint, could move away from the SDK and call it directly with HTTP?
 
 ## Done
 
