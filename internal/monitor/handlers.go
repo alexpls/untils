@@ -226,31 +226,25 @@ func (h *Handlers) renderCheckView(ctx context.Context, checkID int64, userID in
 		return nil, err
 	}
 
-	// Verify the user owns the monitor that this check belongs to
 	if check.UserID != userID {
 		return nil, pgx.ErrNoRows
 	}
 
-	// Fetch the LLM conversation for this check (may not exist)
-	var messages []*models.LLMParsedMessage
-	var toolCalls []models.LLMToolCall
 	conv, err := h.service.queries.GetLLMConversationBySourceID(ctx, h.service.db, &models.GetLLMConversationBySourceIDParams{
 		SourceType: models.LlmConversationsSourceCheck,
 		SourceID:   checkID,
 	})
-	if err == nil {
-		messages = conv.Messages.Parse()
-		toolCalls = conv.Messages.ExtractToolCalls()
+	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
+		return nil, fmt.Errorf("getting conversation: %w", err)
 	}
-	// Ignore pgx.ErrNoRows - conversation is optional
 
-	// Fetch the MonitorResult for this check (may not exist)
-	var result *models.MonitorResult
-	res, err := h.service.queries.GetMonitorResultByCheckID(ctx, h.service.db, checkID)
-	if err == nil {
-		result = res
+	messages := conv.Messages.Parse()
+	toolCalls := conv.Messages.ExtractToolCalls()
+
+	result, err := h.service.queries.GetMonitorResultByCheckID(ctx, h.service.db, checkID)
+	if err == nil && !errors.Is(err, pgx.ErrNoRows) {
+		return nil, fmt.Errorf("getting monitor result: %w", err)
 	}
-	// Ignore pgx.ErrNoRows - result is optional
 
 	return CheckViewPage(CheckViewData{
 		Check:     check,

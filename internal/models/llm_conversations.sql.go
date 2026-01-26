@@ -57,6 +57,8 @@ func (q *Queries) CreateLLMConversation(ctx context.Context, db DBTX, arg *Creat
 const getLLMConversationBySourceID = `-- name: GetLLMConversationBySourceID :one
 select id, user_id, source_type, source_id, messages, created_at, updated_at from llm_conversations
 where source_type = $1 and source_id = $2
+order by created_at desc
+limit 1
 `
 
 type GetLLMConversationBySourceIDParams struct {
@@ -105,8 +107,6 @@ type GetTimelineEventsBySourceIDRow struct {
 	At        pgtype.Timestamptz
 }
 
-// Extracts timeline events (currently function calls) from an LLM conversation
-// without transferring the full messages JSONB to the application.
 func (q *Queries) GetTimelineEventsBySourceID(ctx context.Context, db DBTX, arg *GetTimelineEventsBySourceIDParams) ([]*GetTimelineEventsBySourceIDRow, error) {
 	rows, err := db.Query(ctx, getTimelineEventsBySourceID, arg.SourceType, arg.SourceID)
 	if err != nil {

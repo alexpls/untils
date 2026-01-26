@@ -10,7 +10,9 @@ where id = @llm_conversation_id;
 
 -- name: GetLLMConversationBySourceID :one
 select * from llm_conversations
-where source_type = @source_type and source_id = @source_id;
+where source_type = @source_type and source_id = @source_id
+order by created_at desc
+limit 1;
 
 -- name: GetTimelineEventsBySourceID :many
 select

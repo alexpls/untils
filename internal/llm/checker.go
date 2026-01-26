@@ -51,6 +51,8 @@ func (c *checker) logMessage(ctx context.Context, role models.LLMMessageRole, bo
 var checkerPrompt string
 
 func (c *checker) perform(ctx context.Context, params *CheckParams) (*models.CheckResult, error) {
+	var err error
+
 	workflowStart := time.Now()
 	c.service.logger.DebugContext(ctx, "checker workflow started")
 
@@ -59,7 +61,8 @@ func (c *checker) perform(ctx context.Context, params *CheckParams) (*models.Che
 		previousResult = params.PreviousResults[0]
 	}
 
-	conversation, err := c.service.queries.CreateLLMConversation(ctx, c.service.db, &models.CreateLLMConversationParams{
+	var conversation *models.LlmConversation
+	conversation, err = c.service.queries.CreateLLMConversation(ctx, c.service.db, &models.CreateLLMConversationParams{
 		UserID:     params.UserID,
 		SourceType: models.LlmConversationsSourceCheck,
 		SourceID:   params.MonitorCheckID,
@@ -70,7 +73,11 @@ func (c *checker) perform(ctx context.Context, params *CheckParams) (*models.Che
 	c.conversationID = conversation.ID
 
 	defer func() {
-		c.service.logger.DebugContext(ctx, "checker workflow completed", "total_duration", time.Since(workflowStart))
+		if err == nil {
+			c.service.logger.DebugContext(ctx, "checker workflow completed", "total_duration", time.Since(workflowStart))
+		} else {
+			c.service.logger.ErrorContext(ctx, "error during checker workflow", "total_duration", time.Since(workflowStart), "error", err)
+		}
 		if c.browserCancel != nil {
 			c.browserCancel()
 		}
@@ -115,7 +122,12 @@ func (c *checker) perform(ctx context.Context, params *CheckParams) (*models.Che
 			ParallelToolCalls: openai.Bool(false),
 		})
 		llmDuration := time.Since(llmStart)
-		c.service.logger.DebugContext(ctx, "LLM response received", "turn", c.turn, "duration", llmDuration)
+
+		if err == nil {
+			c.service.logger.DebugContext(ctx, "response received", "turn", c.turn, "duration", llmDuration)
+		} else {
+			c.service.logger.ErrorContext(ctx, "error getting response", "turn", c.turn, "duration", llmDuration, "error", err)
+		}
 
 		if resp != nil {
 			if logErr := c.logMessage(ctx, models.LLMMessageRoleAssistant, json.RawMessage(resp.RawJSON()), llmDuration); logErr != nil {

@@ -14,15 +14,18 @@ import (
 type Fixtures struct {
 	User    *models.User
 	Monitor *models.Monitor
+	Check   *models.MonitorCheck
 }
 
 func New(ctx context.Context, t *testing.T, db db.DB, queries *models.Queries) Fixtures {
 	u := user(ctx, t, db, queries)
 	m := monitor(ctx, t, db, queries, u.ID)
+	c := check(ctx, t, db, queries, m.ID)
 
 	return Fixtures{
 		User:    u,
 		Monitor: m,
+		Check:   c,
 	}
 }
 
@@ -51,4 +54,17 @@ func monitor(ctx context.Context, t *testing.T, db db.DB, queries *models.Querie
 	require.NoError(t, err)
 
 	return monitor
+}
+
+func check(ctx context.Context, t *testing.T, db db.DB, queries *models.Queries, monitorID int64) *models.MonitorCheck {
+	t.Helper()
+
+	check, err := queries.CreateMonitorCheck(ctx, db, &models.CreateMonitorCheckParams{
+		MonitorID:    monitorID,
+		Status:       models.MonitorCheckStatusScheduled,
+		ScheduledFor: time.Now(),
+	})
+	require.NoError(t, err)
+
+	return check
 }

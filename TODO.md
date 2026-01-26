@@ -8,7 +8,6 @@
 - [ ] Refactor: Forms should have some helpers extracted
 - [ ] Improvement: Pushover form should show a spinner while we're validating the token
 - [ ] Improvement: Triage workflow should document steps it took to get to a satisfactory answer so future workflows can do them too - possibly able to skip making new searches this way and just re-request existing URLs?
-- [ ] Fix: When restarting a check (e.g. after server restart), make sure to clear old check events for it
 - [ ] Fix: Need an anchored positioning tooltip polyfill for Firefox
 - [ ] Feature: handle future dates better. At the moment with the 'past tense' date requirement, release dates are referred to in the past tense, even though they haven't happened yet.
 - [ ] Feature: "fire and forget" way to set up monitors, if you don't wanna sit around waiting to confirm that the first check looks good
@@ -17,12 +16,14 @@
 - [ ] Fix: should be able to visit check pages for incomplete checks - but right now that errors
 - [ ] Improvement: special logic when checking prices for things, should include things like finding the cheapest price and reporting on it. Not including multiple store names.
 - [ ] Improvement: The click tool should emit the URL of the new page it landed on as a navigation event so it shows up on the UI
+  - [ ] Refactor: "llm_conversations" should probably be renamed to "monitor_events", especially if it's gonna hold more than llm responses in it.
 - [ ] Fix: (requires https://github.com/starfederation/datastar/issues/900 first) event sse should not deliver a message when subscribed to right after a visit to a page. But they should send a message when subscribed to on reentry to a page (e.g. switching back to the tab). On Dashboard page, only the first subscription should use view transitions.
 - [ ] Improvement: 25% of the produced binary is OpenAI's bloated SDK. I only use one endpoint, could move away from the SDK and call it directly with HTTP?
 - [ ] Improvement: make it clearer what the purpose of the preview is. I've had feedback that it's confusing that it's showing something that's already happened, which isn't something that the user wants to be notified about _now_.
 
 ## Done
 
+- [x] Fix: When restarting a check (e.g. after server restart), make sure to clear old check events for it
 - [x] Fix: sometimes a draft will get stuck on 'previewing' status and will need a page refresh to actually show the "Activate" screen
 - [x] Fix: check timeline event timestamps aren't right aligned. they should be, and should have a small margin on their left for good measure.
 - [x] Refactor: could check_events and llm_conversation concepts be rolled into one? They have some crossover currently

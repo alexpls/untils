@@ -8,14 +8,16 @@ import (
 	"github.com/alexpls/untils/internal/models"
 	"github.com/alexpls/untils/internal/search"
 	"github.com/alexpls/untils/internal/testhelper"
+	testfixtures "github.com/alexpls/untils/internal/testhelper/fixtures"
 	"github.com/openai/openai-go/v3"
 	"github.com/openai/openai-go/v3/option"
 )
 
 type testDeps struct {
-	service *Service
-	pool    models.DBTX
-	queries *models.Queries
+	service  *Service
+	tx       models.DBTX
+	queries  *models.Queries
+	fixtures testfixtures.Fixtures
 }
 
 func newTestDeps(t *testing.T) *testDeps {
@@ -23,8 +25,9 @@ func newTestDeps(t *testing.T) *testDeps {
 
 	ctx := context.Background()
 	tl := testhelper.TestLogger(t)
-	pool := testhelper.TestTx(ctx, t)
+	tx := testhelper.TestTx(ctx, t)
 	queries := models.New()
+	fixtures := testfixtures.New(ctx, t, tx, queries)
 
 	oai := openai.NewClient(
 		option.WithAPIKey(os.Getenv("XAI_KEY")),
@@ -33,16 +36,12 @@ func newTestDeps(t *testing.T) *testDeps {
 
 	ws := search.NewBraveClient(os.Getenv("BRAVE_KEY"), tl)
 
-	svc := NewService(&oai, pool, queries, tl, ws)
+	svc := NewService(&oai, tx, queries, tl, ws)
 
 	return &testDeps{
-		service: svc,
-		pool:    pool,
-		queries: queries,
+		service:  svc,
+		tx:       tx,
+		queries:  queries,
+		fixtures: fixtures,
 	}
-}
-
-func newServiceForTest(t *testing.T) *Service {
-	t.Helper()
-	return newTestDeps(t).service
 }

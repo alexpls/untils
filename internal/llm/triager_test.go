@@ -10,12 +10,14 @@ import (
 )
 
 func TestTriager(t *testing.T) {
-	svc := newServiceForTest(t)
+	t.Parallel()
+
+	deps := newTestDeps(t)
 
 	events := make(logging.Events)
 	ctx := logging.ContextWithEvents(t.Context(), events)
 
-	prompt := NewTriager(svc, &CheckParams{
+	prompt := NewTriager(deps.service, &CheckParams{
 		Subject: "Who is a good boy?",
 	})
 	res, err := prompt.Run(ctx)
