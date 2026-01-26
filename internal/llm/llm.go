@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"log/slog"
 
+	"github.com/alexpls/untils/internal/db"
 	"github.com/alexpls/untils/internal/logging"
+	"github.com/alexpls/untils/internal/models"
 	"github.com/alexpls/untils/internal/search"
 	"github.com/openai/openai-go/v3"
 	"github.com/openai/openai-go/v3/responses"
@@ -16,13 +18,23 @@ var modelReasoning = "grok-4-1-fast-reasoning"
 
 type Service struct {
 	client      *openai.Client
+	db          db.DB
+	queries     *models.Queries
 	logger      *slog.Logger
 	webSearcher search.WebSearcher
 }
 
-func NewService(client *openai.Client, logger *slog.Logger, webSearcher search.WebSearcher) *Service {
+func NewService(
+	client *openai.Client,
+	db db.DB,
+	queries *models.Queries,
+	logger *slog.Logger,
+	webSearcher search.WebSearcher,
+) *Service {
 	return &Service{
 		client:      client,
+		db:          db,
+		queries:     queries,
 		logger:      logger,
 		webSearcher: webSearcher,
 	}

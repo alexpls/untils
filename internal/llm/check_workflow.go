@@ -3,26 +3,23 @@ package llm
 import (
 	"context"
 
-	"github.com/alexpls/untils/internal/db"
 	"github.com/alexpls/untils/internal/logging"
 	"github.com/alexpls/untils/internal/models"
 )
 
 type CheckWorkflow struct {
 	service *Service
-	db      db.DB
-	queries *models.Queries
 }
 
-func NewCheckWorkflow(service *Service, pool db.DB, queries *models.Queries) *CheckWorkflow {
-	return &CheckWorkflow{service: service, db: pool, queries: queries}
+func (s *Service) NewCheckWorkflow() *CheckWorkflow {
+	return &CheckWorkflow{service: s}
 }
 
 func (w *CheckWorkflow) Run(ctx context.Context, params *CheckParams) (*models.CheckResult, error) {
 	llmEvent, _ := logging.GetOrCreateFromContext(ctx, newLLMEvent)
 	defer llmEvent.finish()
 
-	checker := newChecker(w.service, w.db, w.queries)
+	checker := newChecker(w.service)
 
 	return checker.perform(ctx, params)
 }

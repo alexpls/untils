@@ -21,7 +21,7 @@ func TestCheckerEasySubject(t *testing.T) {
 	user := fixtures.user
 	check := fixtures.check
 
-	checker := newChecker(deps.service, deps.pool, deps.queries)
+	checker := newChecker(deps.service)
 
 	events := make(logging.Events)
 	ctx = logging.ContextWithEvents(ctx, events)

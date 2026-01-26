@@ -19,15 +19,18 @@ var (
 	poolOnce sync.Once
 )
 
-func getPool() *pgxpool.Pool {
-	poolOnce.Do(func() {
-		pgURL := os.Getenv("PG_TEST_URL")
-		if pgURL == "" {
-			panic("PG_TEST_URL environment variable is not set")
-		}
+func pgURL() string {
+	pgURL := os.Getenv("PG_TEST_URL")
+	if pgURL == "" {
+		panic("PG_TEST_URL environment variable is not set")
+	}
+	return pgURL
+}
 
+func dbPool() *pgxpool.Pool {
+	poolOnce.Do(func() {
 		var err error
-		pool, err = pgxpool.New(context.Background(), pgURL)
+		pool, err = pgxpool.New(context.Background(), pgURL())
 		if err != nil {
 			panic(fmt.Sprintf("failed to connect to test database: %v", err))
 		}
@@ -42,7 +45,7 @@ func getPool() *pgxpool.Pool {
 }
 
 func TestTx(ctx context.Context, t *testing.T) db.DB {
-	tx, err := getPool().Begin(ctx)
+	tx, err := dbPool().Begin(ctx)
 	require.NoError(t, err)
 
 	t.Cleanup(func() {

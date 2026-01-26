@@ -4,35 +4,44 @@ import (
 	"log/slog"
 
 	"github.com/alexpls/untils/internal/db"
-	"github.com/alexpls/untils/internal/email"
 	"github.com/alexpls/untils/internal/llm"
 	"github.com/alexpls/untils/internal/models"
-	"github.com/alexpls/untils/internal/pushover"
+	"github.com/alexpls/untils/internal/notifications"
 	"github.com/go-playground/validator/v10"
 	"github.com/jackc/pgx/v5"
 	"github.com/riverqueue/river"
 )
 
-type Service struct {
-	db             db.DB
-	queries        *models.Queries
-	llm            *llm.Service
-	river          *river.Client[pgx.Tx]
-	logger         *slog.Logger
-	pushoverClient *pushover.Client // TODO: temporary, this should not be talking directly to pushover but rather a more generic notification service
-	emailService   *email.Service   // TODO: ditto above TODO, but this time for email
-	validate       *validator.Validate
+type llmWorkflowBuilder interface {
+	NewTriageWorkflow() *llm.TriageWorkflow
+	NewCheckWorkflow() *llm.CheckWorkflow
 }
 
-func NewService(db db.DB, queries *models.Queries, llm *llm.Service, river *river.Client[pgx.Tx], logger *slog.Logger, pushoverClient *pushover.Client, emailService *email.Service, validate *validator.Validate) *Service {
+type Service struct {
+	db                 db.DB
+	queries            *models.Queries
+	llm                llmWorkflowBuilder
+	river              *river.Client[pgx.Tx]
+	logger             *slog.Logger
+	notificationSender notifications.Sender
+	validate           *validator.Validate
+}
+
+func NewService(db db.DB,
+	queries *models.Queries,
+	llm llmWorkflowBuilder,
+	river *river.Client[pgx.Tx],
+	logger *slog.Logger,
+	validate *validator.Validate,
+	notificationSender notifications.Sender,
+) *Service {
 	return &Service{
-		db:             db,
-		queries:        queries,
-		llm:            llm,
-		river:          river,
-		logger:         logger,
-		pushoverClient: pushoverClient,
-		validate:       validate,
-		emailService:   emailService,
+		db:                 db,
+		queries:            queries,
+		llm:                llm,
+		river:              river,
+		logger:             logger,
+		validate:           validate,
+		notificationSender: notificationSender,
 	}
 }

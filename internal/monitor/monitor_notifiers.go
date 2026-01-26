@@ -6,11 +6,9 @@ import (
 	"fmt"
 
 	"github.com/alexpls/untils/internal/db"
-	"github.com/alexpls/untils/internal/email"
 	"github.com/alexpls/untils/internal/models"
-	"github.com/alexpls/untils/internal/pushover"
+	"github.com/alexpls/untils/internal/notifications"
 	"github.com/jackc/pgx/v5"
-	"golang.org/x/sync/errgroup"
 )
 
 func (s *Service) ListMonitorNotifiers(ctx context.Context, mon *models.Monitor) ([]*models.MonitorNotifier, error) {
@@ -61,8 +59,8 @@ func (s *Service) DeleteMonitorNotifier(ctx context.Context, mon *models.Monitor
 }
 
 type SendNotificationsParams struct {
-	Monitor *models.Monitor
-	Message string
+	Monitor              *models.Monitor
+	NewResult, OldResult string
 }
 
 func (s *Service) SendNotifications(ctx context.Context, params SendNotificationsParams) error {
@@ -76,31 +74,20 @@ func (s *Service) SendNotifications(ctx context.Context, params SendNotification
 		return fmt.Errorf("listing monitor notifiers: %w", err)
 	}
 
-	g, ctx := errgroup.WithContext(ctx)
-
+	var notificationChannels []models.Notifier
 	for _, notifier := range notifiers {
-		// TODO: remove repetitive code in favor of interface abstraction
-		switch notifier.Type {
-		case models.NotifierEmail:
-			g.Go(func() error {
-				if err := s.sendEmailNotification(ctx, params); err != nil {
-					return fmt.Errorf("sending email notification: %w", err)
-				}
-				return nil
-			})
-		case models.NotifierPushover:
-			g.Go(func() error {
-				if err := s.sendPushoverNotification(ctx, params); err != nil {
-					return fmt.Errorf("sending pushover notification: %w", err)
-				}
-				return nil
-			})
-		}
+		notificationChannels = append(notificationChannels, notifier.Type)
 	}
 
-	if err := g.Wait(); err != nil {
-		return err
-	}
+	s.notificationSender.Send(ctx, notifications.SendParams{
+		UserID:               params.Monitor.UserID,
+		NotificationChannels: notificationChannels,
+		Message: notifications.MonitorNewResult{
+			Subject: params.Monitor.Subject.String,
+			New:     params.NewResult,
+			Old:     params.OldResult,
+		},
+	})
 
 	return nil
 }
@@ -122,25 +109,4 @@ func (s *Service) enableAllNotifiers(ctx context.Context, tx pgx.Tx, mon *models
 	}
 
 	return nil
-}
-
-func (s *Service) sendEmailNotification(ctx context.Context, params SendNotificationsParams) error {
-	u, err := s.queries.GetUser(ctx, s.db, params.Monitor.UserID)
-	if err != nil {
-		return fmt.Errorf("getting user: %w", err)
-	}
-
-	return s.emailService.Send(ctx, &email.SendParams{
-		Recipient: u.Email,
-		Subject:   fmt.Sprintf("Changed monitor: %s", params.Monitor.Subject.String),
-		Body:      params.Message,
-	})
-}
-
-func (s *Service) sendPushoverNotification(ctx context.Context, params SendNotificationsParams) error {
-	return s.pushoverClient.Send(ctx, pushover.SendParams{
-		Title:   fmt.Sprintf("Monitor: %s", params.Monitor.Subject.String),
-		Message: params.Message,
-		UserID:  params.Monitor.UserID,
-	})
 }

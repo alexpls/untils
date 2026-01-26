@@ -10,8 +10,8 @@ type TriageWorkflow struct {
 	service *Service
 }
 
-func NewTriageWorkflow(service *Service) *TriageWorkflow {
-	return &TriageWorkflow{service: service}
+func (s *Service) NewTriageWorkflow() *TriageWorkflow {
+	return &TriageWorkflow{service: s}
 }
 
 func (w *TriageWorkflow) Run(ctx context.Context, params *CheckParams) (*TriagerResponse, error) {

@@ -17,6 +17,7 @@ import (
 	"github.com/alexpls/untils/internal/models"
 	"github.com/alexpls/untils/internal/monitor"
 	"github.com/alexpls/untils/internal/must"
+	"github.com/alexpls/untils/internal/notifications"
 	"github.com/alexpls/untils/internal/pages"
 	"github.com/alexpls/untils/internal/pushover"
 	"github.com/alexpls/untils/internal/search"
@@ -36,28 +37,29 @@ import (
 )
 
 type app struct {
-	config            *config
-	logger            *slog.Logger
-	db                *pgxpool.Pool
-	dbListener        *pgxlisten.Listener
-	queries           *models.Queries
-	auth              *auth.Auth
-	sessionManager    *session.Manager
-	monitor           *monitor.Service
-	monitorEvents     *monitor.DBEventHandler
-	monitorHandlers   *monitor.Handlers
-	dashboardHandlers *dashboard.Handlers
-	pagesHandlers     *pages.Handlers
-	authHandlers      *auth.Handlers
-	settingsHandlers  *settings.Handlers
-	llm               *llm.Service
-	river             *river.Client[pgx.Tx]
-	pushoverClient    *pushover.Client
-	pushoverStore     *pushover.Store
-	emailService      *email.Service
-	validate          *validator.Validate
-	webSearcher       search.WebSearcher
-	devHandlers       *dev.Handlers
+	config              *config
+	logger              *slog.Logger
+	db                  *pgxpool.Pool
+	dbListener          *pgxlisten.Listener
+	queries             *models.Queries
+	auth                *auth.Auth
+	sessionManager      *session.Manager
+	monitor             *monitor.Service
+	monitorEvents       *monitor.DBEventHandler
+	monitorHandlers     *monitor.Handlers
+	dashboardHandlers   *dashboard.Handlers
+	pagesHandlers       *pages.Handlers
+	authHandlers        *auth.Handlers
+	settingsHandlers    *settings.Handlers
+	llm                 *llm.Service
+	river               *river.Client[pgx.Tx]
+	pushoverClient      *pushover.Client
+	pushoverStore       *pushover.Store
+	emailService        *email.Service
+	notificationService *notifications.Service
+	validate            *validator.Validate
+	webSearcher         search.WebSearcher
+	devHandlers         *dev.Handlers
 }
 
 func createApp(c *config) (*app, func()) {
@@ -146,7 +148,7 @@ func createApp(c *config) (*app, func()) {
 		option.WithBaseURL("https://api.x.ai/v1"),
 		option.WithAPIKey(c.xAIKey),
 	)
-	a.llm = llm.NewService(&llmClient, a.logger.With("source", "llm"), a.webSearcher)
+	a.llm = llm.NewService(&llmClient, a.db, a.queries, a.logger.With("source", "llm"), a.webSearcher)
 
 	a.auth = auth.NewAuth(a.logger.With("source", "auth"), a.db, a.queries, a.validate)
 
@@ -162,11 +164,13 @@ func createApp(c *config) (*app, func()) {
 		Port:     c.smtp.port,
 	})
 
-	a.monitor = monitor.NewService(a.db, a.queries, a.llm, a.river, a.logger.With("source", "monitor"), a.pushoverClient, a.emailService, a.validate)
-	a.monitorEvents = monitor.NewDBEventHandler(a.monitor)
+	a.notificationService = notifications.NewService(a.logger.With("source", "notifications.service"), a.pushoverClient, a.emailService, a.db, *a.queries)
+
+	a.monitor = monitor.NewService(a.db, a.queries, a.llm, a.river, a.logger.With("source", "monitor"), a.validate, a.notificationService)
+	a.monitorEvents = monitor.NewDBEventHandler()
 	a.dbListener.Handle("monitor_events", a.monitorEvents)
 
-	a.monitorHandlers = monitor.NewHandlers(a.monitor, a.monitorEvents, a.queries, a.db, a.logger.With("source", "monitor.handlers"))
+	a.monitorHandlers = monitor.NewHandlers(a.monitor, a.monitorEvents, a.logger.With("source", "monitor.handlers"))
 
 	a.dashboardHandlers = dashboard.NewHandlers(a.queries, a.db, a.monitorEvents, a.logger.With("source", "dashboard.handlers"))
 

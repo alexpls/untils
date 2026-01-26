@@ -33,7 +33,7 @@ func newTestDeps(t *testing.T) *testDeps {
 
 	ws := search.NewBraveClient(os.Getenv("BRAVE_KEY"), tl)
 
-	svc := NewService(&oai, tl, ws)
+	svc := NewService(&oai, pool, queries, tl, ws)
 
 	return &testDeps{
 		service: svc,

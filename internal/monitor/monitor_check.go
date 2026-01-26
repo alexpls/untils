@@ -138,7 +138,7 @@ func (s *Service) PerformMonitorCheck(
 		return err
 	}
 
-	checker := llm.NewCheckWorkflow(s.llm, s.db, s.queries)
+	checker := s.llm.NewCheckWorkflow()
 
 	result, err := checker.Run(ctx, &llm.CheckParams{
 		UserID:          userID,
@@ -198,10 +198,10 @@ func (s *Service) PerformMonitorCheck(
 			lastResult = latest[0].MonitorResult.Result
 		}
 
-		notifMessage := fmt.Sprintf("Change detected: %s (was %s)", result.ResultPlaintext, lastResult)
 		if err = s.SendNotifications(ctx, SendNotificationsParams{
-			Monitor: monitor,
-			Message: notifMessage,
+			Monitor:   monitor,
+			NewResult: result.ResultPlaintext,
+			OldResult: lastResult,
 		}); err != nil {
 			return err
 		}

@@ -19,16 +19,14 @@ type subsMap map[chan struct{}]struct{}
 type idToSubsMap map[int64]subsMap
 
 type DBEventHandler struct {
-	s             *Service
 	mu            sync.RWMutex
 	monitorIDSubs idToSubsMap
 	userIDSubs    idToSubsMap
 	subsRebuilt   time.Time
 }
 
-func NewDBEventHandler(s *Service) *DBEventHandler {
+func NewDBEventHandler() *DBEventHandler {
 	return &DBEventHandler{
-		s:             s,
 		monitorIDSubs: make(idToSubsMap),
 		userIDSubs:    make(idToSubsMap),
 		subsRebuilt:   time.Now(),

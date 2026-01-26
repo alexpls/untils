@@ -107,7 +107,7 @@ func (s *Service) ValidateMonitor(ctx context.Context, monitor *models.Monitor) 
 		return fmt.Errorf("getting previous results: %w", err)
 	}
 
-	triage := llm.NewTriageWorkflow(s.llm)
+	triage := s.llm.NewTriageWorkflow()
 
 	trigageRes, err := triage.Run(ctx, &llm.CheckParams{
 		Subject:         monitor.Subject.String,

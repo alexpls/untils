@@ -19,15 +19,13 @@ type checker struct {
 	messages       []responses.ResponseInputItemUnionParam
 	browserCtx     *browser.BrowserCtx
 	browserCancel  context.CancelFunc
-	db             models.DBTX
-	queries        *models.Queries
 	conversationID int64
 	turn           int
 	priorCalls     []toolCall
 }
 
-func newChecker(service *Service, db models.DBTX, queries *models.Queries) *checker {
-	return &checker{service: service, db: db, queries: queries}
+func newChecker(service *Service) *checker {
+	return &checker{service: service}
 }
 
 func (c *checker) logMessage(ctx context.Context, role models.LLMMessageRole, body any, duration time.Duration) error {
@@ -35,7 +33,7 @@ func (c *checker) logMessage(ctx context.Context, role models.LLMMessageRole, bo
 	if err != nil {
 		return fmt.Errorf("marshalling message body: %w", err)
 	}
-	return c.queries.AddMessageToLLMConversation(ctx, c.db, &models.AddMessageToLLMConversationParams{
+	return c.service.queries.AddMessageToLLMConversation(ctx, c.service.db, &models.AddMessageToLLMConversationParams{
 		LlmConversationID: c.conversationID,
 		Message: models.LLMConversationMessages{
 			{
@@ -61,7 +59,7 @@ func (c *checker) perform(ctx context.Context, params *CheckParams) (*models.Che
 		previousResult = params.PreviousResults[0]
 	}
 
-	conversation, err := c.queries.CreateLLMConversation(ctx, c.db, &models.CreateLLMConversationParams{
+	conversation, err := c.service.queries.CreateLLMConversation(ctx, c.service.db, &models.CreateLLMConversationParams{
 		UserID:     params.UserID,
 		SourceType: models.LlmConversationsSourceCheck,
 		SourceID:   params.MonitorCheckID,
