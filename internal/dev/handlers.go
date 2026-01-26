@@ -1,19 +1,25 @@
 package dev
 
 import (
+	"log/slog"
 	"net/http"
 
 	"github.com/alexpls/untils/internal/models"
 )
 
 type Handlers struct {
+	logger *slog.Logger
 }
 
-func NewHandlers() *Handlers {
-	return &Handlers{}
+func NewHandlers(logger *slog.Logger) *Handlers {
+	return &Handlers{
+		logger: logger,
+	}
 }
 
 func (h *Handlers) PaletteGet(w http.ResponseWriter, r *http.Request, _ *models.User) {
 	component := PalettePage()
-	component.Render(r.Context(), w)
+	if err := component.Render(r.Context(), w); err != nil {
+		h.logger.Error("error rendering palette", "error", err)
+	}
 }

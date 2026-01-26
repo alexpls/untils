@@ -180,7 +180,7 @@ func createApp(c *config) (*app, func()) {
 
 	a.settingsHandlers = settings.NewHandlers(a.queries, a.db, a.pushoverStore, a.pushoverClient, a.auth, a.logger.With("source", "settings.handlers"))
 
-	a.devHandlers = dev.NewHandlers()
+	a.devHandlers = dev.NewHandlers(a.logger.With("source", "dev.handlers"))
 
 	river.AddWorker(workers, monitor.NewCheckWorker(a.monitor, a.logger.With("source", "monitor.check_worker")))
 	river.AddWorker(workers, monitor.NewValidateMonitorWorker(a.monitor, a.logger.With("source", "monitor.validate_monitor_worker")))

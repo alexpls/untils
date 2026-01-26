@@ -79,7 +79,7 @@ func (s *Service) SendNotifications(ctx context.Context, params SendNotification
 		notificationChannels = append(notificationChannels, notifier.Type)
 	}
 
-	s.notificationSender.Send(ctx, notifications.SendParams{
+	if err := s.notificationSender.Send(ctx, notifications.SendParams{
 		UserID:               params.Monitor.UserID,
 		NotificationChannels: notificationChannels,
 		Message: notifications.MonitorNewResult{
@@ -87,7 +87,9 @@ func (s *Service) SendNotifications(ctx context.Context, params SendNotification
 			New:     params.NewResult,
 			Old:     params.OldResult,
 		},
-	})
+	}); err != nil {
+		return fmt.Errorf("sending notifications: %w", err)
+	}
 
 	return nil
 }
