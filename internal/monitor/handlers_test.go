@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/alexpls/untils/internal/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -23,15 +24,7 @@ func TestListGet(t *testing.T) {
 		_, err := deps.service.db.Exec(ctx, "delete from monitors where user_id = $1", deps.fixtures.User.ID)
 		require.NoError(t, err)
 
-		handler := func(w http.ResponseWriter, r *http.Request) {
-			deps.handlers.ListGet(w, r, deps.fixtures.User)
-		}
-
-		req := httptest.NewRequest("GET", "/", nil)
-		w := httptest.NewRecorder()
-		handler(w, req)
-
-		res := w.Result()
+		res := getHandler(deps.handlers.ListGet, deps.fixtures.User)
 		page, _ := io.ReadAll(res.Body)
 
 		assert.Equal(t, http.StatusOK, res.StatusCode)
@@ -44,18 +37,23 @@ func TestListGet(t *testing.T) {
 		ctx := context.Background()
 		deps := setupTestDeps(ctx, t)
 
-		handler := func(w http.ResponseWriter, r *http.Request) {
-			deps.handlers.ListGet(w, r, deps.fixtures.User)
-		}
-
-		req := httptest.NewRequest("GET", "/", nil)
-		w := httptest.NewRecorder()
-		handler(w, req)
-
-		res := w.Result()
+		res := getHandler(deps.handlers.ListGet, deps.fixtures.User)
 		page, _ := io.ReadAll(res.Body)
 
 		assert.Equal(t, http.StatusOK, res.StatusCode)
 		assert.Contains(t, string(page), deps.fixtures.Monitor.Subject.String)
 	})
+}
+
+func getHandler(handler func(http.ResponseWriter, *http.Request, *models.User), user *models.User) *http.Response {
+	wrappedHandler := func(w http.ResponseWriter, r *http.Request) {
+		handler(w, r, user)
+	}
+
+	req := httptest.NewRequest("GET", "/", nil)
+	w := httptest.NewRecorder()
+	wrappedHandler(w, req)
+
+	res := w.Result()
+	return res
 }
