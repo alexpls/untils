@@ -13,8 +13,6 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-var monitorCheckFrequency = 6 * time.Hour
-
 func (s *Service) GetMonitor(ctx context.Context, userID, monitorID int64) (*models.Monitor, error) {
 	monitor, err := s.queries.GetMonitor(ctx, s.db, &models.GetMonitorParams{
 		UserID: userID,
@@ -205,8 +203,8 @@ func CheckResultToCreateMonitorResultParams(monitorID, checkID int64, res *model
 	}
 }
 
-func (s *Service) ActivateMonitorFromPreview(ctx context.Context, userID, monitorID int64) (*models.Monitor, error) {
-	monitor, err := s.GetMonitor(ctx, userID, monitorID)
+func (s *Service) ActivateMonitorFromPreview(ctx context.Context, user *models.User, monitorID int64) (*models.Monitor, error) {
+	monitor, err := s.GetMonitor(ctx, user.ID, monitorID)
 	if err != nil {
 		return nil, fmt.Errorf("getting monitor: %w", err)
 	}
@@ -221,7 +219,13 @@ func (s *Service) ActivateMonitorFromPreview(ctx context.Context, userID, monito
 			return nil, fmt.Errorf("getting latest monitor result: %w", err)
 		}
 
-		if _, err := s.scheduleMonitorCheckTx(ctx, tx, monitor, res.CreatedAt.Add(monitorCheckFrequency)); err != nil {
+		fromTime := res.CreatedAt.In(user.Location())
+		nextCheckTime, err := nextCheckTime(monitor.CheckSchedule, fromTime)
+		if err != nil {
+			return nil, fmt.Errorf("calculating next check time: %w", err)
+		}
+
+		if _, err := s.scheduleMonitorCheckTx(ctx, tx, monitor, nextCheckTime); err != nil {
 			return nil, fmt.Errorf("scheduling check: %w", err)
 		}
 
@@ -318,8 +322,8 @@ func (s *Service) deleteMonitorRelations(ctx context.Context, tx models.DBTX, mo
 // When pausing, pending checks are skipped.
 // When unpausing, a new check is scheduled for either now or when the next
 // check would have been due if the monitor had never been paused, whichever is later.
-func (s *Service) SetMonitorPaused(ctx context.Context, userID, monitorID int64, paused bool) (*models.Monitor, error) {
-	monitor, err := s.GetMonitor(ctx, userID, monitorID)
+func (s *Service) SetMonitorPaused(ctx context.Context, user *models.User, monitorID int64, paused bool) (*models.Monitor, error) {
+	monitor, err := s.GetMonitor(ctx, user.ID, monitorID)
 	if err != nil {
 		return nil, fmt.Errorf("getting monitor: %w", err)
 	}
@@ -339,7 +343,10 @@ func (s *Service) SetMonitorPaused(ctx context.Context, userID, monitorID int64,
 				return nil, fmt.Errorf("skipping pending checks: %w", err)
 			}
 		} else {
-			nextCheckTime := s.calculateNextCheckTime(ctx, tx, monitorID)
+			nextCheckTime, err := nextCheckTime(monitor.CheckSchedule, user.Now())
+			if err != nil {
+				return nil, fmt.Errorf("calculating next check time: %w", err)
+			}
 			if _, err := s.scheduleMonitorCheckTx(ctx, tx, monitor, nextCheckTime); err != nil {
 				return nil, fmt.Errorf("scheduling check: %w", err)
 			}
@@ -352,20 +359,4 @@ func (s *Service) SetMonitorPaused(ctx context.Context, userID, monitorID int64,
 
 		return monitor, nil
 	})
-}
-
-// calculateNextCheckTime determines when the next check should be scheduled
-// when unpausing a monitor. Returns now or when the next check would have
-// been due, whichever is later.
-func (s *Service) calculateNextCheckTime(ctx context.Context, tx pgx.Tx, monitorID int64) time.Time {
-	lastScheduledFor, err := s.queries.GetLastScheduledCheckTime(ctx, tx, monitorID)
-	if err != nil {
-		return time.Now()
-	}
-
-	wouldHaveBeenDue := lastScheduledFor.Add(monitorCheckFrequency)
-	if wouldHaveBeenDue.After(time.Now()) {
-		return wouldHaveBeenDue
-	}
-	return time.Now()
 }

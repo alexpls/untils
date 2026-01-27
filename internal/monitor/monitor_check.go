@@ -123,6 +123,11 @@ func (s *Service) PerformMonitorCheck(
 		return nil
 	}
 
+	user, err := s.queries.GetUser(ctx, s.db, userID)
+	if err != nil {
+		return fmt.Errorf("getting user: %w", err)
+	}
+
 	latest, err := db.WithTxV(s.db, ctx, func(tx pgx.Tx) ([]*models.GetPreviousResultsWithCheckRow, error) {
 		latest, err := s.queries.GetPreviousResultsWithCheck(ctx, tx, monitor.ID)
 		if err != nil {
@@ -134,7 +139,11 @@ func (s *Service) PerformMonitorCheck(
 		}
 
 		if scheduleNext {
-			_, err = s.scheduleMonitorCheckTx(ctx, tx, monitor, time.Now().Add(monitorCheckFrequency))
+			nextCheckTime, err := nextCheckTime(monitor.CheckSchedule, user.Now())
+			if err != nil {
+				return nil, fmt.Errorf("calculating next check time: %w", err)
+			}
+			_, err = s.scheduleMonitorCheckTx(ctx, tx, monitor, nextCheckTime)
 			if err != nil {
 				return nil, err
 			}

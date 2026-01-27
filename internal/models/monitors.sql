@@ -20,6 +20,7 @@ select
     m.id as monitor_id,
     m.status,
     m.subject::text as subject,
+    m.check_schedule,
     m.created_at,
     coalesce(mr.result, '') as latest_result,
     coalesce(mr.date, '0001-01-01 00:00:00 +0000') as latest_result_date,
@@ -71,6 +72,12 @@ returning *;
 update monitors
 set subject = @subject, updated_at = now()
 where user_id = @user_id and id = @id and status != 'active'
+returning *;
+
+-- name: UpdateMonitorSchedule :one
+update monitors
+set check_schedule = @check_schedule, updated_at = now()
+where user_id = @user_id and id = @id
 returning *;
 
 -- name: GetMonitorCheck :one

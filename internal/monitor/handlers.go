@@ -428,7 +428,7 @@ func (h *Handlers) ActivatePost(w http.ResponseWriter, r *http.Request, user *mo
 
 	sse := datastar.NewSSE(w, r)
 
-	activatedMonitor, err := h.service.ActivateMonitorFromPreview(r.Context(), user.ID, monitorID)
+	activatedMonitor, err := h.service.ActivateMonitorFromPreview(r.Context(), user, monitorID)
 	if err != nil {
 		h.logger.ErrorContext(r.Context(), "error activating monitor", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
@@ -534,7 +534,7 @@ func (h *Handlers) setMonitorPaused(w http.ResponseWriter, r *http.Request, user
 
 	sse := datastar.NewSSE(w, r)
 
-	mon, err := h.service.SetMonitorPaused(r.Context(), user.ID, monitorID, paused)
+	mon, err := h.service.SetMonitorPaused(r.Context(), user, monitorID, paused)
 	if err != nil {
 		if errors.Is(err, ErrMonitorNotFound) {
 			http.Error(w, "Not found", http.StatusNotFound)
