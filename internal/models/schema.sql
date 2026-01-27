@@ -334,7 +334,8 @@ CREATE TABLE public.monitors (
     subject text,
     rejected_reason text,
     updated_at timestamp with time zone NOT NULL,
-    created_at timestamp with time zone NOT NULL
+    created_at timestamp with time zone NOT NULL,
+    check_schedule text DEFAULT '0 */6 * * *'::text NOT NULL
 );
 
 
@@ -902,5 +903,3 @@ ALTER TABLE ONLY public.river_client_queue
 --
 -- PostgreSQL database dump complete
 --
-
-

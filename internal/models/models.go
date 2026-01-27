@@ -252,6 +252,8 @@ type Monitor struct {
 	RejectedReason pgtype.Text
 	UpdatedAt      time.Time
 	CreatedAt      time.Time
+	// Cron expression defining when monitor checks should run. Default: every 6 hours.
+	CheckSchedule string
 }
 
 type MonitorCheck struct {
