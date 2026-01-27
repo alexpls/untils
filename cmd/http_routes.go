@@ -35,6 +35,8 @@ func (a *app) routes() http.Handler {
 	mux.HandleFunc("POST /app/monitors/{monitor_id}", a.requireAuth(a.monitorHandlers.UpdatePost))
 	mux.HandleFunc("DELETE /app/monitors/{monitor_id}", a.requireAuth(a.monitorHandlers.Delete))
 	mux.HandleFunc("POST /app/monitors/{monitor_id}/check", a.requireAuth(a.monitorHandlers.CheckPost))
+	mux.HandleFunc("POST /app/monitors/{monitor_id}/pause", a.requireAuth(a.monitorHandlers.PausePost))
+	mux.HandleFunc("POST /app/monitors/{monitor_id}/unpause", a.requireAuth(a.monitorHandlers.UnpausePost))
 	mux.HandleFunc("POST /app/monitors/{monitor_id}/activate", a.requireAuth(a.monitorHandlers.ActivatePost))
 	mux.HandleFunc("POST /app/monitors/{monitor_id}/notifiers/{type}", a.requireAuth(a.monitorHandlers.NotifierPost))
 	mux.HandleFunc("DELETE /app/monitors/{monitor_id}/notifiers/{type}", a.requireAuth(a.monitorHandlers.NotifierDelete))

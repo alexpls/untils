@@ -32,6 +32,9 @@ func (s *Service) GetMonitorCheck(ctx context.Context, id int64) (*models.Monito
 func (s *Service) GetNextMonitorCheck(ctx context.Context, monitor *models.Monitor) (*models.MonitorCheck, error) {
 	check, err := s.queries.GetNextMonitorCheck(ctx, s.db, monitor.ID)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil
+		}
 		return nil, fmt.Errorf("getting next monitor check: %w", err)
 	}
 	return check, nil
@@ -109,6 +112,15 @@ func (s *Service) PerformMonitorCheck(
 			return nil
 		}
 		return fmt.Errorf("getting monitor: %w", err)
+	}
+
+	// Skip the check if the monitor is paused
+	if monitor.Status == models.MonitorStatusPaused {
+		s.logger.InfoContext(ctx, "skipping check for paused monitor", "monitor_id", monitor.ID, "check_id", check.ID)
+		if err := s.queries.SkipPendingChecks(ctx, s.db, monitor.ID); err != nil {
+			return fmt.Errorf("skipping pending checks for paused monitor: %w", err)
+		}
+		return nil
 	}
 
 	latest, err := db.WithTxV(s.db, ctx, func(tx pgx.Tx) ([]*models.GetPreviousResultsWithCheckRow, error) {

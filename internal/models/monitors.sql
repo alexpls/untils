@@ -258,3 +258,9 @@ select
 from monitor_checks mc
 join monitors m on m.id = mc.monitor_id
 where mc.id = @check_id;
+
+-- name: GetLastScheduledCheckTime :one
+select scheduled_for from monitor_checks
+where monitor_id = @monitor_id
+order by scheduled_for desc
+limit 1;

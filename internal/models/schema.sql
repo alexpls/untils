@@ -77,7 +77,8 @@ CREATE TYPE public.monitor_status AS ENUM (
     'previewing',
     'rejected',
     'ready',
-    'active'
+    'active',
+    'paused'
 );
 
 

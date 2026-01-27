@@ -313,3 +313,59 @@ func (s *Service) deleteMonitorRelations(ctx context.Context, tx models.DBTX, mo
 	}
 	return nil
 }
+
+// SetMonitorPaused pauses or unpauses a monitor.
+// When pausing, pending checks are skipped.
+// When unpausing, a new check is scheduled for either now or when the next
+// check would have been due if the monitor had never been paused, whichever is later.
+func (s *Service) SetMonitorPaused(ctx context.Context, userID, monitorID int64, paused bool) (*models.Monitor, error) {
+	monitor, err := s.GetMonitor(ctx, userID, monitorID)
+	if err != nil {
+		return nil, fmt.Errorf("getting monitor: %w", err)
+	}
+
+	targetStatus := models.MonitorStatusActive
+	if paused {
+		targetStatus = models.MonitorStatusPaused
+	}
+
+	if err = validateMonitorTransition(monitor.Status, targetStatus); err != nil {
+		return nil, err
+	}
+
+	return db.WithTxV(s.db, ctx, func(tx pgx.Tx) (*models.Monitor, error) {
+		if paused {
+			if err := s.queries.SkipPendingChecks(ctx, tx, monitorID); err != nil {
+				return nil, fmt.Errorf("skipping pending checks: %w", err)
+			}
+		} else {
+			nextCheckTime := s.calculateNextCheckTime(ctx, tx, monitorID)
+			if _, err := s.scheduleMonitorCheckTx(ctx, tx, monitor, nextCheckTime); err != nil {
+				return nil, fmt.Errorf("scheduling check: %w", err)
+			}
+		}
+
+		monitor, err = s.updateMonitorStatus(ctx, tx, monitor, targetStatus)
+		if err != nil {
+			return nil, fmt.Errorf("updating monitor status: %w", err)
+		}
+
+		return monitor, nil
+	})
+}
+
+// calculateNextCheckTime determines when the next check should be scheduled
+// when unpausing a monitor. Returns now or when the next check would have
+// been due, whichever is later.
+func (s *Service) calculateNextCheckTime(ctx context.Context, tx pgx.Tx, monitorID int64) time.Time {
+	lastScheduledFor, err := s.queries.GetLastScheduledCheckTime(ctx, tx, monitorID)
+	if err != nil {
+		return time.Now()
+	}
+
+	wouldHaveBeenDue := lastScheduledFor.Add(monitorCheckFrequency)
+	if wouldHaveBeenDue.After(time.Now()) {
+		return wouldHaveBeenDue
+	}
+	return time.Now()
+}

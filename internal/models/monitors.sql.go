@@ -334,6 +334,20 @@ func (q *Queries) GetInProgressMonitorCheck(ctx context.Context, db DBTX, monito
 	return &i, err
 }
 
+const getLastScheduledCheckTime = `-- name: GetLastScheduledCheckTime :one
+select scheduled_for from monitor_checks
+where monitor_id = $1
+order by scheduled_for desc
+limit 1
+`
+
+func (q *Queries) GetLastScheduledCheckTime(ctx context.Context, db DBTX, monitorID int64) (time.Time, error) {
+	row := db.QueryRow(ctx, getLastScheduledCheckTime, monitorID)
+	var scheduled_for time.Time
+	err := row.Scan(&scheduled_for)
+	return scheduled_for, err
+}
+
 const getLatestMonitorResult = `-- name: GetLatestMonitorResult :one
 select id, monitor_id, confirming_check_ids, result, date, date_past_tense_verb, citations, latest_confirmation_at, created_at, feedback from monitor_results
 where monitor_id = $1

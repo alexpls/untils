@@ -274,10 +274,10 @@ func (h *Handlers) ViewGet(w http.ResponseWriter, r *http.Request, user *models.
 	}
 
 	var comp templ.Component
-	if mon.Status != models.MonitorStatusActive {
-		comp, err = h.renderMonitorDraft(r.Context(), mon, user.ID, NewUpdateMonitorDraftParams(mon), nil)
-	} else {
+	if mon.Status == models.MonitorStatusActive || mon.Status == models.MonitorStatusPaused {
 		comp, err = h.monitorComponent(r.Context(), mon, user.ID)
+	} else {
+		comp, err = h.renderMonitorDraft(r.Context(), mon, user.ID, NewUpdateMonitorDraftParams(mon), nil)
 	}
 	if err != nil {
 		h.logger.ErrorContext(r.Context(), "error rendering monitor", "error", err)
@@ -317,7 +317,7 @@ func (h *Handlers) ViewEventsGet(w http.ResponseWriter, r *http.Request, user *m
 		var comp templ.Component
 
 		switch mon.Status {
-		case models.MonitorStatusActive:
+		case models.MonitorStatusActive, models.MonitorStatusPaused:
 			data, err := h.monitorViewData(sse.Context(), mon, user.ID)
 			if err != nil {
 				h.logger.ErrorContext(sse.Context(), "error rendering monitor view", "error", err)
@@ -499,6 +499,53 @@ func (h *Handlers) CheckPost(w http.ResponseWriter, r *http.Request, user *model
 	_, err = h.service.ScheduleMonitorCheck(r.Context(), mon, time.Now())
 	if err != nil {
 		h.logger.ErrorContext(r.Context(), "error scheduling monitor check", "error", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	comp, err := h.monitorComponent(r.Context(), mon, user.ID)
+	if err != nil {
+		h.logger.ErrorContext(r.Context(), "error rendering monitor component", "error", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	if err := sse.PatchElementTempl(comp); err != nil {
+		h.logger.ErrorContext(sse.Context(), "error patching element", "error", err)
+	}
+}
+
+// PausePost handles POST /app/monitors/{id}/pause
+func (h *Handlers) PausePost(w http.ResponseWriter, r *http.Request, user *models.User) {
+	h.setMonitorPaused(w, r, user, true)
+}
+
+// UnpausePost handles POST /app/monitors/{id}/unpause
+func (h *Handlers) UnpausePost(w http.ResponseWriter, r *http.Request, user *models.User) {
+	h.setMonitorPaused(w, r, user, false)
+}
+
+func (h *Handlers) setMonitorPaused(w http.ResponseWriter, r *http.Request, user *models.User, paused bool) {
+	monitorID := monitorIDFromPath(r)
+	if monitorID == 0 {
+		http.Error(w, "Bad request", http.StatusBadRequest)
+		return
+	}
+
+	sse := datastar.NewSSE(w, r)
+
+	mon, err := h.service.SetMonitorPaused(r.Context(), user.ID, monitorID, paused)
+	if err != nil {
+		if errors.Is(err, ErrMonitorNotFound) {
+			http.Error(w, "Not found", http.StatusNotFound)
+			return
+		}
+		var transitionErr *ErrInvalidStatusTransition
+		if errors.As(err, &transitionErr) {
+			http.Error(w, "Invalid monitor state transition", http.StatusBadRequest)
+			return
+		}
+		h.logger.ErrorContext(r.Context(), "error setting monitor paused state", "error", err, "paused", paused)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}

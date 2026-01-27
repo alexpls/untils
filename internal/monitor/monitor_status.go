@@ -25,7 +25,12 @@ var validMonitorStatusTransitions = map[models.MonitorStatus][]models.MonitorSta
 		models.MonitorStatusValidating,
 		models.MonitorStatusActive,
 	},
-	models.MonitorStatusActive: {},
+	models.MonitorStatusActive: {
+		models.MonitorStatusPaused,
+	},
+	models.MonitorStatusPaused: {
+		models.MonitorStatusActive,
+	},
 }
 
 type ErrInvalidStatusTransition struct {

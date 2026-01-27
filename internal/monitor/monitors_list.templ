@@ -58,17 +58,7 @@ templ MonitorsList(data MonitorsListData) {
 						for _, mon := range data.Monitors {
 							<tr class="hover:bg-base-300">
 								<td class="min-w-30">
-									switch mon.Status {
-										case models.MonitorStatusActive:
-											<div class="badge badge-soft badge-success">
-												<div aria-label="success" class="status status-success"></div>
-												Monitoring
-											</div>
-										default:
-											<div class="badge badge-soft">
-												Draft
-											</div>
-									}
+									@MonitorStatusBadge(mon.Status)
 								</td>
 								<td class="min-w-70">
 									<a class="link link-hover font-semibold line-clamp-2" href={ fmt.Sprintf("/app/monitors/%d", mon.MonitorID) }>

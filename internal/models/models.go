@@ -106,6 +106,7 @@ const (
 	MonitorStatusRejected   MonitorStatus = "rejected"
 	MonitorStatusReady      MonitorStatus = "ready"
 	MonitorStatusActive     MonitorStatus = "active"
+	MonitorStatusPaused     MonitorStatus = "paused"
 )
 
 func (e *MonitorStatus) Scan(src interface{}) error {

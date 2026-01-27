@@ -1,0 +1,1 @@
+-- no-op since enum members can't be removed

@@ -40,10 +40,7 @@ templ MonitorView(data MonitorViewData) {
 	<div id="monitor-view" data-effect={ datastar.GetSSE("/app/monitors/%d/events", data.Monitor.ID) }>
 		@components.Header(data.Monitor.Subject.String, nil) {
 			<div class="text-sm flex gap-x-2 mt-2">
-				<div class="badge badge-soft badge-success">
-					<div aria-label="success" class="status status-success"></div>
-					Monitoring
-				</div>
+				@MonitorStatusBadge(data.Monitor.Status)
 				<div class="badge badge-soft text-base-content/60">
 					<span>Created { components.FormatDate(ctx, data.Monitor.CreatedAt) }</span>
 				</div>
@@ -76,24 +73,45 @@ templ MonitorView(data MonitorViewData) {
 							@MonitorNotifiers(data.Monitor, data.Notifiers)
 						</div>
 					</div>
-					<div>
-						<div class="font-semibold uppercase text-xs">
-							Next checking at
+					if data.Monitor.Status == models.MonitorStatusActive && data.NextScheduledCheck != nil {
+						<div>
+							<div class="font-semibold uppercase text-xs">
+								Next checking at
+							</div>
+							<div class="text-sm text-base-content/60 mt-1">
+								{ components.FormatDateTime(ctx, data.NextScheduledCheck.ScheduledFor) }
+							</div>
 						</div>
-						<div class="text-sm text-base-content/60 mt-1">
-							{ components.FormatDateTime(ctx, data.NextScheduledCheck.ScheduledFor) }
-						</div>
-					</div>
+					}
 					<div class="mt-2">
 						<ul>
-							<li>
-								<button
-									data-on:click={ datastar.PostSSE("/app/monitors/%d/check", data.Monitor.ID) }
-									class="text-sm link"
-								>
-									Check now
-								</button>
-							</li>
+							if data.Monitor.Status == models.MonitorStatusActive {
+								<li>
+									<button
+										data-on:click={ datastar.PostSSE("/app/monitors/%d/pause", data.Monitor.ID) }
+										class="text-sm link"
+									>
+										Pause monitoring
+									</button>
+								</li>
+								<li>
+									<button
+										data-on:click={ datastar.PostSSE("/app/monitors/%d/check", data.Monitor.ID) }
+										class="text-sm link"
+									>
+										Check now
+									</button>
+								</li>
+							} else if data.Monitor.Status == models.MonitorStatusPaused {
+								<li>
+									<button
+										data-on:click={ datastar.PostSSE("/app/monitors/%d/unpause", data.Monitor.ID) }
+										class="text-sm link"
+									>
+										Resume monitoring
+									</button>
+								</li>
+							}
 							<li>
 								<button
 									data-on:click={ datastar.DeleteSSE("/app/monitors/%d", data.Monitor.ID) }
@@ -246,6 +264,25 @@ templ monitorCreatedTimelineHeading(mon *models.Monitor) {
 	<div class="text-base-content/60">
 		Created { components.FormatDate(ctx, mon.CreatedAt) }
 	</div>
+}
+
+templ MonitorStatusBadge(status models.MonitorStatus) {
+	switch status {
+		case models.MonitorStatusActive:
+			<div class="badge badge-soft badge-success">
+				<div aria-label="success" class="status status-success"></div>
+				Monitoring
+			</div>
+		case models.MonitorStatusPaused:
+			<div class="badge badge-soft badge-warning">
+				<div aria-label="paused" class="status status-warning"></div>
+				Paused
+			</div>
+		default:
+			<div class="badge badge-soft">
+				Draft
+			</div>
+	}
 }
 
 func citationFaviconProxiedURL(citation models.Citation) string {
