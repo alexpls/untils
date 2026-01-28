@@ -40,12 +40,20 @@ go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
 go install github.com/riverqueue/river/cmd/river@latest
 go install github.com/a-h/templ/cmd/templ@latest
 go install golang.org/x/tools/gopls@latest
+go install github.com/bokwoon95/wgo@latest
 curl -sSfL https://golangci-lint.run/install.sh | sh -s -- -b $(go env GOPATH)/bin v2.8.0
 '''
 
 [tasks.dev-server]
 run = """
-templ generate --watch --proxy="http://localhost:4200" --open-browser=false --cmd "./scripts/dev-server.sh" | tee dev.log
+wgo -file=.go go run ./cmd serve \
+    -env "$ENV" -db "$PG_URL" -xai-key "$XAI_KEY" -openai-key "$OPENAI_KEY" \
+    -pushover-key "$PUSHOVER_KEY" -brave-key "$BRAVE_KEY"
+"""
+
+[tasks.dev-templ]
+run = """
+templ generate --watch --proxy="http://localhost:4200" --open-browser=false
 """
 
 [tasks.dev-css]
@@ -56,7 +64,7 @@ run = "bun run watch-js"
 
 [tasks.dev]
 run = [
-	{ tasks = ["dev-server", "dev-css", "dev-js"] }
+	{ tasks = ["dev-server", "dev-templ", "dev-css", "dev-js"] }
 ]
 
 [tasks.db-reset]
