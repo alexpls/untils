@@ -3,13 +3,14 @@ package monitor
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/robfig/cron/v3"
 )
 
-// DefaultCheckSchedule is the default cron schedule for monitor checks (every 6 hours).
-const DefaultCheckSchedule = "0 */6 * * *"
+// DefaultCheckSchedule is the default cron schedule for monitor checks (8am, 12pm, 4pm, 8pm every day).
+const DefaultCheckSchedule = "0 8,12,16,20 * * *"
 
 // Schedule frequency bounds
 const (
@@ -67,4 +68,104 @@ func validateSchedule(expr string) error {
 	}
 
 	return nil
+}
+
+func formatCronExpression(expression string) string {
+	if expression == "" {
+		return ""
+	}
+
+	sched, err := parseSchedule(expression)
+	if err != nil {
+		return ""
+	}
+
+	specSched, ok := sched.(*cron.SpecSchedule)
+	if !ok {
+		return ""
+	}
+
+	hours := bitsToSlice(specSched.Hour, 0, 23)
+	weekdays := bitsToSlice(specSched.Dow, 0, 6)
+
+	var timeStr string
+	if len(hours) == 24 {
+		timeStr = "every hour"
+	} else if len(hours) == 1 {
+		timeStr = formatHour(hours[0])
+	} else {
+		hourStrs := make([]string, len(hours))
+		for i, h := range hours {
+			hourStrs[i] = formatHour(h)
+		}
+		if len(hourStrs) == 2 {
+			timeStr = hourStrs[0] + " and " + hourStrs[1]
+		} else {
+			timeStr = strings.Join(hourStrs[:len(hourStrs)-1], ", ") + ", and " + hourStrs[len(hourStrs)-1]
+		}
+	}
+
+	var dayStr string
+	if len(weekdays) == 7 {
+		dayStr = "every day"
+	} else if len(weekdays) == 1 {
+		dayStr = formatWeekday(weekdays[0]) + "s"
+	} else {
+		dayNames := make([]string, len(weekdays))
+		for i, d := range weekdays {
+			dayNames[i] = formatWeekday(d)
+		}
+		if len(dayNames) == 2 {
+			dayStr = dayNames[0] + " and " + dayNames[1]
+		} else {
+			dayStr = strings.Join(dayNames[:len(dayNames)-1], ", ") + ", and " + dayNames[len(dayNames)-1]
+		}
+	}
+
+	if len(weekdays) == 7 {
+		if len(hours) == 24 {
+			return "Every hour, every day"
+		}
+		return timeStr + " every day"
+	}
+
+	if len(hours) == 24 {
+		return "Every hour on " + dayStr
+	}
+
+	return timeStr + " on " + dayStr
+}
+
+// bitsToSlice extracts set bits from a uint64 bit field into a sorted slice of integers.
+func bitsToSlice(bits uint64, min, max int) []int {
+	var result []int
+	for i := min; i <= max; i++ {
+		if bits&(1<<uint(i)) != 0 {
+			result = append(result, i)
+		}
+	}
+	return result
+}
+
+// formatHour formats an hour (0-23) as a friendly time string like "9am" or "12pm".
+func formatHour(hour int) string {
+	switch {
+	case hour == 0:
+		return "12am"
+	case hour < 12:
+		return fmt.Sprintf("%dam", hour)
+	case hour == 12:
+		return "12pm"
+	default:
+		return fmt.Sprintf("%dpm", hour-12)
+	}
+}
+
+// formatWeekday formats a weekday number (0=Sunday) as the day name.
+func formatWeekday(day int) string {
+	days := []string{"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"}
+	if day >= 0 && day < len(days) {
+		return days[day]
+	}
+	return fmt.Sprintf("day%d", day)
 }

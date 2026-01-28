@@ -1,7 +1,9 @@
 package dev
 
-import "github.com/alexpls/untils/internal/components"
-import "github.com/alexpls/untils/internal/monitor"
+import (
+	"github.com/alexpls/untils/internal/components"
+	"github.com/alexpls/untils/internal/monitor"
+)
 
 templ PalettePage() {
 	@components.AppLayout("Palette", []components.Breadcrumb{
@@ -15,6 +17,9 @@ templ PalettePage() {
 		},
 	}) {
 		<div class="p-4">
+			@example("Schedule") {
+				@monitor.SchedulePicker("")
+			}
 			@example("InProgressCheckTimelineItem") {
 				<ul>
 					@monitor.InProgressCheckTimelineItem(*fixtureInProgressCheckTimelineItemData())

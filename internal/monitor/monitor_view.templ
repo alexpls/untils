@@ -73,6 +73,19 @@ templ MonitorView(data MonitorViewData) {
 							@MonitorNotifiers(data.Monitor, data.Notifiers)
 						</div>
 					</div>
+					if data.Monitor.Status == models.MonitorStatusActive || data.Monitor.Status == models.MonitorStatusPaused {
+						<div>
+							<div class="font-semibold uppercase text-xs">
+								Schedule
+							</div>
+							<div class="text-sm text-base-content/60 mt-1">
+								{ formatCronExpression(data.Monitor.CheckSchedule) }
+							</div>
+							<div class="text-sm text-base-content/60 mt-1">
+								@SchedulePicker(data.Monitor.CheckSchedule)
+							</div>
+						</div>
+					}
 					if data.Monitor.Status == models.MonitorStatusActive && data.NextScheduledCheck != nil {
 						<div>
 							<div class="font-semibold uppercase text-xs">

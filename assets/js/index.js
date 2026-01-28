@@ -1,4 +1,5 @@
 import "./vendor/datastar.js"
+import "./schedule.js"
 
 function timezoneName(tz) {
   const formatter = new Intl.DateTimeFormat(undefined, {

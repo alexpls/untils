@@ -75,6 +75,54 @@ func TestValidateSchedule(t *testing.T) {
 	}
 }
 
+func TestFormatCronExpression(t *testing.T) {
+	tests := []struct {
+		name     string
+		expr     string
+		expected string
+	}{
+		// Empty/invalid
+		{"empty", "", ""},
+		{"invalid format", "invalid", "invalid"},
+
+		// Every hour variations
+		{"every hour every day", "0 * * * *", "Every hour, every day"},
+		{"every hour on monday", "0 * * * 1", "Every hour on Mondays"},
+		{"every hour on weekends", "0 * * * 0,6", "Every hour on Sunday and Saturday"},
+
+		// Single hour
+		{"9am every day", "0 9 * * *", "9am every day"},
+		{"midnight every day", "0 0 * * *", "12am every day"},
+		{"noon every day", "0 12 * * *", "12pm every day"},
+		{"5pm every day", "0 17 * * *", "5pm every day"},
+
+		// Multiple hours
+		{"9am and 5pm every day", "0 9,17 * * *", "9am and 5pm every day"},
+		{"8am, 12pm, 4pm, 8pm every day", "0 8,12,16,20 * * *", "8am, 12pm, 4pm, and 8pm every day"},
+
+		// Single day
+		{"9am on monday", "0 9 * * 1", "9am on Mondays"},
+		{"9am on sunday", "0 9 * * 0", "9am on Sundays"},
+
+		// Multiple days
+		{"9am on monday and friday", "0 9 * * 1,5", "9am on Monday and Friday"},
+		{"9am on weekdays", "0 9 * * 1-5", "9am on Monday, Tuesday, Wednesday, Thursday, and Friday"},
+
+		// Hour ranges
+		{"9am-11am every day", "0 9-11 * * *", "9am, 10am, and 11am every day"},
+
+		// Combined
+		{"9am and 5pm on monday and friday", "0 9,17 * * 1,5", "9am and 5pm on Monday and Friday"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := formatCronExpression(tt.expr)
+			assert.Equal(t, tt.expected, result)
+		})
+	}
+}
+
 func TestNextCheckTime(t *testing.T) {
 	t.Run("past", func(t *testing.T) {
 		schedule := "0 9 * * *" // daily at 9am
