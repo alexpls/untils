@@ -19,8 +19,9 @@ const (
 )
 
 var (
-	ErrScheduleTooFrequent   = errors.New("schedule is too frequent (minimum interval is 1 hour)")
-	ErrScheduleTooInfrequent = errors.New("schedule is too infrequent (maximum interval is 1 week)")
+	ErrScheduleTooFrequent         = errors.New("schedule is too frequent (minimum interval is 1 hour)")
+	ErrScheduleTooInfrequent       = errors.New("schedule is too infrequent (maximum interval is 1 week)")
+	ErrScheduleNeedsHourAndWeekday = errors.New("schedule needs at least one hour and one weekday")
 )
 
 // cronParser parses standard 5-field cron expressions (minute, hour, day-of-month, month, day-of-week).
@@ -54,6 +55,18 @@ func validateSchedule(expr string) error {
 		return err
 	}
 
+	// has both an hour and a day of week been selected?
+	specSched, ok := sched.(*cron.SpecSchedule)
+	if !ok {
+		panic("schedule is not a SpecSchedule")
+	}
+	hours := bitsToSlice(specSched.Hour, 0, 23)
+	weekdays := bitsToSlice(specSched.Dow, 0, 6)
+
+	if len(hours) == 0 || len(weekdays) == 0 {
+		return ErrScheduleNeedsHourAndWeekday
+	}
+
 	// Calculate the interval by finding two consecutive runs
 	now := time.Now()
 	first := sched.Next(now)
@@ -82,7 +95,7 @@ func formatCronExpression(expression string) string {
 
 	specSched, ok := sched.(*cron.SpecSchedule)
 	if !ok {
-		return ""
+		panic("schedule is not a SpecSchedule")
 	}
 
 	hours := bitsToSlice(specSched.Hour, 0, 23)

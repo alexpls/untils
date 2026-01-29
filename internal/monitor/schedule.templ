@@ -2,40 +2,18 @@ package monitor
 
 import (
 	"fmt"
+	"github.com/alexpls/untils/internal/models"
+	"github.com/starfederation/datastar-go/datastar"
 	"time"
 )
 
-templ SchedulePicker(cronExpression string) {
+templ SchedulePicker(monitor *models.Monitor) {
+	{{ postAction := datastar.PostSSE("/app/monitors/%d/schedule", monitor.ID) }}
 	<div
 		class="space-y-2"
-		if cronExpression == "" {
-			data-init="schedule.empty()"
-		} else {
-			data-init={ fmt.Sprintf("$schedule = schedule.fromCron(%q)", cronExpression) }
-		}
+		data-init={ fmt.Sprintf("$_schedule = schedule.fromCron(%q)", monitor.CheckSchedule) }
+		data-computed:schedule="schedule.toCron($_schedule)"
 	>
-		<div>
-			<div class="flex justify-between gap-x-1 mt-1">
-				<button
-					class="btn btn-sm btn-outline"
-					data-on:click="schedule.everyMorning($schedule)"
-				>
-					Every morning
-				</button>
-				<button
-					class="btn btn-sm btn-outline"
-					data-on:click="schedule.everyHour($schedule)"
-				>
-					Every hour
-				</button>
-				<button
-					class="btn btn-sm btn-outline"
-					data-on:click="schedule.everyWeek($schedule)"
-				>
-					Every week
-				</button>
-			</div>
-		</div>
 		<div>
 			<h3 class="font-bold">Days</h3>
 			<div class="grid grid-cols-5 mt-1 gap-y-1 gap-x-1 text-sm">
@@ -44,7 +22,14 @@ templ SchedulePicker(cronExpression string) {
 					<div>
 						<label>
 							{{ inputID := fmt.Sprintf("day%d", dayIndex) }}
-							<input type="checkbox" id={ inputID } data-bind={ fmt.Sprintf("schedule.%s", inputID) }/>
+							<input
+								type="checkbox"
+								class="checkbox checkbox-sm"
+								id={ inputID }
+								data-bind={ fmt.Sprintf("_schedule.%s", inputID) }
+								data-attr:disabled={ fmt.Sprintf("$_schedule.%s && schedule.countDays($_schedule) === 1", inputID) }
+								data-on:change={ postAction }
+							/>
 							{ fmt.Sprintf("%.3s", time.Weekday(dayIndex)) }
 						</label>
 					</div>
@@ -59,7 +44,14 @@ templ SchedulePicker(cronExpression string) {
 					<div>
 						<label>
 							{{ inputID := fmt.Sprintf("hour%d", i) }}
-							<input type="checkbox" id={ inputID } data-bind={ fmt.Sprintf("schedule.%s", inputID) }/>
+							<input
+								type="checkbox"
+								class="checkbox checkbox-sm"
+								id={ inputID }
+								data-bind={ fmt.Sprintf("_schedule.%s", inputID) }
+								data-attr:disabled={ fmt.Sprintf("$_schedule.%s && schedule.countHours($_schedule) === 1", inputID) }
+								data-on:change={ postAction }
+							/>
 							{ t.Format("3pm") }
 						</label>
 					</div>

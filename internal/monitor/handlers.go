@@ -355,6 +355,43 @@ func (h *Handlers) NewGet(w http.ResponseWriter, r *http.Request, user *models.U
 	}
 }
 
+type updateCheckScheduleSignals struct {
+	Schedule string `json:"schedule"`
+}
+
+// UpdateCheckSchedule handles POST /app/monitors/{id}/schedule
+func (h *Handlers) UpdateCheckSchedule(w http.ResponseWriter, r *http.Request, user *models.User) {
+	monitorID := monitorIDFromPath(r)
+	mon, err := h.service.GetMonitor(r.Context(), user.ID, monitorID)
+	if err != nil {
+		if errors.Is(err, ErrMonitorNotFound) {
+			http.NotFound(w, r)
+			return
+		}
+		h.logger.Error("error getting monitor", "error", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	var params updateCheckScheduleSignals
+	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
+		h.logger.Error("error unmarshaling json", "error", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+	if err := r.Body.Close(); err != nil {
+		h.logger.Error("error closing response body", "error", err)
+	}
+
+	if _, err := h.service.UpdateMonitorSchedule(r.Context(), mon, UpdateMonitorScheduleParams{
+		CheckSchedule: params.Schedule,
+	}); err != nil {
+		h.logger.Error("error updating monitor schedule", "error", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+}
+
 // UpdatePost handles POST /app/monitors/{id}
 func (h *Handlers) UpdatePost(w http.ResponseWriter, r *http.Request, user *models.User) {
 	monitorID := monitorIDFromPath(r)

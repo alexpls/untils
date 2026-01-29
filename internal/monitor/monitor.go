@@ -283,6 +283,24 @@ func (s *Service) updateMonitorDraftAndRevalidate(
 	})
 }
 
+type UpdateMonitorScheduleParams struct {
+	CheckSchedule string `json:"check_schedule"`
+}
+
+func (s *Service) UpdateMonitorSchedule(ctx context.Context, monitor *models.Monitor, params UpdateMonitorScheduleParams) (*models.Monitor, error) {
+	if err := validateSchedule(params.CheckSchedule); err != nil {
+		return nil, err
+	}
+
+	return db.WithTxV(s.db, ctx, func(tx pgx.Tx) (*models.Monitor, error) {
+		// TODO: schedule next check whenever this is updated, too
+		return s.queries.UpdateMonitorCheckSchedule(ctx, tx, &models.UpdateMonitorCheckScheduleParams{
+			MonitorID:     monitor.ID,
+			CheckSchedule: params.CheckSchedule,
+		})
+	})
+}
+
 func (s *Service) UpdateMonitorDraft(ctx context.Context, userID, monitorID int64, params UpdateMonitorDraftParams) (*models.Monitor, error) {
 	if err := s.validate.Struct(params); err != nil {
 		return nil, err

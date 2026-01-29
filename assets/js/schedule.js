@@ -37,31 +37,6 @@ function empty() {
   return { ...EMPTY_SCHEDULE }
 }
 
-function everyMorning(schedule) {
-  for (const key in schedule) {
-    if (key.startsWith("day")) {
-      schedule[key] = true
-    } else {
-      schedule[key] = false
-    }
-  }
-  schedule.hour9 = true
-}
-
-function everyHour(schedule) {
-  for (const key in schedule) {
-    schedule[key] = true
-  }
-}
-
-function everyWeek(schedule) {
-  for (const key in schedule) {
-    schedule[key] = false
-  }
-  schedule.day1 = true
-  schedule.hour8 = true
-}
-
 // Merge consecutive numbers into ranges, e.g. [1,2,3,5,6] => "1-3,5-6"
 function cronMergeConsecutive(nums) {
   if (nums.length === 0) return ""
@@ -150,6 +125,22 @@ function fromCron(cron) {
   return schedule
 }
 
+function countDays(schedule) {
+  let count = 0
+  for (let i = 0; i < 7; i++) {
+    if (schedule[`day${i}`]) count++
+  }
+  return count
+}
+
+function countHours(schedule) {
+  let count = 0
+  for (let i = 0; i < 24; i++) {
+    if (schedule[`hour${i}`]) count++
+  }
+  return count
+}
+
 function toCron(schedule) {
   // cron format: minute(0-59) hour(0-23) day(1-31) month(1-12) weekday(0-6 0=sunday)
 
@@ -170,11 +161,11 @@ function toCron(schedule) {
   }
 
   if (hours.length === 0) {
-    return "invalid: at least one hour must be chosen"
+    throw new Error("at least one hour must be chosen")
   }
 
   if (days.length === 0) {
-    return "invalid: at least one day must be chosen"
+    throw new Error("at least one day must be chosen")
   }
 
   const min = "0" // always on the 0th minute
@@ -188,9 +179,8 @@ function toCron(schedule) {
 
 window.schedule = {
   empty: empty,
-  everyMorning: everyMorning,
-  everyHour: everyHour,
-  everyWeek: everyWeek,
   fromCron: fromCron,
   toCron: toCron,
+  countDays: countDays,
+  countHours: countHours,
 }

@@ -10,7 +10,9 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"github.com/alexpls/untils/internal/components"
+	"github.com/alexpls/untils/internal/models"
 	"github.com/alexpls/untils/internal/monitor"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func PalettePage() templ.Component {
@@ -62,7 +64,7 @@ func PalettePage() templ.Component {
 					}()
 				}
 				ctx = templ.InitializeContext(ctx)
-				templ_7745c5c3_Err = monitor.SchedulePicker("").Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = monitor.SchedulePicker(monitorStub()).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -153,7 +155,7 @@ func example(title string) templ.Component {
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/dev/palette.templ`, Line: 33, Col: 43}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/dev/palette.templ`, Line: 35, Col: 43}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -173,6 +175,14 @@ func example(title string) templ.Component {
 		}
 		return nil
 	})
+}
+
+func monitorStub() *models.Monitor {
+	return &models.Monitor{
+		ID:            0,
+		Subject:       pgtype.Text{Valid: true, String: "hi"},
+		CheckSchedule: monitor.DefaultCheckSchedule,
+	}
 }
 
 var _ = templruntime.GeneratedTemplate

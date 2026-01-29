@@ -901,6 +901,34 @@ func (q *Queries) UpdateMonitorCheckFailed(ctx context.Context, db DBTX, arg *Up
 	return err
 }
 
+const updateMonitorCheckSchedule = `-- name: UpdateMonitorCheckSchedule :one
+update monitors
+set check_schedule = $1, updated_at = now()
+where id = $2
+returning id, user_id, status, subject, rejected_reason, updated_at, created_at, check_schedule
+`
+
+type UpdateMonitorCheckScheduleParams struct {
+	CheckSchedule string
+	MonitorID     int64
+}
+
+func (q *Queries) UpdateMonitorCheckSchedule(ctx context.Context, db DBTX, arg *UpdateMonitorCheckScheduleParams) (*Monitor, error) {
+	row := db.QueryRow(ctx, updateMonitorCheckSchedule, arg.CheckSchedule, arg.MonitorID)
+	var i Monitor
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Status,
+		&i.Subject,
+		&i.RejectedReason,
+		&i.UpdatedAt,
+		&i.CreatedAt,
+		&i.CheckSchedule,
+	)
+	return &i, err
+}
+
 const updateMonitorCheckSuccess = `-- name: UpdateMonitorCheckSuccess :exec
 update monitor_checks
 set status = 'success', result = $1, done_at = now()

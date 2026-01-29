@@ -2,7 +2,9 @@ package dev
 
 import (
 	"github.com/alexpls/untils/internal/components"
+	"github.com/alexpls/untils/internal/models"
 	"github.com/alexpls/untils/internal/monitor"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 templ PalettePage() {
@@ -18,7 +20,7 @@ templ PalettePage() {
 	}) {
 		<div class="p-4">
 			@example("Schedule") {
-				@monitor.SchedulePicker("")
+				@monitor.SchedulePicker(monitorStub())
 			}
 			@example("InProgressCheckTimelineItem") {
 				<ul>
@@ -34,4 +36,12 @@ templ example(title string) {
 	<div class="max-w-sm border border-red-500/40 border-dashed mt-2">
 		{ children... }
 	</div>
+}
+
+func monitorStub() *models.Monitor {
+	return &models.Monitor{
+		ID:            0,
+		Subject:       pgtype.Text{Valid: true, String: "hi"},
+		CheckSchedule: monitor.DefaultCheckSchedule,
+	}
 }

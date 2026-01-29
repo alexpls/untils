@@ -64,8 +64,8 @@ templ MonitorView(data MonitorViewData) {
 				}
 			</div>
 			<div class="lg:col-span-4 m-4 p-4 border border-base-content/10 rounded">
-				<div>
-					<div class="mb-4">
+				<div class="space-y-4">
+					<div>
 						<div class="font-semibold uppercase text-xs">
 							Notifications
 						</div>
@@ -74,15 +74,20 @@ templ MonitorView(data MonitorViewData) {
 						</div>
 					</div>
 					if data.Monitor.Status == models.MonitorStatusActive || data.Monitor.Status == models.MonitorStatusPaused {
-						<div>
+						<div data-signal:editing-schedule="false">
 							<div class="font-semibold uppercase text-xs">
 								Schedule
 							</div>
-							<div class="text-sm text-base-content/60 mt-1">
-								{ formatCronExpression(data.Monitor.CheckSchedule) }
+							<div class="text-sm text-base-content/60 mt-1" data-show="!$editingSchedule">
+								<div>
+									{ formatCronExpression(data.Monitor.CheckSchedule) }
+								</div>
+								<button class="btn btn-sm" data-on:click="$editingSchedule = true">Edit</button>
 							</div>
 							<div class="text-sm text-base-content/60 mt-1">
-								@SchedulePicker(data.Monitor.CheckSchedule)
+								<div class="bg-base-300 py-2 px-3 rounded" data-show="$editingSchedule" style="display:none">
+									@SchedulePicker(data.Monitor)
+								</div>
 							</div>
 						</div>
 					}
@@ -96,7 +101,7 @@ templ MonitorView(data MonitorViewData) {
 							</div>
 						</div>
 					}
-					<div class="mt-2">
+					<div>
 						<ul>
 							if data.Monitor.Status == models.MonitorStatusActive {
 								<li>

@@ -74,6 +74,12 @@ set subject = @subject, updated_at = now()
 where user_id = @user_id and id = @id and status != 'active'
 returning *;
 
+-- name: UpdateMonitorCheckSchedule :one
+update monitors
+set check_schedule = @check_schedule, updated_at = now()
+where id = @monitor_id
+returning *;
+
 -- name: UpdateMonitorSchedule :one
 update monitors
 set check_schedule = @check_schedule, updated_at = now()
