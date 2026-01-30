@@ -256,23 +256,12 @@ func (h *Handlers) renderCheckView(ctx context.Context, checkID int64, userID in
 
 // ViewGet handles GET /app/monitors/{id}
 func (h *Handlers) ViewGet(w http.ResponseWriter, r *http.Request, user *models.User) {
-	monitorID := monitorIDFromPath(r)
-	if monitorID == 0 {
-		http.Error(w, "Bad request", http.StatusBadRequest)
+	mon := h.monitorFromPath(w, r, user)
+	if mon == nil {
 		return
 	}
 
-	mon, err := h.service.GetMonitor(r.Context(), user.ID, monitorID)
-	if errors.Is(err, ErrMonitorNotFound) {
-		http.Error(w, "Not found", http.StatusNotFound)
-		return
-	}
-	if err != nil {
-		h.logger.ErrorContext(r.Context(), "error viewing monitor", "error", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
-
+	var err error
 	var comp templ.Component
 	if mon.Status == models.MonitorStatusActive || mon.Status == models.MonitorStatusPaused {
 		comp, err = h.monitorComponent(r.Context(), mon, user.ID)
@@ -291,15 +280,8 @@ func (h *Handlers) ViewGet(w http.ResponseWriter, r *http.Request, user *models.
 
 // ViewEventsGet handles GET /app/monitors/{id}/events (SSE)
 func (h *Handlers) ViewEventsGet(w http.ResponseWriter, r *http.Request, user *models.User) {
-	monitorID := monitorIDFromPath(r)
-	if monitorID == 0 {
-		http.Error(w, "Bad request", http.StatusBadRequest)
-		return
-	}
-
-	mon, err := h.service.GetMonitor(r.Context(), user.ID, monitorID)
-	if err != nil {
-		h.logger.ErrorContext(r.Context(), "error getting monitor for events", "error", err)
+	mon := h.monitorFromPath(w, r, user)
+	if mon == nil {
 		return
 	}
 
@@ -307,8 +289,9 @@ func (h *Handlers) ViewEventsGet(w http.ResponseWriter, r *http.Request, user *m
 
 	ch := h.events.SubscribeMonitor(sse.Context(), mon.ID)
 
+	var err error
 	for {
-		mon, err = h.service.GetMonitor(sse.Context(), user.ID, monitorID)
+		mon, err = h.service.GetMonitor(sse.Context(), user.ID, mon.ID)
 		if err != nil {
 			h.logger.ErrorContext(sse.Context(), "error refreshing monitor", "error", err)
 			return
@@ -361,15 +344,8 @@ type updateCheckScheduleSignals struct {
 
 // UpdateCheckSchedule handles POST /app/monitors/{id}/schedule
 func (h *Handlers) UpdateCheckSchedule(w http.ResponseWriter, r *http.Request, user *models.User) {
-	monitorID := monitorIDFromPath(r)
-	mon, err := h.service.GetMonitor(r.Context(), user.ID, monitorID)
-	if err != nil {
-		if errors.Is(err, ErrMonitorNotFound) {
-			http.NotFound(w, r)
-			return
-		}
-		h.logger.Error("error getting monitor", "error", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+	mon := h.monitorFromPath(w, r, user)
+	if mon == nil {
 		return
 	}
 
@@ -394,26 +370,14 @@ func (h *Handlers) UpdateCheckSchedule(w http.ResponseWriter, r *http.Request, u
 
 // UpdatePost handles POST /app/monitors/{id}
 func (h *Handlers) UpdatePost(w http.ResponseWriter, r *http.Request, user *models.User) {
-	monitorID := monitorIDFromPath(r)
-	if monitorID == 0 {
-		http.Error(w, "Bad request", http.StatusBadRequest)
+	mon := h.monitorFromPath(w, r, user)
+	if mon == nil {
 		return
 	}
 
 	var params MonitorCommonParams
 	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
 		h.logger.ErrorContext(r.Context(), "error decoding json", "error", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
-
-	mon, err := h.service.GetMonitor(r.Context(), user.ID, monitorID)
-	if errors.Is(err, ErrMonitorNotFound) {
-		http.Error(w, "Not found", http.StatusNotFound)
-		return
-	}
-	if err != nil {
-		h.logger.ErrorContext(r.Context(), "error updating monitor", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -514,25 +478,14 @@ func (h *Handlers) CreatePost(w http.ResponseWriter, r *http.Request, user *mode
 
 // CheckPost handles POST /app/monitors/{id}/check
 func (h *Handlers) CheckPost(w http.ResponseWriter, r *http.Request, user *models.User) {
-	monitorID := monitorIDFromPath(r)
-	if monitorID == 0 {
-		http.Error(w, "Bad request", http.StatusBadRequest)
-		return
-	}
-
-	mon, err := h.service.GetMonitor(r.Context(), user.ID, monitorID)
-	if errors.Is(err, ErrMonitorNotFound) {
-		http.Error(w, "Not found", http.StatusNotFound)
-		return
-	}
-	if err != nil {
-		h.logger.ErrorContext(r.Context(), "error checking monitor", "error", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+	mon := h.monitorFromPath(w, r, user)
+	if mon == nil {
 		return
 	}
 
 	sse := datastar.NewSSE(w, r)
 
+	var err error
 	_, err = h.service.ScheduleMonitorCheck(r.Context(), mon, time.Now())
 	if err != nil {
 		h.logger.ErrorContext(r.Context(), "error scheduling monitor check", "error", err)
@@ -623,28 +576,16 @@ func (h *Handlers) Delete(w http.ResponseWriter, r *http.Request, user *models.U
 
 // NotifierPost handles POST /app/monitors/{id}/notifiers/{type}
 func (h *Handlers) NotifierPost(w http.ResponseWriter, r *http.Request, user *models.User) {
-	monitorID := monitorIDFromPath(r)
-	if monitorID == 0 {
-		http.Error(w, "Bad request", http.StatusBadRequest)
+	mon := h.monitorFromPath(w, r, user)
+	if mon == nil {
 		return
 	}
 
 	notifierType := r.PathValue("type")
 
-	mon, err := h.service.GetMonitor(r.Context(), user.ID, monitorID)
-	if errors.Is(err, ErrMonitorNotFound) {
-		http.Error(w, "Not found", http.StatusNotFound)
-		return
-	}
-	if err != nil {
-		h.logger.ErrorContext(r.Context(), "error creating notifier", "error", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
-
 	sse := datastar.NewSSE(w, r)
 
-	_, err = h.service.CreateMonitorNotifier(r.Context(), mon, models.Notifier(notifierType))
+	_, err := h.service.CreateMonitorNotifier(r.Context(), mon, models.Notifier(notifierType))
 	if err != nil {
 		h.logger.ErrorContext(r.Context(), "error creating notifier", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
@@ -665,28 +606,16 @@ func (h *Handlers) NotifierPost(w http.ResponseWriter, r *http.Request, user *mo
 
 // NotifierDelete handles DELETE /app/monitors/{id}/notifiers/{type}
 func (h *Handlers) NotifierDelete(w http.ResponseWriter, r *http.Request, user *models.User) {
-	monitorID := monitorIDFromPath(r)
-	if monitorID == 0 {
-		http.Error(w, "Bad request", http.StatusBadRequest)
+	mon := h.monitorFromPath(w, r, user)
+	if mon == nil {
 		return
 	}
 
 	notifierType := r.PathValue("type")
 
-	mon, err := h.service.GetMonitor(r.Context(), user.ID, monitorID)
-	if errors.Is(err, ErrMonitorNotFound) {
-		http.Error(w, "Not found", http.StatusNotFound)
-		return
-	}
-	if err != nil {
-		h.logger.ErrorContext(r.Context(), "error deleting notifier", "error", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
-
 	sse := datastar.NewSSE(w, r)
 
-	err = h.service.DeleteMonitorNotifier(r.Context(), mon, models.Notifier(notifierType))
+	err := h.service.DeleteMonitorNotifier(r.Context(), mon, models.Notifier(notifierType))
 	if err != nil {
 		h.logger.ErrorContext(r.Context(), "error deleting notifier", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
@@ -707,21 +636,15 @@ func (h *Handlers) NotifierDelete(w http.ResponseWriter, r *http.Request, user *
 
 // ResultFeedbackGet handles GET /app/monitors/{id}/results/{result_id}/feedback
 func (h *Handlers) ResultFeedbackGet(w http.ResponseWriter, r *http.Request, user *models.User) {
-	monitorID := monitorIDFromPath(r)
-	resultID := resultIDFromPath(r)
-
-	if monitorID == 0 || resultID == 0 {
-		http.Error(w, "Bad request", http.StatusBadRequest)
+	mon := h.monitorFromPath(w, r, user)
+	if mon == nil {
 		return
 	}
 
-	mon, err := h.service.GetMonitor(r.Context(), user.ID, monitorID)
-	if err != nil {
-		if errors.Is(err, ErrMonitorNotFound) {
-			http.NotFound(w, r)
-			return
-		}
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+	resultID := resultIDFromPath(r)
+
+	if resultID == 0 {
+		http.Error(w, "Bad request", http.StatusBadRequest)
 		return
 	}
 
@@ -754,22 +677,15 @@ func (h *Handlers) ResultFeedbackGet(w http.ResponseWriter, r *http.Request, use
 // ResultFeedbackPost handles POST /app/monitors/{id}/results/{result_id}/feedback
 func (h *Handlers) ResultFeedbackPost(w http.ResponseWriter, r *http.Request, user *models.User) {
 	// TODO: consolidate this and ResultFeedbackGet - so much of the handler is duplicated
-
-	monitorID := monitorIDFromPath(r)
-	resultID := resultIDFromPath(r)
-
-	if monitorID == 0 || resultID == 0 {
-		http.Error(w, "Bad request", http.StatusBadRequest)
+	mon := h.monitorFromPath(w, r, user)
+	if mon == nil {
 		return
 	}
 
-	mon, err := h.service.GetMonitor(r.Context(), user.ID, monitorID)
-	if err != nil {
-		if errors.Is(err, ErrMonitorNotFound) {
-			http.NotFound(w, r)
-			return
-		}
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+	resultID := resultIDFromPath(r)
+
+	if resultID == 0 {
+		http.Error(w, "Bad request", http.StatusBadRequest)
 		return
 	}
 
@@ -840,6 +756,28 @@ func idFromPath(r *http.Request, name string) int64 {
 		return 0
 	}
 	return id
+}
+
+func (h *Handlers) monitorFromPath(w http.ResponseWriter, r *http.Request, user *models.User) *models.Monitor {
+	monitorID := monitorIDFromPath(r)
+	if monitorID == 0 {
+		http.Error(w, "Bad request", http.StatusBadRequest)
+		return nil
+	}
+
+	mon, err := h.service.GetMonitor(r.Context(), user.ID, monitorID)
+	if err != nil {
+		if errors.Is(err, ErrMonitorNotFound) {
+			http.Error(w, "Not found", http.StatusNotFound)
+			return nil
+		}
+
+		h.logger.ErrorContext(r.Context(), "error getting monitor", "error", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return nil
+	}
+
+	return mon
 }
 
 func (h *Handlers) renderMonitorDraft(
