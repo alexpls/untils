@@ -1,13 +1,64 @@
 package monitor
 
-import "github.com/alexpls/untils/internal/models"
+import (
+	"fmt"
+	"github.com/alexpls/untils/internal/components"
+	"github.com/alexpls/untils/internal/models"
+)
 
 type MonitorChecksViewData struct {
 	Monitor *models.Monitor
+	Checks  []*models.MonitorCheck
 }
 
 templ MonitorChecksPage(data MonitorChecksViewData) {
 	@MonitorSidebarLayout(data.Monitor, MonitorPageTypeChecks) {
-		<div>hi</div>
+		<div class="py-4 space-y-8">
+			<div>
+				<h2 class="font-bold text-2xl mb-3">Schedule</h2>
+				<div class="bg-base-100 rounded border border-base-content/10 p-2 px-4 w-lg">
+					@SchedulePicker(data.Monitor)
+				</div>
+			</div>
+			if (len(data.Checks) == 0) {
+				<p>No checks yet.</p>
+			} else {
+				<h2 class="font-bold text-2xl mb-3">Recent checks</h2>
+				<table class="table bg-base-100 border border-base-content/10">
+					<thead>
+						<tr>
+							<th>Status</th>
+							<th>Scheduled</th>
+							<th>Done at</th>
+							<th></th>
+						</tr>
+						<tbody>
+							for _, check := range data.Checks {
+								<tr class="hover:bg-base-200">
+									<td class="min-w-30">
+										@checkStatusBadge(check.Status)
+									</td>
+									<td class="text-muted min-w-38 tabular-nums">
+										@components.TimeAgo(fmt.Sprintf("checkScheduledFor%d", check.ID), check.ScheduledFor)
+									</td>
+									<td class="text-muted min-w-38 tabular-nums">
+										if check.DoneAt != nil {
+											@components.TimeAgo(fmt.Sprintf("checkDoneAt%d", check.ID), *check.DoneAt)
+										} else {
+											<span class="text-muted">-</span>
+										}
+									</td>
+									<td class="min-w-30">
+										if check.Status == models.MonitorCheckStatusSuccess {
+											<a class="btn btn-sm btn-soft" href={ fmt.Sprintf("/app/checks/%d", check.ID) }>Details</a>
+										}
+									</td>
+								</tr>
+							}
+						</tbody>
+					</thead>
+				</table>
+			}
+		</div>
 	}
 }

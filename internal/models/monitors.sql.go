@@ -684,6 +684,41 @@ func (q *Queries) ListMonitorActivity(ctx context.Context, db DBTX, userID int64
 	return items, nil
 }
 
+const listMonitorChecks = `-- name: ListMonitorChecks :many
+select id, monitor_id, status, scheduled_for, failure_reason, done_at, result from monitor_checks
+where monitor_id = $1
+order by scheduled_for desc
+limit 30
+`
+
+func (q *Queries) ListMonitorChecks(ctx context.Context, db DBTX, monitorID int64) ([]*MonitorCheck, error) {
+	rows, err := db.Query(ctx, listMonitorChecks, monitorID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []*MonitorCheck
+	for rows.Next() {
+		var i MonitorCheck
+		if err := rows.Scan(
+			&i.ID,
+			&i.MonitorID,
+			&i.Status,
+			&i.ScheduledFor,
+			&i.FailureReason,
+			&i.DoneAt,
+			&i.Result,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listMonitorNotifiers = `-- name: ListMonitorNotifiers :many
 select id, monitor_id, type, created_at from monitor_notifiers
 where monitor_id = $1

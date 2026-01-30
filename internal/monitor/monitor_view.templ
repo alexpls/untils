@@ -49,7 +49,7 @@ templ MonitorSidebarLayout(monitor *models.Monitor, pageType MonitorPageType) {
 				</div>
 			</div>
 		}
-		<div class="grid grid-cols-9 px-4 gap-x-2">
+		<div class="grid grid-cols-9 px-4 gap-x-4">
 			<div class="col-span-1">
 				<div class="py-4 space-y-2">
 					<a
@@ -106,24 +106,6 @@ templ MonitorPage(data MonitorViewData) {
 								@MonitorNotifiers(data.Monitor, data.Notifiers)
 							</div>
 						</div>
-						if data.Monitor.Status == models.MonitorStatusActive || data.Monitor.Status == models.MonitorStatusPaused {
-							<div data-signal:editing-schedule="false">
-								<div class="font-semibold uppercase text-xs">
-									Schedule
-								</div>
-								<div class="text-sm text-base-content/60 mt-1" data-show="!$editingSchedule">
-									<div>
-										{ formatCronExpression(data.Monitor.CheckSchedule) }
-									</div>
-									<button class="btn btn-sm" data-on:click="$editingSchedule = true">Edit</button>
-								</div>
-								<div class="text-sm text-base-content/60 mt-1">
-									<div class="bg-base-300 py-2 px-3 rounded" data-show="$editingSchedule" style="display:none">
-										@SchedulePicker(data.Monitor)
-									</div>
-								</div>
-							</div>
-						}
 						if data.Monitor.Status == models.MonitorStatusActive && data.NextScheduledCheck != nil {
 							<div>
 								<div class="font-semibold uppercase text-xs">
@@ -279,8 +261,8 @@ templ monitorResultTimelineItem(result *models.MonitorResult, allowFeedback bool
 		if allowFeedback {
 			if result.Feedback.String == "" {
 				<div class="mt-2 border py-1 px-2 rounded border-base-content/10 shadow flex items-center text-sm">
-					@icons.Info(icons.IconParams{Size: 16})
-					<div class="ml-2">
+					@icons.Info(icons.IconParams{Size: 16, Classes: templ.Classes("text-muted")})
+					<div class="ml-2 text-muted">
 						Not the result you expected?
 						<button
 							class="link font-bold"

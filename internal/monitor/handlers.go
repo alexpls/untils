@@ -338,8 +338,16 @@ func (h *Handlers) ViewChecksGet(w http.ResponseWriter, r *http.Request, user *m
 		return
 	}
 
+	checks, err := h.service.queries.ListMonitorChecks(r.Context(), h.service.db, mon.ID)
+	if err != nil {
+		h.logger.Error("error listing monitor checks", "error", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
 	comp := MonitorChecksPage(MonitorChecksViewData{
 		Monitor: mon,
+		Checks:  checks,
 	})
 	if err := comp.Render(r.Context(), w); err != nil {
 		h.logger.ErrorContext(r.Context(), "error rendering monitor checks component", "error", err)

@@ -37,7 +37,7 @@ func SchedulePicker(monitor *models.Monitor) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 		postAction := datastar.PostSSE("/app/monitors/%d/schedule", monitor.ID)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"space-y-2\" data-init=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"space-y-3\" data-init=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -50,7 +50,7 @@ func SchedulePicker(monitor *models.Monitor) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" data-computed:schedule=\"schedule.toCron($_schedule)\"><div><h3 class=\"font-bold\">Days</h3><div class=\"grid grid-cols-5 mt-1 gap-y-1 gap-x-1 text-sm\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" data-computed:schedule=\"schedule.toCron($_schedule)\"><div><h3 class=\"font-bold text-sm text-muted\">Days</h3><div class=\"grid grid-cols-5 mt-1 gap-y-1 gap-x-1 text-sm\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -131,7 +131,7 @@ func SchedulePicker(monitor *models.Monitor) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</div></div><div><h3 class=\"font-bold\">Hours</h3><div class=\"grid grid-flow-col grid-rows-4 mt-1 gap-y-1 gap-x-1 text-sm\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</div></div><div><h3 class=\"font-bold text-sm text-muted\">Hours</h3><div class=\"grid grid-flow-col grid-rows-4 mt-1 gap-y-1 gap-x-1 text-sm\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

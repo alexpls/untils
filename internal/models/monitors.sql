@@ -243,6 +243,12 @@ delete from monitor_notifiers
 where type = @type
 and monitor_id in (select id from monitors where user_id = @user_id);
 
+-- name: ListMonitorChecks :many
+select * from monitor_checks
+where monitor_id = @monitor_id
+order by scheduled_for desc
+limit 30;
+
 -- name: ListChecksWithMonitor :many
 select
     mc.id as check_id,
