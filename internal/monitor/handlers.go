@@ -242,7 +242,7 @@ func (h *Handlers) renderCheckView(ctx context.Context, checkID int64, userID in
 	toolCalls := conv.Messages.ExtractToolCalls()
 
 	result, err := h.service.queries.GetMonitorResultByCheckID(ctx, h.service.db, checkID)
-	if err == nil && !errors.Is(err, pgx.ErrNoRows) {
+	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
 		return nil, fmt.Errorf("getting monitor result: %w", err)
 	}
 
