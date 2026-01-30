@@ -32,6 +32,7 @@ func (a *app) routes() http.Handler {
 	mux.HandleFunc("POST /app/monitors/new", a.requireAuth(a.monitorHandlers.CreatePost))
 	mux.HandleFunc("GET /app/monitors/{monitor_id}", a.requireAuth(a.monitorHandlers.ViewGet))
 	mux.HandleFunc("GET /app/monitors/{monitor_id}/events", a.requireAuth(a.monitorHandlers.ViewEventsGet))
+	mux.HandleFunc("GET /app/monitors/{monitor_id}/checks", a.requireAuth(a.monitorHandlers.ViewChecksGet))
 	mux.HandleFunc("POST /app/monitors/{monitor_id}", a.requireAuth(a.monitorHandlers.UpdatePost))
 	mux.HandleFunc("DELETE /app/monitors/{monitor_id}", a.requireAuth(a.monitorHandlers.Delete))
 	mux.HandleFunc("POST /app/monitors/{monitor_id}/check", a.requireAuth(a.monitorHandlers.CheckPost))

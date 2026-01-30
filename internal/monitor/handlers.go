@@ -307,7 +307,7 @@ func (h *Handlers) ViewEventsGet(w http.ResponseWriter, r *http.Request, user *m
 				return
 			}
 
-			comp = MonitorView(data)
+			comp = MonitorPage(data)
 
 		default:
 			data, err := h.monitorDraftViewData(sse.Context(), mon, user.ID, NewUpdateMonitorDraftParams(mon), nil)
@@ -328,6 +328,22 @@ func (h *Handlers) ViewEventsGet(w http.ResponseWriter, r *http.Request, user *m
 		case <-sse.Context().Done():
 			return
 		}
+	}
+}
+
+// ViewChecksGet handles GET /app/monitors/{id}/checks
+func (h *Handlers) ViewChecksGet(w http.ResponseWriter, r *http.Request, user *models.User) {
+	mon := h.monitorFromPath(w, r, user)
+	if mon == nil {
+		return
+	}
+
+	comp := MonitorChecksPage(MonitorChecksViewData{
+		Monitor: mon,
+	})
+	if err := comp.Render(r.Context(), w); err != nil {
+		h.logger.ErrorContext(r.Context(), "error rendering monitor checks component", "error", err)
+		return
 	}
 }
 
@@ -799,7 +815,7 @@ func (h *Handlers) monitorComponent(ctx context.Context, mon *models.Monitor, us
 	if err != nil {
 		return nil, err
 	}
-	return MonitorViewPage(data), nil
+	return MonitorPage(data), nil
 }
 
 func (h *Handlers) monitorNotifiersComponent(ctx context.Context, mon *models.Monitor, userID int64) (templ.Component, error) {

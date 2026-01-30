@@ -1,0 +1,13 @@
+package monitor
+
+import "github.com/alexpls/untils/internal/models"
+
+type MonitorChecksViewData struct {
+	Monitor *models.Monitor
+}
+
+templ MonitorChecksPage(data MonitorChecksViewData) {
+	@MonitorSidebarLayout(data.Monitor, MonitorPageTypeChecks) {
+		<div>hi</div>
+	}
+}

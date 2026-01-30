@@ -26,124 +26,158 @@ type MonitorNotifierViewData struct {
 	Active bool
 }
 
-templ MonitorViewPage(data MonitorViewData) {
-	@components.AppLayout(data.Monitor.Subject.String, []components.Breadcrumb{
+type MonitorPageType int
+
+const (
+	_ MonitorPageType = iota
+	MonitorPageTypeActivity
+	MonitorPageTypeChecks
+)
+
+templ MonitorSidebarLayout(monitor *models.Monitor, pageType MonitorPageType) {
+	@components.AppLayout(monitor.Subject.String, []components.Breadcrumb{
 		{Title: "Dashboard", Href: "/app"},
 		{Title: "Monitors", Href: "/app/monitors"},
-		{Title: data.Monitor.Subject.String, Href: fmt.Sprintf("/app/monitors/%d", data.Monitor.ID)},
+		{Title: monitor.Subject.String, Href: fmt.Sprintf("/app/monitors/%d", monitor.ID)},
 	}) {
-		@MonitorView(data)
+		<!-- TODO: update the header with sse as well -->
+		@components.Header(monitor.Subject.String, nil) {
+			<div class="text-sm flex gap-x-2 mt-2">
+				@MonitorStatusBadge(monitor.Status)
+				<div class="badge badge-soft text-base-content/60">
+					<span>Created { components.FormatDate(ctx, monitor.CreatedAt) }</span>
+				</div>
+			</div>
+		}
+		<div class="grid grid-cols-9 px-4 gap-x-2">
+			<div class="col-span-1">
+				<div class="py-4 space-y-2">
+					<a
+						class={ "block", "w-full", "rounded", templ.KV("bg-base-100", pageType == MonitorPageTypeActivity), "px-4", "py-2", "text-muted", "text-sm", "hover:bg-base-100", "transition-colors" }
+						href={ fmt.Sprintf("/app/monitors/%d", monitor.ID) }
+					>
+						Activity
+					</a>
+					<a
+						class={ "block", "w-full", "rounded", templ.KV("bg-base-100", pageType == MonitorPageTypeChecks), "px-4", "py-2", "text-muted", "text-sm", "hover:bg-base-100", "transition-colors" }
+						href={ fmt.Sprintf("/app/monitors/%d/checks", monitor.ID) }
+					>
+						Checks
+					</a>
+				</div>
+			</div>
+			<div class="col-span-8">
+				{ children... }
+			</div>
+		</div>
 	}
 }
 
 templ MonitorView(data MonitorViewData) {
-	<div id="monitor-view" data-effect={ datastar.GetSSE("/app/monitors/%d/events", data.Monitor.ID) }>
-		@components.Header(data.Monitor.Subject.String, nil) {
-			<div class="text-sm flex gap-x-2 mt-2">
-				@MonitorStatusBadge(data.Monitor.Status)
-				<div class="badge badge-soft text-base-content/60">
-					<span>Created { components.FormatDate(ctx, data.Monitor.CreatedAt) }</span>
+}
+
+templ MonitorPage(data MonitorViewData) {
+	@MonitorSidebarLayout(data.Monitor, MonitorPageTypeActivity) {
+		<div id="monitor-view" data-effect={ datastar.GetSSE("/app/monitors/%d/events", data.Monitor.ID) }>
+			<div class="grid grid-cols-1 lg:grid-cols-12">
+				<div class="lg:col-span-8 m-4 p-4 bg-base-100 rounded border border-base-content/10">
+					@components.Timeline() {
+						if data.InProgressCheck != nil {
+							@InProgressCheckTimelineItem(InProgressCheckTimelineItemViewData{
+								Check:          data.InProgressCheck,
+								TimelineEvents: data.InProgressCheckTimelineEvents,
+							})
+						}
+						for _, result := range data.Results {
+							@monitorResultTimelineItem(result, true)
+						}
+						<li>
+							@components.TimelineItem(monitorCreatedTimelineHeading(data.Monitor), nil)
+						</li>
+					}
 				</div>
-			</div>
-		}
-		<div class="grid grid-cols-1 lg:grid-cols-12">
-			<div class="lg:col-span-8 m-4 p-4 bg-base-100 rounded border border-base-content/10">
-				@components.Timeline() {
-					if data.InProgressCheck != nil {
-						@InProgressCheckTimelineItem(InProgressCheckTimelineItemViewData{
-							Check:          data.InProgressCheck,
-							TimelineEvents: data.InProgressCheckTimelineEvents,
-						})
-					}
-					for _, result := range data.Results {
-						@monitorResultTimelineItem(result, true)
-					}
-					<li>
-						@components.TimelineItem(monitorCreatedTimelineHeading(data.Monitor), nil)
-					</li>
-				}
-			</div>
-			<div class="lg:col-span-4 m-4 p-4 border border-base-content/10 rounded">
-				<div class="space-y-4">
-					<div>
-						<div class="font-semibold uppercase text-xs">
-							Notifications
-						</div>
-						<div class="mt-2">
-							@MonitorNotifiers(data.Monitor, data.Notifiers)
-						</div>
-					</div>
-					if data.Monitor.Status == models.MonitorStatusActive || data.Monitor.Status == models.MonitorStatusPaused {
-						<div data-signal:editing-schedule="false">
-							<div class="font-semibold uppercase text-xs">
-								Schedule
-							</div>
-							<div class="text-sm text-base-content/60 mt-1" data-show="!$editingSchedule">
-								<div>
-									{ formatCronExpression(data.Monitor.CheckSchedule) }
-								</div>
-								<button class="btn btn-sm" data-on:click="$editingSchedule = true">Edit</button>
-							</div>
-							<div class="text-sm text-base-content/60 mt-1">
-								<div class="bg-base-300 py-2 px-3 rounded" data-show="$editingSchedule" style="display:none">
-									@SchedulePicker(data.Monitor)
-								</div>
-							</div>
-						</div>
-					}
-					if data.Monitor.Status == models.MonitorStatusActive && data.NextScheduledCheck != nil {
+				<div class="lg:col-span-4 m-4 p-4 border border-base-content/10 rounded">
+					<div class="space-y-4">
 						<div>
 							<div class="font-semibold uppercase text-xs">
-								Next checking at
+								Notifications
 							</div>
-							<div class="text-sm text-base-content/60 mt-1">
-								{ components.FormatDateTime(ctx, data.NextScheduledCheck.ScheduledFor) }
+							<div class="mt-2">
+								@MonitorNotifiers(data.Monitor, data.Notifiers)
 							</div>
 						</div>
-					}
-					<div>
-						<ul>
-							if data.Monitor.Status == models.MonitorStatusActive {
+						if data.Monitor.Status == models.MonitorStatusActive || data.Monitor.Status == models.MonitorStatusPaused {
+							<div data-signal:editing-schedule="false">
+								<div class="font-semibold uppercase text-xs">
+									Schedule
+								</div>
+								<div class="text-sm text-base-content/60 mt-1" data-show="!$editingSchedule">
+									<div>
+										{ formatCronExpression(data.Monitor.CheckSchedule) }
+									</div>
+									<button class="btn btn-sm" data-on:click="$editingSchedule = true">Edit</button>
+								</div>
+								<div class="text-sm text-base-content/60 mt-1">
+									<div class="bg-base-300 py-2 px-3 rounded" data-show="$editingSchedule" style="display:none">
+										@SchedulePicker(data.Monitor)
+									</div>
+								</div>
+							</div>
+						}
+						if data.Monitor.Status == models.MonitorStatusActive && data.NextScheduledCheck != nil {
+							<div>
+								<div class="font-semibold uppercase text-xs">
+									Next checking at
+								</div>
+								<div class="text-sm text-base-content/60 mt-1">
+									{ components.FormatDateTime(ctx, data.NextScheduledCheck.ScheduledFor) }
+								</div>
+							</div>
+						}
+						<div>
+							<ul>
+								if data.Monitor.Status == models.MonitorStatusActive {
+									<li>
+										<button
+											data-on:click={ datastar.PostSSE("/app/monitors/%d/pause", data.Monitor.ID) }
+											class="text-sm link"
+										>
+											Pause monitoring
+										</button>
+									</li>
+									<li>
+										<button
+											data-on:click={ datastar.PostSSE("/app/monitors/%d/check", data.Monitor.ID) }
+											class="text-sm link"
+										>
+											Check now
+										</button>
+									</li>
+								} else if data.Monitor.Status == models.MonitorStatusPaused {
+									<li>
+										<button
+											data-on:click={ datastar.PostSSE("/app/monitors/%d/unpause", data.Monitor.ID) }
+											class="text-sm link"
+										>
+											Resume monitoring
+										</button>
+									</li>
+								}
 								<li>
 									<button
-										data-on:click={ datastar.PostSSE("/app/monitors/%d/pause", data.Monitor.ID) }
-										class="text-sm link"
+										data-on:click={ datastar.DeleteSSE("/app/monitors/%d", data.Monitor.ID) }
+										class="text-sm text-error link"
 									>
-										Pause monitoring
+										Delete
 									</button>
 								</li>
-								<li>
-									<button
-										data-on:click={ datastar.PostSSE("/app/monitors/%d/check", data.Monitor.ID) }
-										class="text-sm link"
-									>
-										Check now
-									</button>
-								</li>
-							} else if data.Monitor.Status == models.MonitorStatusPaused {
-								<li>
-									<button
-										data-on:click={ datastar.PostSSE("/app/monitors/%d/unpause", data.Monitor.ID) }
-										class="text-sm link"
-									>
-										Resume monitoring
-									</button>
-								</li>
-							}
-							<li>
-								<button
-									data-on:click={ datastar.DeleteSSE("/app/monitors/%d", data.Monitor.ID) }
-									class="text-sm text-error link"
-								>
-									Delete
-								</button>
-							</li>
-						</ul>
+							</ul>
+						</div>
 					</div>
 				</div>
 			</div>
 		</div>
-	</div>
+	}
 }
 
 templ MonitorNotifiers(monitor *models.Monitor, notifiers []*MonitorNotifierViewData) {
