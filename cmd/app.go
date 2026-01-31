@@ -24,6 +24,7 @@ import (
 	"github.com/alexpls/untils/internal/search"
 	"github.com/alexpls/untils/internal/session"
 	"github.com/alexpls/untils/internal/settings"
+	"github.com/alexpls/untils/internal/types"
 	"github.com/alexpls/untils/public"
 	"github.com/go-playground/validator/v10"
 	"github.com/jackc/pgx/v5"
@@ -138,7 +139,8 @@ func createApp(c *config) (*app, context.Context, func()) {
 	a.river = must.NoErrVal(river.NewClient(riverpgxv5.New(a.db), &river.Config{
 		Logger: riverLogger,
 		Queues: map[string]river.QueueConfig{
-			river.QueueDefault: {MaxWorkers: 50},
+			river.QueueDefault:      {MaxWorkers: 50},
+			types.RiverBrowserQueue: {MaxWorkers: 5},
 		},
 		Workers:      workers,
 		PeriodicJobs: periodicJobs,

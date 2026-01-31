@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/alexpls/untils/internal/types"
 	"github.com/riverqueue/river"
 )
 
@@ -17,6 +18,12 @@ type ValidateMonitorArgs struct {
 
 func (ValidateMonitorArgs) Kind() string {
 	return "validate_draft"
+}
+
+func (ValidateMonitorArgs) InsertOpts() river.InsertOpts {
+	return river.InsertOpts{
+		Queue: types.RiverBrowserQueue,
+	}
 }
 
 type ValidateMonitorWorker struct {
@@ -30,6 +37,10 @@ func NewValidateMonitorWorker(monitorService *Service, logger *slog.Logger) *Val
 		service: monitorService,
 		logger:  logger,
 	}
+}
+
+func (w *ValidateMonitorWorker) Timeout(job *river.Job[ValidateMonitorArgs]) time.Duration {
+	return 3 * time.Minute
 }
 
 func (w *ValidateMonitorWorker) Work(ctx context.Context, job *river.Job[ValidateMonitorArgs]) error {
@@ -56,8 +67,4 @@ func (w *ValidateMonitorWorker) Work(ctx context.Context, job *river.Job[Validat
 	}
 
 	return nil
-}
-
-func (w *ValidateMonitorWorker) Timeout(job *river.Job[ValidateMonitorArgs]) time.Duration {
-	return 3 * time.Minute
 }

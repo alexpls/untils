@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/alexpls/untils/internal/types"
 	"github.com/jackc/pgx/v5"
 	"github.com/riverqueue/river"
 )
@@ -20,6 +21,12 @@ func (CheckArgs) Kind() string {
 	return "check"
 }
 
+func (CheckArgs) InsertOpts() river.InsertOpts {
+	return river.InsertOpts{
+		Queue: types.RiverBrowserQueue,
+	}
+}
+
 type CheckWorker struct {
 	river.WorkerDefaults[CheckArgs]
 	service *Service
@@ -31,6 +38,10 @@ func NewCheckWorker(monitorService *Service, logger *slog.Logger) *CheckWorker {
 		service: monitorService,
 		logger:  logger,
 	}
+}
+
+func (w *CheckWorker) Timeout(job *river.Job[CheckArgs]) time.Duration {
+	return 5 * time.Minute
 }
 
 func (w *CheckWorker) Work(ctx context.Context, job *river.Job[CheckArgs]) error {
@@ -54,8 +65,4 @@ func (w *CheckWorker) Work(ctx context.Context, job *river.Job[CheckArgs]) error
 	}
 
 	return nil
-}
-
-func (w *CheckWorker) Timeout(job *river.Job[CheckArgs]) time.Duration {
-	return 5 * time.Minute
 }
