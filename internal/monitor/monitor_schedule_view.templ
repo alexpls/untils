@@ -1,0 +1,27 @@
+package monitor
+
+import "github.com/alexpls/untils/internal/models"
+
+type MonitorScheduleViewData struct {
+	Monitor *models.Monitor
+}
+
+templ MonitorSchedulePage(data MonitorScheduleViewData) {
+	@MonitorSidebarLayout(data.Monitor, MonitorPageTypeSchedule) {
+		@MonitorScheduleView(data)
+	}
+}
+
+templ MonitorScheduleView(data MonitorScheduleViewData) {
+	<div id="monitor-schedule-view" class="p-4">
+		<div class="p-4 bg-base-100 rounded border border-base-content/10">
+			<div class="text-lg pb-2 border-b border-b-base-content/10">
+				Checks at
+				<strong>{ formatCronExpression(data.Monitor.CheckSchedule) }</strong>
+			</div>
+			<div class="max-w-md mt-2">
+				@SchedulePicker(data.Monitor)
+			</div>
+		</div>
+	</div>
+}

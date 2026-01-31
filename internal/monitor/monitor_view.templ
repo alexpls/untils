@@ -32,6 +32,7 @@ const (
 	_ MonitorPageType = iota
 	MonitorPageTypeActivity
 	MonitorPageTypeChecks
+	MonitorPageTypeSchedule
 )
 
 templ MonitorSidebarLayout(monitor *models.Monitor, pageType MonitorPageType) {
@@ -40,7 +41,6 @@ templ MonitorSidebarLayout(monitor *models.Monitor, pageType MonitorPageType) {
 		{Title: "Monitors", Href: "/app/monitors"},
 		{Title: monitor.Subject.String, Href: fmt.Sprintf("/app/monitors/%d", monitor.ID)},
 	}) {
-		<!-- TODO: update the header with sse as well -->
 		@components.Header(monitor.Subject.String, nil) {
 			<div class="text-sm flex gap-x-2 mt-2">
 				@MonitorStatusBadge(monitor.Status)
@@ -64,6 +64,12 @@ templ MonitorSidebarLayout(monitor *models.Monitor, pageType MonitorPageType) {
 					>
 						Checks
 					</a>
+					<a
+						class={ "block", "w-full", "rounded", templ.KV("bg-base-100", pageType == MonitorPageTypeSchedule), "px-4", "py-2", "text-muted", "text-sm", "hover:bg-base-100", "transition-colors" }
+						href={ fmt.Sprintf("/app/monitors/%d/schedule", monitor.ID) }
+					>
+						Schedule
+					</a>
 				</div>
 			</div>
 			<div class="col-span-8">
@@ -71,9 +77,6 @@ templ MonitorSidebarLayout(monitor *models.Monitor, pageType MonitorPageType) {
 			</div>
 		</div>
 	}
-}
-
-templ MonitorView(data MonitorViewData) {
 }
 
 templ MonitorPage(data MonitorViewData) {
@@ -109,7 +112,7 @@ templ MonitorPage(data MonitorViewData) {
 						if data.Monitor.Status == models.MonitorStatusActive && data.NextScheduledCheck != nil {
 							<div>
 								<div class="font-semibold uppercase text-xs">
-									Next checking at
+									Next check at
 								</div>
 								<div class="text-sm text-base-content/60 mt-1">
 									{ components.FormatDateTime(ctx, data.NextScheduledCheck.ScheduledFor) }

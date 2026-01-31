@@ -11,19 +11,13 @@ type MonitorChecksViewData struct {
 	Checks  []*models.MonitorCheck
 }
 
+// TODO: should be SSE driven so new check activity immediately shows up
 templ MonitorChecksPage(data MonitorChecksViewData) {
 	@MonitorSidebarLayout(data.Monitor, MonitorPageTypeChecks) {
 		<div class="py-4 space-y-8">
-			<div>
-				<h2 class="font-bold text-2xl mb-3">Schedule</h2>
-				<div class="bg-base-100 rounded border border-base-content/10 p-2 px-4 w-lg">
-					@SchedulePicker(data.Monitor)
-				</div>
-			</div>
 			if (len(data.Checks) == 0) {
 				<p>No checks yet.</p>
 			} else {
-				<h2 class="font-bold text-2xl mb-3">Recent checks</h2>
 				<table class="table bg-base-100 border border-base-content/10">
 					<thead>
 						<tr>

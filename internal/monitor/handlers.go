@@ -355,6 +355,22 @@ func (h *Handlers) ViewChecksGet(w http.ResponseWriter, r *http.Request, user *m
 	}
 }
 
+// ViewScheduleGet handles GET /app/monitors/{id}/schedule
+func (h *Handlers) ViewScheduleGet(w http.ResponseWriter, r *http.Request, user *models.User) {
+	mon := h.monitorFromPath(w, r, user)
+	if mon == nil {
+		return
+	}
+
+	comp := MonitorSchedulePage(MonitorScheduleViewData{
+		Monitor: mon,
+	})
+	if err := comp.Render(r.Context(), w); err != nil {
+		h.logger.ErrorContext(r.Context(), "error rendering monitor schedule page", "error", err)
+		return
+	}
+}
+
 // NewGet handles GET /app/monitors/new
 func (h *Handlers) NewGet(w http.ResponseWriter, r *http.Request, user *models.User) {
 	if err := MonitorNewPage(MonitorNewData{}).Render(r.Context(), w); err != nil {
@@ -383,11 +399,19 @@ func (h *Handlers) UpdateCheckSchedule(w http.ResponseWriter, r *http.Request, u
 		h.logger.Error("error closing response body", "error", err)
 	}
 
-	if _, err := h.service.UpdateMonitorSchedule(r.Context(), mon, UpdateMonitorScheduleParams{
+	var err error
+	if mon, err = h.service.UpdateMonitorSchedule(r.Context(), mon, UpdateMonitorScheduleParams{
 		CheckSchedule: params.Schedule,
 	}); err != nil {
 		h.logger.Error("error updating monitor schedule", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	sse := datastar.NewSSE(w, r)
+	comp := MonitorScheduleView(MonitorScheduleViewData{Monitor: mon})
+	if err := sse.PatchElementTempl(comp, datastar.WithViewTransitions()); err != nil {
+		h.logger.Error("error patching monitor schedule view", "error", err)
 		return
 	}
 }
