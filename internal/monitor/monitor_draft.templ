@@ -188,11 +188,14 @@ templ MonitorDraftView(data MonitorDraftData) {
 								})
 								<div class="ml-2 w-full">
 									<p class="text-success">Ready to go</p>
-									<div class="text-base-content/50 mt-1">
-										When a new result is detected&hellip;
+									<div class="muted mt-1">
+										When a new result is found&hellip;
 									</div>
 									<div class="space-y-1 mt-2">
-										@MonitorNotifiers(data.Monitor, data.Notifiers)
+										@MonitorNotificationsList(MonitorNotificationsViewData{
+											Monitor:   data.Monitor,
+											Notifiers: data.Notifiers,
+										})
 									</div>
 								</div>
 							</div>

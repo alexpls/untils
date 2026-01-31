@@ -33,6 +33,7 @@ const (
 	MonitorPageTypeActivity
 	MonitorPageTypeChecks
 	MonitorPageTypeSchedule
+	MonitorPageTypeNotifications
 )
 
 templ MonitorSidebarLayout(monitor *models.Monitor, pageType MonitorPageType) {
@@ -63,6 +64,12 @@ templ MonitorSidebarLayout(monitor *models.Monitor, pageType MonitorPageType) {
 						href={ fmt.Sprintf("/app/monitors/%d/checks", monitor.ID) }
 					>
 						Checks
+					</a>
+					<a
+						class={ "block", "w-full", "rounded", templ.KV("bg-base-100", pageType == MonitorPageTypeNotifications), "px-4", "py-2", "text-muted", "text-sm", "hover:bg-base-100", "transition-colors" }
+						href={ fmt.Sprintf("/app/monitors/%d/notifications", monitor.ID) }
+					>
+						Notifications
 					</a>
 					<a
 						class={ "block", "w-full", "rounded", templ.KV("bg-base-100", pageType == MonitorPageTypeSchedule), "px-4", "py-2", "text-muted", "text-sm", "hover:bg-base-100", "transition-colors" }
@@ -101,14 +108,6 @@ templ MonitorPage(data MonitorViewData) {
 				</div>
 				<div class="lg:col-span-4 m-4 p-4 border border-base-content/10 rounded">
 					<div class="space-y-4">
-						<div>
-							<div class="font-semibold uppercase text-xs">
-								Notifications
-							</div>
-							<div class="mt-2">
-								@MonitorNotifiers(data.Monitor, data.Notifiers)
-							</div>
-						</div>
 						if data.Monitor.Status == models.MonitorStatusActive && data.NextScheduledCheck != nil {
 							<div>
 								<div class="font-semibold uppercase text-xs">
@@ -163,29 +162,6 @@ templ MonitorPage(data MonitorViewData) {
 			</div>
 		</div>
 	}
-}
-
-templ MonitorNotifiers(monitor *models.Monitor, notifiers []*MonitorNotifierViewData) {
-	<div id="monitor-notifiers">
-		for _, notifier := range notifiers {
-			<div>
-				<label class="label text-sm">
-					<input
-						name={ notifier.Integration.Name }
-						type="checkbox"
-						class="checkbox checkbox-sm"
-						checked?={ notifier.Active }
-						if notifier.Active {
-							data-on:change={ datastar.DeleteSSE("/app/monitors/%d/notifiers/%s", monitor.ID, notifier.Integration.Name) }
-						} else {
-							data-on:change={ datastar.PostSSE("/app/monitors/%d/notifiers/%s", monitor.ID, notifier.Integration.Name) }
-						}
-					/>
-					Notify by { notifier.Integration.DisplayName() }
-				</label>
-			</div>
-		}
-	</div>
 }
 
 templ inProgressCheckTimelineHeading() {

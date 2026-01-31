@@ -1,0 +1,59 @@
+package monitor
+
+import (
+	"github.com/alexpls/untils/internal/models"
+	"github.com/starfederation/datastar-go/datastar"
+)
+
+type MonitorNotificationsViewData struct {
+	Monitor   *models.Monitor
+	Notifiers []*MonitorNotifierViewData
+}
+
+templ MonitorNotificationsPage(data MonitorNotificationsViewData) {
+	@MonitorSidebarLayout(data.Monitor, MonitorPageTypeNotifications) {
+		@MonitorNotificationsView(data)
+	}
+}
+
+templ MonitorNotificationsView(data MonitorNotificationsViewData) {
+	<div class="p-4">
+		<div class="p-4 border border-base-content/10 rounded bg-base-100">
+			<h3>When a new result is found&hellip;</h3>
+			@MonitorNotificationsList(data)
+			<div class="text-sm text-muted mt-4">
+				Configure more integrations in
+				<a href="/app/settings" class="link">Settings</a>.
+			</div>
+		</div>
+	</div>
+}
+
+templ MonitorNotificationsList(data MonitorNotificationsViewData) {
+	<ul id="monitor-notifications-list" class="mt-3 max-w-md list border border-base-content/10 rounded">
+		for _, notifier := range data.Notifiers {
+			<li class="list-row flex justify-between items-center">
+				<div>
+					Notify by <strong>{ notifier.Integration.DisplayName() }</strong>
+				</div>
+				<label class="label">
+					if notifier.Active {
+						Enabled
+					} else {
+						Disabled
+					}
+					<input
+						type="checkbox"
+						class="toggle ml-1"
+						if notifier.Active {
+							checked
+							data-on:change={ datastar.DeleteSSE("/app/monitors/%d/notifiers/%s", data.Monitor.ID, notifier.Integration.Name) }
+						} else {
+							data-on:change={ datastar.PostSSE("/app/monitors/%d/notifiers/%s", data.Monitor.ID, notifier.Integration.Name) }
+						}
+					/>
+				</label>
+			</li>
+		}
+	</ul>
+}

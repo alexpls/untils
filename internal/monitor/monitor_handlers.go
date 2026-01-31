@@ -184,6 +184,27 @@ func (h *Handlers) ViewMonitorSchedule(w http.ResponseWriter, r *http.Request, u
 	}
 }
 
+// ViewMonitorNotifications handles GET /app/monitors/{id}/notifications
+func (h *Handlers) ViewMonitorNotifications(w http.ResponseWriter, r *http.Request, user *models.User) {
+	mon := h.monitorFromPath(w, r, user)
+	if mon == nil {
+		return
+	}
+
+	data, err := h.monitorNotificationsViewData(r.Context(), mon, user)
+	if err != nil {
+		h.logger.ErrorContext(r.Context(), "error getting monitor notifications view data", "error", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	comp := MonitorNotificationsPage(data)
+	if err := comp.Render(r.Context(), w); err != nil {
+		h.logger.ErrorContext(r.Context(), "error rendering monitor notifications page", "error", err)
+		return
+	}
+}
+
 // NewMonitor handles GET /app/monitors/new
 func (h *Handlers) NewMonitor(w http.ResponseWriter, r *http.Request, user *models.User) {
 	if err := MonitorNewPage(MonitorNewData{}).Render(r.Context(), w); err != nil {
@@ -443,24 +464,14 @@ func (h *Handlers) UpdateMonitorNotifier(w http.ResponseWriter, r *http.Request,
 
 	notifierType := r.PathValue("type")
 
-	sse := datastar.NewSSE(w, r)
-
 	if _, err := h.service.CreateMonitorNotifier(r.Context(), mon, models.Notifier(notifierType)); err != nil {
 		h.logger.ErrorContext(r.Context(), "error creating notifier", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
-	comp, err := h.monitorNotifiersComponent(r.Context(), mon, user.ID)
-	if err != nil {
-		h.logger.ErrorContext(r.Context(), "error rendering notifiers", "error", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
-
-	if err := sse.PatchElementTempl(comp); err != nil {
-		h.logger.ErrorContext(sse.Context(), "error patching element", "error", err)
-	}
+	sse := datastar.NewSSE(w, r)
+	h.patchMonitorNotificationsList(sse, mon, user)
 }
 
 // DeleteMonitorNotifier handles DELETE /app/monitors/{id}/notifiers/{type}
@@ -472,23 +483,27 @@ func (h *Handlers) DeleteMonitorNotifier(w http.ResponseWriter, r *http.Request,
 
 	notifierType := r.PathValue("type")
 
-	sse := datastar.NewSSE(w, r)
-
 	if err := h.service.DeleteMonitorNotifier(r.Context(), mon, models.Notifier(notifierType)); err != nil {
 		h.logger.ErrorContext(r.Context(), "error deleting notifier", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
-	comp, err := h.monitorNotifiersComponent(r.Context(), mon, user.ID)
+	sse := datastar.NewSSE(w, r)
+	h.patchMonitorNotificationsList(sse, mon, user)
+}
+
+func (h *Handlers) patchMonitorNotificationsList(sse *datastar.ServerSentEventGenerator, mon *models.Monitor, user *models.User) {
+	data, err := h.monitorNotificationsViewData(sse.Context(), mon, user)
 	if err != nil {
-		h.logger.ErrorContext(r.Context(), "error rendering notifiers", "error", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		h.logger.ErrorContext(sse.Context(), "error getting monitor notifications view data", "error", err)
 		return
 	}
 
+	comp := MonitorNotificationsList(data)
 	if err := sse.PatchElementTempl(comp); err != nil {
 		h.logger.ErrorContext(sse.Context(), "error patching element", "error", err)
+		return
 	}
 }
 
@@ -635,14 +650,6 @@ func (h *Handlers) monitorComponent(ctx context.Context, mon *models.Monitor, us
 	return MonitorPage(data), nil
 }
 
-func (h *Handlers) monitorNotifiersComponent(ctx context.Context, mon *models.Monitor, userID int64) (templ.Component, error) {
-	data, err := h.monitorNotifierViewData(ctx, mon, userID)
-	if err != nil {
-		return nil, err
-	}
-	return MonitorNotifiers(mon, data), nil
-}
-
 func (h *Handlers) monitorDraftViewData(
 	ctx context.Context,
 	mon *models.Monitor,
@@ -770,4 +777,16 @@ func (h *Handlers) monitorNotifierViewData(ctx context.Context, mon *models.Moni
 	}
 
 	return notifiers, nil
+}
+
+func (h *Handlers) monitorNotificationsViewData(ctx context.Context, mon *models.Monitor, user *models.User) (MonitorNotificationsViewData, error) {
+	notifiers, err := h.monitorNotifierViewData(ctx, mon, user.ID)
+	if err != nil {
+		return MonitorNotificationsViewData{}, err
+	}
+
+	return MonitorNotificationsViewData{
+		Monitor:   mon,
+		Notifiers: notifiers,
+	}, nil
 }
