@@ -20,6 +20,7 @@ import (
 	"github.com/alexpls/untils/internal/notifications"
 	"github.com/alexpls/untils/internal/pages"
 	"github.com/alexpls/untils/internal/pushover"
+	"github.com/alexpls/untils/internal/reqcontext"
 	"github.com/alexpls/untils/internal/search"
 	"github.com/alexpls/untils/internal/session"
 	"github.com/alexpls/untils/internal/settings"
@@ -62,8 +63,12 @@ type app struct {
 	devHandlers         *dev.Handlers
 }
 
-func createApp(c *config) (*app, func()) {
-	ctx, cancelFn := context.WithCancel(context.Background())
+func createApp(c *config) (*app, context.Context, func()) {
+	ctx, cancelFn := context.WithCancel(
+		reqcontext.ContextWithBuildVersion(
+			reqcontext.ContextWithEnv(context.Background(), c.env), c.buildVersion,
+		),
+	)
 	a := &app{config: c}
 
 	a.validate = validator.New(validator.WithRequiredStructEnabled())
@@ -213,5 +218,5 @@ func createApp(c *config) (*app, func()) {
 		dbCloser()
 	}
 
-	return a, closer
+	return a, ctx, closer
 }

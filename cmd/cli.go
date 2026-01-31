@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"runtime/debug"
 	"slices"
 
 	"github.com/alexpls/untils/internal/must"
@@ -60,6 +61,8 @@ func parseSeed() *config {
 }
 
 func globalFlags(c *config, f *flag.FlagSet) {
+	c.buildVersion = buildVersion()
+
 	f.StringVar(&c.env, "env", "prod", "environment (dev, prod)")
 	f.StringVar(&c.dbUrl, "db", "", "postgresql connection url")
 	f.StringVar(&c.xAIKey, "xai-key", "", "x.ai API key")
@@ -105,4 +108,30 @@ func parseMigrate() *migrateConfig {
 	}
 
 	return &mc
+}
+
+func buildVersion() string {
+	var revision, date string
+	buildInfo, ok := debug.ReadBuildInfo()
+	if !ok {
+		return "unknown"
+	}
+
+	for _, setting := range buildInfo.Settings {
+		if revision != "" && date != "" {
+			break
+		}
+		switch setting.Key {
+		case "vcs.revision":
+			revision = setting.Value[0:7]
+		case "vcs.time":
+			date = setting.Value
+		}
+	}
+
+	if revision == "" && date == "" {
+		return "unknown"
+	}
+
+	return revision + " " + date
 }

@@ -10,11 +10,21 @@ type contextKey int
 
 const (
 	_ contextKey = iota
+	buildVersionKey
 	requestIDKey
 	userKey
 	tzKey
 	envKey
 )
+
+func ContextWithBuildVersion(ctx context.Context, buildVersion string) context.Context {
+	return context.WithValue(ctx, buildVersionKey, buildVersion)
+}
+
+func BuildVersionFromContext(ctx context.Context) string {
+	buildVersion, _ := ctx.Value(buildVersionKey).(string)
+	return buildVersion
+}
 
 func ContextWithRequestID(ctx context.Context, reqID string) context.Context {
 	return context.WithValue(ctx, requestIDKey, reqID)
@@ -47,7 +57,7 @@ func ContextWithEnv(ctx context.Context, env string) context.Context {
 	return context.WithValue(ctx, envKey, env)
 }
 
-func EnvFromContext(ctx context.Context) (string, bool) {
-	env, ok := ctx.Value(envKey).(string)
-	return env, ok
+func EnvFromContext(ctx context.Context) string {
+	env, _ := ctx.Value(envKey).(string)
+	return env
 }

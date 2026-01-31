@@ -1,13 +1,14 @@
 package main
 
 type config struct {
-	env         string
-	dbUrl       string
-	xAIKey      string
-	openAIKey   string
-	braveKey    string
-	pushoverKey string
-	smtp        struct {
+	buildVersion string
+	env          string
+	dbUrl        string
+	xAIKey       string
+	openAIKey    string
+	braveKey     string
+	pushoverKey  string
+	smtp         struct {
 		username string
 		password string
 		host     string

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -18,29 +19,32 @@ func main() {
 		defer stop()
 
 		globalCfg, c := parseServe()
-		a, appCloser := createApp(globalCfg)
+		a, appCtx, appCloser := createApp(globalCfg)
 		defer appCloser()
 
 		addr := fmt.Sprintf(":%d", c.port)
 		srv := &http.Server{
 			Addr:    addr,
 			Handler: a.routes(),
+			BaseContext: func(l net.Listener) context.Context {
+				return appCtx
+			},
 		}
 		srvErrs := make(chan error, 1)
 
 		go func() {
-			a.logger.InfoContext(ctx, "starting http server", "port", c.port)
+			a.logger.InfoContext(appCtx, "starting http server", "port", c.port)
 			srvErrs <- srv.ListenAndServe()
 		}()
 
 		select {
 		case err := <-srvErrs:
-			a.logger.ErrorContext(ctx, "http server error", "error", err)
+			a.logger.ErrorContext(appCtx, "http server error", "error", err)
 			return
 		case <-ctx.Done():
-			a.logger.InfoContext(ctx, "http server received shutdown signal")
+			a.logger.InfoContext(appCtx, "http server received shutdown signal")
 
-			tctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			tctx, cancel := context.WithTimeout(appCtx, 5*time.Second)
 			defer cancel()
 
 			if err := srv.Shutdown(tctx); err != nil {
@@ -55,7 +59,7 @@ func main() {
 	case "seed":
 		globalCfg := parseSeed()
 
-		a, appCloser := createApp(globalCfg)
+		a, _, appCloser := createApp(globalCfg)
 		defer appCloser()
 
 		a.seed()

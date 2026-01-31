@@ -77,11 +77,12 @@ func ValidationError(data validation.HasValidationErrors, field string) string {
 }
 
 func IsDev(ctx context.Context) bool {
-	env, ok := reqcontext.EnvFromContext(ctx)
-	if !ok {
-		panic("env not set in context")
-	}
+	env := reqcontext.EnvFromContext(ctx)
 	return env == "dev"
+}
+
+func BuildVersion(ctx context.Context) string {
+	return reqcontext.BuildVersionFromContext(ctx)
 }
 
 func MaskSecret(str string) string {

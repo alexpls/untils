@@ -19,6 +19,9 @@ templ Layout(title string) {
 		</head>
 		<body class="bg-base-300 min-h-screen flex flex-col">
 			{ children... }
+			<footer class="text-muted text-xs py-2 text-center">
+				Build: { BuildVersion(ctx) }
+			</footer>
 		</body>
 	</html>
 }

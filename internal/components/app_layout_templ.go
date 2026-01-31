@@ -102,7 +102,7 @@ func AppLayout(title string, breadcrumbs []Breadcrumb) templ.Component {
 				"container", "mx-auto", "flex-1",
 				"bg-base-200",
 				"border", "border-base-content/10", "border-b-0",
-				"rounded-lg", "rounded-bl-none", "rounded-br-none",
+				"rounded-lg",
 				"shadow-xl",
 				"relative", "z-10",
 			)}
