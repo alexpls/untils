@@ -17,7 +17,7 @@ func NewHandlers(logger *slog.Logger) *Handlers {
 	}
 }
 
-func (h *Handlers) PaletteGet(w http.ResponseWriter, r *http.Request, _ *models.User) {
+func (h *Handlers) ViewPalette(w http.ResponseWriter, r *http.Request, _ *models.User) {
 	component := PalettePage()
 	if err := component.Render(r.Context(), w); err != nil {
 		h.logger.Error("error rendering palette", "error", err)

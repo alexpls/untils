@@ -51,8 +51,8 @@ func NewHandlers(
 	}
 }
 
-// SettingsGet handles GET /app/settings
-func (h *Handlers) SettingsGet(w http.ResponseWriter, r *http.Request, user *models.User) {
+// ViewSettings handles GET /app/settings
+func (h *Handlers) ViewSettings(w http.ResponseWriter, r *http.Request, user *models.User) {
 	integrations, err := h.queries.UserIntegrations(r.Context(), h.db, user.ID)
 	if err != nil {
 		h.logger.ErrorContext(r.Context(), "error listing integrations", "error", err)
@@ -66,8 +66,8 @@ func (h *Handlers) SettingsGet(w http.ResponseWriter, r *http.Request, user *mod
 	}
 }
 
-// PushoverSettingsGet handles GET /app/settings/pushover
-func (h *Handlers) PushoverSettingsGet(w http.ResponseWriter, r *http.Request, user *models.User) {
+// ViewPushoverSettings handles GET /app/settings/pushover
+func (h *Handlers) ViewPushoverSettings(w http.ResponseWriter, r *http.Request, user *models.User) {
 	tok, err := h.pushoverStore.GetToken(r.Context(), user.ID)
 	if err != nil {
 		if !errors.Is(err, pushover.ErrNoPushoverUserToken) {
@@ -94,8 +94,8 @@ func (h *Handlers) PushoverSettingsGet(w http.ResponseWriter, r *http.Request, u
 	}
 }
 
-// PushoverSettingsPost handles POST /app/settings/pushover
-func (h *Handlers) PushoverSettingsPost(w http.ResponseWriter, r *http.Request, user *models.User) {
+// UpdatePushoverSettings handles POST /app/settings/pushover
+func (h *Handlers) UpdatePushoverSettings(w http.ResponseWriter, r *http.Request, user *models.User) {
 	if err := r.ParseForm(); err != nil {
 		h.logger.ErrorContext(r.Context(), "failed to parse form", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
@@ -144,8 +144,8 @@ func (h *Handlers) PushoverSettingsPost(w http.ResponseWriter, r *http.Request, 
 	http.Redirect(w, r, "/app/settings/pushover", http.StatusSeeOther)
 }
 
-// PushoverSettingsDelete handles DELETE /app/settings/pushover
-func (h *Handlers) PushoverSettingsDelete(w http.ResponseWriter, r *http.Request, user *models.User) {
+// DeletePushoverSettings handles DELETE /app/settings/pushover
+func (h *Handlers) DeletePushoverSettings(w http.ResponseWriter, r *http.Request, user *models.User) {
 	sse := datastar.NewSSE(w, r)
 
 	err := h.pushoverStore.DeleteToken(r.Context(), user.ID)
@@ -160,8 +160,8 @@ func (h *Handlers) PushoverSettingsDelete(w http.ResponseWriter, r *http.Request
 	}
 }
 
-// EmailSettingsGet handles GET /app/settings/email
-func (h *Handlers) EmailSettingsGet(w http.ResponseWriter, r *http.Request, user *models.User) {
+// ViewEmailSettings handles GET /app/settings/email
+func (h *Handlers) ViewEmailSettings(w http.ResponseWriter, r *http.Request, user *models.User) {
 	if err := EmailSettings(&EmailSettingsViewModel{
 		Email: user.Email,
 	}).Render(r.Context(), w); err != nil {
@@ -173,8 +173,8 @@ type timezoneUpdate struct {
 	Timezone string `json:"timezone"`
 }
 
-// UpdateTimezonePost handles POST /app/settings/timezone
-func (h *Handlers) UpdateTimezonePost(w http.ResponseWriter, r *http.Request, user *models.User) {
+// UpdateTimezone handles POST /app/settings/timezone
+func (h *Handlers) UpdateTimezone(w http.ResponseWriter, r *http.Request, user *models.User) {
 	var params timezoneUpdate
 	err := json.NewDecoder(r.Body).Decode(&params)
 	if err != nil {

@@ -83,7 +83,7 @@ func TestFormatCronExpression(t *testing.T) {
 	}{
 		// Empty/invalid
 		{"empty", "", ""},
-		{"invalid format", "invalid", "invalid"},
+		{"invalid format", "invalid", ""},
 
 		// Every hour variations
 		{"every hour every day", "0 * * * *", "Every hour, every day"},

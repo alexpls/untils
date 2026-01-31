@@ -25,8 +25,8 @@ func NewHandlers(auth *Auth, sessionManager *session.Manager, logger *slog.Logge
 	}
 }
 
-// SignInGet handles GET /sign_in
-func (h *Handlers) SignInGet(w http.ResponseWriter, r *http.Request) {
+// ViewSignIn handles GET /sign_in
+func (h *Handlers) ViewSignIn(w http.ResponseWriter, r *http.Request) {
 	if _, ok := reqcontext.UserFromContext(r.Context()); ok {
 		http.Redirect(w, r, "/app", http.StatusSeeOther)
 		return
@@ -41,8 +41,8 @@ func (h *Handlers) SignInGet(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// SignOutGet handles GET /sign_out
-func (h *Handlers) SignOutGet(w http.ResponseWriter, r *http.Request) {
+// SignOut handles GET /sign_out
+func (h *Handlers) SignOut(w http.ResponseWriter, r *http.Request) {
 	err := h.sessionManager.Destroy(r, w)
 	if err != nil {
 		h.logger.ErrorContext(r.Context(), "error destroying session", "error", err)
@@ -52,8 +52,8 @@ func (h *Handlers) SignOutGet(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-// SignInPost handles POST /sign_in
-func (h *Handlers) SignInPost(w http.ResponseWriter, r *http.Request) {
+// SignIn handles POST /sign_in
+func (h *Handlers) SignIn(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		h.logger.ErrorContext(r.Context(), "error parsing sign in form", "error", err)

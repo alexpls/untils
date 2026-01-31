@@ -28,8 +28,8 @@ func NewHandlers(queries *models.Queries, db db.DB, monitorEvents *monitor.DBEve
 	}
 }
 
-// Get handles GET /app
-func (h *Handlers) Get(w http.ResponseWriter, r *http.Request, user *models.User) {
+// ViewDashboard handles GET /app
+func (h *Handlers) ViewDashboard(w http.ResponseWriter, r *http.Request, user *models.User) {
 	data := DashboardViewData{
 		MonitorActivity: MonitorActivityWidgetData{
 			Loading: LoadingStatusLoading,
@@ -43,8 +43,8 @@ func (h *Handlers) Get(w http.ResponseWriter, r *http.Request, user *models.User
 	}
 }
 
-// Events handles GET /app/dashboard/events (SSE)
-func (h *Handlers) Events(w http.ResponseWriter, r *http.Request, user *models.User) {
+// ViewDashboardEvents handles GET /app/dashboard/events (SSE)
+func (h *Handlers) ViewDashboardEvents(w http.ResponseWriter, r *http.Request, user *models.User) {
 	sse := datastar.NewSSE(w, r)
 
 	ch := h.monitorEvents.SubscribeUser(r.Context(), user.ID)

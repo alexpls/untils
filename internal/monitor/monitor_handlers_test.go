@@ -24,7 +24,7 @@ func TestListGet(t *testing.T) {
 		_, err := deps.service.db.Exec(ctx, "delete from monitors where user_id = $1", deps.fixtures.User.ID)
 		require.NoError(t, err)
 
-		res := getHandler(deps.handlers.ListGet, deps.fixtures.User)
+		res := getHandler(deps.handlers.ListMonitors, deps.fixtures.User)
 		page, _ := io.ReadAll(res.Body)
 
 		assert.Equal(t, http.StatusOK, res.StatusCode)
@@ -37,7 +37,7 @@ func TestListGet(t *testing.T) {
 		ctx := context.Background()
 		deps := setupTestDeps(ctx, t)
 
-		res := getHandler(deps.handlers.ListGet, deps.fixtures.User)
+		res := getHandler(deps.handlers.ListMonitors, deps.fixtures.User)
 		page, _ := io.ReadAll(res.Body)
 
 		assert.Equal(t, http.StatusOK, res.StatusCode)
