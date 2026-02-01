@@ -22,6 +22,7 @@
 - [ ] Improvement: make it clearer what the purpose of the preview is. I've had feedback that it's confusing that it's showing something that's already happened, which isn't something that the user wants to be notified about _now_.
 - [ ] Feature: hide results that were bad, and feed them back to LLM
 - [ ] Refactor: can I get rid of skipped checks? It's annoying and doesn't make sense on the UI.
+- [ ] Fix: updating the check schedule should modify the currently scheduled checks
 
 ## Done
 
