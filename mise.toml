@@ -22,6 +22,7 @@ psql "${PG_TEST_URL}" --echo-errors --quiet -c '\timing off' -f ./internal/model
 '''
 
 [tasks.test]
+env.TEMPL_DEV_MODE=false
 run = [
     { task = 'test-db-setup' },
     'go test ./...',
@@ -63,6 +64,7 @@ run = "bun run watch-css"
 run = "bun run watch-js"
 
 [tasks.dev]
+env.TEMPL_DEV_MODE=true
 run = [
 	{ tasks = ["dev-server", "dev-templ", "dev-css", "dev-js"] }
 ]
