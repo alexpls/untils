@@ -19,8 +19,8 @@ templ PalettePage() {
 		},
 	}) {
 		<div class="p-4">
-			@example("Schedule") {
-				@monitor.SchedulePicker(monitorStub())
+			@example("FrequencyPicker") {
+				@monitor.FrequencyPicker(monitorStub())
 			}
 			@example("InProgressCheckTimelineItem") {
 				<ul>
@@ -40,8 +40,8 @@ templ example(title string) {
 
 func monitorStub() *models.Monitor {
 	return &models.Monitor{
-		ID:            0,
-		Subject:       pgtype.Text{Valid: true, String: "hi"},
-		CheckSchedule: monitor.DefaultCheckSchedule,
+		ID:                    0,
+		Subject:               pgtype.Text{Valid: true, String: "hi"},
+		CheckFrequencyMinutes: monitor.DefaultCheckFrequencyMinutes,
 	}
 }

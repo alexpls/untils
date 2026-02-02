@@ -20,7 +20,7 @@ select
     m.id as monitor_id,
     m.status,
     m.subject::text as subject,
-    m.check_schedule,
+    m.check_frequency_minutes,
     m.created_at,
     coalesce(mr.result, '') as latest_result,
     coalesce(mr.date, '0001-01-01 00:00:00 +0000') as latest_result_date,
@@ -74,16 +74,10 @@ set subject = @subject, updated_at = now()
 where user_id = @user_id and id = @id and status != 'active'
 returning *;
 
--- name: UpdateMonitorCheckSchedule :one
+-- name: UpdateMonitorCheckFrequency :one
 update monitors
-set check_schedule = @check_schedule, updated_at = now()
+set check_frequency_minutes = @check_frequency_minutes, updated_at = now()
 where id = @monitor_id
-returning *;
-
--- name: UpdateMonitorSchedule :one
-update monitors
-set check_schedule = @check_schedule, updated_at = now()
-where user_id = @user_id and id = @id
 returning *;
 
 -- name: GetMonitorCheck :one

@@ -41,7 +41,7 @@ func (q *Queries) BumpMonitorVersion(ctx context.Context, db DBTX, monitorID int
 const createMonitor = `-- name: CreateMonitor :one
 insert into monitors (user_id, subject, status, updated_at, created_at)
 values ($1, $2, 'validating', now(), now())
-returning id, user_id, status, subject, rejected_reason, updated_at, created_at, check_schedule
+returning id, user_id, status, subject, rejected_reason, updated_at, created_at, check_frequency_minutes
 `
 
 type CreateMonitorParams struct {
@@ -60,7 +60,7 @@ func (q *Queries) CreateMonitor(ctx context.Context, db DBTX, arg *CreateMonitor
 		&i.RejectedReason,
 		&i.UpdatedAt,
 		&i.CreatedAt,
-		&i.CheckSchedule,
+		&i.CheckFrequencyMinutes,
 	)
 	return &i, err
 }
@@ -375,7 +375,7 @@ func (q *Queries) GetLatestMonitorResult(ctx context.Context, db DBTX, monitorID
 }
 
 const getMonitor = `-- name: GetMonitor :one
-select id, user_id, status, subject, rejected_reason, updated_at, created_at, check_schedule from monitors
+select id, user_id, status, subject, rejected_reason, updated_at, created_at, check_frequency_minutes from monitors
 where user_id = $1 and id = $2
 `
 
@@ -395,7 +395,7 @@ func (q *Queries) GetMonitor(ctx context.Context, db DBTX, arg *GetMonitorParams
 		&i.RejectedReason,
 		&i.UpdatedAt,
 		&i.CreatedAt,
-		&i.CheckSchedule,
+		&i.CheckFrequencyMinutes,
 	)
 	return &i, err
 }
@@ -809,7 +809,7 @@ select
     m.id as monitor_id,
     m.status,
     m.subject::text as subject,
-    m.check_schedule,
+    m.check_frequency_minutes,
     m.created_at,
     coalesce(mr.result, '') as latest_result,
     coalesce(mr.date, '0001-01-01 00:00:00 +0000') as latest_result_date,
@@ -836,7 +836,7 @@ type ListMonitorsWithResultsRow struct {
 	MonitorID                     int64
 	Status                        MonitorStatus
 	Subject                       string
-	CheckSchedule                 string
+	CheckFrequencyMinutes         int32
 	CreatedAt                     time.Time
 	LatestResult                  string
 	LatestResultDate              time.Time
@@ -859,7 +859,7 @@ func (q *Queries) ListMonitorsWithResults(ctx context.Context, db DBTX, arg *Lis
 			&i.MonitorID,
 			&i.Status,
 			&i.Subject,
-			&i.CheckSchedule,
+			&i.CheckFrequencyMinutes,
 			&i.CreatedAt,
 			&i.LatestResult,
 			&i.LatestResultDate,
@@ -936,20 +936,20 @@ func (q *Queries) UpdateMonitorCheckFailed(ctx context.Context, db DBTX, arg *Up
 	return err
 }
 
-const updateMonitorCheckSchedule = `-- name: UpdateMonitorCheckSchedule :one
+const updateMonitorCheckFrequency = `-- name: UpdateMonitorCheckFrequency :one
 update monitors
-set check_schedule = $1, updated_at = now()
+set check_frequency_minutes = $1, updated_at = now()
 where id = $2
-returning id, user_id, status, subject, rejected_reason, updated_at, created_at, check_schedule
+returning id, user_id, status, subject, rejected_reason, updated_at, created_at, check_frequency_minutes
 `
 
-type UpdateMonitorCheckScheduleParams struct {
-	CheckSchedule string
-	MonitorID     int64
+type UpdateMonitorCheckFrequencyParams struct {
+	CheckFrequencyMinutes int32
+	MonitorID             int64
 }
 
-func (q *Queries) UpdateMonitorCheckSchedule(ctx context.Context, db DBTX, arg *UpdateMonitorCheckScheduleParams) (*Monitor, error) {
-	row := db.QueryRow(ctx, updateMonitorCheckSchedule, arg.CheckSchedule, arg.MonitorID)
+func (q *Queries) UpdateMonitorCheckFrequency(ctx context.Context, db DBTX, arg *UpdateMonitorCheckFrequencyParams) (*Monitor, error) {
+	row := db.QueryRow(ctx, updateMonitorCheckFrequency, arg.CheckFrequencyMinutes, arg.MonitorID)
 	var i Monitor
 	err := row.Scan(
 		&i.ID,
@@ -959,7 +959,7 @@ func (q *Queries) UpdateMonitorCheckSchedule(ctx context.Context, db DBTX, arg *
 		&i.RejectedReason,
 		&i.UpdatedAt,
 		&i.CreatedAt,
-		&i.CheckSchedule,
+		&i.CheckFrequencyMinutes,
 	)
 	return &i, err
 }
@@ -984,7 +984,7 @@ const updateMonitorDraft = `-- name: UpdateMonitorDraft :one
 update monitors
 set subject = $1, updated_at = now()
 where user_id = $2 and id = $3 and status != 'active'
-returning id, user_id, status, subject, rejected_reason, updated_at, created_at, check_schedule
+returning id, user_id, status, subject, rejected_reason, updated_at, created_at, check_frequency_minutes
 `
 
 type UpdateMonitorDraftParams struct {
@@ -1004,7 +1004,7 @@ func (q *Queries) UpdateMonitorDraft(ctx context.Context, db DBTX, arg *UpdateMo
 		&i.RejectedReason,
 		&i.UpdatedAt,
 		&i.CreatedAt,
-		&i.CheckSchedule,
+		&i.CheckFrequencyMinutes,
 	)
 	return &i, err
 }
@@ -1025,40 +1025,11 @@ func (q *Queries) UpdateMonitorResultWithFeedback(ctx context.Context, db DBTX, 
 	return err
 }
 
-const updateMonitorSchedule = `-- name: UpdateMonitorSchedule :one
-update monitors
-set check_schedule = $1, updated_at = now()
-where user_id = $2 and id = $3
-returning id, user_id, status, subject, rejected_reason, updated_at, created_at, check_schedule
-`
-
-type UpdateMonitorScheduleParams struct {
-	CheckSchedule string
-	UserID        int64
-	ID            int64
-}
-
-func (q *Queries) UpdateMonitorSchedule(ctx context.Context, db DBTX, arg *UpdateMonitorScheduleParams) (*Monitor, error) {
-	row := db.QueryRow(ctx, updateMonitorSchedule, arg.CheckSchedule, arg.UserID, arg.ID)
-	var i Monitor
-	err := row.Scan(
-		&i.ID,
-		&i.UserID,
-		&i.Status,
-		&i.Subject,
-		&i.RejectedReason,
-		&i.UpdatedAt,
-		&i.CreatedAt,
-		&i.CheckSchedule,
-	)
-	return &i, err
-}
-
 const updateMonitorStatus = `-- name: UpdateMonitorStatus :one
 update monitors
 set status = $1, updated_at = now()
 where user_id = $2 and id = $3
-returning id, user_id, status, subject, rejected_reason, updated_at, created_at, check_schedule
+returning id, user_id, status, subject, rejected_reason, updated_at, created_at, check_frequency_minutes
 `
 
 type UpdateMonitorStatusParams struct {
@@ -1078,7 +1049,7 @@ func (q *Queries) UpdateMonitorStatus(ctx context.Context, db DBTX, arg *UpdateM
 		&i.RejectedReason,
 		&i.UpdatedAt,
 		&i.CreatedAt,
-		&i.CheckSchedule,
+		&i.CheckFrequencyMinutes,
 	)
 	return &i, err
 }
@@ -1087,7 +1058,7 @@ const updateMonitorToReady = `-- name: UpdateMonitorToReady :one
 update monitors
 set status = 'ready', subject = $1, updated_at = now()
 where user_id = $2 and id = $3
-returning id, user_id, status, subject, rejected_reason, updated_at, created_at, check_schedule
+returning id, user_id, status, subject, rejected_reason, updated_at, created_at, check_frequency_minutes
 `
 
 type UpdateMonitorToReadyParams struct {
@@ -1107,7 +1078,7 @@ func (q *Queries) UpdateMonitorToReady(ctx context.Context, db DBTX, arg *Update
 		&i.RejectedReason,
 		&i.UpdatedAt,
 		&i.CreatedAt,
-		&i.CheckSchedule,
+		&i.CheckFrequencyMinutes,
 	)
 	return &i, err
 }

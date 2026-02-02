@@ -168,22 +168,6 @@ func (h *Handlers) ViewMonitorCheck(w http.ResponseWriter, r *http.Request, user
 	}
 }
 
-// ViewMonitorSchedule handles GET /app/monitors/{id}/schedule
-func (h *Handlers) ViewMonitorSchedule(w http.ResponseWriter, r *http.Request, user *models.User) {
-	mon := h.monitorFromPath(w, r, user)
-	if mon == nil {
-		return
-	}
-
-	comp := MonitorSchedulePage(MonitorScheduleViewData{
-		Monitor: mon,
-	})
-	if err := comp.Render(r.Context(), w); err != nil {
-		h.logger.ErrorContext(r.Context(), "error rendering monitor schedule page", "error", err)
-		return
-	}
-}
-
 // ViewMonitorNotifications handles GET /app/monitors/{id}/notifications
 func (h *Handlers) ViewMonitorNotifications(w http.ResponseWriter, r *http.Request, user *models.User) {
 	mon := h.monitorFromPath(w, r, user)
@@ -212,19 +196,19 @@ func (h *Handlers) NewMonitor(w http.ResponseWriter, r *http.Request, user *mode
 	}
 }
 
-type updateCheckScheduleSignals struct {
-	Schedule string `json:"schedule"`
+type updateCheckFrequencySignals struct {
+	Frequency int32 `json:"frequency"`
 }
 
-// UpdateCheckSchedule handles POST /app/monitors/{id}/schedule
-func (h *Handlers) UpdateCheckSchedule(w http.ResponseWriter, r *http.Request, user *models.User) {
+// UpdateCheckFrequency handles POST /app/monitors/{id}/frequency
+func (h *Handlers) UpdateCheckFrequency(w http.ResponseWriter, r *http.Request, user *models.User) {
 	mon := h.monitorFromPath(w, r, user)
 	if mon == nil {
 		return
 	}
 
-	var params updateCheckScheduleSignals
-	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
+	var signals updateCheckFrequencySignals
+	if err := json.NewDecoder(r.Body).Decode(&signals); err != nil {
 		h.logger.Error("error unmarshaling json", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
@@ -233,21 +217,16 @@ func (h *Handlers) UpdateCheckSchedule(w http.ResponseWriter, r *http.Request, u
 		h.logger.Error("error closing response body", "error", err)
 	}
 
-	var err error
-	if mon, err = h.service.UpdateMonitorSchedule(r.Context(), mon, UpdateMonitorScheduleParams{
-		CheckSchedule: params.Schedule,
-	}); err != nil {
-		h.logger.Error("error updating monitor schedule", "error", err)
+	mon, err := h.service.UpdateMonitorFrequency(r.Context(), mon, UpdateMonitorFrequencyParams{
+		CheckFrequencyMinutes: signals.Frequency,
+	})
+	if err != nil {
+		h.logger.Error("error updating monitor frequency", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
-	sse := datastar.NewSSE(w, r)
-	comp := MonitorScheduleView(MonitorScheduleViewData{Monitor: mon})
-	if err := sse.PatchElementTempl(comp, datastar.WithViewTransitions()); err != nil {
-		h.logger.Error("error patching monitor schedule view", "error", err)
-		return
-	}
+	w.WriteHeader(http.StatusOK)
 }
 
 // UpdateMonitor handles POST /app/monitors/{id}

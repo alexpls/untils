@@ -332,7 +332,7 @@ CREATE TABLE public.monitors (
     rejected_reason text,
     updated_at timestamp with time zone NOT NULL,
     created_at timestamp with time zone NOT NULL,
-    check_schedule text DEFAULT '0 8,12,16,20 * * *'::text NOT NULL
+    check_frequency_minutes integer DEFAULT 1440 NOT NULL
 );
 
 

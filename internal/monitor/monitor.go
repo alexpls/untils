@@ -220,10 +220,7 @@ func (s *Service) ActivateMonitorFromPreview(ctx context.Context, user *models.U
 		}
 
 		fromTime := res.CreatedAt.In(user.Location())
-		nextCheckTime, err := nextCheckTime(monitor.CheckSchedule, fromTime)
-		if err != nil {
-			return nil, fmt.Errorf("calculating next check time: %w", err)
-		}
+		nextCheckTime := nextCheckTime(monitor.CheckFrequencyMinutes, fromTime)
 
 		if _, err := s.scheduleMonitorCheckTx(ctx, tx, monitor, nextCheckTime); err != nil {
 			return nil, fmt.Errorf("scheduling check: %w", err)
@@ -283,20 +280,20 @@ func (s *Service) updateMonitorDraftAndRevalidate(
 	})
 }
 
-type UpdateMonitorScheduleParams struct {
-	CheckSchedule string `json:"check_schedule"`
+type UpdateMonitorFrequencyParams struct {
+	CheckFrequencyMinutes int32 `json:"check_frequency_minutes"`
 }
 
-func (s *Service) UpdateMonitorSchedule(ctx context.Context, monitor *models.Monitor, params UpdateMonitorScheduleParams) (*models.Monitor, error) {
-	if err := validateSchedule(params.CheckSchedule); err != nil {
+func (s *Service) UpdateMonitorFrequency(ctx context.Context, monitor *models.Monitor, params UpdateMonitorFrequencyParams) (*models.Monitor, error) {
+	if err := validateFrequency(params.CheckFrequencyMinutes); err != nil {
 		return nil, err
 	}
 
 	return db.WithTxV(s.db, ctx, func(tx pgx.Tx) (*models.Monitor, error) {
 		// TODO: schedule next check whenever this is updated, too
-		return s.queries.UpdateMonitorCheckSchedule(ctx, tx, &models.UpdateMonitorCheckScheduleParams{
-			MonitorID:     monitor.ID,
-			CheckSchedule: params.CheckSchedule,
+		return s.queries.UpdateMonitorCheckFrequency(ctx, tx, &models.UpdateMonitorCheckFrequencyParams{
+			MonitorID:             monitor.ID,
+			CheckFrequencyMinutes: params.CheckFrequencyMinutes,
 		})
 	})
 }
@@ -361,10 +358,7 @@ func (s *Service) SetMonitorPaused(ctx context.Context, user *models.User, monit
 				return nil, fmt.Errorf("skipping pending checks: %w", err)
 			}
 		} else {
-			nextCheckTime, err := nextCheckTime(monitor.CheckSchedule, user.Now())
-			if err != nil {
-				return nil, fmt.Errorf("calculating next check time: %w", err)
-			}
+			nextCheckTime := nextCheckTime(monitor.CheckFrequencyMinutes, user.Now())
 			if _, err := s.scheduleMonitorCheckTx(ctx, tx, monitor, nextCheckTime); err != nil {
 				return nil, fmt.Errorf("scheduling check: %w", err)
 			}

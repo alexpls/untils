@@ -32,7 +32,6 @@ const (
 	_ MonitorPageType = iota
 	MonitorPageTypeActivity
 	MonitorPageTypeChecks
-	MonitorPageTypeSchedule
 	MonitorPageTypeNotifications
 )
 
@@ -70,12 +69,6 @@ templ MonitorSidebarLayout(monitor *models.Monitor, pageType MonitorPageType) {
 						href={ fmt.Sprintf("/app/monitors/%d/notifications", monitor.ID) }
 					>
 						Notifications
-					</a>
-					<a
-						class={ "block", "w-full", "rounded", templ.KV("bg-base-100", pageType == MonitorPageTypeSchedule), "px-4", "py-2", "text-muted", "text-sm", "hover:bg-base-100", "transition-colors" }
-						href={ fmt.Sprintf("/app/monitors/%d/schedule", monitor.ID) }
-					>
-						Schedule
 					</a>
 				</div>
 			</div>

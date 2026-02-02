@@ -1,0 +1,58 @@
+package monitor
+
+import (
+	"fmt"
+	"github.com/alexpls/untils/internal/models"
+	"github.com/starfederation/datastar-go/datastar"
+	"unicode"
+	"unicode/utf8"
+)
+
+templ FrequencyPicker(monitor *models.Monitor) {
+	{{ postAction := datastar.PostSSE("/app/monitors/%d/frequency", monitor.ID) }}
+	<div class="space-y-3">
+		<div class="w-full max-w-full">
+			{{
+				selectedIndex := 0
+				for i, opt := range FrequencyOptions {
+					if monitor.CheckFrequencyMinutes == opt.Minutes {
+						selectedIndex = i
+						break
+					}
+				}
+			}}
+			<input
+				name="frequency"
+				type="range"
+				min="0"
+				max={ len(FrequencyOptions) - 1 }
+				value={ selectedIndex }
+				step="1"
+				class="range [--range-fill:0] w-full"
+				data-init="$_frequencies = [];"
+				data-bind="_frequencyIndex"
+				data-effect="$frequency = $_frequencies[$_frequencyIndex]; $_frequenciesPadding = Math.floor((el.offsetWidth / $_frequencies.length) / 2)"
+				data-on:resize__window__debounce.50ms="$_frequenciesPadding = Math.floor((el.offsetWidth / $_frequencies.length) / 2)"
+				data-style:padding-left="$_frequenciesPadding + 'px'"
+				data-style:padding-right="$_frequenciesPadding + 'px'"
+				data-on:change={ postAction }
+			/>
+			<div class="flex justify-between px-2.5 mt-2 text-sm">
+				for i, opt := range FrequencyOptions {
+					<span
+						class="flex-1 text-center"
+						data-init={ fmt.Sprintf("$_frequencies[%d] = %d", i, opt.Minutes) }
+					>{ capitalize(opt.Label) }</span>
+				}
+			</div>
+		</div>
+	</div>
+}
+
+func capitalize(s string) string {
+	if s == "" {
+		return s
+	}
+	r, size := utf8.DecodeRuneInString(s)
+	return string(unicode.ToUpper(r)) + s[size:]
+}

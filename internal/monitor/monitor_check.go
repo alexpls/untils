@@ -139,10 +139,7 @@ func (s *Service) PerformMonitorCheck(
 		}
 
 		if scheduleNext {
-			nextCheckTime, err := nextCheckTime(monitor.CheckSchedule, user.Now())
-			if err != nil {
-				return nil, fmt.Errorf("calculating next check time: %w", err)
-			}
+			nextCheckTime := nextCheckTime(monitor.CheckFrequencyMinutes, user.Now())
 			_, err = s.scheduleMonitorCheckTx(ctx, tx, monitor, nextCheckTime)
 			if err != nil {
 				return nil, err

@@ -17,7 +17,6 @@ require (
 	github.com/riverqueue/river v0.30.2
 	github.com/riverqueue/river/riverdriver/riverpgxv5 v0.30.2
 	github.com/riverqueue/river/rivertype v0.30.2
-	github.com/robfig/cron/v3 v3.0.1
 	github.com/starfederation/datastar-go v1.1.0
 	github.com/stretchr/testify v1.11.1
 	golang.org/x/sync v0.19.0

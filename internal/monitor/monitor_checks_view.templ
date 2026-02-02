@@ -14,7 +14,18 @@ type MonitorChecksViewData struct {
 // TODO: should be SSE driven so new check activity immediately shows up
 templ MonitorChecksPage(data MonitorChecksViewData) {
 	@MonitorSidebarLayout(data.Monitor, MonitorPageTypeChecks) {
-		<div class="py-4 space-y-8">
+		@MonitorChecksView(data)
+	}
+}
+
+templ MonitorChecksView(data MonitorChecksViewData) {
+	<div id="monitor-checks-view" class="py-4 space-y-8">
+		<div>
+			<div class="p-4 bg-base-100 border border-base-content/10 rounded">
+				@FrequencyPicker(data.Monitor)
+			</div>
+		</div>
+		<div>
 			if (len(data.Checks) == 0) {
 				<p>No checks yet.</p>
 			} else {
@@ -54,5 +65,5 @@ templ MonitorChecksPage(data MonitorChecksViewData) {
 				</table>
 			}
 		</div>
-	}
+	</div>
 }

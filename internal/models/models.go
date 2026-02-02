@@ -245,14 +245,14 @@ type LlmConversation struct {
 }
 
 type Monitor struct {
-	ID             int64
-	UserID         int64
-	Status         MonitorStatus
-	Subject        pgtype.Text
-	RejectedReason pgtype.Text
-	UpdatedAt      time.Time
-	CreatedAt      time.Time
-	CheckSchedule  string
+	ID                    int64
+	UserID                int64
+	Status                MonitorStatus
+	Subject               pgtype.Text
+	RejectedReason        pgtype.Text
+	UpdatedAt             time.Time
+	CreatedAt             time.Time
+	CheckFrequencyMinutes int32
 }
 
 type MonitorCheck struct {

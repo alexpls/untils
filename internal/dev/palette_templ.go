@@ -64,13 +64,13 @@ func PalettePage() templ.Component {
 					}()
 				}
 				ctx = templ.InitializeContext(ctx)
-				templ_7745c5c3_Err = monitor.SchedulePicker(monitorStub()).Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = monitor.FrequencyPicker(monitorStub()).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				return nil
 			})
-			templ_7745c5c3_Err = example("Schedule").Render(templ.WithChildren(ctx, templ_7745c5c3_Var3), templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = example("FrequencyPicker").Render(templ.WithChildren(ctx, templ_7745c5c3_Var3), templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -179,9 +179,9 @@ func example(title string) templ.Component {
 
 func monitorStub() *models.Monitor {
 	return &models.Monitor{
-		ID:            0,
-		Subject:       pgtype.Text{Valid: true, String: "hi"},
-		CheckSchedule: monitor.DefaultCheckSchedule,
+		ID:                    0,
+		Subject:               pgtype.Text{Valid: true, String: "hi"},
+		CheckFrequencyMinutes: monitor.DefaultCheckFrequencyMinutes,
 	}
 }
 
