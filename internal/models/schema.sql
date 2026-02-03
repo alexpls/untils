@@ -62,7 +62,6 @@ CREATE TYPE public.llm_conversations_source AS ENUM (
 CREATE TYPE public.monitor_check_status AS ENUM (
     'scheduled',
     'checking',
-    'skipped',
     'failed',
     'success'
 );

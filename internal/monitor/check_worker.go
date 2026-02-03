@@ -60,6 +60,9 @@ func (w *CheckWorker) Work(ctx context.Context, job *river.Job[CheckArgs]) error
 	}
 
 	if err = w.service.PerformMonitorCheck(ctx, job.Args.UserID, check, true, ""); err != nil {
+		if errors.Is(err, ErrMonitorPaused) {
+			return nil
+		}
 		logger.ErrorContext(ctx, "failed to perform monitor check", "error", err)
 		return err
 	}

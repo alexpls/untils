@@ -17,7 +17,6 @@ import (
 
 var MonitorCheckTerminalStatuses = []models.MonitorCheckStatus{
 	models.MonitorCheckStatusFailed,
-	models.MonitorCheckStatusSkipped,
 	models.MonitorCheckStatusSuccess,
 }
 
@@ -64,8 +63,8 @@ func (s *Service) ScheduleMonitorCheck(ctx context.Context, monitor *models.Moni
 }
 
 func (s *Service) scheduleMonitorCheckTx(ctx context.Context, tx pgx.Tx, monitor *models.Monitor, scheduledFor time.Time) (*models.MonitorCheck, error) {
-	if err := s.queries.SkipPendingChecks(ctx, tx, monitor.ID); err != nil {
-		return nil, fmt.Errorf("skipping pending checks: %w", err)
+	if err := s.queries.DeleteScheduledChecks(ctx, tx, monitor.ID); err != nil {
+		return nil, fmt.Errorf("deleting scheduled checks: %w", err)
 	}
 
 	check, err := s.queries.CreateMonitorCheck(ctx, tx, &models.CreateMonitorCheckParams{
@@ -93,6 +92,8 @@ func (s *Service) scheduleMonitorCheckTx(ctx context.Context, tx pgx.Tx, monitor
 	return check, nil
 }
 
+var ErrMonitorPaused = errors.New("monitor is paused")
+
 func (s *Service) PerformMonitorCheck(
 	ctx context.Context,
 	userID int64,
@@ -114,13 +115,8 @@ func (s *Service) PerformMonitorCheck(
 		return fmt.Errorf("getting monitor: %w", err)
 	}
 
-	// Skip the check if the monitor is paused
 	if monitor.Status == models.MonitorStatusPaused {
-		s.logger.InfoContext(ctx, "skipping check for paused monitor", "monitor_id", monitor.ID, "check_id", check.ID)
-		if err := s.queries.SkipPendingChecks(ctx, s.db, monitor.ID); err != nil {
-			return fmt.Errorf("skipping pending checks for paused monitor: %w", err)
-		}
-		return nil
+		return ErrMonitorPaused
 	}
 
 	user, err := s.queries.GetUser(ctx, s.db, userID)

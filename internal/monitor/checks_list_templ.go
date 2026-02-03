@@ -375,11 +375,6 @@ func checkStatusBadge(status models.MonitorCheckStatus) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case models.MonitorCheckStatusSkipped:
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "<div class=\"badge badge-soft\">Skipped</div>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
 		}
 		return nil
 	})

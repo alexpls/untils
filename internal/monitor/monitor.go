@@ -334,7 +334,7 @@ func (s *Service) deleteMonitorRelations(ctx context.Context, tx models.DBTX, mo
 }
 
 // SetMonitorPaused pauses or unpauses a monitor.
-// When pausing, pending checks are skipped.
+// When pausing, scheduled checks are deleted.
 // When unpausing, a new check is scheduled for either now or when the next
 // check would have been due if the monitor had never been paused, whichever is later.
 func (s *Service) SetMonitorPaused(ctx context.Context, user *models.User, monitorID int64, paused bool) (*models.Monitor, error) {
@@ -354,8 +354,8 @@ func (s *Service) SetMonitorPaused(ctx context.Context, user *models.User, monit
 
 	return db.WithTxV(s.db, ctx, func(tx pgx.Tx) (*models.Monitor, error) {
 		if paused {
-			if err := s.queries.SkipPendingChecks(ctx, tx, monitorID); err != nil {
-				return nil, fmt.Errorf("skipping pending checks: %w", err)
+			if err := s.queries.DeleteScheduledChecks(ctx, tx, monitorID); err != nil {
+				return nil, fmt.Errorf("deleting scheduled checks: %w", err)
 			}
 		} else {
 			nextCheckTime := nextCheckTime(monitor.CheckFrequencyMinutes, user.Now())

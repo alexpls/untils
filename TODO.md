@@ -21,11 +21,11 @@
 - [ ] Improvement: 25% of the produced binary is OpenAI's bloated SDK. I only use one endpoint, could move away from the SDK and call it directly with HTTP?
 - [ ] Improvement: make it clearer what the purpose of the preview is. I've had feedback that it's confusing that it's showing something that's already happened, which isn't something that the user wants to be notified about _now_.
 - [ ] Feature: hide results that were bad, and feed them back to LLM
-- [ ] Refactor: can I get rid of skipped checks? It's annoying and doesn't make sense on the UI.
 - [ ] Fix: updating the check schedule should modify the currently scheduled checks
 
 ## Done
 
+- [x] Refactor: can I get rid of skipped checks? It's annoying and doesn't make sense on the UI.
 - [x] Fix: When restarting a check (e.g. after server restart), make sure to clear old check events for it
 - [x] Fix: sometimes a draft will get stuck on 'previewing' status and will need a page refresh to actually show the "Activate" screen
 - [x] Fix: check timeline event timestamps aren't right aligned. they should be, and should have a small margin on their left for good measure.

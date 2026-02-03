@@ -19,6 +19,8 @@ run = '''
 psql "${PG_TEST_URL%/untils_test}" --echo-errors --quiet -c '\timing off' -c "drop database if exists untils_test with (force);"
 psql "${PG_TEST_URL%/untils_test}" --echo-errors --quiet -c '\timing off' -c "create database untils_test;"
 psql "${PG_TEST_URL}" --echo-errors --quiet -c '\timing off' -f ./internal/models/schema.sql
+# Mark River migrations as applied since they're in schema.sql - TODO there must be a better way?
+psql "${PG_TEST_URL}" --echo-errors --quiet -c "insert into river_migration (line, version, created_at) values ('main', 1, now()), ('main', 2, now()), ('main', 3, now()), ('main', 4, now()), ('main', 5, now()), ('main', 6, now()) on conflict do nothing;"
 '''
 
 [tasks.test]

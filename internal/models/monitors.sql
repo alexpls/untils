@@ -120,11 +120,10 @@ left join monitor_checks mc on mc.monitor_id = m.id
 group by calendar.day
 order by day asc;
 
--- name: SkipPendingChecks :exec
-update monitor_checks
-set status = 'skipped'
+-- name: DeleteScheduledChecks :exec
+delete from monitor_checks
 where monitor_id = @monitor_id
-and status in ('scheduled', 'checking');
+and status in ('scheduled');
 
 -- name: CreateMonitorCheck :one
 insert into monitor_checks (monitor_id, status, scheduled_for, done_at, result)

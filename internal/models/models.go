@@ -58,7 +58,6 @@ type MonitorCheckStatus string
 const (
 	MonitorCheckStatusScheduled MonitorCheckStatus = "scheduled"
 	MonitorCheckStatusChecking  MonitorCheckStatus = "checking"
-	MonitorCheckStatusSkipped   MonitorCheckStatus = "skipped"
 	MonitorCheckStatusFailed    MonitorCheckStatus = "failed"
 	MonitorCheckStatusSuccess   MonitorCheckStatus = "success"
 )

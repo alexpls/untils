@@ -229,6 +229,17 @@ func (q *Queries) DeleteMonitorResults(ctx context.Context, db DBTX, monitorID i
 	return err
 }
 
+const deleteScheduledChecks = `-- name: DeleteScheduledChecks :exec
+delete from monitor_checks
+where monitor_id = $1
+and status in ('scheduled')
+`
+
+func (q *Queries) DeleteScheduledChecks(ctx context.Context, db DBTX, monitorID int64) error {
+	_, err := db.Exec(ctx, deleteScheduledChecks, monitorID)
+	return err
+}
+
 const getCheckWithMonitor = `-- name: GetCheckWithMonitor :one
 select
     mc.id as check_id,
@@ -894,18 +905,6 @@ type RejectMonitorParams struct {
 
 func (q *Queries) RejectMonitor(ctx context.Context, db DBTX, arg *RejectMonitorParams) error {
 	_, err := db.Exec(ctx, rejectMonitor, arg.RejectedReason, arg.UserID, arg.ID)
-	return err
-}
-
-const skipPendingChecks = `-- name: SkipPendingChecks :exec
-update monitor_checks
-set status = 'skipped'
-where monitor_id = $1
-and status in ('scheduled', 'checking')
-`
-
-func (q *Queries) SkipPendingChecks(ctx context.Context, db DBTX, monitorID int64) error {
-	_, err := db.Exec(ctx, skipPendingChecks, monitorID)
 	return err
 }
 
