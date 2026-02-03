@@ -15,9 +15,9 @@ import (
 // ListChecks handles GET /app/checks
 func (h *Handlers) ListChecks(w http.ResponseWriter, r *http.Request, user *models.User) {
 	patcher := ConditionalPatchRenderer{
-		Logger:    h.logger,
-		Subscribe: func(ctx context.Context) (<-chan struct{}, error) { return h.events.SubscribeUser(ctx, user.ID), nil },
-		Render: func(patch bool) (templ.Component, error) {
+		Logger:  h.logger,
+		Updater: func(ctx context.Context) (<-chan struct{}, error) { return h.events.SubscribeUser(ctx, user.ID), nil },
+		Renderer: func(patch bool) (templ.Component, error) {
 			pag := pagination.PaginationFromRequest(r, 50)
 
 			checks, err := h.service.queries.ListChecksWithMonitor(
@@ -61,9 +61,9 @@ func (h *Handlers) ViewCheck(w http.ResponseWriter, r *http.Request, user *model
 	}
 
 	patcher := ConditionalPatchRenderer{
-		Logger:    h.logger,
-		Subscribe: func(ctx context.Context) (<-chan struct{}, error) { return h.events.SubscribeUser(ctx, user.ID), nil },
-		Render: func(patch bool) (templ.Component, error) {
+		Logger:  h.logger,
+		Updater: func(ctx context.Context) (<-chan struct{}, error) { return h.events.SubscribeUser(ctx, user.ID), nil },
+		Renderer: func(patch bool) (templ.Component, error) {
 			check, err := h.service.queries.GetCheckWithMonitor(r.Context(), h.service.db, checkID)
 			if err != nil {
 				return nil, err

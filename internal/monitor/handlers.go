@@ -57,12 +57,12 @@ func sseReload(sse *datastar.ServerSentEventGenerator) error {
 }
 
 // ConditionalPatchRenderer renders a [templ.Component] either as a patch within
-// an SSE stream (updated each time [Subscribe] sends a message), or as a plain
+// an SSE stream (updated each time [Updater] sends a message), or as a plain
 // HTTP response.
 type ConditionalPatchRenderer struct {
-	Logger    *slog.Logger
-	Render    func(patch bool) (templ.Component, error)
-	Subscribe func(ctx context.Context) (<-chan struct{}, error)
+	Logger   *slog.Logger
+	Renderer func(patch bool) (templ.Component, error)
+	Updater  func(ctx context.Context) (<-chan struct{}, error)
 }
 
 // Handle responds to the [http.Request] by rendering the configured component. It
@@ -74,14 +74,14 @@ func (cpr *ConditionalPatchRenderer) Handle(w http.ResponseWriter, r *http.Reque
 	if wantsPatches {
 		sse := datastar.NewSSE(w, r)
 
-		updates, err := cpr.Subscribe(sse.Context())
+		updates, err := cpr.Updater(sse.Context())
 		if err != nil {
 			cpr.Logger.ErrorContext(sse.Context(), "error subscribing for updates", "error", err)
 			return
 		}
 
 		for {
-			comp, err := cpr.Render(wantsPatches)
+			comp, err := cpr.Renderer(wantsPatches)
 			if err != nil {
 				cpr.Logger.ErrorContext(sse.Context(), "error rendering component", "error", err)
 				return
@@ -99,7 +99,7 @@ func (cpr *ConditionalPatchRenderer) Handle(w http.ResponseWriter, r *http.Reque
 		}
 
 	} else {
-		comp, err := cpr.Render(wantsPatches)
+		comp, err := cpr.Renderer(wantsPatches)
 		if err != nil {
 			cpr.Logger.ErrorContext(r.Context(), "error rendering component", "error", err)
 			http.Error(w, "Internal server error", http.StatusInternalServerError)

@@ -19,9 +19,9 @@ import (
 // ListMonitors handles GET /app/monitors
 func (h *Handlers) ListMonitors(w http.ResponseWriter, r *http.Request, user *models.User) {
 	patcher := ConditionalPatchRenderer{
-		Logger:    h.logger,
-		Subscribe: func(ctx context.Context) (<-chan struct{}, error) { return h.events.SubscribeUser(ctx, user.ID), nil },
-		Render: func(patch bool) (templ.Component, error) {
+		Logger:  h.logger,
+		Updater: func(ctx context.Context) (<-chan struct{}, error) { return h.events.SubscribeUser(ctx, user.ID), nil },
+		Renderer: func(patch bool) (templ.Component, error) {
 			pag := pagination.PaginationFromRequest(r, 30)
 
 			monitors, err := h.service.queries.ListMonitorsWithResults(
@@ -67,7 +67,7 @@ func (h *Handlers) ViewMonitor(w http.ResponseWriter, r *http.Request, user *mod
 
 	patcher := ConditionalPatchRenderer{
 		Logger: h.logger,
-		Render: func(patch bool) (templ.Component, error) {
+		Renderer: func(patch bool) (templ.Component, error) {
 			freshMon, err := h.service.GetMonitor(r.Context(), user.ID, monitorID)
 			if err != nil {
 				return nil, err
@@ -78,7 +78,7 @@ func (h *Handlers) ViewMonitor(w http.ResponseWriter, r *http.Request, user *mod
 			}
 			return h.renderMonitorDraft(r.Context(), freshMon, user.ID, NewUpdateMonitorDraftParams(freshMon), nil)
 		},
-		Subscribe: func(ctx context.Context) (<-chan struct{}, error) {
+		Updater: func(ctx context.Context) (<-chan struct{}, error) {
 			return h.events.SubscribeMonitor(ctx, monitorID), nil
 		},
 	}
@@ -89,7 +89,7 @@ func (h *Handlers) ViewMonitor(w http.ResponseWriter, r *http.Request, user *mod
 func (h *Handlers) ViewMonitorChecks(w http.ResponseWriter, r *http.Request, user *models.User) {
 	patcher := ConditionalPatchRenderer{
 		Logger: h.logger,
-		Render: func(patch bool) (templ.Component, error) {
+		Renderer: func(patch bool) (templ.Component, error) {
 			mon := h.monitorFromPath(w, r, user)
 			if mon == nil {
 				return nil, fmt.Errorf("monitor not found")
@@ -111,7 +111,7 @@ func (h *Handlers) ViewMonitorChecks(w http.ResponseWriter, r *http.Request, use
 				return MonitorChecksPage(data), nil
 			}
 		},
-		Subscribe: func(ctx context.Context) (<-chan struct{}, error) {
+		Updater: func(ctx context.Context) (<-chan struct{}, error) {
 			monitorID := monitorIDFromPath(r)
 			if monitorID == 0 {
 				return nil, fmt.Errorf("monitor not found")

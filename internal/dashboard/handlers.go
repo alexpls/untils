@@ -29,7 +29,28 @@ func NewHandlers(queries *models.Queries, db db.DB, monitorEvents *monitor.DBEve
 	}
 }
 
-func (h *Handlers) renderDashboard(ctx context.Context, userID int64, loading LoadingStatus) (DashboardViewData, error) {
+// ViewDashboard handles GET /app
+func (h *Handlers) ViewDashboard(w http.ResponseWriter, r *http.Request, user *models.User) {
+	patcher := monitor.ConditionalPatchRenderer{
+		Logger: h.logger,
+		Renderer: func(patch bool) (templ.Component, error) {
+			data, err := h.dashboardViewData(r.Context(), user.ID, LoadingStatusLoaded)
+			if err != nil {
+				return nil, err
+			}
+			if patch {
+				return DashboardView(data), nil
+			}
+			return DashboardPage(data), nil
+		},
+		Updater: func(ctx context.Context) (<-chan struct{}, error) {
+			return h.monitorEvents.SubscribeUser(ctx, user.ID), nil
+		},
+	}
+	patcher.Handle(w, r)
+}
+
+func (h *Handlers) dashboardViewData(ctx context.Context, userID int64, loading LoadingStatus) (DashboardViewData, error) {
 	if loading == LoadingStatusLoading {
 		return DashboardViewData{
 			MonitorActivity: MonitorActivityWidgetData{
@@ -67,25 +88,4 @@ func (h *Handlers) renderDashboard(ctx context.Context, userID int64, loading Lo
 			DailyCheckCounts: dailyCheckCounts,
 		},
 	}, nil
-}
-
-// ViewDashboard handles GET /app
-func (h *Handlers) ViewDashboard(w http.ResponseWriter, r *http.Request, user *models.User) {
-	patcher := monitor.ConditionalPatchRenderer{
-		Logger: h.logger,
-		Render: func(patch bool) (templ.Component, error) {
-			data, err := h.renderDashboard(r.Context(), user.ID, LoadingStatusLoaded)
-			if err != nil {
-				return nil, err
-			}
-			if patch {
-				return DashboardView(data), nil
-			}
-			return DashboardPage(data), nil
-		},
-		Subscribe: func(ctx context.Context) (<-chan struct{}, error) {
-			return h.monitorEvents.SubscribeUser(ctx, user.ID), nil
-		},
-	}
-	patcher.Handle(w, r)
 }
