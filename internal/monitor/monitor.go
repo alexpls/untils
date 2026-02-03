@@ -284,17 +284,34 @@ type UpdateMonitorFrequencyParams struct {
 	CheckFrequencyMinutes int32 `json:"check_frequency_minutes"`
 }
 
-func (s *Service) UpdateMonitorFrequency(ctx context.Context, monitor *models.Monitor, params UpdateMonitorFrequencyParams) (*models.Monitor, error) {
+func (s *Service) UpdateMonitorCheckFrequency(ctx context.Context, monitor *models.Monitor, params UpdateMonitorFrequencyParams) (*models.Monitor, error) {
 	if err := validateFrequency(params.CheckFrequencyMinutes); err != nil {
 		return nil, err
 	}
 
 	return db.WithTxV(s.db, ctx, func(tx pgx.Tx) (*models.Monitor, error) {
-		// TODO: schedule next check whenever this is updated, too
-		return s.queries.UpdateMonitorCheckFrequency(ctx, tx, &models.UpdateMonitorCheckFrequencyParams{
+		if _, err := s.queries.UpdateMonitorCheckFrequency(ctx, tx, &models.UpdateMonitorCheckFrequencyParams{
 			MonitorID:             monitor.ID,
 			CheckFrequencyMinutes: params.CheckFrequencyMinutes,
-		})
+		}); err != nil {
+			return nil, fmt.Errorf("updating monitor check frequency: %w", err)
+		}
+
+		user, err := s.queries.GetUser(ctx, tx, monitor.UserID)
+		if err != nil {
+			return nil, fmt.Errorf("getting user: %w", err)
+		}
+
+		if err := s.queries.DeleteScheduledChecks(ctx, tx, monitor.ID); err != nil {
+			return nil, fmt.Errorf("deleting scheduled checks: %w", err)
+		}
+
+		nextCheckTime := nextCheckTime(params.CheckFrequencyMinutes, user.Now())
+		if _, err := s.scheduleMonitorCheckTx(ctx, tx, monitor, nextCheckTime); err != nil {
+			return nil, fmt.Errorf("scheduling check: %w", err)
+		}
+
+		return monitor, nil
 	})
 }
 

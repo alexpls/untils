@@ -200,8 +200,8 @@ type updateCheckFrequencySignals struct {
 	Frequency int32 `json:"frequency"`
 }
 
-// UpdateCheckFrequency handles POST /app/monitors/{id}/frequency
-func (h *Handlers) UpdateCheckFrequency(w http.ResponseWriter, r *http.Request, user *models.User) {
+// UpdateMonitorCheckFrequency handles POST /app/monitors/{id}/frequency
+func (h *Handlers) UpdateMonitorCheckFrequency(w http.ResponseWriter, r *http.Request, user *models.User) {
 	mon := h.monitorFromPath(w, r, user)
 	if mon == nil {
 		return
@@ -217,7 +217,7 @@ func (h *Handlers) UpdateCheckFrequency(w http.ResponseWriter, r *http.Request, 
 		h.logger.Error("error closing response body", "error", err)
 	}
 
-	mon, err := h.service.UpdateMonitorFrequency(r.Context(), mon, UpdateMonitorFrequencyParams{
+	mon, err := h.service.UpdateMonitorCheckFrequency(r.Context(), mon, UpdateMonitorFrequencyParams{
 		CheckFrequencyMinutes: signals.Frequency,
 	})
 	if err != nil {
