@@ -49,7 +49,7 @@ templ MonitorSidebarLayout(monitor *models.Monitor, pageType MonitorPageType) {
 				</div>
 			</div>
 		}
-		<div class="grid grid-cols-9 px-4 gap-x-4">
+		<div class="grid grid-cols-1 lg:grid-cols-9 px-4 gap-x-4">
 			<div class="col-span-1">
 				<div class="py-4 space-y-2">
 					<a
@@ -72,7 +72,7 @@ templ MonitorSidebarLayout(monitor *models.Monitor, pageType MonitorPageType) {
 					</a>
 				</div>
 			</div>
-			<div class="col-span-8">
+			<div class="col-span-1 lg:col-span-8">
 				{ children... }
 			</div>
 		</div>
@@ -82,8 +82,8 @@ templ MonitorSidebarLayout(monitor *models.Monitor, pageType MonitorPageType) {
 templ MonitorPage(data MonitorViewData) {
 	@MonitorSidebarLayout(data.Monitor, MonitorPageTypeActivity) {
 		<div id="monitor-view" data-effect={ datastar.GetSSE("/app/monitors/%d?sse=true", data.Monitor.ID) }>
-			<div class="grid grid-cols-1 lg:grid-cols-12">
-				<div class="lg:col-span-8 m-4 p-4 bg-base-100 rounded border border-base-content/10">
+			<div class="grid grid-cols-1 lg:grid-cols-12 space-y-4">
+				<div class="lg:col-span-8 lg:m-4 px-4 py-2 bg-base-100 rounded border border-base-content/10">
 					@components.Timeline() {
 						if data.InProgressCheck != nil {
 							@InProgressCheckTimelineItem(InProgressCheckTimelineItemViewData{
@@ -99,7 +99,7 @@ templ MonitorPage(data MonitorViewData) {
 						</li>
 					}
 				</div>
-				<div class="lg:col-span-4 m-4 p-4 border border-base-content/10 rounded">
+				<div class="lg:col-span-4 lg:m-4 p-4 border border-base-content/10 rounded">
 					<div class="space-y-4">
 						if data.Monitor.Status == models.MonitorStatusActive && data.NextScheduledCheck != nil {
 							<div>
@@ -232,14 +232,14 @@ templ monitorResultTimelineItem(result *models.MonitorResult, allowFeedback bool
 		</div>
 		if allowFeedback {
 			if result.Feedback.String == "" {
-				<div class="mt-2 border py-1 px-2 rounded border-base-content/10 shadow flex items-center text-sm">
+				<div class="mt-2 border py-1 px-2 rounded border-base-content/10 shadow flex items-center text-xs md:text-sm">
 					@icons.Info(icons.IconParams{Size: 16, Classes: templ.Classes("text-muted")})
 					<div class="ml-2 text-muted">
 						Not the result you expected?
 						<button
-							class="link font-bold"
+							class="inline link font-bold text-start"
 							data-on:click={ datastar.GetSSE("/app/monitors/%d/results/%d/feedback", result.MonitorID, result.ID) }
-						>Provide feedback to improve it</button>.
+						>Provide feedback to improve it.</button>
 					</div>
 				</div>
 			} else {

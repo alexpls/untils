@@ -19,10 +19,10 @@ templ MonitorChecksPage(data MonitorChecksViewData) {
 }
 
 templ MonitorChecksView(data MonitorChecksViewData) {
-	<div id="monitor-checks-view" class="py-4 space-y-8" data-effect={ datastar.GetSSE("/app/monitors/%d/checks?sse=true", data.Monitor.ID) }>
+	<div id="monitor-checks-view" class="lg:py-4 space-y-4 lg:space-y-8" data-effect={ datastar.GetSSE("/app/monitors/%d/checks?sse=true", data.Monitor.ID) }>
 		<div>
 			<div class="p-4 bg-base-100 border border-base-content/10 rounded">
-				<h2 class="text-lg font-bold text-center">How often should this monitor be checked?</h2>
+				<h2 class="text-base lg:text-lg font-bold text-center">How often should this monitor be checked?</h2>
 				<div class="mt-6">
 					@FrequencyPicker(data.Monitor)
 				</div>
@@ -32,40 +32,42 @@ templ MonitorChecksView(data MonitorChecksViewData) {
 			if (len(data.Checks) == 0) {
 				<p>No checks yet.</p>
 			} else {
-				<table class="table bg-base-100 border border-base-content/10">
-					<thead>
-						<tr>
-							<th>Status</th>
-							<th>Scheduled</th>
-							<th>Done at</th>
-							<th></th>
-						</tr>
-						<tbody>
-							for _, check := range data.Checks {
-								<tr class="hover:bg-base-200">
-									<td class="min-w-30">
-										@checkStatusBadge(check.Status)
-									</td>
-									<td class="text-muted min-w-38 tabular-nums">
-										@components.TimeAgo(fmt.Sprintf("checkScheduledFor%d", check.ID), check.ScheduledFor)
-									</td>
-									<td class="text-muted min-w-38 tabular-nums">
-										if check.DoneAt != nil {
-											@components.TimeAgo(fmt.Sprintf("checkDoneAt%d", check.ID), *check.DoneAt)
-										} else {
-											<span class="text-muted">-</span>
-										}
-									</td>
-									<td class="min-w-30">
-										if check.Status == models.MonitorCheckStatusSuccess {
-											<a class="btn btn-sm btn-soft" href={ fmt.Sprintf("/app/checks/%d", check.ID) }>Details</a>
-										}
-									</td>
-								</tr>
-							}
-						</tbody>
-					</thead>
-				</table>
+				<div class="overflow-x-auto">
+					<table class="table bg-base-100 border border-base-content/10">
+						<thead>
+							<tr>
+								<th>Status</th>
+								<th>Scheduled</th>
+								<th>Done at</th>
+								<th></th>
+							</tr>
+							<tbody>
+								for _, check := range data.Checks {
+									<tr class="hover:bg-base-200">
+										<td class="min-w-30">
+											@checkStatusBadge(check.Status)
+										</td>
+										<td class="text-muted min-w-38 tabular-nums">
+											@components.TimeAgo(fmt.Sprintf("checkScheduledFor%d", check.ID), check.ScheduledFor)
+										</td>
+										<td class="text-muted min-w-38 tabular-nums">
+											if check.DoneAt != nil {
+												@components.TimeAgo(fmt.Sprintf("checkDoneAt%d", check.ID), *check.DoneAt)
+											} else {
+												<span class="text-muted">-</span>
+											}
+										</td>
+										<td class="min-w-30">
+											if check.Status == models.MonitorCheckStatusSuccess {
+												<a class="btn btn-sm btn-soft" href={ fmt.Sprintf("/app/checks/%d", check.ID) }>Details</a>
+											}
+										</td>
+									</tr>
+								}
+							</tbody>
+						</thead>
+					</table>
+				</div>
 			}
 		</div>
 	</div>

@@ -86,7 +86,7 @@ func MonitorNotificationsView(data MonitorNotificationsViewData) templ.Component
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"p-4\"><div class=\"p-4 border border-base-content/10 rounded bg-base-100\"><h3>When a new result is found&hellip;</h3>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"lg:p-4\"><div class=\"p-4 border border-base-content/10 rounded bg-base-100\"><h3>When a new result is found&hellip;</h3>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

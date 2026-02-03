@@ -119,7 +119,7 @@ func MonitorSidebarLayout(monitor *models.Monitor, pageType MonitorPageType) tem
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, " <div class=\"grid grid-cols-9 px-4 gap-x-4\"><div class=\"col-span-1\"><div class=\"py-4 space-y-2\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, " <div class=\"grid grid-cols-1 lg:grid-cols-9 px-4 gap-x-4\"><div class=\"col-span-1\"><div class=\"py-4 space-y-2\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -224,7 +224,7 @@ func MonitorSidebarLayout(monitor *models.Monitor, pageType MonitorPageType) tem
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\">Notifications</a></div></div><div class=\"col-span-8\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\">Notifications</a></div></div><div class=\"col-span-1 lg:col-span-8\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -296,7 +296,7 @@ func MonitorPage(data MonitorViewData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\"><div class=\"grid grid-cols-1 lg:grid-cols-12\"><div class=\"lg:col-span-8 m-4 p-4 bg-base-100 rounded border border-base-content/10\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\"><div class=\"grid grid-cols-1 lg:grid-cols-12 space-y-4\"><div class=\"lg:col-span-8 lg:m-4 px-4 py-2 bg-base-100 rounded border border-base-content/10\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -345,7 +345,7 @@ func MonitorPage(data MonitorViewData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</div><div class=\"lg:col-span-4 m-4 p-4 border border-base-content/10 rounded\"><div class=\"space-y-4\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</div><div class=\"lg:col-span-4 lg:m-4 p-4 border border-base-content/10 rounded\"><div class=\"space-y-4\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -752,7 +752,7 @@ func monitorResultTimelineItem(result *models.MonitorResult, allowFeedback bool)
 			}
 			if allowFeedback {
 				if result.Feedback.String == "" {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 54, "<div class=\"mt-2 border py-1 px-2 rounded border-base-content/10 shadow flex items-center text-sm\">")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 54, "<div class=\"mt-2 border py-1 px-2 rounded border-base-content/10 shadow flex items-center text-xs md:text-sm\">")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -760,7 +760,7 @@ func monitorResultTimelineItem(result *models.MonitorResult, allowFeedback bool)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 55, "<div class=\"ml-2 text-muted\">Not the result you expected? <button class=\"link font-bold\" data-on:click=\"")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 55, "<div class=\"ml-2 text-muted\">Not the result you expected? <button class=\"inline link font-bold text-start\" data-on:click=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -773,7 +773,7 @@ func monitorResultTimelineItem(result *models.MonitorResult, allowFeedback bool)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 56, "\">Provide feedback to improve it</button>.</div></div>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 56, "\">Provide feedback to improve it.</button></div></div>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}

@@ -88,20 +88,20 @@ func MonitorChecksView(data MonitorChecksViewData) templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div id=\"monitor-checks-view\" class=\"py-4 space-y-8\" data-effect=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div id=\"monitor-checks-view\" class=\"lg:py-4 space-y-4 lg:space-y-8\" data-effect=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(datastar.GetSSE("/app/monitors/%d/checks?sse=true", data.Monitor.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_checks_view.templ`, Line: 22, Col: 136}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_checks_view.templ`, Line: 22, Col: 152}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\"><div><div class=\"p-4 bg-base-100 border border-base-content/10 rounded\"><h2 class=\"text-lg font-bold text-center\">How often should this monitor be checked?</h2><div class=\"mt-6\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\"><div><div class=\"p-4 bg-base-100 border border-base-content/10 rounded\"><h2 class=\"text-base lg:text-lg font-bold text-center\">How often should this monitor be checked?</h2><div class=\"mt-6\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -119,7 +119,7 @@ func MonitorChecksView(data MonitorChecksViewData) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<table class=\"table bg-base-100 border border-base-content/10\"><thead><tr><th>Status</th><th>Scheduled</th><th>Done at</th><th></th></tr><tbody>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"overflow-x-auto\"><table class=\"table bg-base-100 border border-base-content/10\"><thead><tr><th>Status</th><th>Scheduled</th><th>Done at</th><th></th></tr><tbody>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -167,7 +167,7 @@ func MonitorChecksView(data MonitorChecksViewData) templ.Component {
 					var templ_7745c5c3_Var5 templ.SafeURL
 					templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinURLErrs(fmt.Sprintf("/app/checks/%d", check.ID))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_checks_view.templ`, Line: 61, Col: 88}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_checks_view.templ`, Line: 62, Col: 89}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 					if templ_7745c5c3_Err != nil {
@@ -183,7 +183,7 @@ func MonitorChecksView(data MonitorChecksViewData) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</tbody></thead></table>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</tbody></thead></table></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
