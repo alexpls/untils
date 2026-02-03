@@ -22,7 +22,10 @@ templ MonitorChecksView(data MonitorChecksViewData) {
 	<div id="monitor-checks-view" class="py-4 space-y-8">
 		<div>
 			<div class="p-4 bg-base-100 border border-base-content/10 rounded">
-				@FrequencyPicker(data.Monitor)
+				<h2 class="text-lg font-bold text-center">How often should this monitor be checked?</h2>
+				<div class="mt-6">
+					@FrequencyPicker(data.Monitor)
+				</div>
 			</div>
 		</div>
 		<div>

@@ -9,7 +9,6 @@ import (
 )
 
 templ FrequencyPicker(monitor *models.Monitor) {
-	{{ postAction := datastar.PostSSE("/app/monitors/%d/frequency", monitor.ID) }}
 	<div class="space-y-3">
 		<div class="w-full max-w-full">
 			{{
@@ -35,13 +34,16 @@ templ FrequencyPicker(monitor *models.Monitor) {
 				data-on:resize__window__debounce.50ms="$_frequenciesPadding = Math.floor((el.offsetWidth / $_frequencies.length) / 2)"
 				data-style:padding-left="$_frequenciesPadding + 'px'"
 				data-style:padding-right="$_frequenciesPadding + 'px'"
-				data-on:change={ postAction }
+				data-on-signal-patch={ datastar.PostSSE("/app/monitors/%d/frequency", monitor.ID) }
+				data-on-signal-patch-filter="{include: /frequencyIndex/}"
 			/>
-			<div class="flex justify-between px-2.5 mt-2 text-sm">
+			<div class="flex justify-between px-2.5 text-sm">
 				for i, opt := range FrequencyOptions {
 					<span
-						class="flex-1 text-center"
+						class="flex-1 pt-2 text-center text-xs md:text-sm cursor-pointer transition-all"
+						data-class={ fmt.Sprintf("{'font-bold': $_frequencyIndex == %d, 'text-muted': $_frequencyIndex != %d}", i, i) }
 						data-init={ fmt.Sprintf("$_frequencies[%d] = %d", i, opt.Minutes) }
+						data-on:click={ fmt.Sprintf("$_frequencyIndex = %d", i) }
 					>{ capitalize(opt.Label) }</span>
 				}
 			</div>
