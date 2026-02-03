@@ -23,16 +23,13 @@ func (a *app) routes() http.Handler {
 
 	// dashboard
 	mux.HandleFunc("GET /app", a.requireAuth(a.dashboardHandlers.ViewDashboard))
-	mux.HandleFunc("GET /app/dashboard/events", a.requireAuth(a.dashboardHandlers.ViewDashboardEvents))
 
 	// monitors
 	mux.HandleFunc("GET /app/monitors", a.requireAuth(a.monitorHandlers.ListMonitors))
-	mux.HandleFunc("GET /app/monitors/events", a.requireAuth(a.monitorHandlers.ListMonitorsEvents))
 	mux.HandleFunc("GET /app/monitors/new", a.requireAuth(a.monitorHandlers.NewMonitor))
 	mux.HandleFunc("POST /app/monitors/new", a.requireAuth(a.monitorHandlers.CreateMonitor))
 	mux.HandleFunc("GET /app/monitors/{monitor_id}", a.requireAuth(a.monitorHandlers.ViewMonitor))
-	mux.HandleFunc("GET /app/monitors/{monitor_id}/events", a.requireAuth(a.monitorHandlers.ViewMonitorEvents))
-	mux.HandleFunc("GET /app/monitors/{monitor_id}/checks", a.requireAuth(a.monitorHandlers.ViewMonitorCheck))
+	mux.HandleFunc("GET /app/monitors/{monitor_id}/checks", a.requireAuth(a.monitorHandlers.ViewMonitorChecks))
 	mux.HandleFunc("GET /app/monitors/{monitor_id}/notifications", a.requireAuth(a.monitorHandlers.ViewMonitorNotifications))
 	mux.HandleFunc("POST /app/monitors/{monitor_id}", a.requireAuth(a.monitorHandlers.UpdateMonitor))
 	mux.HandleFunc("DELETE /app/monitors/{monitor_id}", a.requireAuth(a.monitorHandlers.DeleteMonitor))
@@ -48,9 +45,7 @@ func (a *app) routes() http.Handler {
 
 	// checks
 	mux.HandleFunc("GET /app/checks", a.requireAuth(a.monitorHandlers.ListChecks))
-	mux.HandleFunc("GET /app/checks/events", a.requireAuth(a.monitorHandlers.ListChecksEvents))
 	mux.HandleFunc("GET /app/checks/{check_id}", a.requireAuth(a.monitorHandlers.ViewCheck))
-	mux.HandleFunc("GET /app/checks/{check_id}/events", a.requireAuth(a.monitorHandlers.ViewCheckEvents))
 
 	// settings
 	mux.HandleFunc("GET /app/settings", a.requireAuth(a.settingsHandlers.ViewSettings))

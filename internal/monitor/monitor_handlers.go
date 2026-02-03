@@ -18,154 +18,109 @@ import (
 
 // ListMonitors handles GET /app/monitors
 func (h *Handlers) ListMonitors(w http.ResponseWriter, r *http.Request, user *models.User) {
-	comp, err := h.renderMonitorList(r, user)
-	if err != nil {
-		h.logger.ErrorContext(r.Context(), "error rendering monitor list", "error", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
+	patcher := ConditionalPatchRenderer{
+		Logger:    h.logger,
+		Subscribe: func(ctx context.Context) (<-chan struct{}, error) { return h.events.SubscribeUser(ctx, user.ID), nil },
+		Render: func(patch bool) (templ.Component, error) {
+			pag := pagination.PaginationFromRequest(r, 30)
 
-	if err := comp.Render(r.Context(), w); err != nil {
-		h.logger.ErrorContext(r.Context(), "error rendering monitors list", "error", err)
-	}
-}
+			monitors, err := h.service.queries.ListMonitorsWithResults(
+				r.Context(),
+				h.service.db,
+				&models.ListMonitorsWithResultsParams{
+					UserID:    user.ID,
+					PageSize:  int32(pag.PageSizeWithPeek()),
+					RowOffset: int32(pag.Offset()),
+				},
+			)
+			if err != nil {
+				return nil, err
+			}
 
-// ListMonitorsEvents handles GET /app/monitors/events (SSE)
-func (h *Handlers) ListMonitorsEvents(w http.ResponseWriter, r *http.Request, user *models.User) {
-	sse := datastar.NewSSE(w, r)
-	ch := h.events.SubscribeUser(sse.Context(), user.ID)
+			// TODO: move this peeking logic to something more generic in pagination package
+			if len(monitors) == pag.PageSizeWithPeek() {
+				monitors = monitors[:pag.PageSize]
+				pag.HasMore = true
+			}
 
-	for {
-		comp, err := h.renderMonitorList(r, user)
-		if err != nil {
-			h.logger.ErrorContext(sse.Context(), "error rendering monitor list", "error", err)
-			return
-		}
-		if err := ssePatchElementTemplFragment(sse, comp, monitorListFragment); err != nil {
-			h.logger.ErrorContext(sse.Context(), "error sending monitors list SSE patch", "error", err)
-			return
-		}
+			data := MonitorsListData{
+				Monitors:   monitors,
+				Pagination: pag,
+			}
 
-		select {
-		case <-ch:
-		case <-sse.Context().Done():
-			return
-		}
-	}
-}
-
-func (h *Handlers) renderMonitorList(r *http.Request, user *models.User) (templ.Component, error) {
-	pag := pagination.PaginationFromRequest(r, 30)
-
-	monitors, err := h.service.queries.ListMonitorsWithResults(
-		r.Context(),
-		h.service.db,
-		&models.ListMonitorsWithResultsParams{
-			UserID:    user.ID,
-			PageSize:  int32(pag.PageSizeWithPeek()),
-			RowOffset: int32(pag.Offset()),
+			if patch {
+				return MonitorsList(data), nil
+			}
+			return MonitorsListPage(data), nil
 		},
-	)
-	if err != nil {
-		return nil, err
 	}
-
-	// TODO: move this peeking logic to something more generic in pagination package
-	if len(monitors) == pag.PageSizeWithPeek() {
-		monitors = monitors[:pag.PageSize]
-		pag.HasMore = true
-	}
-
-	return MonitorsListPage(MonitorsListData{
-		Monitors:   monitors,
-		Pagination: pag,
-	}), nil
+	patcher.Handle(w, r)
 }
 
 // ViewMonitor handles GET /app/monitors/{id}
 func (h *Handlers) ViewMonitor(w http.ResponseWriter, r *http.Request, user *models.User) {
-	mon := h.monitorFromPath(w, r, user)
-	if mon == nil {
+	monitorID := monitorIDFromPath(r)
+	if monitorID == 0 {
+		http.NotFound(w, r)
 		return
 	}
 
-	var err error
-	var comp templ.Component
-	if mon.Status == models.MonitorStatusActive || mon.Status == models.MonitorStatusPaused {
-		comp, err = h.monitorComponent(r.Context(), mon, user.ID)
-	} else {
-		comp, err = h.renderMonitorDraft(r.Context(), mon, user.ID, NewUpdateMonitorDraftParams(mon), nil)
+	patcher := ConditionalPatchRenderer{
+		Logger: h.logger,
+		Render: func(patch bool) (templ.Component, error) {
+			freshMon, err := h.service.GetMonitor(r.Context(), user.ID, monitorID)
+			if err != nil {
+				return nil, err
+			}
+
+			if freshMon.Status == models.MonitorStatusActive || freshMon.Status == models.MonitorStatusPaused {
+				return h.monitorComponent(r.Context(), freshMon, user.ID)
+			}
+			return h.renderMonitorDraft(r.Context(), freshMon, user.ID, NewUpdateMonitorDraftParams(freshMon), nil)
+		},
+		Subscribe: func(ctx context.Context) (<-chan struct{}, error) {
+			return h.events.SubscribeMonitor(ctx, monitorID), nil
+		},
 	}
-	if err != nil {
-		h.logger.ErrorContext(r.Context(), "error rendering monitor", "error", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
-	if err := comp.Render(r.Context(), w); err != nil {
-		h.logger.ErrorContext(r.Context(), "error rendering monitor component", "error", err)
-	}
+	patcher.Handle(w, r)
 }
 
-// ViewMonitorEvents handles GET /app/monitors/{id}/events (SSE)
-func (h *Handlers) ViewMonitorEvents(w http.ResponseWriter, r *http.Request, user *models.User) {
-	mon := h.monitorFromPath(w, r, user)
-	if mon == nil {
-		return
+// ViewMonitorChecks handles GET /app/monitors/{id}/checks
+func (h *Handlers) ViewMonitorChecks(w http.ResponseWriter, r *http.Request, user *models.User) {
+	patcher := ConditionalPatchRenderer{
+		Logger: h.logger,
+		Render: func(patch bool) (templ.Component, error) {
+			mon := h.monitorFromPath(w, r, user)
+			if mon == nil {
+				return nil, fmt.Errorf("monitor not found")
+			}
+
+			checks, err := h.service.queries.ListMonitorChecks(r.Context(), h.service.db, mon.ID)
+			if err != nil {
+				return nil, err
+			}
+
+			data := MonitorChecksViewData{
+				Monitor: mon,
+				Checks:  checks,
+			}
+
+			if patch {
+				return MonitorChecksView(data), nil
+			} else {
+				return MonitorChecksPage(data), nil
+			}
+		},
+		Subscribe: func(ctx context.Context) (<-chan struct{}, error) {
+			monitorID := monitorIDFromPath(r)
+			if monitorID == 0 {
+				return nil, fmt.Errorf("monitor not found")
+			}
+			return h.events.SubscribeMonitor(ctx, monitorID), nil
+		},
 	}
 
-	sse := datastar.NewSSE(w, r)
-
-	ch := h.events.SubscribeMonitor(sse.Context(), mon.ID)
-
-	var err error
-	for {
-		mon, err = h.service.GetMonitor(sse.Context(), user.ID, mon.ID)
-		if err != nil {
-			h.logger.ErrorContext(sse.Context(), "error refreshing monitor", "error", err)
-			return
-		}
-
-		var comp templ.Component
-		if mon.Status == models.MonitorStatusActive || mon.Status == models.MonitorStatusPaused {
-			comp, err = h.monitorComponent(r.Context(), mon, user.ID)
-		} else {
-			comp, err = h.renderMonitorDraft(r.Context(), mon, user.ID, NewUpdateMonitorDraftParams(mon), nil)
-		}
-
-		if err := sse.PatchElementTempl(comp); err != nil {
-			h.logger.ErrorContext(sse.Context(), "error sending monitor view events SSE patch", "error", err)
-		}
-
-		select {
-		case <-ch:
-		case <-sse.Context().Done():
-			return
-		}
-	}
-}
-
-// ViewMonitorCheck handles GET /app/monitors/{id}/checks
-func (h *Handlers) ViewMonitorCheck(w http.ResponseWriter, r *http.Request, user *models.User) {
-	mon := h.monitorFromPath(w, r, user)
-	if mon == nil {
-		return
-	}
-
-	checks, err := h.service.queries.ListMonitorChecks(r.Context(), h.service.db, mon.ID)
-	if err != nil {
-		h.logger.Error("error listing monitor checks", "error", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
-
-	comp := MonitorChecksPage(MonitorChecksViewData{
-		Monitor: mon,
-		Checks:  checks,
-	})
-	if err := comp.Render(r.Context(), w); err != nil {
-		h.logger.ErrorContext(r.Context(), "error rendering monitor checks component", "error", err)
-		return
-	}
+	patcher.Handle(w, r)
 }
 
 // ViewMonitorNotifications handles GET /app/monitors/{id}/notifications

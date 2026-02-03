@@ -7,13 +7,7 @@ import (
 	"github.com/alexpls/untils/internal/components/icons"
 	"github.com/alexpls/untils/internal/models"
 	"github.com/alexpls/untils/internal/pagination"
-)
-
-type fragmentName int
-
-const (
-	_ fragmentName = iota
-	monitorListFragment
+	"github.com/starfederation/datastar-go/datastar"
 )
 
 type MonitorsListData struct {
@@ -33,14 +27,12 @@ templ MonitorsListPage(data MonitorsListData) {
 		{Title: "Monitors", Href: "/app/monitors"},
 	}) {
 		@components.Header("Monitors", monitorListPageActions())
-		@templ.Fragment(monitorListFragment) {
-			@MonitorsList(data)
-		}
+		@MonitorsList(data)
 	}
 }
 
 templ MonitorsList(data MonitorsListData) {
-	<div id="monitors-list" data-effect={ fmt.Sprintf("@get('/app/monitors/events?%s')", data.Pagination.CurrentPageParams().Encode()) }>
+	<div id="monitors-list" data-effect={ datastar.GetSSE("/app/monitors?sse=true&%s", data.Pagination.CurrentPageParams().Encode()) }>
 		if len(data.Monitors) > 0 {
 			<div class="overflow-x-auto">
 				<table class="table">

@@ -34,7 +34,7 @@ templ DashboardView(data DashboardViewData) {
 	<div
 		id="dashboard"
 		class="grid grid-cols-12 gap-4 p-4"
-		data-effect={ datastar.GetSSE("/app/dashboard/events") }
+		data-effect={ datastar.GetSSE("/app?sse=true") }
 	>
 		<div class="col-span-12 md:col-span-6 space-y-4">
 			@quickLinksWidget()

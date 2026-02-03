@@ -1,8 +1,7 @@
 package monitor
 
 import (
-	"bytes"
-	"fmt"
+	"context"
 	"log/slog"
 	"net/http"
 	"strconv"
@@ -51,20 +50,65 @@ func idFromPath(r *http.Request, name string) int64 {
 	return id
 }
 
-// ssePatchElementTemplFragment sends HTML to the sse stream for the given templ component and fragment
-func ssePatchElementTemplFragment(sse *datastar.ServerSentEventGenerator, c templ.Component, fragmentIDs ...any) error {
-	var buf bytes.Buffer
-	if err := templ.RenderFragments(sse.Context(), &buf, c, fragmentIDs...); err != nil {
-		return fmt.Errorf("failed to patch element: %w", err)
-	}
-	if err := sse.PatchElements(buf.String()); err != nil {
-		return fmt.Errorf("failed to patch element: %w", err)
-	}
-	return nil
-}
-
 // sseReload sends javascript to the sse stream to reload the page
 func sseReload(sse *datastar.ServerSentEventGenerator) error {
 	js := "setTimeout(() => window.location.reload())"
 	return sse.ExecuteScript(js)
+}
+
+// ConditionalPatchRenderer renders a [templ.Component] either as a patch within
+// an SSE stream (updated each time [Subscribe] sends a message), or as a plain
+// HTTP response.
+type ConditionalPatchRenderer struct {
+	Logger    *slog.Logger
+	Render    func(patch bool) (templ.Component, error)
+	Subscribe func(ctx context.Context) (<-chan struct{}, error)
+}
+
+// Handle responds to the [http.Request] by rendering the configured component. It
+// either does this by opening an SSE stream when the query param ?sse=true is given, or by
+// rendering straight to HTTP.
+func (cpr *ConditionalPatchRenderer) Handle(w http.ResponseWriter, r *http.Request) {
+	wantsPatches := r.URL.Query().Get("sse") == "true"
+
+	if wantsPatches {
+		sse := datastar.NewSSE(w, r)
+
+		updates, err := cpr.Subscribe(sse.Context())
+		if err != nil {
+			cpr.Logger.ErrorContext(sse.Context(), "error subscribing for updates", "error", err)
+			return
+		}
+
+		for {
+			comp, err := cpr.Render(wantsPatches)
+			if err != nil {
+				cpr.Logger.ErrorContext(sse.Context(), "error rendering component", "error", err)
+				return
+			}
+			if err := sse.PatchElementTempl(comp); err != nil {
+				cpr.Logger.ErrorContext(sse.Context(), "error patching component", "error", err)
+				return
+			}
+
+			select {
+			case <-updates:
+			case <-sse.Context().Done():
+				return
+			}
+		}
+
+	} else {
+		comp, err := cpr.Render(wantsPatches)
+		if err != nil {
+			cpr.Logger.ErrorContext(r.Context(), "error rendering component", "error", err)
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+		if err := comp.Render(r.Context(), w); err != nil {
+			cpr.Logger.ErrorContext(r.Context(), "error rendering component", "error", err)
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+	}
 }

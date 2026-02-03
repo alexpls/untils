@@ -7,10 +7,7 @@ import (
 	"github.com/alexpls/untils/internal/components/icons"
 	"github.com/alexpls/untils/internal/models"
 	"github.com/alexpls/untils/internal/pagination"
-)
-
-const (
-	checksListFragment fragmentName = iota + 100
+	"github.com/starfederation/datastar-go/datastar"
 )
 
 type ChecksListData struct {
@@ -24,14 +21,12 @@ templ ChecksListPage(data ChecksListData) {
 		{Title: "Checks", Href: "/app/checks"},
 	}) {
 		@components.Header("Checks", nil)
-		@templ.Fragment(checksListFragment) {
-			@ChecksList(data)
-		}
+		@ChecksList(data)
 	}
 }
 
 templ ChecksList(data ChecksListData) {
-	<div id="checks-list" data-effect={ fmt.Sprintf("@get('/app/checks/events?%s')", data.Pagination.CurrentPageParams().Encode()) }>
+	<div id="checks-list" data-effect={ datastar.GetSSE("/app/checks?sse=true&%s", data.Pagination.CurrentPageParams().Encode()) }>
 		if len(data.Checks) > 0 {
 			<div class="overflow-x-auto">
 				<table class="table">

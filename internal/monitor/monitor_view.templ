@@ -81,7 +81,7 @@ templ MonitorSidebarLayout(monitor *models.Monitor, pageType MonitorPageType) {
 
 templ MonitorPage(data MonitorViewData) {
 	@MonitorSidebarLayout(data.Monitor, MonitorPageTypeActivity) {
-		<div id="monitor-view" data-effect={ datastar.GetSSE("/app/monitors/%d/events", data.Monitor.ID) }>
+		<div id="monitor-view" data-effect={ datastar.GetSSE("/app/monitors/%d?sse=true", data.Monitor.ID) }>
 			<div class="grid grid-cols-1 lg:grid-cols-12">
 				<div class="lg:col-span-8 m-4 p-4 bg-base-100 rounded border border-base-content/10">
 					@components.Timeline() {

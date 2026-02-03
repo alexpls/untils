@@ -1,13 +1,14 @@
 package dashboard
 
 import (
+	"context"
 	"log/slog"
 	"net/http"
 
+	"github.com/a-h/templ"
 	"github.com/alexpls/untils/internal/db"
 	"github.com/alexpls/untils/internal/models"
 	"github.com/alexpls/untils/internal/monitor"
-	"github.com/starfederation/datastar-go/datastar"
 )
 
 // Handlers contains the HTTP handlers for dashboard routes
@@ -28,82 +29,63 @@ func NewHandlers(queries *models.Queries, db db.DB, monitorEvents *monitor.DBEve
 	}
 }
 
-// ViewDashboard handles GET /app
-func (h *Handlers) ViewDashboard(w http.ResponseWriter, r *http.Request, user *models.User) {
-	data := DashboardViewData{
-		MonitorActivity: MonitorActivityWidgetData{
-			Loading: LoadingStatusLoading,
-		},
-		CheckStats: CheckStatsWidgetData{
-			Loading: LoadingStatusLoading,
-		},
-	}
-	if err := DashboardPage(data).Render(r.Context(), w); err != nil {
-		h.logger.ErrorContext(r.Context(), "error rendering dashboard page", "error", err)
-	}
-}
-
-// ViewDashboardEvents handles GET /app/dashboard/events (SSE)
-func (h *Handlers) ViewDashboardEvents(w http.ResponseWriter, r *http.Request, user *models.User) {
-	sse := datastar.NewSSE(w, r)
-
-	ch := h.monitorEvents.SubscribeUser(r.Context(), user.ID)
-
-	// only use view transitions for the initial load, otherwise if they
-	// happen on every change to monitors it can be distracting and potentially
-	// fire for no-ops.
-	useViewTransition := true
-
-	for {
-		activity, err := h.queries.ListMonitorActivity(r.Context(), h.db, user.ID)
-		if err != nil {
-			h.logger.ErrorContext(r.Context(), "error listing monitor activity", "error", err)
-			return
-		}
-
-		checkStats, err := h.queries.GetMonitorCheckStats(r.Context(), h.db, user.ID)
-		if err != nil {
-			h.logger.ErrorContext(r.Context(), "error getting monitor check stats", "error", err)
-			return
-		}
-
-		dailyCheckCounts, err := h.queries.GetDailyMonitorCheckCounts(r.Context(), h.db, user.ID)
-		if err != nil {
-			h.logger.ErrorContext(r.Context(), "error getting daily monitor check counts", "error", err)
-			return
-		}
-
-		data := DashboardViewData{
+func (h *Handlers) renderDashboard(ctx context.Context, userID int64, loading LoadingStatus) (DashboardViewData, error) {
+	if loading == LoadingStatusLoading {
+		return DashboardViewData{
 			MonitorActivity: MonitorActivityWidgetData{
-				Loading: LoadingStatusLoaded,
-				Items:   activity,
+				Loading: LoadingStatusLoading,
 			},
 			CheckStats: CheckStatsWidgetData{
-				Loading:          LoadingStatusLoaded,
-				CheckStats:       checkStats,
-				DailyCheckCounts: dailyCheckCounts,
+				Loading: LoadingStatusLoading,
 			},
-		}
-
-		comp := DashboardView(data)
-
-		var viewTransitionOpt datastar.PatchElementOption
-		if useViewTransition {
-			viewTransitionOpt = datastar.WithViewTransitions()
-		} else {
-			viewTransitionOpt = datastar.WithoutViewTransitions()
-		}
-
-		if err := sse.PatchElementTempl(comp, viewTransitionOpt); err != nil {
-			h.logger.ErrorContext(sse.Context(), "error patching element", "error", err)
-		}
-
-		select {
-		case <-ch:
-			useViewTransition = false
-			continue
-		case <-sse.Context().Done():
-			return
-		}
+		}, nil
 	}
+
+	activity, err := h.queries.ListMonitorActivity(ctx, h.db, userID)
+	if err != nil {
+		return DashboardViewData{}, err
+	}
+
+	checkStats, err := h.queries.GetMonitorCheckStats(ctx, h.db, userID)
+	if err != nil {
+		return DashboardViewData{}, err
+	}
+
+	dailyCheckCounts, err := h.queries.GetDailyMonitorCheckCounts(ctx, h.db, userID)
+	if err != nil {
+		return DashboardViewData{}, err
+	}
+
+	return DashboardViewData{
+		MonitorActivity: MonitorActivityWidgetData{
+			Loading: LoadingStatusLoaded,
+			Items:   activity,
+		},
+		CheckStats: CheckStatsWidgetData{
+			Loading:          LoadingStatusLoaded,
+			CheckStats:       checkStats,
+			DailyCheckCounts: dailyCheckCounts,
+		},
+	}, nil
+}
+
+// ViewDashboard handles GET /app
+func (h *Handlers) ViewDashboard(w http.ResponseWriter, r *http.Request, user *models.User) {
+	patcher := monitor.ConditionalPatchRenderer{
+		Logger: h.logger,
+		Render: func(patch bool) (templ.Component, error) {
+			data, err := h.renderDashboard(r.Context(), user.ID, LoadingStatusLoaded)
+			if err != nil {
+				return nil, err
+			}
+			if patch {
+				return DashboardView(data), nil
+			}
+			return DashboardPage(data), nil
+		},
+		Subscribe: func(ctx context.Context) (<-chan struct{}, error) {
+			return h.monitorEvents.SubscribeUser(ctx, user.ID), nil
+		},
+	}
+	patcher.Handle(w, r)
 }

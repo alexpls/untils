@@ -27,7 +27,7 @@ templ CheckViewPage(data CheckViewData) {
 }
 
 templ CheckView(data CheckViewData) {
-	<div id="check-view" data-effect={ datastar.GetSSE("/app/checks/%d/events", data.Check.CheckID) }>
+	<div id="check-view" data-effect={ datastar.GetSSE("/app/checks/%d?sse=true", data.Check.CheckID) }>
 		@components.Header(fmt.Sprintf("Check #%d", data.Check.CheckID), nil)
 		<div class="grid grid-cols-1 lg:grid-cols-12">
 			<div class="lg:col-span-8 m-4 space-y-4">

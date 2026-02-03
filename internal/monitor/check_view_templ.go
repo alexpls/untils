@@ -101,9 +101,9 @@ func CheckView(data CheckViewData) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 string
-		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(datastar.GetSSE("/app/checks/%d/events", data.Check.CheckID))
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(datastar.GetSSE("/app/checks/%d?sse=true", data.Check.CheckID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/check_view.templ`, Line: 30, Col: 96}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/check_view.templ`, Line: 30, Col: 98}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
