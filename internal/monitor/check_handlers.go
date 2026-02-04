@@ -104,3 +104,41 @@ func (h *Handlers) ViewCheck(w http.ResponseWriter, r *http.Request, user *model
 	}
 	patcher.Handle(w, r)
 }
+
+// RunCheckNow handles POST /app/checks/{check_id}/run
+func (h *Handlers) RunCheckNow(w http.ResponseWriter, r *http.Request, user *models.User) {
+	checkID := checkIDFromPath(r)
+	if checkID == 0 {
+		http.Error(w, "Bad request", http.StatusBadRequest)
+		return
+	}
+
+	// Verify the check belongs to this user
+	check, err := h.service.queries.GetCheckWithMonitor(r.Context(), h.service.db, checkID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			http.Error(w, "Not found", http.StatusNotFound)
+			return
+		}
+		h.logger.ErrorContext(r.Context(), "error getting check", "error", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	if check.UserID != user.ID {
+		http.Error(w, "Not found", http.StatusNotFound)
+		return
+	}
+
+	if err := h.service.RunCheckNow(r.Context(), checkID); err != nil {
+		if errors.Is(err, ErrCheckNotScheduled) {
+			http.Error(w, "Check is not scheduled", http.StatusBadRequest)
+			return
+		}
+		h.logger.ErrorContext(r.Context(), "error running check now", "error", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}

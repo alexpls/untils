@@ -52,6 +52,41 @@ func (s *Service) GetInProgressMonitorCheck(ctx context.Context, monitor *models
 	return check, nil
 }
 
+var ErrCheckNotScheduled = errors.New("check is not in scheduled state")
+
+// RunCheckNow updates a scheduled check to run immediately by updating its
+// scheduled_for time and rescheduling the River job.
+func (s *Service) RunCheckNow(ctx context.Context, checkID int64) error {
+	return db.WithTx(s.db, ctx, func(tx pgx.Tx) error {
+		// Get the check to verify it exists and is scheduled
+		check, err := s.queries.GetMonitorCheck(ctx, tx, checkID)
+		if err != nil {
+			return fmt.Errorf("getting check: %w", err)
+		}
+
+		if check.Status != models.MonitorCheckStatusScheduled {
+			return ErrCheckNotScheduled
+		}
+
+		now := time.Now()
+
+		// Update the check's scheduled_for time
+		if err := s.queries.UpdateMonitorCheckScheduledFor(ctx, tx, &models.UpdateMonitorCheckScheduledForParams{
+			ID:           checkID,
+			ScheduledFor: now,
+		}); err != nil {
+			return fmt.Errorf("updating check scheduled_for: %w", err)
+		}
+
+		// Update the River job to run now (sets scheduled_at to now and state to 'available')
+		if err := s.queries.RescheduleRiverJobNow(ctx, tx, fmt.Sprintf("%d", checkID)); err != nil {
+			return fmt.Errorf("rescheduling river job: %w", err)
+		}
+
+		return nil
+	})
+}
+
 func (s *Service) ScheduleMonitorCheck(ctx context.Context, monitor *models.Monitor, scheduledFor time.Time) (*models.MonitorCheck, error) {
 	return db.WithTxV(s.db, ctx, func(tx pgx.Tx) (*models.MonitorCheck, error) {
 		check, err := s.scheduleMonitorCheckTx(ctx, tx, monitor, scheduledFor)
@@ -134,16 +169,18 @@ func (s *Service) PerformMonitorCheck(
 			}
 		}
 
+		// Mark check as 'checking' BEFORE scheduling next check, because
+		// scheduleMonitorCheckTx deletes all 'scheduled' checks for this monitor.
+		if err = s.queries.UpdateMonitorCheckChecking(ctx, tx, check.ID); err != nil {
+			return nil, fmt.Errorf("updating monitor check status: %w", err)
+		}
+
 		if scheduleNext {
 			nextCheckTime := nextCheckTime(monitor.CheckFrequencyMinutes, user.Now())
 			_, err = s.scheduleMonitorCheckTx(ctx, tx, monitor, nextCheckTime)
 			if err != nil {
 				return nil, err
 			}
-		}
-
-		if err = s.queries.UpdateMonitorCheckChecking(ctx, tx, check.ID); err != nil {
-			return nil, fmt.Errorf("updating monitor check status: %w", err)
 		}
 
 		return latest, nil

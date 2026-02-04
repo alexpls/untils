@@ -276,3 +276,15 @@ select scheduled_for from monitor_checks
 where monitor_id = @monitor_id
 order by scheduled_for desc
 limit 1;
+
+-- name: UpdateMonitorCheckScheduledFor :exec
+update monitor_checks
+set scheduled_for = @scheduled_for
+where id = @id;
+
+-- name: RescheduleRiverJobNow :exec
+update river_job
+set scheduled_at = now(), state = 'available'
+where kind = 'check'
+and args->>'monitor_check_id' = @check_id::text
+and state = 'scheduled';

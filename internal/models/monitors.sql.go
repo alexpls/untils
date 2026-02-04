@@ -908,6 +908,19 @@ func (q *Queries) RejectMonitor(ctx context.Context, db DBTX, arg *RejectMonitor
 	return err
 }
 
+const rescheduleRiverJobNow = `-- name: RescheduleRiverJobNow :exec
+update river_job
+set scheduled_at = now(), state = 'available'
+where kind = 'check'
+and args->>'monitor_check_id' = $1::text
+and state = 'scheduled'
+`
+
+func (q *Queries) RescheduleRiverJobNow(ctx context.Context, db DBTX, checkID string) error {
+	_, err := db.Exec(ctx, rescheduleRiverJobNow, checkID)
+	return err
+}
+
 const updateMonitorCheckChecking = `-- name: UpdateMonitorCheckChecking :exec
 update monitor_checks
 set status = 'checking'
@@ -961,6 +974,22 @@ func (q *Queries) UpdateMonitorCheckFrequency(ctx context.Context, db DBTX, arg 
 		&i.CheckFrequencyMinutes,
 	)
 	return &i, err
+}
+
+const updateMonitorCheckScheduledFor = `-- name: UpdateMonitorCheckScheduledFor :exec
+update monitor_checks
+set scheduled_for = $1
+where id = $2
+`
+
+type UpdateMonitorCheckScheduledForParams struct {
+	ScheduledFor time.Time
+	ID           int64
+}
+
+func (q *Queries) UpdateMonitorCheckScheduledFor(ctx context.Context, db DBTX, arg *UpdateMonitorCheckScheduledForParams) error {
+	_, err := db.Exec(ctx, updateMonitorCheckScheduledFor, arg.ScheduledFor, arg.ID)
+	return err
 }
 
 const updateMonitorCheckSuccess = `-- name: UpdateMonitorCheckSuccess :exec

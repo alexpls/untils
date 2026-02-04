@@ -33,7 +33,7 @@ func (a *app) routes() http.Handler {
 	mux.HandleFunc("GET /app/monitors/{monitor_id}/notifications", a.requireAuth(a.monitorHandlers.ViewMonitorNotifications))
 	mux.HandleFunc("POST /app/monitors/{monitor_id}", a.requireAuth(a.monitorHandlers.UpdateMonitor))
 	mux.HandleFunc("DELETE /app/monitors/{monitor_id}", a.requireAuth(a.monitorHandlers.DeleteMonitor))
-	mux.HandleFunc("POST /app/monitors/{monitor_id}/check", a.requireAuth(a.monitorHandlers.CreateMonitorCheck))
+
 	mux.HandleFunc("POST /app/monitors/{monitor_id}/pause", a.requireAuth(a.monitorHandlers.PauseMonitor))
 	mux.HandleFunc("POST /app/monitors/{monitor_id}/unpause", a.requireAuth(a.monitorHandlers.UnpauseMonitor))
 	mux.HandleFunc("POST /app/monitors/{monitor_id}/activate", a.requireAuth(a.monitorHandlers.ActivateMonitor))
@@ -46,6 +46,7 @@ func (a *app) routes() http.Handler {
 	// checks
 	mux.HandleFunc("GET /app/checks", a.requireAuth(a.monitorHandlers.ListChecks))
 	mux.HandleFunc("GET /app/checks/{check_id}", a.requireAuth(a.monitorHandlers.ViewCheck))
+	mux.HandleFunc("POST /app/checks/{check_id}/run", a.requireAuth(a.monitorHandlers.RunCheckNow))
 
 	// settings
 	mux.HandleFunc("GET /app/settings", a.requireAuth(a.settingsHandlers.ViewSettings))

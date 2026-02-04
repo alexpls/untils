@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/a-h/templ"
 	"github.com/alexpls/untils/internal/models"
@@ -290,35 +289,6 @@ func (h *Handlers) CreateMonitor(w http.ResponseWriter, r *http.Request, user *m
 	}
 
 	http.Redirect(w, r, fmt.Sprintf("/app/monitors/%d", createdMonitor.ID), http.StatusSeeOther)
-}
-
-// CreateMonitorCheck handles POST /app/monitors/{id}/check
-func (h *Handlers) CreateMonitorCheck(w http.ResponseWriter, r *http.Request, user *models.User) {
-	mon := h.monitorFromPath(w, r, user)
-	if mon == nil {
-		return
-	}
-
-	sse := datastar.NewSSE(w, r)
-
-	var err error
-	_, err = h.service.ScheduleMonitorCheck(r.Context(), mon, time.Now())
-	if err != nil {
-		h.logger.ErrorContext(r.Context(), "error scheduling monitor check", "error", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
-
-	comp, err := h.monitorComponent(r.Context(), mon, user.ID)
-	if err != nil {
-		h.logger.ErrorContext(r.Context(), "error rendering monitor component", "error", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
-
-	if err := sse.PatchElementTempl(comp); err != nil {
-		h.logger.ErrorContext(sse.Context(), "error patching element", "error", err)
-	}
 }
 
 // PauseMonitor handles POST /app/monitors/{id}/pause

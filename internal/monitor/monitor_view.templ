@@ -101,16 +101,6 @@ templ MonitorPage(data MonitorViewData) {
 				</div>
 				<div class="lg:col-span-4 lg:m-4 p-4 border border-base-content/10 rounded">
 					<div class="space-y-4">
-						if data.Monitor.Status == models.MonitorStatusActive && data.NextScheduledCheck != nil {
-							<div>
-								<div class="font-semibold uppercase text-xs">
-									Next check at
-								</div>
-								<div class="text-sm text-base-content/60 mt-1">
-									{ components.FormatDateTime(ctx, data.NextScheduledCheck.ScheduledFor) }
-								</div>
-							</div>
-						}
 						<div>
 							<ul>
 								if data.Monitor.Status == models.MonitorStatusActive {
@@ -120,14 +110,6 @@ templ MonitorPage(data MonitorViewData) {
 											class="text-sm link"
 										>
 											Pause monitoring
-										</button>
-									</li>
-									<li>
-										<button
-											data-on:click={ datastar.PostSSE("/app/monitors/%d/check", data.Monitor.ID) }
-											class="text-sm link"
-										>
-											Check now
 										</button>
 									</li>
 								} else if data.Monitor.Status == models.MonitorStatusPaused {

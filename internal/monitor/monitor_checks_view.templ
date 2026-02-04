@@ -57,10 +57,13 @@ templ MonitorChecksView(data MonitorChecksViewData) {
 												<span class="text-muted">-</span>
 											}
 										</td>
-										<td class="min-w-30">
-											if check.Status == models.MonitorCheckStatusSuccess {
+										<td class="min-w-40 text-end">
+										switch check.Status {
+											case models.MonitorCheckStatusSuccess:
 												<a class="btn btn-sm btn-soft" href={ fmt.Sprintf("/app/checks/%d", check.ID) }>Details</a>
-											}
+											case models.MonitorCheckStatusScheduled:
+												<button class="btn btn-sm btn-soft" data-on:click={ datastar.PostSSE("/app/checks/%d/run", check.ID) }>Run now</button>
+										}
 										</td>
 									</tr>
 								}
