@@ -12,7 +12,7 @@ import (
 
 type MonitorViewData struct {
 	Monitor                       *models.Monitor
-	Results                       []*models.MonitorResult
+	Results                       []*models.MonitorResultsWithLatestCheck
 	NextScheduledCheck            *models.MonitorCheck
 	InProgressCheck               *models.MonitorCheck
 	InProgressCheckTimelineEvents []*models.GetTimelineEventsBySourceIDRow
@@ -164,7 +164,7 @@ templ InProgressCheckTimelineItem(data InProgressCheckTimelineItemViewData) {
 	}
 }
 
-templ monitorResultTimelineItem(result *models.MonitorResult, allowFeedback bool) {
+templ monitorResultTimelineItem(result *models.MonitorResultsWithLatestCheck, allowFeedback bool) {
 	@components.TimelineItem(monitorResultHeading(result), nil) {
 		if result.Date != nil && result.DatePastTenseVerb.Valid {
 			<div class="text-sm">
@@ -178,9 +178,13 @@ templ monitorResultTimelineItem(result *models.MonitorResult, allowFeedback bool
 					Latest check
 				</div>
 				<div>
-					<a href={ fmt.Sprintf("/app/checks/%d", result.ConfirmingCheckIds[len(result.ConfirmingCheckIds)-1]) } class="link-hover">
-						{ components.FormatDateTime(ctx, result.LatestConfirmationAt) }
-					</a>
+					if result.LatestCheckID.Valid {
+						<a href={ fmt.Sprintf("/app/checks/%d", result.LatestCheckID.Int64) } class="link-hover">
+							{ components.FormatDateTime(ctx, *result.LatestConfirmationAt) }
+						</a>
+					} else {
+						<span>-</span>
+					}
 				</div>
 			</div>
 			<div>
@@ -242,7 +246,7 @@ templ monitorResultTimelineItem(result *models.MonitorResult, allowFeedback bool
 	}
 }
 
-templ monitorResultHeading(result *models.MonitorResult) {
+templ monitorResultHeading(result *models.MonitorResultsWithLatestCheck) {
 	<div class="text-lg font-semibold">
 		{ result.Result }
 	</div>

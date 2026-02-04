@@ -176,7 +176,7 @@ func (s *Service) ValidateMonitor(ctx context.Context, monitor *models.Monitor) 
 	return err
 }
 
-func CheckResultToCreateMonitorResultParams(monitorID, checkID int64, res *models.CheckResult) *models.CreateMonitorResultParams {
+func CheckResultToCreateMonitorResultParams(monitorID int64, res *models.CheckResult) *models.CreateMonitorResultParams {
 	resultDate := pgtype.Timestamptz{Time: time.Time{}, Valid: false}
 	resultDatePastTenseVerb := pgtype.Text{String: "", Valid: false}
 
@@ -194,12 +194,11 @@ func CheckResultToCreateMonitorResultParams(monitorID, checkID int64, res *model
 	}
 
 	return &models.CreateMonitorResultParams{
-		MonitorID:          monitorID,
-		ConfirmingCheckIds: []int64{checkID},
-		Result:             res.ResultPlaintext,
-		Citations:          &res.Citations,
-		Date:               &resultDate.Time,
-		DatePastTenseVerb:  resultDatePastTenseVerb,
+		MonitorID:         monitorID,
+		Result:            res.ResultPlaintext,
+		Citations:         &res.Citations,
+		Date:              &resultDate.Time,
+		DatePastTenseVerb: resultDatePastTenseVerb,
 	}
 }
 

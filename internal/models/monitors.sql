@@ -146,32 +146,34 @@ set status = 'success', result = @result, done_at = now()
 where id = @id;
 
 -- name: GetLatestMonitorResult :one
-select * from monitor_results
+select * from monitor_results_with_latest_check
 where monitor_id = @monitor_id
 order by created_at desc
 limit 1;
 
 -- name: GetPreviousResultsWithCheck :many
 select sqlc.embed(mr), sqlc.embed(mc)
-from monitor_results mr
-inner join monitor_checks mc on mc.id = mr.confirming_check_ids[array_length(mr.confirming_check_ids, 1)]
+from monitor_results_with_latest_check mr
+inner join monitor_checks mc on mc.id = mr.latest_check_id
 where mr.monitor_id = @monitor_id
 order by mr.created_at desc
 limit 10;
 
 -- name: ListMonitorResults :many
-select * from monitor_results
+select * from monitor_results_with_latest_check
 where monitor_id = @monitor_id
 order by created_at desc;
 
 -- name: GetMonitorResult :one
-select * from monitor_results
+select * from monitor_results_with_latest_check
 where monitor_id = @monitor_id
 and id = @result_id;
 
 -- name: GetMonitorResultByCheckID :one
-select * from monitor_results
-where @check_id::bigint = any(confirming_check_ids)
+select mr.*
+from monitor_results_with_latest_check mr
+inner join monitor_checks mc on mc.result_id = mr.id
+where mc.id = @check_id
 limit 1;
 
 -- name: DeleteMonitorChecks :exec
@@ -183,15 +185,14 @@ delete from monitor_results
 where monitor_id = @monitor_id;
 
 -- name: CreateMonitorResult :one
-insert into monitor_results (monitor_id, confirming_check_ids, result, date, date_past_tense_verb, citations, latest_confirmation_at, created_at)
-values (@monitor_id, @confirming_check_ids, @result, @date, @date_past_tense_verb, @citations, now(), now())
+insert into monitor_results (monitor_id, result, date, date_past_tense_verb, citations, created_at)
+values (@monitor_id, @result, @date, @date_past_tense_verb, @citations, now())
 returning *;
 
--- name: AppendConfirmingCheckIDToResult :exec
-update monitor_results
-set confirming_check_ids = array_append(confirming_check_ids, @confirming_check_id_to_append::bigint),
-    latest_confirmation_at = now()
-where id = @monitor_result_id;
+-- name: LinkCheckToResult :exec
+update monitor_checks
+set result_id = @result_id
+where id = @check_id;
 
 -- name: UpdateMonitorResultWithFeedback :exec
 update monitor_results

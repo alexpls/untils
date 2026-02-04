@@ -20,7 +20,7 @@ type CheckViewData struct {
 	Check     *models.GetCheckWithMonitorRow
 	Messages  []*models.LLMParsedMessage
 	ToolCalls []models.LLMToolCall
-	Result    *models.MonitorResult
+	Result    *models.MonitorResultsWithLatestCheck
 }
 
 func CheckViewPage(data CheckViewData) templ.Component {

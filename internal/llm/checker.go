@@ -160,7 +160,7 @@ func (c *checker) perform(ctx context.Context, params *CheckParams) (*models.Che
 		}
 
 		if previousResult != nil {
-			if res.DifferentToPrevious && sameResultStr(res.ResultPlaintext, previousResult.MonitorResult.Result) {
+			if res.DifferentToPrevious && sameResultStr(res.ResultPlaintext, previousResult.MonitorResultsWithLatestCheck.Result) {
 				errorMsg := "error: different_to_previous is true but result_plaintext is the same as the previous result"
 				c.messages = append(
 					c.messages,

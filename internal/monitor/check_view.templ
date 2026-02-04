@@ -12,7 +12,7 @@ type CheckViewData struct {
 	Check     *models.GetCheckWithMonitorRow
 	Messages  []*models.LLMParsedMessage
 	ToolCalls []models.LLMToolCall
-	Result    *models.MonitorResult
+	Result    *models.MonitorResultsWithLatestCheck
 }
 
 templ CheckViewPage(data CheckViewData) {

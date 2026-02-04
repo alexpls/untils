@@ -224,16 +224,29 @@ func (s *Service) PerformMonitorCheck(
 		}
 
 		if result.DifferentToPrevious || len(latest) == 0 {
-			params := CheckResultToCreateMonitorResultParams(check.MonitorID, check.ID, result)
-			if _, err := s.queries.CreateMonitorResult(ctx, tx, params); err != nil {
-				return fmt.Errorf("creating check result: %w", err)
+			params := CheckResultToCreateMonitorResultParams(check.MonitorID, result)
+			newResult, err := s.queries.CreateMonitorResult(ctx, tx, params)
+			if err != nil {
+				return fmt.Errorf("creating monitor result: %w", err)
+			}
+			if err := s.queries.LinkCheckToResult(ctx, tx, &models.LinkCheckToResultParams{
+				CheckID: check.ID,
+				ResultID: pgtype.Int8{
+					Int64: newResult.ID,
+					Valid: true,
+				},
+			}); err != nil {
+				return fmt.Errorf("linking check to result: %w", err)
 			}
 		} else {
-			if err := s.queries.AppendConfirmingCheckIDToResult(ctx, tx, &models.AppendConfirmingCheckIDToResultParams{
-				MonitorResultID:           latest[0].MonitorResult.ID,
-				ConfirmingCheckIDToAppend: check.ID,
+			if err := s.queries.LinkCheckToResult(ctx, tx, &models.LinkCheckToResultParams{
+				CheckID: check.ID,
+				ResultID: pgtype.Int8{
+					Int64: latest[0].MonitorResultsWithLatestCheck.ID,
+					Valid: true,
+				},
 			}); err != nil {
-				return fmt.Errorf("appending confirming check id to result: %w", err)
+				return fmt.Errorf("linking check to result: %w", err)
 			}
 		}
 
@@ -246,7 +259,7 @@ func (s *Service) PerformMonitorCheck(
 	if result.DifferentToPrevious {
 		lastResult := "(none)"
 		if len(latest) > 0 {
-			lastResult = latest[0].MonitorResult.Result
+			lastResult = latest[0].MonitorResultsWithLatestCheck.Result
 		}
 
 		if err = s.SendNotifications(ctx, SendNotificationsParams{

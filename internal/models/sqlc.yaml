@@ -33,6 +33,11 @@ sql:
               type: "Citations"
               pointer: true
 
+          - column: "monitor_results_with_latest_check.citations"
+            go_type:
+              type: "Citations"
+              pointer: true
+
           - column: "monitor_checks.result"
             go_type:
               type: "CheckResult"

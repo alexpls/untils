@@ -20,7 +20,7 @@ func (c CheckParams) UserMessageString() string {
 func (c CheckParams) PreviousResultsString() string {
 	var prevs strings.Builder
 	for _, pr := range c.PreviousResults {
-		prevs.WriteString(pr.MonitorResult.Markdown())
+		prevs.WriteString(pr.MonitorResultsWithLatestCheck.Markdown())
 		prevs.WriteString("\n")
 	}
 	return prevs.String()

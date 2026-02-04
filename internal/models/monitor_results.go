@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func (mr MonitorResult) Markdown() string {
+func (mr MonitorResultsWithLatestCheck) Markdown() string {
 	var sb strings.Builder
 
 	_, _ = fmt.Fprintf(&sb, "**Result:** %s\n\n", mr.Result)
@@ -18,7 +18,9 @@ func (mr MonitorResult) Markdown() string {
 		}
 	}
 
-	_, _ = fmt.Fprintf(&sb, "**Latest check ran at:** %s\n", mr.LatestConfirmationAt.Format("January 2, 2006 at 3:04 PM"))
+	if mr.LatestConfirmationAt != nil {
+		_, _ = fmt.Fprintf(&sb, "**Latest check ran at:** %s\n", mr.LatestConfirmationAt.Format("January 2, 2006 at 3:04 PM"))
+	}
 
 	if mr.Feedback.Valid && mr.Feedback.String != "" {
 		_, _ = fmt.Fprintf(&sb, "**User feedback:** %s\n", mr.Feedback.String)

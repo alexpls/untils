@@ -171,10 +171,9 @@ func (h *Handlers) UpdateMonitorCheckFrequency(w http.ResponseWriter, r *http.Re
 		h.logger.Error("error closing response body", "error", err)
 	}
 
-	mon, err := h.service.UpdateMonitorCheckFrequency(r.Context(), mon, UpdateMonitorFrequencyParams{
+	if _, err := h.service.UpdateMonitorCheckFrequency(r.Context(), mon, UpdateMonitorFrequencyParams{
 		CheckFrequencyMinutes: signals.Frequency,
-	})
-	if err != nil {
+	}); err != nil {
 		h.logger.Error("error updating monitor frequency", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
@@ -561,7 +560,7 @@ func (h *Handlers) monitorDraftViewData(
 	values UpdateMonitorDraftParams,
 	validationErrs validation.ValidationErrors,
 ) (MonitorDraftData, error) {
-	var preview *models.MonitorResult
+	var preview *models.MonitorResultsWithLatestCheck
 	if mon.Status == models.MonitorStatusReady {
 		res, err := h.service.queries.ListMonitorResults(ctx, h.service.db, mon.ID)
 		if err != nil {

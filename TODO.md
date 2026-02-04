@@ -22,6 +22,7 @@
 - [ ] Improvement: make it clearer what the purpose of the preview is. I've had feedback that it's confusing that it's showing something that's already happened, which isn't something that the user wants to be notified about _now_.
 - [ ] Feature: hide results that were bad, and feed them back to LLM
 - [ ] Fix: if running a river job right away, make sure it's not 'scheduled', but rather 'available' - see https://riverqueue.com/docs/scheduled-jobs
+- [ ] Fix: "check now" when clicked should put the check in some kinda "queued" state, so the user has immediate feedback that their action had an effect, even if a worker may not pick it up for a while.
 
 ## Done
 
