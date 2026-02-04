@@ -1,0 +1,2 @@
+-- cannot restore deleted check ids - this migration is one-way
+-- the orphaned ids pointed to checks that no longer exist
