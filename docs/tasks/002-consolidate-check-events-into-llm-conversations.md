@@ -35,12 +35,13 @@ We can parse this in the UI layer to display the same "in progress" timeline we 
 ### Tool Display Rendering
 
 The current UI renders tool events with context-specific details, e.g.:
+
 - `Searching for "taylor swift albums"`
 - `Browsing "wikipedia.org"`
 - `Waiting for the page to load`
 - `Clicking on a link`
 
-The `arguments` field in the function call contains the parameters needed to render these details (e.g. `{"url": "..."}` or `{"query": "..."}`). 
+The `arguments` field in the function call contains the parameters needed to render these details (e.g. `{"url": "..."}` or `{"query": "..."}`).
 
 Display logic is kept in the UI layer via a simple switch statement in the template package (`internal/monitor/check_view.templ`). This keeps display concerns out of the service/model layer and makes it easy to add new tool display formats in one place.
 
@@ -112,6 +113,7 @@ This extends the existing trigger function to handle `llm_conversations` and emi
 1. **Update `GetLLMConversationBySourceID`** or add a new query to fetch conversations by check ID
 
 2. **Create helper function in template package** (`internal/monitor/check_view.templ`) to map tool names to display text:
+
    ```go
    func toolDisplayText(call models.LLMFunctionCall) string {
        switch call.Name {
@@ -139,7 +141,6 @@ This extends the existing trigger function to handle `llm_conversations` and emi
    - Remove separate `Events` field from `CheckViewData`
    - Extract timeline events from `Conversation.Messages`
    - Use the `toolDisplayText()` helper function for display text
-   
 2. **Update `monitor_view.templ`**:
    - Update `checkInProgressTimelineItem` to work with conversation messages
    - Use the `toolDisplayText()` helper function for display text
@@ -168,13 +169,14 @@ This extends the existing trigger function to handle `llm_conversations` and emi
    - Delete `MonitorCheckEventKind` enum
 
 4. **Create migration to drop table**:
+
    ```sql
    -- up
    DROP TRIGGER IF EXISTS monitor_check_events_notify_trigger ON monitor_check_events;
    DROP FUNCTION IF EXISTS monitor_check_events_notify();
    DROP TABLE IF EXISTS monitor_check_events;
    DROP TYPE IF EXISTS monitor_check_event_kind;
-   
+
    -- down
    -- Recreate table, enum, trigger (copy from original migration)
    ```
@@ -184,28 +186,29 @@ This extends the existing trigger function to handle `llm_conversations` and emi
 ### Phase 5: Update TODO.md
 
 Remove the completed item:
+
 ```
 - [ ] Refactor: could check_events and llm_conversation concepts be rolled into one?
 ```
 
 ## Files to Modify
 
-| File | Changes |
-|------|---------|
-| `internal/db/migrations/XXXXXX_llm_conversations_notify.up.sql` | New: Add pg_notify trigger |
-| `internal/db/migrations/XXXXXX_drop_check_events.up.sql` | New: Drop check_events table |
-| `internal/models/monitors.sql` | Remove check_events queries |
-| `internal/models/monitor_types.go` | Remove check event types |
-| `internal/models/llm_conversations.go` | Add helper to extract tool calls |
-| `internal/llm/check_workflow.go` | Remove EventsChan |
-| `internal/llm/checker.go` | Remove event channel usage |
-| `internal/llm/tools.go` | Remove `checkEvent` from tool definitions |
-| `internal/monitor/monitor_check_event.go` | Delete file |
-| `internal/monitor/monitor_check.go` | Remove event goroutine |
-| `internal/monitor/handlers.go` | Handle `llm_conversations` events, update data fetching |
-| `internal/monitor/check_view.templ` | Update timeline to use conversation, add `toolDisplayText()` helper |
-| `internal/monitor/monitor_view.templ` | Update in-progress events display, use `toolDisplayText()` helper |
-| `internal/monitor/monitor_draft.templ` | Update preview events display |
+| File                                                            | Changes                                                             |
+| --------------------------------------------------------------- | ------------------------------------------------------------------- |
+| `internal/db/migrations/XXXXXX_llm_conversations_notify.up.sql` | New: Add pg_notify trigger                                          |
+| `internal/db/migrations/XXXXXX_drop_check_events.up.sql`        | New: Drop check_events table                                        |
+| `internal/models/monitors.sql`                                  | Remove check_events queries                                         |
+| `internal/models/monitor_types.go`                              | Remove check event types                                            |
+| `internal/models/llm_conversations.go`                          | Add helper to extract tool calls                                    |
+| `internal/llm/check_workflow.go`                                | Remove EventsChan                                                   |
+| `internal/llm/checker.go`                                       | Remove event channel usage                                          |
+| `internal/llm/tools.go`                                         | Remove `checkEvent` from tool definitions                           |
+| `internal/monitor/monitor_check_event.go`                       | Delete file                                                         |
+| `internal/monitor/monitor_check.go`                             | Remove event goroutine                                              |
+| `internal/monitor/handlers.go`                                  | Handle `llm_conversations` events, update data fetching             |
+| `internal/monitor/check_view.templ`                             | Update timeline to use conversation, add `toolDisplayText()` helper |
+| `internal/monitor/monitor_view.templ`                           | Update in-progress events display, use `toolDisplayText()` helper   |
+| `internal/monitor/monitor_draft.templ`                          | Update preview events display                                       |
 
 ## Testing
 

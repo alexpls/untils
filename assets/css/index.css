@@ -2,55 +2,55 @@
 @plugin "daisyui";
 
 @view-transition {
-    navigation: auto;
+  navigation: auto;
 }
 
 @utility text-muted {
-    color: color-mix(
-        in oklab,
-        var(--color-base-content) 60%,
-        var(--color-base-100)
-    );
+  color: color-mix(
+    in oklab,
+    var(--color-base-content) 60%,
+    var(--color-base-100)
+  );
 }
 
 @utility scrollbar-gutter-stable {
-    scrollbar-gutter: stable;
+  scrollbar-gutter: stable;
 }
 
 /* Dashboard widget view transitions */
 ::view-transition-group(monitor-activity-widget),
 ::view-transition-group(checks-widget) {
-    animation: none;
+  animation: none;
 }
 
 ::view-transition-old(monitor-activity-widget),
 ::view-transition-old(checks-widget) {
-    animation: widget-fade-out 0.2s ease-out forwards;
+  animation: widget-fade-out 0.2s ease-out forwards;
 }
 
 ::view-transition-new(monitor-activity-widget),
 ::view-transition-new(checks-widget) {
-    animation: widget-fade-in 0.3s ease-out forwards;
+  animation: widget-fade-in 0.3s ease-out forwards;
 }
 
 @keyframes widget-fade-out {
-    from {
-        opacity: 1;
-        transform: translateY(0);
-    }
-    to {
-        opacity: 0;
-        transform: translateY(-8px);
-    }
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
 }
 
 @keyframes widget-fade-in {
-    from {
-        opacity: 0;
-        transform: translateY(8px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

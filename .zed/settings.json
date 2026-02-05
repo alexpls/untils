@@ -6,23 +6,23 @@
   "lsp": {
     "gopls": {
       "initialization_options": {
-        "buildFlags": ["-tags=integration"],
-      },
+        "buildFlags": ["-tags=integration"]
+      }
     },
     "tailwindcss-language-server": {
       "settings": {
         "includeLanguages": {
-          "templ": "html",
-        },
-      },
-    },
+          "templ": "html"
+        }
+      }
+    }
   },
   "languages": {
     "Templ": {
       "formatter": {
-        "language_server": { "name": "templ" },
+        "language_server": { "name": "templ" }
       },
-      "language_servers": ["tailwindcss-language-server", "..."],
-    },
-  },
+      "language_servers": ["tailwindcss-language-server", "..."]
+    }
+  }
 }

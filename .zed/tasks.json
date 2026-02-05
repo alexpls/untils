@@ -1,10 +1,10 @@
 [
   {
     "label": "dev server",
-    "command": "mise run dev",
+    "command": "mise run dev"
   },
   {
     "label": "opencode",
-    "command": "opencode",
-  },
+    "command": "opencode"
+  }
 ]

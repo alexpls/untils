@@ -37,9 +37,7 @@
       "backend_node_id": 138,
       "node_id": "138",
       "parent_id": "2",
-      "child_ids": [
-        "68"
-      ],
+      "child_ids": ["68"],
       "ignored": false,
       "role": "paragraph"
     },
@@ -47,11 +45,7 @@
       "backend_node_id": 150,
       "node_id": "150",
       "parent_id": "2",
-      "child_ids": [
-        "151",
-        "153",
-        "157"
-      ],
+      "child_ids": ["151", "153", "157"],
       "ignored": false,
       "role": "list"
     },
@@ -59,10 +53,7 @@
       "backend_node_id": 151,
       "node_id": "151",
       "parent_id": "150",
-      "child_ids": [
-        "70",
-        "69"
-      ],
+      "child_ids": ["70", "69"],
       "ignored": false,
       "role": "listitem"
     },
@@ -70,9 +61,7 @@
       "backend_node_id": 153,
       "node_id": "153",
       "parent_id": "150",
-      "child_ids": [
-        "154"
-      ],
+      "child_ids": ["154"],
       "ignored": false,
       "role": "listitem"
     },
@@ -88,9 +77,7 @@
       "backend_node_id": 157,
       "node_id": "157",
       "parent_id": "150",
-      "child_ids": [
-        "158"
-      ],
+      "child_ids": ["158"],
       "ignored": false,
       "role": "listitem"
     },
@@ -129,13 +116,7 @@
     "2": {
       "backend_node_id": 2,
       "node_id": "2",
-      "child_ids": [
-        "137",
-        "138",
-        "246",
-        "163",
-        "150"
-      ],
+      "child_ids": ["137", "138", "246", "163", "150"],
       "ignored": false,
       "name": "Energex Emergency Outages",
       "role": "RootWebArea"
@@ -160,13 +141,7 @@
       "backend_node_id": 246,
       "node_id": "246",
       "parent_id": "2",
-      "child_ids": [
-        "259",
-        "252",
-        "254",
-        "256",
-        "90"
-      ],
+      "child_ids": ["259", "252", "254", "256", "90"],
       "ignored": false,
       "role": "sectionfooter"
     },
@@ -198,13 +173,7 @@
       "backend_node_id": 259,
       "node_id": "259",
       "parent_id": "246",
-      "child_ids": [
-        "260",
-        "262",
-        "264",
-        "266",
-        "268"
-      ],
+      "child_ids": ["260", "262", "264", "266", "268"],
       "ignored": false,
       "role": "list"
     },
@@ -212,9 +181,7 @@
       "backend_node_id": 260,
       "node_id": "260",
       "parent_id": "259",
-      "child_ids": [
-        "261"
-      ],
+      "child_ids": ["261"],
       "ignored": false,
       "role": "listitem"
     },
@@ -230,9 +197,7 @@
       "backend_node_id": 262,
       "node_id": "262",
       "parent_id": "259",
-      "child_ids": [
-        "263"
-      ],
+      "child_ids": ["263"],
       "ignored": false,
       "role": "listitem"
     },
@@ -248,9 +213,7 @@
       "backend_node_id": 264,
       "node_id": "264",
       "parent_id": "259",
-      "child_ids": [
-        "265"
-      ],
+      "child_ids": ["265"],
       "ignored": false,
       "role": "listitem"
     },
@@ -266,9 +229,7 @@
       "backend_node_id": 266,
       "node_id": "266",
       "parent_id": "259",
-      "child_ids": [
-        "267"
-      ],
+      "child_ids": ["267"],
       "ignored": false,
       "role": "listitem"
     },
@@ -284,9 +245,7 @@
       "backend_node_id": 268,
       "node_id": "268",
       "parent_id": "259",
-      "child_ids": [
-        "89"
-      ],
+      "child_ids": ["89"],
       "ignored": false,
       "role": "listitem"
     },
@@ -294,11 +253,7 @@
       "backend_node_id": 48,
       "node_id": "48",
       "parent_id": "163",
-      "child_ids": [
-        "76",
-        "77",
-        "49"
-      ],
+      "child_ids": ["76", "77", "49"],
       "ignored": false,
       "name": "Manually refresh outage data",
       "role": "button"

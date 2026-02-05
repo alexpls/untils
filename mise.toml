@@ -1,20 +1,27 @@
 [tools]
-go = "1.25.5"
+go = "1.25.7"
 bun = "latest"
 
 [settings]
 env_file = '.env.dev'
 
-[tasks.build-x86]
+[tasks."build:x86"]
+depends = ["lint", "test:*"]
 run = "GOOS=linux GOARCH=amd64 go build -o untils_linux_amd64 ./cmd"
 
+[tasks."format:go"]
+run = "go fmt ./..."
+
+[tasks."format:js"]
+run = "bun run format"
+
 [tasks.format]
-run = "go fmt ./... && bun run format"
+depends = "format:*"
 
 [tasks.lint]
 run = "golangci-lint run"
 
-[tasks.test-db-setup]
+[tasks."testsetup:db"]
 run = '''
 psql "${PG_TEST_URL%/untils_test}" --echo-errors --quiet -c '\timing off' -c "drop database if exists untils_test with (force);"
 psql "${PG_TEST_URL%/untils_test}" --echo-errors --quiet -c '\timing off' -c "create database untils_test;"
@@ -23,20 +30,16 @@ psql "${PG_TEST_URL}" --echo-errors --quiet -c '\timing off' -f ./internal/model
 psql "${PG_TEST_URL}" --echo-errors --quiet -c "insert into river_migration (line, version, created_at) values ('main', 1, now()), ('main', 2, now()), ('main', 3, now()), ('main', 4, now()), ('main', 5, now()), ('main', 6, now()) on conflict do nothing;"
 '''
 
-[tasks.test]
+[tasks."test:unit"]
 env.TEMPL_DEV_MODE=false
-run = [
-    { task = 'test-db-setup' },
-    'go test ./...',
-]
+depends = ["testsetup:*"]
+run = 'go test ./...'
 
-[tasks.test-integration]
-run = [
-    { task = 'test-db-setup' },
-    'go test -tags=integration ./...',
-]
+[tasks."test:integration"]
+depends = ["testsetup:*"]
+run = 'go test -tags=integration ./...'
 
-[tasks.dev-deps]
+[tasks."dev:deps"]
 run = '''
 go install -tags 'pgx5' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
@@ -47,55 +50,51 @@ go install github.com/bokwoon95/wgo@latest
 curl -sSfL https://golangci-lint.run/install.sh | sh -s -- -b $(go env GOPATH)/bin v2.8.0
 '''
 
-[tasks.dev-server]
+[tasks."dev:watch:server"]
 run = """
 wgo -file=.go go run ./cmd serve \
     -env "$ENV" -db "$PG_URL" -xai-key "$XAI_KEY" -openai-key "$OPENAI_KEY" \
     -pushover-key "$PUSHOVER_KEY" -brave-key "$BRAVE_KEY"
 """
 
-[tasks.dev-templ]
-run = """
-templ generate --watch --proxy="http://localhost:4200" --open-browser=false
-"""
+[tasks."dev:watch:templ"]
+run = "templ generate --watch --proxy=\"http://localhost:4200\" --open-browser=false"
 
-[tasks.dev-css]
+[tasks."dev:watch:css"]
 run = "bun run watch-css"
 
-[tasks.dev-js]
+[tasks."dev:watch:js"]
 run = "bun run watch-js"
 
 [tasks.dev]
 env.TEMPL_DEV_MODE=true
+run = { task = "dev:watch:*" }
+
+[tasks."db:reset"]
 run = [
-	{ tasks = ["dev-server", "dev-templ", "dev-css", "dev-js"] }
+    { task = "db:drop" },
+    { task = "db:create" },
+    { task = "db:migrate:up" },
+    { task = "db:seed" },
+    { task = "sqlc:generate" },
 ]
 
-[tasks.db-reset]
-run = [
-    { task = "db-drop" },
-    { task = "db-create" },
-    { task = "db-migrate-up" },
-    { task = "db-seed" },
-    { task = "sqlc-generate" },
-]
-
-[tasks.db-create]
+[tasks."db:create"]
 run = '''
 psql "${PG_URL%/untils_dev}" -c "create database untils_dev;" || true
 psql "${PG_TEST_URL%/untils_test}" -c "create database untils_test;" || true
 '''
 
-[tasks.db-drop]
+[tasks."db:drop"]
 run = '''
 psql "${PG_URL%/untils_dev}" -c "drop database untils_dev;" || true
 psql "${PG_TEST_URL%/untils_test}" -c "drop database untils_test;" || true
 '''
 
-[tasks.db-seed]
+[tasks."db:seed"]
 run = 'go run ./cmd seed -env dev -db $PG_URL'
 
-[tasks.db-migrate-create]
+[tasks."db:migrate:create"]
 usage = '''
 arg "<name>" help="migration name"
 '''
@@ -103,7 +102,8 @@ run = '''
 migrate create -ext sql -dir internal/db/migrations "${usage_name?}"
 '''
 
-[tasks.db-migrate-up]
+[tasks."db:migrate:up"]
+depends_post = ["db:dump_schema"]
 run = '''
 migrate -database ${PG_URL/postgresql/pgx5} -path internal/db/migrations up
 migrate -database ${PG_TEST_URL/postgresql/pgx5} -path internal/db/migrations up
@@ -111,13 +111,14 @@ river migrate-up --database-url "${PG_URL}"
 river migrate-up --database-url "${PG_TEST_URL}"
 '''
 
-[tasks.db-migrate-down]
+[tasks."db:migrate:down"]
+depends_post = ["db:dump_schema"]
 run = '''
 migrate -database ${PG_URL/postgresql/pgx5} -path internal/db/migrations down 1
 migrate -database ${PG_TEST_URL/postgresql/pgx5} -path internal/db/migrations down 1
 '''
 
-[tasks.db-dump-schema]
+[tasks."db:dump_schema"]
 run = '''
 # stripping restrict tags because sqlc balks when processing them. remove once: https://github.com/sqlc-dev/sqlc/issues/4065 is fixed
 pg_dump "$PG_URL" --schema-only --no-owner --no-privileges --restrict-key stable \
@@ -125,6 +126,6 @@ pg_dump "$PG_URL" --schema-only --no-owner --no-privileges --restrict-key stable
     > internal/models/schema.sql
 '''
 
-[tasks.sqlc-generate]
-depends = ["db-dump-schema"]
+[tasks."sqlc:generate"]
+depends = ["db:dump_schema"]
 run = "cd internal/models && sqlc generate"
