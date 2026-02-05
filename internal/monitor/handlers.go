@@ -2,11 +2,13 @@ package monitor
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"net/http"
 	"strconv"
 
 	"github.com/a-h/templ"
+	"github.com/alexpls/untils/internal/errortypes"
 	"github.com/starfederation/datastar-go/datastar"
 )
 
@@ -101,13 +103,15 @@ func (cpr *ConditionalPatchRenderer) Handle(w http.ResponseWriter, r *http.Reque
 	} else {
 		comp, err := cpr.Renderer(wantsPatches)
 		if err != nil {
-			cpr.Logger.ErrorContext(r.Context(), "error rendering component", "error", err)
-			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			if !errors.Is(err, &errortypes.ResourceNotFoundError{}) {
+				cpr.Logger.ErrorContext(r.Context(), "error rendering component", "error", err)
+			}
+			_ = errortypes.HandleError(err, w)
 			return
 		}
 		if err := comp.Render(r.Context(), w); err != nil {
 			cpr.Logger.ErrorContext(r.Context(), "error rendering component", "error", err)
-			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			_ = errortypes.HandleError(err, w)
 			return
 		}
 	}

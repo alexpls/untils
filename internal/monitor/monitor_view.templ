@@ -33,6 +33,7 @@ const (
 	MonitorPageTypeActivity
 	MonitorPageTypeChecks
 	MonitorPageTypeNotifications
+	MonitorPageTypeSettings
 )
 
 templ MonitorSidebarLayout(monitor *models.Monitor, pageType MonitorPageType) {
@@ -64,13 +65,19 @@ templ MonitorSidebarLayout(monitor *models.Monitor, pageType MonitorPageType) {
 					>
 						Checks
 					</a>
-					<a
-						class={ "block", "w-full", "rounded", templ.KV("bg-base-100", pageType == MonitorPageTypeNotifications), "px-4", "py-2", "text-muted", "text-sm", "hover:bg-base-100", "transition-colors" }
-						href={ fmt.Sprintf("/app/monitors/%d/notifications", monitor.ID) }
-					>
-						Notifications
-					</a>
-				</div>
+				<a
+					class={ "block", "w-full", "rounded", templ.KV("bg-base-100", pageType == MonitorPageTypeNotifications), "px-4", "py-2", "text-muted", "text-sm", "hover:bg-base-100", "transition-colors" }
+					href={ fmt.Sprintf("/app/monitors/%d/notifications", monitor.ID) }
+				>
+					Notifications
+				</a>
+				<a
+					class={ "block", "w-full", "rounded", templ.KV("bg-base-100", pageType == MonitorPageTypeSettings), "px-4", "py-2", "text-muted", "text-sm", "hover:bg-base-100", "transition-colors" }
+					href={ fmt.Sprintf("/app/monitors/%d/settings", monitor.ID) }
+				>
+					Settings
+				</a>
+			</div>
 			</div>
 			<div class="col-span-1 lg:col-span-8">
 				{ children... }
@@ -81,60 +88,21 @@ templ MonitorSidebarLayout(monitor *models.Monitor, pageType MonitorPageType) {
 
 templ MonitorPage(data MonitorViewData) {
 	@MonitorSidebarLayout(data.Monitor, MonitorPageTypeActivity) {
-		<div id="monitor-view" data-effect={ datastar.GetSSE("/app/monitors/%d?sse=true", data.Monitor.ID) }>
-			<div class="grid grid-cols-1 lg:grid-cols-12 space-y-4">
-				<div class="lg:col-span-8 lg:m-4 px-4 py-2 bg-base-100 rounded border border-base-content/10">
-					@components.Timeline() {
-						if data.InProgressCheck != nil {
-							@InProgressCheckTimelineItem(InProgressCheckTimelineItemViewData{
-								Check:          data.InProgressCheck,
-								TimelineEvents: data.InProgressCheckTimelineEvents,
-							})
-						}
-						for _, result := range data.Results {
-							@monitorResultTimelineItem(result, true)
-						}
-						<li>
-							@components.TimelineItem(monitorCreatedTimelineHeading(data.Monitor), nil)
-						</li>
-					}
-				</div>
-				<div class="lg:col-span-4 lg:m-4 p-4 border border-base-content/10 rounded">
-					<div class="space-y-4">
-						<div>
-							<ul>
-								if data.Monitor.Status == models.MonitorStatusActive {
-									<li>
-										<button
-											data-on:click={ datastar.PostSSE("/app/monitors/%d/pause", data.Monitor.ID) }
-											class="text-sm link"
-										>
-											Pause monitoring
-										</button>
-									</li>
-								} else if data.Monitor.Status == models.MonitorStatusPaused {
-									<li>
-										<button
-											data-on:click={ datastar.PostSSE("/app/monitors/%d/unpause", data.Monitor.ID) }
-											class="text-sm link"
-										>
-											Resume monitoring
-										</button>
-									</li>
-								}
-								<li>
-									<button
-										data-on:click={ datastar.DeleteSSE("/app/monitors/%d", data.Monitor.ID) }
-										class="text-sm text-error link"
-									>
-										Delete
-									</button>
-								</li>
-							</ul>
-						</div>
-					</div>
-				</div>
-			</div>
+		<div id="monitor-view" class="lg:m-4 px-4 py-2 bg-base-100 rounded border border-base-content/10" data-effect={ datastar.GetSSE("/app/monitors/%d?sse=true", data.Monitor.ID) }>
+			@components.Timeline() {
+				if data.InProgressCheck != nil {
+					@InProgressCheckTimelineItem(InProgressCheckTimelineItemViewData{
+						Check:          data.InProgressCheck,
+						TimelineEvents: data.InProgressCheckTimelineEvents,
+					})
+				}
+				for _, result := range data.Results {
+					@monitorResultTimelineItem(result, true)
+				}
+				<li>
+					@components.TimelineItem(monitorCreatedTimelineHeading(data.Monitor), nil)
+				</li>
+			}
 		</div>
 	}
 }

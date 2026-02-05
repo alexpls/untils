@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/a-h/templ"
+	"github.com/alexpls/untils/internal/errortypes"
 	"github.com/alexpls/untils/internal/models"
 	"github.com/alexpls/untils/internal/pagination"
 	"github.com/jackc/pgx/v5"
@@ -131,7 +132,7 @@ func (h *Handlers) RunCheckNow(w http.ResponseWriter, r *http.Request, user *mod
 	}
 
 	if err := h.service.RunCheckNow(r.Context(), checkID); err != nil {
-		if errors.Is(err, ErrCheckNotScheduled) {
+		if errors.Is(err, &errortypes.ErrCheckNotScheduled{}) {
 			http.Error(w, "Check is not scheduled", http.StatusBadRequest)
 			return
 		}

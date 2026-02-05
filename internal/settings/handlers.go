@@ -11,6 +11,7 @@ import (
 
 	"github.com/alexpls/untils/internal/auth"
 	"github.com/alexpls/untils/internal/db"
+	"github.com/alexpls/untils/internal/errortypes"
 	"github.com/alexpls/untils/internal/models"
 	"github.com/alexpls/untils/internal/pushover"
 	"github.com/alexpls/untils/internal/validation"
@@ -70,7 +71,7 @@ func (h *Handlers) ViewSettings(w http.ResponseWriter, r *http.Request, user *mo
 func (h *Handlers) ViewPushoverSettings(w http.ResponseWriter, r *http.Request, user *models.User) {
 	tok, err := h.pushoverStore.GetToken(r.Context(), user.ID)
 	if err != nil {
-		if !errors.Is(err, pushover.ErrNoPushoverUserToken) {
+		if !errors.Is(err, &errortypes.ErrNoPushoverUserToken{}) {
 			h.logger.ErrorContext(r.Context(), "error getting pushover token", "error", err)
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 			return
@@ -108,7 +109,7 @@ func (h *Handlers) UpdatePushoverSettings(w http.ResponseWriter, r *http.Request
 
 	err := h.pushoverClient.Validate(r.Context(), params.Token)
 	if err != nil {
-		var validationErr *pushover.ErrInvalidToken
+		var validationErr *errortypes.ErrInvalidToken
 		if errors.As(err, &validationErr) {
 			mapped := validation.ValidationError{
 				Field:   "Token",

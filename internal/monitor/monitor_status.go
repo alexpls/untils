@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"slices"
 
+	"github.com/alexpls/untils/internal/errortypes"
 	"github.com/alexpls/untils/internal/models"
 )
 
@@ -31,15 +32,6 @@ var validMonitorStatusTransitions = map[models.MonitorStatus][]models.MonitorSta
 	models.MonitorStatusPaused: {
 		models.MonitorStatusActive,
 	},
-}
-
-type ErrInvalidStatusTransition struct {
-	from models.MonitorStatus
-	to   models.MonitorStatus
-}
-
-func (e ErrInvalidStatusTransition) Error() string {
-	return fmt.Sprintf("monitor: invalid status transition from '%s' to '%s'", e.from, e.to)
 }
 
 func (s *Service) updateMonitorStatus(ctx context.Context, tx models.DBTX, mon *models.Monitor, newStatus models.MonitorStatus) (*models.Monitor, error) {
@@ -69,7 +61,7 @@ func validateMonitorTransition(from models.MonitorStatus, to models.MonitorStatu
 		return fmt.Errorf("monitor: unconfigured 'from' status: %s", from)
 	}
 	if !slices.Contains(validTos, to) {
-		return &ErrInvalidStatusTransition{from: from, to: to}
+		return &errortypes.InvalidMonitorStatusTransitionError{From: from, To: to}
 	}
 	return nil
 }

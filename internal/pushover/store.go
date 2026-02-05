@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/alexpls/untils/internal/db"
+	"github.com/alexpls/untils/internal/errortypes"
 	"github.com/alexpls/untils/internal/models"
 	"github.com/go-playground/validator/v10"
 	"github.com/jackc/pgx/v5"
@@ -21,13 +22,11 @@ func NewStore(db db.DB, queries *models.Queries, validate *validator.Validate) *
 	return &Store{db: db, queries: queries, validate: validate}
 }
 
-var ErrNoPushoverUserToken = errors.New("no pushover user token found")
-
 func (s *Store) GetToken(ctx context.Context, userID int64) (*models.PushoverUserToken, error) {
 	tok, err := s.queries.GetPushoverUserToken(ctx, s.db, userID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, ErrNoPushoverUserToken
+			return nil, &errortypes.ErrNoPushoverUserToken{}
 		}
 		return nil, fmt.Errorf("getting pushover user token: %w", err)
 	}

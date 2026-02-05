@@ -1,0 +1,50 @@
+package monitor
+
+import (
+	"github.com/alexpls/untils/internal/models"
+	"github.com/starfederation/datastar-go/datastar"
+)
+
+type MonitorSettingsViewData struct {
+	Monitor *models.Monitor
+}
+
+templ MonitorSettingsPage(data MonitorSettingsViewData) {
+	@MonitorSidebarLayout(data.Monitor, MonitorPageTypeSettings) {
+		@MonitorSettingsView(data)
+	}
+}
+
+templ MonitorSettingsView(data MonitorSettingsViewData) {
+	<div id="monitor-settings-view" class="lg:p-4">
+		<div class="p-4 border border-base-content/10 rounded bg-base-100 space-y-4">
+			<h3 class="font-semibold">Monitor Settings</h3>
+			<div class="space-y-2">
+				if data.Monitor.Status == models.MonitorStatusActive {
+					<button
+						data-on:click={ datastar.PostSSE("/app/monitors/%d/pause", data.Monitor.ID) }
+						class="btn btn-sm btn-soft"
+					>
+						Pause
+					</button>
+				} else if data.Monitor.Status == models.MonitorStatusPaused {
+					<button
+						data-on:click={ datastar.PostSSE("/app/monitors/%d/unpause", data.Monitor.ID) }
+						class="btn btn-sm btn-soft"
+					>
+						Resume
+					</button>
+				}
+			</div>
+			<div class="divider"></div>
+			<div>
+				<button
+					data-on:click={ "confirm('Are you sure you want to delete this monitor? This action cannot be undone.') &&" + datastar.DeleteSSE("/app/monitors/%d", data.Monitor.ID) }
+					class="btn btn-sm btn-error"
+				>
+					Delete monitor
+				</button>
+			</div>
+		</div>
+	</div>
+}

@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/alexpls/untils/internal/errortypes"
 	"github.com/alexpls/untils/internal/types"
 	"github.com/jackc/pgx/v5"
 	"github.com/riverqueue/river"
@@ -60,7 +61,7 @@ func (w *CheckWorker) Work(ctx context.Context, job *river.Job[CheckArgs]) error
 	}
 
 	if err = w.service.PerformMonitorCheck(ctx, job.Args.UserID, check, true, ""); err != nil {
-		if errors.Is(err, ErrMonitorPaused) {
+		if errors.Is(err, &errortypes.ErrMonitorPaused{}) {
 			return nil
 		}
 		logger.ErrorContext(ctx, "failed to perform monitor check", "error", err)

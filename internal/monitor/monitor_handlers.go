@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/a-h/templ"
+	"github.com/alexpls/untils/internal/errortypes"
 	"github.com/alexpls/untils/internal/models"
 	"github.com/alexpls/untils/internal/pagination"
 	"github.com/alexpls/untils/internal/validation"
@@ -139,6 +140,24 @@ func (h *Handlers) ViewMonitorNotifications(w http.ResponseWriter, r *http.Reque
 	comp := MonitorNotificationsPage(data)
 	if err := comp.Render(r.Context(), w); err != nil {
 		h.logger.ErrorContext(r.Context(), "error rendering monitor notifications page", "error", err)
+		return
+	}
+}
+
+// ViewMonitorSettings handles GET /app/monitors/{id}/settings
+func (h *Handlers) ViewMonitorSettings(w http.ResponseWriter, r *http.Request, user *models.User) {
+	mon := h.monitorFromPath(w, r, user)
+	if mon == nil {
+		return
+	}
+
+	data := MonitorSettingsViewData{
+		Monitor: mon,
+	}
+
+	comp := MonitorSettingsPage(data)
+	if err := comp.Render(r.Context(), w); err != nil {
+		h.logger.ErrorContext(r.Context(), "error rendering monitor settings page", "error", err)
 		return
 	}
 }
@@ -309,31 +328,15 @@ func (h *Handlers) setMonitorPaused(w http.ResponseWriter, r *http.Request, user
 
 	sse := datastar.NewSSE(w, r)
 
-	mon, err := h.service.SetMonitorPaused(r.Context(), user, monitorID, paused)
-	if err != nil {
-		if errors.Is(err, ErrMonitorNotFound) {
-			http.Error(w, "Not found", http.StatusNotFound)
-			return
-		}
-		var transitionErr *ErrInvalidStatusTransition
-		if errors.As(err, &transitionErr) {
-			http.Error(w, "Invalid monitor state transition", http.StatusBadRequest)
-			return
-		}
+	if _, err := h.service.SetMonitorPaused(r.Context(), user, monitorID, paused); err != nil {
 		h.logger.ErrorContext(r.Context(), "error setting monitor paused state", "error", err, "paused", paused)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		_ = errortypes.HandleError(err, w)
 		return
 	}
 
-	comp, err := h.monitorComponent(r.Context(), mon, user.ID)
-	if err != nil {
-		h.logger.ErrorContext(r.Context(), "error rendering monitor component", "error", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+	if err := sseReload(sse); err != nil {
+		h.logger.ErrorContext(sse.Context(), "error sending reload over sse", "error", err)
 		return
-	}
-
-	if err := sse.PatchElementTempl(comp); err != nil {
-		h.logger.ErrorContext(sse.Context(), "error patching element", "error", err)
 	}
 }
 
@@ -512,19 +515,13 @@ func (h *Handlers) UpdateResultFeedback(w http.ResponseWriter, r *http.Request, 
 func (h *Handlers) monitorFromPath(w http.ResponseWriter, r *http.Request, user *models.User) *models.Monitor {
 	monitorID := monitorIDFromPath(r)
 	if monitorID == 0 {
-		http.Error(w, "Bad request", http.StatusBadRequest)
+		http.NotFound(w, r)
 		return nil
 	}
 
 	mon, err := h.service.GetMonitor(r.Context(), user.ID, monitorID)
 	if err != nil {
-		if errors.Is(err, ErrMonitorNotFound) {
-			http.Error(w, "Not found", http.StatusNotFound)
-			return nil
-		}
-
-		h.logger.ErrorContext(r.Context(), "error getting monitor", "error", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		_ = errortypes.HandleError(err, w)
 		return nil
 	}
 

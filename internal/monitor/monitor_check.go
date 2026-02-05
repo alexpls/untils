@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/alexpls/untils/internal/db"
+	"github.com/alexpls/untils/internal/errortypes"
 	"github.com/alexpls/untils/internal/llm"
 	"github.com/alexpls/untils/internal/models"
 	"github.com/jackc/pgx/v5"
@@ -52,8 +53,6 @@ func (s *Service) GetInProgressMonitorCheck(ctx context.Context, monitor *models
 	return check, nil
 }
 
-var ErrCheckNotScheduled = errors.New("check is not in scheduled state")
-
 // RunCheckNow updates a scheduled check to run immediately by updating its
 // scheduled_for time and rescheduling the River job.
 func (s *Service) RunCheckNow(ctx context.Context, checkID int64) error {
@@ -65,7 +64,7 @@ func (s *Service) RunCheckNow(ctx context.Context, checkID int64) error {
 		}
 
 		if check.Status != models.MonitorCheckStatusScheduled {
-			return ErrCheckNotScheduled
+			return &errortypes.ErrCheckNotScheduled{}
 		}
 
 		now := time.Now()
@@ -127,8 +126,6 @@ func (s *Service) scheduleMonitorCheckTx(ctx context.Context, tx pgx.Tx, monitor
 	return check, nil
 }
 
-var ErrMonitorPaused = errors.New("monitor is paused")
-
 func (s *Service) PerformMonitorCheck(
 	ctx context.Context,
 	userID int64,
@@ -151,7 +148,7 @@ func (s *Service) PerformMonitorCheck(
 	}
 
 	if monitor.Status == models.MonitorStatusPaused {
-		return ErrMonitorPaused
+		return &errortypes.ErrMonitorPaused{}
 	}
 
 	user, err := s.queries.GetUser(ctx, s.db, userID)

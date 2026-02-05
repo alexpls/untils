@@ -10,6 +10,8 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/alexpls/untils/internal/errortypes"
 )
 
 type Client struct {
@@ -24,14 +26,6 @@ func NewPushoverClient(key string, logger *slog.Logger, store *Store) *Client {
 		key:    key,
 		store:  store,
 	}
-}
-
-type ErrInvalidToken struct {
-	Reasons []string
-}
-
-func (e ErrInvalidToken) Error() string {
-	return fmt.Sprintf("invalid token: %s", strings.Join(e.Reasons, ", "))
 }
 
 func (c *Client) Validate(ctx context.Context, userKey string) error {
@@ -49,7 +43,7 @@ func (c *Client) Validate(ctx context.Context, userKey string) error {
 	}
 
 	if res.Status != 1 {
-		return &ErrInvalidToken{Reasons: *res.Errors}
+		return &errortypes.ErrInvalidToken{Reasons: *res.Errors}
 	}
 
 	return nil
@@ -64,7 +58,7 @@ type SendParams struct {
 func (c *Client) Send(ctx context.Context, params SendParams) error {
 	token, err := c.store.GetToken(ctx, params.UserID)
 	if err != nil {
-		if errors.Is(err, ErrNoPushoverUserToken) {
+		if errors.Is(err, &errortypes.ErrNoPushoverUserToken{}) {
 			c.logger.WarnContext(ctx, "tried to send pushover notification to a user without a pushover token", "user_id", params.UserID)
 			return nil
 		}

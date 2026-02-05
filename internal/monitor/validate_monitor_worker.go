@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/alexpls/untils/internal/errortypes"
 	"github.com/alexpls/untils/internal/types"
 	"github.com/riverqueue/river"
 )
@@ -50,7 +51,7 @@ func (w *ValidateMonitorWorker) Work(ctx context.Context, job *river.Job[Validat
 
 	mon, err := w.service.GetMonitor(ctx, job.Args.UserID, job.Args.MonitorID)
 	if err != nil {
-		if errors.Is(err, ErrMonitorNotFound) {
+		if errors.Is(err, &errortypes.ResourceNotFoundError{}) {
 			return river.JobCancel(fmt.Errorf("monitor no longer exists"))
 		}
 		logger.ErrorContext(ctx, "failed to get monitor", "error", err)
@@ -58,7 +59,7 @@ func (w *ValidateMonitorWorker) Work(ctx context.Context, job *river.Job[Validat
 	}
 
 	if err = w.service.ValidateMonitor(ctx, mon); err != nil {
-		var er *ErrInvalidStatusTransition
+		var er *errortypes.InvalidMonitorStatusTransitionError
 		if errors.As(err, &er) {
 			return river.JobCancel(er)
 		}

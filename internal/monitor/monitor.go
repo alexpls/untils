@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/alexpls/untils/internal/db"
+	"github.com/alexpls/untils/internal/errortypes"
 	"github.com/alexpls/untils/internal/llm"
 	"github.com/alexpls/untils/internal/models"
 	"github.com/jackc/pgx/v5"
@@ -20,7 +21,7 @@ func (s *Service) GetMonitor(ctx context.Context, userID, monitorID int64) (*mod
 	})
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, ErrMonitorNotFound
+			return nil, &errortypes.ResourceNotFoundError{Resource: "monitor", ID: monitorID}
 		}
 		return nil, fmt.Errorf("getting monitor: %w", err)
 	}
