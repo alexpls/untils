@@ -1,0 +1,16 @@
+name: setup
+
+description: install mise tools and build css/js
+
+runs:
+  using: composite
+  steps:
+    - uses: jdx/mise-action@v2
+      with:
+        install_args: go bun
+    - run: bun install
+      shell: bash
+    - run: bun run build-css
+      shell: bash
+    - run: bun run build-js
+      shell: bash
