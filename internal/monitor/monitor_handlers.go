@@ -3,7 +3,6 @@ package monitor
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 
@@ -12,7 +11,6 @@ import (
 	"github.com/alexpls/untils/internal/models"
 	"github.com/alexpls/untils/internal/pagination"
 	"github.com/alexpls/untils/internal/validation"
-	"github.com/jackc/pgx/v5"
 	"github.com/starfederation/datastar-go/datastar"
 )
 
@@ -420,22 +418,9 @@ func (h *Handlers) ViewResultFeedbackModal(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	resultID := resultIDFromPath(r)
-
-	if resultID == 0 {
-		http.Error(w, "Bad request", http.StatusBadRequest)
+	result := h.monitorResultFromPath(w, r, mon)
+	if result == nil {
 		return
-	}
-
-	result, err := h.service.queries.GetMonitorResult(r.Context(), h.service.db, &models.GetMonitorResultParams{
-		MonitorID: mon.ID,
-		ResultID:  resultID,
-	})
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			http.NotFound(w, r)
-			return
-		}
 	}
 
 	sse := datastar.NewSSE(w, r)
@@ -455,28 +440,14 @@ func (h *Handlers) ViewResultFeedbackModal(w http.ResponseWriter, r *http.Reques
 
 // UpdateResultFeedback handles POST /app/monitors/{id}/results/{result_id}/feedback
 func (h *Handlers) UpdateResultFeedback(w http.ResponseWriter, r *http.Request, user *models.User) {
-	// TODO: consolidate this and ResultFeedbackGet - so much of the handler is duplicated
 	mon := h.monitorFromPath(w, r, user)
 	if mon == nil {
 		return
 	}
 
-	resultID := resultIDFromPath(r)
-
-	if resultID == 0 {
-		http.Error(w, "Bad request", http.StatusBadRequest)
+	result := h.monitorResultFromPath(w, r, mon)
+	if result == nil {
 		return
-	}
-
-	result, err := h.service.queries.GetMonitorResult(r.Context(), h.service.db, &models.GetMonitorResultParams{
-		MonitorID: mon.ID,
-		ResultID:  resultID,
-	})
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			http.NotFound(w, r)
-			return
-		}
 	}
 
 	var params CreateMonitorResultFeedbackParams

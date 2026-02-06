@@ -9,6 +9,8 @@ import (
 
 	"github.com/a-h/templ"
 	"github.com/alexpls/untils/internal/errortypes"
+	"github.com/alexpls/untils/internal/models"
+	"github.com/jackc/pgx/v5"
 	"github.com/starfederation/datastar-go/datastar"
 )
 
@@ -115,4 +117,25 @@ func (cpr *ConditionalPatchRenderer) Handle(w http.ResponseWriter, r *http.Reque
 			return
 		}
 	}
+}
+
+func (h *Handlers) monitorResultFromPath(w http.ResponseWriter, r *http.Request, mon *models.Monitor) *models.MonitorResultsWithLatestCheck {
+	resultID := resultIDFromPath(r)
+	if resultID == 0 {
+		http.NotFound(w, r)
+		return nil
+	}
+
+	result, err := h.service.queries.GetMonitorResult(r.Context(), h.service.db, &models.GetMonitorResultParams{
+		MonitorID: mon.ID,
+		ResultID:  resultID,
+	})
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			http.NotFound(w, r)
+			return nil
+		}
+	}
+
+	return result
 }
