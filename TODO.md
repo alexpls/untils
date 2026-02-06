@@ -1,31 +1,43 @@
 ## To do
 
-- [ ] Feature: Allow switching API providers between x.ai and OpenAI on startup
-- [ ] Feature: User signup
-- [ ] Improvement: Better use of context. Should pass it all the way down and rely less on closer functions during app startup/shutdown
-- [ ] Improvement: Pass the user's timezone as context to all prompts
+### Monitor results
+
 - [ ] Feature: Checks should be able to produce multiple results
+- [ ] Improvement: special logic when checking prices for things, should include things like finding the cheapest price and reporting on it. Not including multiple store names.
+- [ ] Feature: handle future dates better. At the moment with the 'past tense' date requirement, release dates are referred to in the past tense, even though they haven't happened yet.
+
+### Monitor previews
+
+- [ ] Feature: "fire and forget" way to set up monitors, if you don't wanna sit around waiting to confirm that the first check looks good
+- [ ] Improvement: make it clearer what the purpose of the preview is. I've had feedback that it's confusing that it's showing something that's already happened, which isn't something that the user wants to be notified about _now_.
+
+### AI SDKs
+
+- [ ] Refactor: Abstract out calls to the underlying LLM provider so we can swap 'em out on the fly
+- [ ] Feature: Allow switching API providers between x.ai and OpenAI on startup
+- [ ] Improvement: 25% of the produced binary is OpenAI's bloated SDK. I only use one endpoint, could move away from the SDK and call it directly with HTTP?
+
+### Misc
+
+- [ ] Feature: User signup
+- [ ] Improvement: Better use of go context. Should pass it all the way down and rely less on closer functions during app startup/shutdown
+- [ ] Improvement: Pass the user's timezone as context to all prompts
 - [ ] Refactor: Forms should have some helpers extracted
 - [ ] Improvement: Pushover form should show a spinner while we're validating the token
 - [ ] Improvement: Triage workflow should document steps it took to get to a satisfactory answer so future workflows can do them too - possibly able to skip making new searches this way and just re-request existing URLs?
 - [ ] Fix: Need an anchored positioning tooltip polyfill for Firefox
-- [ ] Feature: handle future dates better. At the moment with the 'past tense' date requirement, release dates are referred to in the past tense, even though they haven't happened yet.
-- [ ] Feature: "fire and forget" way to set up monitors, if you don't wanna sit around waiting to confirm that the first check looks good
 - [ ] Improvement: should be able to checkpoint progress in conversation with LLM and resume it on server restart
 - [ ] Refactor: make new tool creation less of a trek through various parts of the codebase
 - [ ] Fix: should be able to visit check pages for incomplete checks - but right now that errors
-- [ ] Improvement: special logic when checking prices for things, should include things like finding the cheapest price and reporting on it. Not including multiple store names.
 - [ ] Improvement: The click tool should emit the URL of the new page it landed on as a navigation event so it shows up on the UI
   - [ ] Refactor: "llm_conversations" should probably be renamed to "monitor_events", especially if it's gonna hold more than llm responses in it.
 - [ ] Fix: (requires https://github.com/starfederation/datastar/issues/900 first) event sse should not deliver a message when subscribed to right after a visit to a page. But they should send a message when subscribed to on reentry to a page (e.g. switching back to the tab). On Dashboard page, only the first subscription should use view transitions.
-- [ ] Improvement: 25% of the produced binary is OpenAI's bloated SDK. I only use one endpoint, could move away from the SDK and call it directly with HTTP?
-- [ ] Improvement: make it clearer what the purpose of the preview is. I've had feedback that it's confusing that it's showing something that's already happened, which isn't something that the user wants to be notified about _now_.
 - [ ] Feature: hide results that were bad, and feed them back to LLM
-- [ ] Fix: if running a river job right away, make sure it's not 'scheduled', but rather 'available' - see https://riverqueue.com/docs/scheduled-jobs
 - [ ] Fix: "check now" when clicked should put the check in some kinda "queued" state, so the user has immediate feedback that their action had an effect, even if a worker may not pick it up for a while.
 
 ## Done
 
+- [x] Fix: if running a river job right away, make sure it's not 'scheduled', but rather 'available' - see https://riverqueue.com/docs/scheduled-jobs
 - [x] Fix: updating the check schedule should modify the currently scheduled checks
 - [x] Refactor: can I get rid of skipped checks? It's annoying and doesn't make sense on the UI.
 - [x] Fix: When restarting a check (e.g. after server restart), make sure to clear old check events for it
