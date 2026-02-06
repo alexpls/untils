@@ -8,7 +8,7 @@ import (
 )
 
 type CreateMonitorResultFeedbackParams struct {
-	Feedback string `json:"feedback" validate:"required,min=3,max=2000"`
+	Feedback string `json:"feedback"`
 }
 
 func (s *Service) CreateMonitorResultFeedback(ctx context.Context, userID int64, result *models.MonitorResultsWithLatestCheck, params CreateMonitorResultFeedbackParams) error {
@@ -24,7 +24,7 @@ func (s *Service) CreateMonitorResultFeedback(ctx context.Context, userID int64,
 	updater := func(ctx context.Context, tx models.DBTX, mon *models.Monitor) (*models.Monitor, error) {
 		err := s.queries.UpdateMonitorResultWithFeedback(ctx, tx, &models.UpdateMonitorResultWithFeedbackParams{
 			MonitorResultID: result.ID,
-			Feedback:        pgtype.Text{Valid: true, String: params.Feedback},
+			Feedback:        pgtype.Text{Valid: params.Feedback != "", String: params.Feedback},
 		})
 		return mon, err
 	}
