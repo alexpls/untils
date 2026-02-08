@@ -8,6 +8,12 @@
 
 ### Monitor previews
 
+- [ ] Feedback: it's unclear that the monitor isn't already ready to go when it's being previewed. When the first "preview" result comes in there's an assumption that the thing is already active.
+- [ ] Feedback: it's unclear how often email notifications will be sent. People don't wanna get spammed so this should be much more obvious.
+- [ ] Feedback: observation: non-technical people don't care so much about "how often it checks". They just care about "how often it notifies".
+- [ ] Feedback: it's not obvious at all that there are multiple ways to receive notifications.
+- [ ] Feedback: "start monitoring now" button should probably just say "Activate".
+- [ ] Feedback: it's not clear that the "feedback" option goes to the LLM to influence future results. People were trying to give feedback about the application itself in that field.
 - [ ] Feature: "fire and forget" way to set up monitors, if you don't wanna sit around waiting to confirm that the first check looks good
 - [ ] Improvement: make it clearer what the purpose of the preview is. I've had feedback that it's confusing that it's showing something that's already happened, which isn't something that the user wants to be notified about _now_.
 
