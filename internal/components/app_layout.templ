@@ -64,6 +64,9 @@ templ AppLayout(title string, breadcrumbs []Breadcrumb) {
 		>
 			{ children... }
 		</div>
+		<footer class="text-muted text-xs py-2 text-center">
+			Build: { BuildVersion(ctx) }
+		</footer>
 	}
 }
 

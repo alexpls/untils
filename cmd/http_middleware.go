@@ -20,6 +20,18 @@ type HandlerFuncWithUser func(http.ResponseWriter, *http.Request, *models.User)
 func (a *app) requireAuth(next HandlerFuncWithUser) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		sess := session.FromRequest(r)
+
+		// If demo mode is set, get user ID 1 and allow the request
+		if reqcontext.DemoFromContext(r.Context()) {
+			user, err := a.auth.GetUser(r.Context(), 1)
+			if a.internalServerError(err, w) {
+				a.logger.ErrorContext(r.Context(), "failed to get demo user", "user_id", 1)
+				return
+			}
+			next(w, r, user)
+			return
+		}
+
 		if sess.Data.IsSignedIn() {
 			user, ok := reqcontext.UserFromContext(r.Context())
 			if !ok {
@@ -31,6 +43,17 @@ func (a *app) requireAuth(next HandlerFuncWithUser) http.HandlerFunc {
 			ret := url.QueryEscape(r.URL.String())
 			http.Redirect(w, r, "/sign_in?return="+ret, http.StatusSeeOther)
 		}
+	}
+}
+
+func (a *app) allowDemo(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Query().Get("demo") == "true" {
+			ctx := reqcontext.ContextWithDemo(r.Context())
+			next(w, r.WithContext(ctx))
+			return
+		}
+		next(w, r)
 	}
 }
 

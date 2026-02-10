@@ -19,9 +19,6 @@ templ Layout(title string) {
 		</head>
 		<body class="bg-base-300 min-h-screen flex flex-col">
 			{ children... }
-			<footer class="text-muted text-xs py-2 text-center">
-				Build: { BuildVersion(ctx) }
-			</footer>
 		</body>
 	</html>
 }
@@ -30,8 +27,9 @@ templ Page(title string) {
 	@Layout(title) {
 		<header class="grid grid-cols-3 p-4">
 			<div class="text-start"></div>
-			<div class="text-center">
-				<a href="/" class="font-stretch-expanded">untils</a>
+			<div class="text-center flex items-center justify-center gap-x-2">
+				<img src={ AssetURL("images/logo.png") } height="24px" width="24px" alt="Untils logo"/>
+				<a href="/" class="font-stretch-expanded mb-0.5">untils</a>
 			</div>
 			<div class="text-end text-sm">
 				if IsSignedIn(ctx) {

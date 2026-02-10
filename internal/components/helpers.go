@@ -81,6 +81,10 @@ func IsDev(ctx context.Context) bool {
 	return env == "dev"
 }
 
+func IsDemo(ctx context.Context) bool {
+	return reqcontext.DemoFromContext(ctx)
+}
+
 func BuildVersion(ctx context.Context) string {
 	return reqcontext.BuildVersionFromContext(ctx)
 }

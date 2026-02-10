@@ -1,11 +1,69 @@
 package pages
 
 import "github.com/alexpls/untils/internal/components"
+import "github.com/starfederation/datastar-go/datastar"
 
 templ HomePage() {
 	@components.Page("Home") {
-		<div class="container mx-auto">
-			TODO: home page
+		<div class="max-w-[56ch] mt-8 mx-auto text-lg bg-base-200 text-base-content/88 rounded-lg py-6 px-4 mb-8">
+			<section>
+				<p class="mb-3">Hey, I'm <a href="https://alexplescan.com" target="_blank" class="underline">Alex</a> and I'm building untils because I'm tired of how I use the internet to answer questions like:</p>
+				<ul class="mb-3 list-disc list-inside">
+					<li>What's the latest album by Radiohead?</li>
+					<li>When's the next solar eclipse happening in Brisbane?</li>
+					<li>Is there a sale on the iPhone 17 in Australia?</li>
+				</ul>
+				<p class="mb-3">When one of those things changes, I want to know. What I <em>don't</em> want is to have to remember to Google them each day, give my email up to back‑in‑stock sites, or set reminders to check in later.</p>
+			</section>
+			<section>
+				<p>Here's a live peek at my untils account:</p>
+				<div class="my-8 border border-base-content/10 bg-base-300 rounded-lg shadow-lg -mx-24 w-[calc(100%+12rem)]">
+					<div id="monitors-list" data-init={ datastar.GetSSE("/app/monitors?sse=true&demo=true") }></div>
+				</div>
+				<p class="mb-5">See all those monitors? untils continuously searches the internet for their subjects, and sends me notifications when it detects a change. No more tabs, no more clutter, no more forgetting. Just relevant information as it happens.</p>
+			</section>
+			<section>
+				<h2 class="text-xl font-bold mb-3">Interested?</h2>
+				<p class="mb-3">If you'd like to try untils early, or just hear how it's going - enter your email below:</p>
+				<div class="mb-5">
+					@emailForm()
+				</div>
+			</section>
+			<section>
+				<h2 class="text-xl font-bold mb-3">Is this just text matching change detection?</h2>
+				<p class="mb-5">Not in the traditional sense, no. untils uses a real browser and an AI agent to scan the internet and determine answers without relying on crude text matching methods that can lead to incorrect results.</p>
+				<h2 class="text-xl font-bold mb-3">Oh it uses AI, it must be expensive?</h2>
+				<p class="mb-5">I'm trying to keep costs down as much as possible. That means being flexible on model choice, optimising token use, and doing some things in-house.</p>
+				<h2 class="text-xl font-bold mb-3">Oh it uses AI, it must get false positives?</h2>
+				<p class="mb-5">Yeah - it does. I'm trying to minimise them, however mistakes will happen. When one does, untils lets you give feedback (aka scold) the agent so it knows why it was wrong and how to adjust the check next time.</p>
+			</section>
+			<section>
+				<h2 class="text-xl font-bold mb-3">What's the release plan?</h2>
+				<ol class="mb-3">
+					<li>Build a solid foundation for untils</li>
+					<li>Open source it for self hosting</li>
+					<li>Release a paid offering where I host untils for you</li>
+				</ol>
+				<p class="mb-3">Sign up and I'll let you know when 2 &amp; 3 happen:</p>
+				<div class="mb-5">
+					@emailForm()
+				</div>
+			</section>
+			<section>
+				<p class="mb-3">Thanks for reading, and have a great day!</p>
+				<p>Alex</p>
+			</section>
 		</div>
 	}
+}
+
+templ emailForm() {
+	<form class="flex justify-center">
+		<div class="join">
+			<div>
+				<input class="input input-lg join-item" name="email" type="email" placeholder="mail@site.com" required/>
+			</div>
+			<button class="btn btn-lg btn-primary join-item">Submit</button>
+		</div>
+	</form>
 }

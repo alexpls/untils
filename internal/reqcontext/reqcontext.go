@@ -15,6 +15,7 @@ const (
 	userKey
 	tzKey
 	envKey
+	demoKey
 )
 
 func ContextWithBuildVersion(ctx context.Context, buildVersion string) context.Context {
@@ -60,4 +61,13 @@ func ContextWithEnv(ctx context.Context, env string) context.Context {
 func EnvFromContext(ctx context.Context) string {
 	env, _ := ctx.Value(envKey).(string)
 	return env
+}
+
+func ContextWithDemo(ctx context.Context) context.Context {
+	return context.WithValue(ctx, demoKey, true)
+}
+
+func DemoFromContext(ctx context.Context) bool {
+	demo, _ := ctx.Value(demoKey).(bool)
+	return demo
 }
