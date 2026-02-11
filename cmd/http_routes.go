@@ -15,6 +15,7 @@ func (a *app) routes() http.Handler {
 
 	// public pages
 	mux.HandleFunc("GET /{$}", a.pagesHandlers.Home)
+	mux.HandleFunc("POST /subscribe", a.pagesHandlers.SubscribeEmail)
 
 	// auth pages
 	mux.HandleFunc("GET /sign_in", a.authHandlers.ViewSignIn)

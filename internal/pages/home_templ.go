@@ -9,7 +9,9 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import "github.com/alexpls/untils/internal/components"
-import "github.com/starfederation/datastar-go/datastar"
+
+import "fmt"
+import "github.com/alexpls/untils/internal/components/icons"
 
 func HomePage() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -44,20 +46,15 @@ func HomePage() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"max-w-[56ch] mt-8 mx-auto text-lg bg-base-200 text-base-content/88 rounded-lg py-6 px-4 mb-8\"><section><p class=\"mb-3\">Hey, I'm <a href=\"https://alexplescan.com\" target=\"_blank\" class=\"underline\">Alex</a> and I'm building untils because I'm tired of how I use the internet to answer questions like:</p><ul class=\"mb-3 list-disc list-inside\"><li>What's the latest album by Radiohead?</li><li>When's the next solar eclipse happening in Brisbane?</li><li>Is there a sale on the iPhone 17 in Australia?</li></ul><p class=\"mb-3\">When one of those things changes, I want to know. What I <em>don't</em> want is to have to remember to Google them each day, give my email up to back‑in‑stock sites, or set reminders to check in later.</p></section><section><p>Here's a live peek at my untils account:</p><div class=\"my-8 border border-base-content/10 bg-base-300 rounded-lg shadow-lg -mx-24 w-[calc(100%+12rem)]\"><div id=\"monitors-list\" data-init=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"max-w-[56ch] mx-auto text-lg bg-base-200 text-base-content/82 rounded-lg py-6 px-4 mb-8\"><section><p class=\"mb-4\">Hey, I'm <a href=\"https://alexplescan.com\" target=\"_blank\" class=\"underline\">Alex</a> and I'm building untils because I'm tired of how I use the internet to answer questions like:</p><ul class=\"mb-4 list-disc list-inside\"><li>What's the latest album by Radiohead?</li><li>When's the next solar eclipse happening in Brisbane?</li><li>Is there a sale on the iPhone 17 in Australia?</li></ul><p class=\"mb-4\">When one of those things changes, I want to know. What I <em>don't</em> want is to have to remember to Google them each day, give my email up to back‑in‑stock sites, or set reminders to check in later.</p></section><section><p>Here's what untils looks like &mdash; this is actually a live peek at some of my monitors:</p><div class=\"my-8 border border-base-content/10 bg-base-300 rounded-lg shadow-xl -mx-2 lg:-mx-30 h-100 overflow-hidden\"><div class=\"flex items-center gap-3 px-4 py-2.5 bg-base-300 border-b border-base-content/10\"><div class=\"flex gap-1.5\"><div class=\"w-3 h-3 rounded-full bg-error/70\"></div><div class=\"w-3 h-3 rounded-full bg-warning/70\"></div><div class=\"w-3 h-3 rounded-full bg-success/70\"></div></div><div class=\"flex-1 flex items-center gap-2 bg-base-100 rounded-md px-3 py-1.5 text-sm text-base-content/50 pointer-events-none\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var3 string
-			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(datastar.GetSSE("/app/monitors?sse=true&demo=true"))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/pages/home.templ`, Line: 21, Col: 92}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+			templ_7745c5c3_Err = icons.Lock(icons.IconParams{Size: 12}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\"></div></div><p class=\"mb-5\">See all those monitors? untils continuously searches the internet for their subjects, and sends me notifications when it detects a change. No more tabs, no more clutter, no more forgetting. Just relevant information as it happens.</p></section><section><h2 class=\"text-xl font-bold mb-3\">Interested?</h2><p class=\"mb-3\">If you'd like to try untils early, or just hear how it's going - enter your email below:</p><div class=\"mb-5\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<span>untils.com/app/monitors</span></div></div><iframe class=\"w-full h-[calc(100%-52px)] bg-base-100\" src=\"/app/monitors?demo=true\"></iframe></div><p class=\"mb-6\">untils continuously searches the internet for the subjects I'm monitoring and sends me notifications when something changes. No more tabs, no more clutter, no more forgetting. Just relevant information as it happens.</p></section><section><h2 class=\"text-xl font-bold mb-4 text-base-content/90\">Is this just text matching change detection?</h2><p class=\"mb-6\">Not in the traditional sense, no. untils uses a real browser and an AI agent to scan the internet and determine answers without relying on crude text matching methods that can lead to incorrect results.</p><h2 class=\"text-xl font-bold mb-4 text-base-content/90\">Oh it uses AI, it must be expensive?</h2><p class=\"mb-6\">I'm trying to keep costs down as much as possible. That means being flexible on model choice, optimising token use, and doing some things in-house.</p><h2 class=\"text-xl font-bold mb-4 text-base-content/90\">Oh it uses AI, it must get false positives?</h2><p class=\"mb-6\">Yeah - it does. I'm trying to minimise them, however mistakes will happen. When one does, untils lets you give feedback (aka scold) the agent so it knows why it was wrong and how to adjust the check next time.</p></section><section><h2 class=\"text-xl font-bold mb-4\">What's the release plan?</h2><ol class=\"mb-4 list-decimal list-inside\"><li>Build a solid foundation for untils</li><li>Open source it for self hosting</li><li>Release a paid offering where I host untils for you</li></ol><p class=\"mb-8\"><strong>Interested?</strong> Enter your email and I'll let you know when 2 &amp; 3 happen, or email me at <a class=\"link\" href=\"mailto:alex@alexplescan.com\">alex@alexplescan.com</a>. I'd love to hear from you:</p><div class=\"mb-8\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -65,15 +62,7 @@ func HomePage() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div></section><section><h2 class=\"text-xl font-bold mb-3\">Is this just text matching change detection?</h2><p class=\"mb-5\">Not in the traditional sense, no. untils uses a real browser and an AI agent to scan the internet and determine answers without relying on crude text matching methods that can lead to incorrect results.</p><h2 class=\"text-xl font-bold mb-3\">Oh it uses AI, it must be expensive?</h2><p class=\"mb-5\">I'm trying to keep costs down as much as possible. That means being flexible on model choice, optimising token use, and doing some things in-house.</p><h2 class=\"text-xl font-bold mb-3\">Oh it uses AI, it must get false positives?</h2><p class=\"mb-5\">Yeah - it does. I'm trying to minimise them, however mistakes will happen. When one does, untils lets you give feedback (aka scold) the agent so it knows why it was wrong and how to adjust the check next time.</p></section><section><h2 class=\"text-xl font-bold mb-3\">What's the release plan?</h2><ol class=\"mb-3\"><li>Build a solid foundation for untils</li><li>Open source it for self hosting</li><li>Release a paid offering where I host untils for you</li></ol><p class=\"mb-3\">Sign up and I'll let you know when 2 &amp; 3 happen:</p><div class=\"mb-5\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = emailForm().Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div></section><section><p class=\"mb-3\">Thanks for reading, and have a great day!</p><p>Alex</p></section></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div></section><section><p class=\"mb-4\">Thanks for reading, and have a great day!</p><p>&mdash; Alex</p></section></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -103,12 +92,106 @@ func emailForm() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var3 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var3 == nil {
+			templ_7745c5c3_Var3 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = emailFormInner("").Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+func emailFormInner(errorMessage string) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
 		templ_7745c5c3_Var4 := templ.GetChildren(ctx)
 		if templ_7745c5c3_Var4 == nil {
 			templ_7745c5c3_Var4 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<form class=\"flex justify-center\"><div class=\"join\"><div><input class=\"input input-lg join-item\" name=\"email\" type=\"email\" placeholder=\"mail@site.com\" required></div><button class=\"btn btn-lg btn-primary join-item\">Submit</button></div></form>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div id=\"email-form\" class=\"flex flex-col items-center\"><form class=\"flex justify-center\" data-on:submit=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var5 string
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("@post('/subscribe', {contentType: 'form'})"))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/pages/home.templ`, Line: 74, Col: 77}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" data-indicator:submitting><div class=\"join\"><div><input class=\"input input-lg join-item\" name=\"email\" type=\"email\" placeholder=\"Your email address...\" required data-attr:disabled=\"$submitting\"></div><button class=\"btn btn-lg btn-primary join-item\" data-attr:disabled=\"$submitting\"><span data-show=\"$submitting\" style=\"display: none\" class=\"loading loading-spinner loading-sm\"></span> Submit</button></div></form>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if errorMessage != "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<p class=\"text-error text-sm font-medium mt-3\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var6 string
+			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(errorMessage)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/pages/home.templ`, Line: 98, Col: 64}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</p>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+func emailFormSuccess() templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var7 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var7 == nil {
+			templ_7745c5c3_Var7 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<div id=\"email-form\" class=\"text-center h-12 flex items-center justify-center\"><p class=\"text-success text-sm font-medium\">Thanks for subscribing! I'll be in touch.</p></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

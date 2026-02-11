@@ -181,7 +181,7 @@ func createApp(c *config) (*app, context.Context, func()) {
 
 	a.dashboardHandlers = dashboard.NewHandlers(a.queries, a.db, a.monitorEvents, a.logger.With("source", "dashboard.handlers"))
 
-	a.pagesHandlers = pages.NewHandlers(a.logger.With("source", "pages.handlers"))
+	a.pagesHandlers = pages.NewHandlers(a.queries, a.db, a.logger.With("source", "pages.handlers"))
 
 	a.authHandlers = auth.NewHandlers(a.auth, a.sessionManager, a.logger.With("source", "auth.handlers"))
 

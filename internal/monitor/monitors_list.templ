@@ -17,7 +17,7 @@ type MonitorsListData struct {
 }
 
 templ monitorListPageActions() {
-	<div>
+	<div class={ templ.KV("pointer-events-none", components.IsDemo(ctx)) }>
 		<a class="btn btn-primary" href="/app/monitors/new">Create</a>
 	</div>
 }

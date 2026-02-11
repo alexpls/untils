@@ -6,7 +6,7 @@ templ AppLayout(title string, breadcrumbs []Breadcrumb) {
 	@Layout(title) {
 		@TimezoneSync()
 		<header
-			class="sticky top-0 z-0"
+			class={ "sticky",  "top-0",  "z-0", templ.KV("pointer-events-none", IsDemo(ctx)) }
 			data-signals:_header.scroll-y="0"
 			data-init="$_header.height = el.offsetHeight"
 			data-on:scroll__window="$_header.scrollY = window.scrollY"
@@ -104,7 +104,8 @@ templ HeaderContainer() {
 
 templ TimezoneSync() {
 	{{ tzCookie := TimezoneFromCookie(ctx) }}
-	if tzCookie != "" && CurrentUser(ctx).Timezone != tzCookie {
+	// TODO: render demo in user's timezone
+	if !IsDemo(ctx) && tzCookie != "" && CurrentUser(ctx).Timezone != tzCookie {
 		<div
 			class="hidden"
 			data-signals:timezone={ templ.JSONString(tzCookie) }

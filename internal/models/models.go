@@ -233,6 +233,12 @@ func (ns NullRiverJobState) Value() (driver.Value, error) {
 	return string(ns.RiverJobState), nil
 }
 
+type EmailSubscriber struct {
+	ID        int64
+	Email     string
+	CreatedAt time.Time
+}
+
 type LlmConversation struct {
 	ID         int64
 	UserID     int64
