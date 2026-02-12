@@ -5,3 +5,4 @@ node_modules
 .env.*
 /untils_linux_amd64
 dev.log
+/tmp/

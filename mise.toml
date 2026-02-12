@@ -52,13 +52,16 @@ curl -sSfL https://golangci-lint.run/install.sh | sh -s -- -b $(go env GOPATH)/b
 
 [tasks."dev:watch:server"]
 run = """
-wgo -file=.go go run ./cmd serve \
+wgo -file=.go -xfile=_test.go go build -o ./tmp/serve ./cmd :: ./tmp/serve serve \
     -env "$ENV" -db "$PG_URL" -xai-key "$XAI_KEY" -openai-key "$OPENAI_KEY" \
     -pushover-key "$PUSHOVER_KEY" -brave-key "$BRAVE_KEY" | tee dev.log
 """
 
 [tasks."dev:watch:templ"]
-run = "templ generate --watch --proxy=\"http://localhost:4200\" --open-browser=false"
+run = """
+pkill -f 'templ generate' || true
+templ generate --watch --proxy="http://localhost:4200" --open-browser=false
+"""
 
 [tasks."dev:watch:css"]
 run = "bun run watch-css"
