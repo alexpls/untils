@@ -19,7 +19,6 @@
 
 ### AI SDKs
 
-- [ ] Refactor: Abstract out calls to the underlying LLM provider so we can swap 'em out on the fly
 - [ ] Feature: Allow switching API providers between x.ai and OpenAI on startup
 - [ ] Improvement: 25% of the produced binary is OpenAI's bloated SDK. I only use one endpoint, could move away from the SDK and call it directly with HTTP?
 
@@ -44,6 +43,7 @@
 
 ## Done
 
+- [x] Refactor: Abstract out calls to the underlying LLM provider so we can swap 'em out on the fly
 - [x] Fix: if running a river job right away, make sure it's not 'scheduled', but rather 'available' - see https://riverqueue.com/docs/scheduled-jobs
 - [x] Fix: updating the check schedule should modify the currently scheduled checks
 - [x] Refactor: can I get rid of skipped checks? It's annoying and doesn't make sense on the UI.
