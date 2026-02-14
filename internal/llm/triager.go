@@ -3,25 +3,23 @@ package llm
 import (
 	"context"
 	_ "embed"
-	"encoding/json"
 	"fmt"
-	"time"
 
-	"github.com/openai/openai-go/v3/responses"
+	"github.com/alexpls/untils/internal/models"
 )
 
 type Triager struct {
-	service  *Service
-	messages responses.ResponseNewParamsInputUnion
+	service      *Service
+	conversation *dbConversation
+	params       *CheckParams
 }
 
 func NewTriager(service *Service, params *CheckParams) *Triager {
-	messages := inputItems(
-		systemMessage(triagerPrompt),
-		userMessage(params.UserMessageString()),
-	)
-
-	return &Triager{service: service, messages: messages}
+	return &Triager{
+		service:      service,
+		conversation: newDBConversation(service),
+		params:       params,
+	}
 }
 
 //go:embed triager_prompt.md
@@ -33,43 +31,26 @@ type TriagerResponse struct {
 }
 
 func (p *Triager) Run(ctx context.Context) (*TriagerResponse, error) {
-	var resp *responseResult
-	var err error
-
-	try := 0
-	maxTries := 3
-
-	for {
-		if try >= maxTries {
-			return nil, fmt.Errorf("max tries reached for triage prompt: %w", err)
-		}
-		try++
-
-		resp, err = p.service.response(ctx, responses.ResponseNewParams{
-			Model: modelNonReasoning,
-			Input: p.messages,
-			Text:  jsonSchemaResponse(TriagerResponse{}),
-		})
-
-		if err != nil {
-			time.Sleep(time.Duration(try*500) * time.Millisecond)
-			continue
-		}
-
-		sanitized := sanitizeXAIOutput(resp.OutputText())
-		res := TriagerResponse{}
-		if err = json.Unmarshal([]byte(sanitized), &res); err != nil {
-			p.addMessage(systemMessage(fmt.Sprintf(
-				"The output was not valid JSON: %s. Ensure your response follows the correct JSON schema.",
-				err.Error(),
-			)))
-			continue
-		}
-
-		return &res, nil
+	if err := p.conversation.start(ctx, p.params.UserID, p.params.MonitorID, models.LlmConversationsSourceTriage); err != nil {
+		return nil, err
 	}
-}
+	if err := p.conversation.addSystem(ctx, triagerPrompt); err != nil {
+		return nil, fmt.Errorf("failed to log system message: %w", err)
+	}
+	if err := p.conversation.addUser(ctx, p.params.UserMessageString()); err != nil {
+		return nil, fmt.Errorf("failed to log user message: %w", err)
+	}
 
-func (p *Triager) addMessage(message responses.ResponseInputItemUnionParam) {
-	p.messages.OfInputItemList = append(p.messages.OfInputItemList, message)
+	res, err := runAgent[TriagerResponse](ctx, p.service, agentRunOptions[TriagerResponse]{
+		model:          modelNonReasoning,
+		responseName:   "TriagerResponse",
+		responseSchema: jsonSchema(TriagerResponse{}),
+		maxTurns:       3,
+		conversation:   p.conversation,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("max tries reached for triage prompt: %w", err)
+	}
+
+	return res, nil
 }

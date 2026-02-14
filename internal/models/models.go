@@ -15,7 +15,8 @@ import (
 type LLMConversationsSource string
 
 const (
-	LlmConversationsSourceCheck LLMConversationsSource = "check"
+	LlmConversationsSourceCheck  LLMConversationsSource = "check"
+	LlmConversationsSourceTriage LLMConversationsSource = "triage"
 )
 
 func (e *LLMConversationsSource) Scan(src interface{}) error {

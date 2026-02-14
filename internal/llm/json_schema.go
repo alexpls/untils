@@ -2,9 +2,6 @@ package llm
 
 import (
 	"reflect"
-
-	"github.com/openai/openai-go/v3"
-	"github.com/openai/openai-go/v3/responses"
 )
 
 func jsonSchema(s any) map[string]any {
@@ -14,19 +11,6 @@ func jsonSchema(s any) map[string]any {
 	}
 	structValue := reflect.ValueOf(s)
 	return typeToSchema(structType, structValue)
-}
-
-func jsonSchemaResponse(s any) responses.ResponseTextConfigParam {
-	name := reflect.TypeOf(s).Name()
-	return responses.ResponseTextConfigParam{
-		Format: responses.ResponseFormatTextConfigUnionParam{
-			OfJSONSchema: &responses.ResponseFormatTextJSONSchemaConfigParam{
-				Name:   name,
-				Strict: openai.Bool(true),
-				Schema: jsonSchema(s),
-			},
-		},
-	}
 }
 
 func typeToSchema(t reflect.Type, v reflect.Value) map[string]any {

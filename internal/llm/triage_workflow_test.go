@@ -15,7 +15,9 @@ func TestTriageWorkflow(t *testing.T) {
 
 	triage := deps.service.NewTriageWorkflow()
 	_, err := triage.Run(t.Context(), &CheckParams{
-		Subject: "Latest game that IGN has given a 10/10 rating",
+		UserID:    deps.fixtures.User.ID,
+		MonitorID: deps.fixtures.Monitor.ID,
+		Subject:   "Latest game that IGN has given a 10/10 rating",
 	})
 	require.NoError(t, err)
 }

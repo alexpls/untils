@@ -3,48 +3,27 @@ package llm
 import (
 	"context"
 	_ "embed"
-	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
 
 	"github.com/alexpls/untils/internal/browser"
 	"github.com/alexpls/untils/internal/models"
-	"github.com/openai/openai-go/v3"
-	"github.com/openai/openai-go/v3/responses"
 )
 
 type checker struct {
-	service        *Service
-	messages       []responses.ResponseInputItemUnionParam
-	browserCtx     *browser.BrowserCtx
-	browserCancel  context.CancelFunc
-	conversationID int64
-	turn           int
-	priorCalls     []toolCall
+	service       *Service
+	conversation  *dbConversation
+	browserCtx    *browser.BrowserCtx
+	browserCancel context.CancelFunc
+	priorCalls    []toolCall
 }
 
 func newChecker(service *Service) *checker {
-	return &checker{service: service}
-}
-
-func (c *checker) logMessage(ctx context.Context, role models.LLMMessageRole, body any, duration time.Duration) error {
-	bodyJSON, err := json.Marshal(body)
-	if err != nil {
-		return fmt.Errorf("marshalling message body: %w", err)
+	return &checker{
+		service:      service,
+		conversation: newDBConversation(service),
 	}
-	return c.service.queries.AddMessageToLLMConversation(ctx, c.service.db, &models.AddMessageToLLMConversationParams{
-		LlmConversationID: c.conversationID,
-		Message: models.LLMConversationMessages{
-			{
-				Turn:     c.turn,
-				Role:     role,
-				At:       time.Now(),
-				Duration: duration,
-				Body:     bodyJSON,
-			},
-		},
-	})
 }
 
 //go:embed checker_prompt.md
@@ -61,16 +40,9 @@ func (c *checker) perform(ctx context.Context, params *CheckParams) (*models.Che
 		previousResult = params.PreviousResults[0]
 	}
 
-	var conversation *models.LlmConversation
-	conversation, err = c.service.queries.CreateLLMConversation(ctx, c.service.db, &models.CreateLLMConversationParams{
-		UserID:     params.UserID,
-		SourceType: models.LlmConversationsSourceCheck,
-		SourceID:   params.MonitorCheckID,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("creating llm conversation: %w", err)
+	if err = c.conversation.start(ctx, params.UserID, params.MonitorCheckID, models.LlmConversationsSourceCheck); err != nil {
+		return nil, err
 	}
-	c.conversationID = conversation.ID
 
 	defer func() {
 		if err == nil {
@@ -86,128 +58,45 @@ func (c *checker) perform(ctx context.Context, params *CheckParams) (*models.Che
 	systemMsg := checkerPrompt
 	userMsg := params.UserMessageString()
 
-	c.messages = []responses.ResponseInputItemUnionParam{
-		systemMessage(systemMsg),
-		userMessage(userMsg),
-	}
-
-	if logErr := c.logMessage(ctx, models.LLMMessageRoleSystem, map[string]string{"content": systemMsg}, 0); logErr != nil {
+	if logErr := c.conversation.addSystem(ctx, systemMsg); logErr != nil {
 		return nil, fmt.Errorf("failed to log system message: %w", logErr)
 	}
-	if logErr := c.logMessage(ctx, models.LLMMessageRoleUser, map[string]string{"content": userMsg}, 0); logErr != nil {
+	if logErr := c.conversation.addUser(ctx, userMsg); logErr != nil {
 		return nil, fmt.Errorf("failed to log user message: %w", logErr)
 	}
 
-	var resp *responseResult
-	maxTurns := 99
-
-	for {
-		if c.turn >= maxTurns {
-			return nil, fmt.Errorf("exceeded max turns: %w", err)
-		}
-		c.turn++
-		turnStart := time.Now()
-		c.service.logger.DebugContext(ctx, "starting turn", "turn", c.turn)
-
-		llmStart := time.Now()
-		resp, err = c.service.response(ctx, responses.ResponseNewParams{
-			Model: modelReasoning,
-			Input: inputItems(c.messages...),
-			Text:  jsonSchemaResponse(models.CheckResult{}),
-			Tools: []responses.ToolUnionParam{
-				browserNavigateTool.toOpenAIParam(),
-				browserClickTool.toOpenAIParam(),
-				searchTool.toOpenAIParam(),
-			},
-			ParallelToolCalls: openai.Bool(false),
-		})
-		llmDuration := time.Since(llmStart)
-
-		if err == nil {
-			c.service.logger.DebugContext(ctx, "response received", "turn", c.turn, "duration", llmDuration)
-		} else {
-			c.service.logger.ErrorContext(ctx, "error getting response", "turn", c.turn, "duration", llmDuration, "error", err)
-		}
-
-		if resp != nil {
-			if logErr := c.logMessage(ctx, models.LLMMessageRoleAssistant, json.RawMessage(resp.RawJSON()), llmDuration); logErr != nil {
-				return nil, fmt.Errorf("failed to log assistant message: %w", logErr)
+	res, runErr := runAgent[models.CheckResult](ctx, c.service, agentRunOptions[models.CheckResult]{
+		model:          modelReasoning,
+		responseName:   "CheckResult",
+		responseSchema: jsonSchema(models.CheckResult{}),
+		tools: []ToolDefinition{
+			browserWaitTool.definition(),
+			browserNavigateTool.definition(),
+			browserClickTool.definition(),
+			searchTool.definition(),
+		},
+		parallelToolCalls: false,
+		maxTurns:          99,
+		conversation:      c.conversation,
+		toolExecutor:      c.executeToolCall,
+		validate: func(res *models.CheckResult) string {
+			if previousResult == nil {
+				return ""
 			}
-		}
-
-		if err != nil {
-			return nil, err
-		}
-
-		if len(resp.toolCalls) > 0 {
-			toolsStart := time.Now()
-			if err := c.callTools(ctx, resp.toolCalls); err != nil {
-				return nil, err
-			}
-			c.service.logger.DebugContext(ctx, "turn completed with tool calls", "turn", c.turn, "tools_duration", time.Since(toolsStart), "turn_duration", time.Since(turnStart))
-			continue
-		}
-
-		sanitized := sanitizeXAIOutput(resp.OutputText())
-		res := &models.CheckResult{}
-		if err := json.Unmarshal([]byte(sanitized), res); err != nil {
-			errorMsg := "error: invalid response format"
-			c.messages = append(c.messages, systemMessage(errorMsg))
-			if logErr := c.logMessage(ctx, models.LLMMessageRoleSystem, map[string]string{"content": errorMsg}, 0); logErr != nil {
-				return nil, fmt.Errorf("failed to log error message: %w", logErr)
-			}
-			continue
-		}
-
-		if previousResult != nil {
 			if res.DifferentToPrevious && sameResultStr(res.ResultPlaintext, previousResult.MonitorResultsWithLatestCheck.Result) {
-				errorMsg := "error: different_to_previous is true but result_plaintext is the same as the previous result"
-				c.messages = append(
-					c.messages,
-					systemMessage(errorMsg),
-				)
-				if logErr := c.logMessage(ctx, models.LLMMessageRoleSystem, map[string]string{"content": errorMsg}, 0); logErr != nil {
-					return nil, fmt.Errorf("failed to log error message: %w", logErr)
-				}
-				continue
+				return "error: different_to_previous is true but result_plaintext is the same as the previous result"
 			}
-		}
-
-		return res, nil
-	}
+			return ""
+		},
+	})
+	err = runErr
+	return res, runErr
 }
 
-func (c *checker) callTools(ctx context.Context, toolCalls []responses.ResponseFunctionToolCall) error {
-	for _, call := range toolCalls {
-		c.messages = append(c.messages, toolCallMessage(call))
+func (c *checker) executeToolCall(ctx context.Context, call ToolCall) (string, error) {
+	name := call.Name
+	args := call.Arguments
 
-		result, err := c.callTool(ctx, call.Name, call.Arguments)
-		if err != nil {
-			c.service.logger.ErrorContext(ctx, "error executing tool call", "tool", call.Name, "error", err)
-			errorMsg := "error: " + err.Error()
-			c.messages = append(c.messages, toolOutputMessage(call.CallID, errorMsg))
-			if logErr := c.logMessage(ctx, models.LLMMessageRoleTool, map[string]any{
-				"call_id": call.CallID,
-				"name":    call.Name,
-				"output":  errorMsg,
-			}, 0); logErr != nil {
-				return fmt.Errorf("failed to log tool error message: %w", logErr)
-			}
-			continue
-		}
-		c.messages = append(c.messages, toolOutputMessage(call.CallID, result))
-		if logErr := c.logMessage(ctx, models.LLMMessageRoleTool, map[string]any{
-			"call_id": call.CallID,
-			"name":    call.Name,
-			"output":  result,
-		}, 0); logErr != nil {
-			return fmt.Errorf("failed to log tool output message: %w", logErr)
-		}
-	}
-	return nil
-}
-
-func (c *checker) callTool(ctx context.Context, name string, args string) (string, error) {
 	toolStart := time.Now()
 	c.service.logger.DebugContext(ctx, "tool call started", "tool", name, "args", args)
 

@@ -8,6 +8,7 @@ import (
 
 type CheckParams struct {
 	UserID          int64
+	MonitorID       int64
 	MonitorCheckID  int64
 	Subject         string
 	PreviousResults []*models.GetPreviousResultsWithCheckRow

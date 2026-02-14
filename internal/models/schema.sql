@@ -4,7 +4,7 @@
 
 
 -- Dumped from database version 18.0 (Debian 18.0-1.pgdg13+3)
--- Dumped by pg_dump version 18.1
+-- Dumped by pg_dump version 18.2
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -51,7 +51,8 @@ COMMENT ON EXTENSION pgcrypto IS 'cryptographic functions';
 --
 
 CREATE TYPE public.llm_conversations_source AS ENUM (
-    'check'
+    'check',
+    'triage'
 );
 
 
@@ -120,9 +121,9 @@ declare
   rec record;
 begin
   if tg_op = 'DELETE' then
-    rec := OLD;
+    rec := old;
   else
-    rec := NEW;
+    rec := new;
   end if;
 
   if tg_table_name = 'monitors' then
@@ -134,6 +135,9 @@ begin
       select monitor_id into payload_monitor_id
       from monitor_checks
       where id = rec.source_id;
+    elsif rec.source_type = 'triage' then
+      payload_monitor_id := rec.source_id;
+      payload_user_id := rec.user_id;
     end if;
   else
     payload_monitor_id := rec.monitor_id;
@@ -153,7 +157,7 @@ begin
       )::text
     );
   end if;
-  return NEW;
+  return new;
 end;
 $$;
 

@@ -25,24 +25,17 @@ type LLMConversationMessage struct {
 	Body     json.RawMessage `json:"body"`
 }
 
-// LLMAssistantMessageBody represents the body of an assistant message.
-type LLMAssistantMessageBody struct {
-	Output []LLMAssistantOutputItem `json:"output"`
+// LLMAssistantNormalizedMessageBody is the provider-neutral assistant message
+// shape stored by the llm package.
+type LLMAssistantNormalizedMessageBody struct {
+	TextOutput string                           `json:"text_output,omitempty"`
+	ToolCalls  []LLMAssistantNormalizedToolCall `json:"tool_calls,omitempty"`
 }
 
-// LLMAssistantOutputItem represents an item in the assistant message output array.
-type LLMAssistantOutputItem struct {
-	Type      string                      `json:"type"`
-	CallID    string                      `json:"call_id,omitempty"`
-	Name      string                      `json:"name,omitempty"`
-	Arguments string                      `json:"arguments,omitempty"`
-	Content   []LLMAssistantOutputContent `json:"content,omitempty"`
-}
-
-// LLMAssistantOutputContent represents content within an assistant output item.
-type LLMAssistantOutputContent struct {
-	Type string `json:"type"`
-	Text string `json:"text,omitempty"`
+type LLMAssistantNormalizedToolCall struct {
+	ID        string `json:"id,omitempty"`
+	Name      string `json:"name"`
+	Arguments string `json:"arguments"`
 }
 
 // LLMAssistantContent represents the parsed content from an assistant message,
@@ -56,26 +49,20 @@ type LLMAssistantContent struct {
 // returns structured content with tool calls and text output extracted.
 // Returns nil if the body cannot be parsed.
 func parseAssistantMessageBody(body json.RawMessage) *LLMAssistantContent {
-	var data LLMAssistantMessageBody
+	var data LLMAssistantNormalizedMessageBody
 	if err := json.Unmarshal(body, &data); err != nil {
 		return nil
 	}
 
-	result := &LLMAssistantContent{}
-	for _, item := range data.Output {
-		switch item.Type {
-		case "function_call":
-			result.ToolCalls = append(result.ToolCalls, LLMToolCall{
-				Name:      item.Name,
-				Arguments: item.Arguments,
-			})
-		case "message":
-			for _, c := range item.Content {
-				if c.Type == "output_text" && c.Text != "" {
-					result.TextOutput = c.Text
-				}
-			}
-		}
+	result := &LLMAssistantContent{
+		TextOutput: data.TextOutput,
+		ToolCalls:  make([]LLMToolCall, 0, len(data.ToolCalls)),
+	}
+	for _, call := range data.ToolCalls {
+		result.ToolCalls = append(result.ToolCalls, LLMToolCall{
+			Name:      call.Name,
+			Arguments: call.Arguments,
+		})
 	}
 	return result
 }

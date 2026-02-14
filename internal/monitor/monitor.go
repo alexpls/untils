@@ -109,6 +109,8 @@ func (s *Service) ValidateMonitor(ctx context.Context, monitor *models.Monitor) 
 	triage := s.llm.NewTriageWorkflow()
 
 	trigageRes, err := triage.Run(ctx, &llm.CheckParams{
+		UserID:          monitor.UserID,
+		MonitorID:       monitor.ID,
 		Subject:         monitor.Subject.String,
 		PreviousResults: prevs,
 	})

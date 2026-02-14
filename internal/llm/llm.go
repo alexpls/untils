@@ -2,22 +2,19 @@ package llm
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 
 	"github.com/alexpls/untils/internal/db"
 	"github.com/alexpls/untils/internal/logging"
 	"github.com/alexpls/untils/internal/models"
 	"github.com/alexpls/untils/internal/search"
-	"github.com/openai/openai-go/v3"
-	"github.com/openai/openai-go/v3/responses"
 )
 
 var modelNonReasoning = "grok-4-1-fast-non-reasoning"
 var modelReasoning = "grok-4-1-fast-reasoning"
 
 type Service struct {
-	client      *openai.Client
+	provider    Provider
 	db          db.DB
 	queries     *models.Queries
 	logger      *slog.Logger
@@ -25,14 +22,14 @@ type Service struct {
 }
 
 func NewService(
-	client *openai.Client,
+	provider Provider,
 	db db.DB,
 	queries *models.Queries,
 	logger *slog.Logger,
 	webSearcher search.WebSearcher,
 ) *Service {
 	return &Service{
-		client:      client,
+		provider:    provider,
 		db:          db,
 		queries:     queries,
 		logger:      logger,
@@ -40,77 +37,29 @@ func NewService(
 	}
 }
 
-type responseResult struct {
-	*responses.Response
-	toolCalls []responses.ResponseFunctionToolCall
-}
-
-func (s *Service) response(ctx context.Context, params responses.ResponseNewParams) (*responseResult, error) {
+func (s *Service) response(ctx context.Context, params CompletionRequest) (*CompletionResponse, error) {
 	llmEvent, _ := logging.GetOrCreateFromContext(ctx, newLLMEvent)
 	turn := llmEvent.newTurn()
 
 	defer turn.finish()
 
-	resp, err := s.client.Responses.New(ctx, params)
+	resp, err := s.provider.Complete(ctx, params)
 
 	if err != nil {
 		turn.addError(err)
-		return nil, fmt.Errorf("fetching llm response: %w", err)
+		return nil, err
 	}
 
-	cost, err := calculateCost(modelNonReasoning, resp)
+	cost, err := s.provider.CalculateCostUSD(params.Model, resp.Usage)
 	if err != nil {
 		s.logger.ErrorContext(ctx, "failed to calculate cost", "error", err)
 	} else {
 		turn.addCost(cost)
 	}
 
-	toolCalls := extractToolCalls(resp.Output)
-	for _, item := range toolCalls {
+	for _, item := range resp.ToolCalls {
 		turn.incrToolCall(item.Name)
 	}
 
-	return &responseResult{
-		toolCalls: toolCalls,
-		Response:  resp,
-	}, nil
-}
-
-func userMessage(content string) responses.ResponseInputItemUnionParam {
-	return responses.ResponseInputItemUnionParam{
-		OfMessage: &responses.EasyInputMessageParam{
-			Content: responses.EasyInputMessageContentUnionParam{
-				OfString: openai.String(content),
-			},
-			Role: "user",
-		},
-	}
-}
-
-func systemMessage(content string) responses.ResponseInputItemUnionParam {
-	return responses.ResponseInputItemUnionParam{
-		OfMessage: &responses.EasyInputMessageParam{
-			Content: responses.EasyInputMessageContentUnionParam{
-				OfString: openai.String(content),
-			},
-			Role: "system",
-		},
-	}
-}
-
-func inputItems(messages ...responses.ResponseInputItemUnionParam) responses.ResponseNewParamsInputUnion {
-	return responses.ResponseNewParamsInputUnion{
-		OfInputItemList: responses.ResponseInputParam(messages),
-	}
-}
-
-func extractToolCalls(outputs []responses.ResponseOutputItemUnion) (out []responses.ResponseFunctionToolCall) {
-	for _, item := range outputs {
-		switch item.AsAny().(type) {
-		case responses.ResponseFunctionToolCall:
-			item := item.AsFunctionCall()
-			out = append(out, item)
-		}
-	}
-	return out
+	return resp, nil
 }

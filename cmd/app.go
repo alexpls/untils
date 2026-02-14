@@ -155,7 +155,8 @@ func createApp(c *config) (*app, context.Context, func()) {
 		option.WithBaseURL("https://api.x.ai/v1"),
 		option.WithAPIKey(c.xAIKey),
 	)
-	a.llm = llm.NewService(&llmClient, a.db, a.queries, a.logger.With("source", "llm"), a.webSearcher)
+	llmProvider := llm.NewOpenAIProvider(&llmClient)
+	a.llm = llm.NewService(llmProvider, a.db, a.queries, a.logger.With("source", "llm"), a.webSearcher)
 
 	a.auth = auth.NewAuth(a.logger.With("source", "auth"), a.db, a.queries, a.validate)
 

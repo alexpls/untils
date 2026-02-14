@@ -82,17 +82,20 @@ func (q *Queries) GetLLMConversationBySourceID(ctx context.Context, db DBTX, arg
 }
 
 const getTimelineEventsBySourceID = `-- name: GetTimelineEventsBySourceID :many
+with assistant_messages as (
+  select m
+  from llm_conversations c,
+      jsonb_array_elements(c.messages) as m
+  where c.source_type = $1
+    and c.source_id = $2
+    and m->>'role' = 'assistant'
+)
 select
-    (out->>'name')::text as name,
-    (out->>'arguments')::text as arguments,
+    (tc->>'name')::text as name,
+    (tc->>'arguments')::text as arguments,
     (m->>'at')::timestamptz as at
-from llm_conversations c,
-    jsonb_array_elements(c.messages) as m,
-    jsonb_array_elements(m->'body'->'output') as out
-where c.source_type = $1
-  and c.source_id = $2
-  and m->>'role' = 'assistant'
-  and out->>'type' = 'function_call'
+from assistant_messages,
+    jsonb_array_elements(coalesce(m->'body'->'tool_calls', '[]'::jsonb)) as tc
 order by (m->>'at')::timestamptz
 `
 

@@ -11,8 +11,6 @@ import (
 	"github.com/alexpls/untils/internal/logging"
 	"github.com/alexpls/untils/internal/models"
 	"github.com/alexpls/untils/internal/search"
-	"github.com/openai/openai-go/v3"
-	"github.com/openai/openai-go/v3/responses"
 )
 
 var toolRegistry = map[string]toolBuilder{
@@ -48,15 +46,12 @@ type tool[P any] struct {
 	validate    func(tc *toolContext, params P) string
 }
 
-// toOpenAIParam returns the tool definition as expected by the OpenAI API.
-func (t tool[P]) toOpenAIParam() responses.ToolUnionParam {
+func (t tool[P]) definition() ToolDefinition {
 	var zero P
-	return responses.ToolUnionParam{
-		OfFunction: &responses.FunctionToolParam{
-			Name:        t.name,
-			Description: openai.String(t.description),
-			Parameters:  jsonSchema(zero),
-		},
+	return ToolDefinition{
+		Name:        t.name,
+		Description: t.description,
+		Parameters:  jsonSchema(zero),
 	}
 }
 
@@ -164,7 +159,7 @@ var browserWaitTool = tool[browserWaitParams]{
 		l := len(*tc.priorCalls)
 		if l > 0 {
 			last := (*tc.priorCalls)[l-1]
-			if params.equalTo(last) {
+			if params.equalTo(last.params) {
 				return "can't wait multiple times consecutively. try using another tool " +
 					"to navigate to a new page."
 			}
@@ -200,27 +195,6 @@ var searchTool = tool[models.SearchRequestParams]{
 		return noDuplicateCallsValidator(tc, params, "searching with the same query twice is not allowed. "+
 			"try adjusting the query or using an existing result from a previous search")
 	},
-}
-
-func toolOutputMessage(callID, output string) responses.ResponseInputItemUnionParam {
-	return responses.ResponseInputItemUnionParam{
-		OfFunctionCallOutput: &responses.ResponseInputItemFunctionCallOutputParam{
-			CallID: callID,
-			Output: responses.ResponseInputItemFunctionCallOutputOutputUnionParam{
-				OfString: openai.String(output),
-			},
-		},
-	}
-}
-
-func toolCallMessage(call responses.ResponseFunctionToolCall) responses.ResponseInputItemUnionParam {
-	return responses.ResponseInputItemUnionParam{
-		OfFunctionCall: &responses.ResponseFunctionToolCallParam{
-			CallID:    call.CallID,
-			Name:      call.Name,
-			Arguments: call.Arguments,
-		},
-	}
 }
 
 // noDuplicateCallsValidator returns a validation error if params matches any prior call.

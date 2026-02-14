@@ -18,7 +18,9 @@ func TestTriager(t *testing.T) {
 	ctx := logging.ContextWithEvents(t.Context(), events)
 
 	prompt := NewTriager(deps.service, &CheckParams{
-		Subject: "Who is a good boy?",
+		UserID:    deps.fixtures.User.ID,
+		MonitorID: deps.fixtures.Monitor.ID,
+		Subject:   "Who is a good boy?",
 	})
 	res, err := prompt.Run(ctx)
 	require.NoError(t, err)
