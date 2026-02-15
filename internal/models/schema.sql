@@ -257,8 +257,7 @@ CREATE TABLE public.monitor_checks (
     scheduled_for timestamp with time zone NOT NULL,
     failure_reason text,
     done_at timestamp with time zone,
-    result jsonb,
-    result_id bigint
+    result jsonb
 );
 
 
@@ -319,12 +318,14 @@ ALTER SEQUENCE public.monitor_notifiers_id_seq OWNED BY public.monitor_notifiers
 CREATE TABLE public.monitor_results (
     id bigint NOT NULL,
     monitor_id bigint NOT NULL,
-    result text NOT NULL,
-    date timestamp with time zone,
-    date_past_tense_verb text,
     citations jsonb DEFAULT '[]'::jsonb NOT NULL,
     created_at timestamp with time zone NOT NULL,
-    feedback text
+    feedback text,
+    last_confirmed_check_id bigint NOT NULL,
+    last_confirmed_at timestamp with time zone NOT NULL,
+    data jsonb NOT NULL,
+    headline text NOT NULL,
+    subtitle text NOT NULL
 );
 
 
@@ -348,30 +349,34 @@ ALTER SEQUENCE public.monitor_results_id_seq OWNED BY public.monitor_results.id;
 
 
 --
--- Name: monitor_results_with_latest_check; Type: VIEW; Schema: public; Owner: -
+-- Name: monitor_schemas; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE VIEW public.monitor_results_with_latest_check AS
- WITH latest_checks AS (
-         SELECT DISTINCT ON (monitor_checks.result_id) monitor_checks.result_id,
-            monitor_checks.id AS latest_check_id,
-            monitor_checks.done_at AS latest_confirmation_at
-           FROM public.monitor_checks
-          WHERE ((monitor_checks.status = 'success'::public.monitor_check_status) AND (monitor_checks.result_id IS NOT NULL))
-          ORDER BY monitor_checks.result_id, monitor_checks.done_at DESC
-        )
- SELECT mr.id,
-    mr.monitor_id,
-    mr.result,
-    mr.date,
-    mr.date_past_tense_verb,
-    mr.citations,
-    mr.created_at,
-    mr.feedback,
-    lc.latest_confirmation_at,
-    lc.latest_check_id
-   FROM (public.monitor_results mr
-     LEFT JOIN latest_checks lc ON ((lc.result_id = mr.id)));
+CREATE TABLE public.monitor_schemas (
+    id bigint NOT NULL,
+    monitor_id bigint NOT NULL,
+    data jsonb NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: monitor_schemas_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.monitor_schemas_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: monitor_schemas_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.monitor_schemas_id_seq OWNED BY public.monitor_schemas.id;
 
 
 --
@@ -627,6 +632,13 @@ ALTER TABLE ONLY public.monitor_results ALTER COLUMN id SET DEFAULT nextval('pub
 
 
 --
+-- Name: monitor_schemas id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.monitor_schemas ALTER COLUMN id SET DEFAULT nextval('public.monitor_schemas_id_seq'::regclass);
+
+
+--
 -- Name: monitors id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -693,6 +705,14 @@ ALTER TABLE ONLY public.monitor_notifiers
 
 ALTER TABLE ONLY public.monitor_results
     ADD CONSTRAINT monitor_results_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: monitor_schemas monitor_schemas_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.monitor_schemas
+    ADD CONSTRAINT monitor_schemas_pkey PRIMARY KEY (id);
 
 
 --
@@ -807,24 +827,10 @@ CREATE INDEX idx_llm_conversations_user_id_source_type_source_id ON public.llm_c
 
 
 --
--- Name: idx_monitor_checks_monitor_id_result_id; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_monitor_checks_monitor_id_result_id ON public.monitor_checks USING btree (monitor_id, result_id);
-
-
---
 -- Name: idx_monitor_checks_monitor_id_status_scheduled_for; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_monitor_checks_monitor_id_status_scheduled_for ON public.monitor_checks USING btree (monitor_id, status, scheduled_for DESC);
-
-
---
--- Name: idx_monitor_checks_result_id; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_monitor_checks_result_id ON public.monitor_checks USING btree (result_id);
 
 
 --
@@ -839,6 +845,13 @@ CREATE UNIQUE INDEX idx_monitor_notifiers_monitor_id_type ON public.monitor_noti
 --
 
 CREATE INDEX idx_monitor_results_monitor_id ON public.monitor_results USING btree (monitor_id, created_at DESC);
+
+
+--
+-- Name: idx_monitor_schemas_monitor_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_monitor_schemas_monitor_id ON public.monitor_schemas USING btree (monitor_id);
 
 
 --
@@ -942,14 +955,6 @@ ALTER TABLE ONLY public.monitor_checks
 
 
 --
--- Name: monitor_checks monitor_checks_result_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.monitor_checks
-    ADD CONSTRAINT monitor_checks_result_id_fkey FOREIGN KEY (result_id) REFERENCES public.monitor_results(id) ON DELETE SET NULL;
-
-
---
 -- Name: monitor_notifiers monitor_notifiers_monitor_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -958,11 +963,27 @@ ALTER TABLE ONLY public.monitor_notifiers
 
 
 --
+-- Name: monitor_results monitor_results_last_confirmed_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.monitor_results
+    ADD CONSTRAINT monitor_results_last_confirmed_check_id_fkey FOREIGN KEY (last_confirmed_check_id) REFERENCES public.monitor_checks(id);
+
+
+--
 -- Name: monitor_results monitor_results_monitor_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.monitor_results
     ADD CONSTRAINT monitor_results_monitor_id_fkey FOREIGN KEY (monitor_id) REFERENCES public.monitors(id) ON DELETE CASCADE;
+
+
+--
+-- Name: monitor_schemas monitor_schemas_monitor_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.monitor_schemas
+    ADD CONSTRAINT monitor_schemas_monitor_id_fkey FOREIGN KEY (monitor_id) REFERENCES public.monitors(id) ON DELETE CASCADE;
 
 
 --
