@@ -1,6 +1,7 @@
 package llm
 
 import (
+	"encoding/json"
 	"strings"
 
 	"github.com/alexpls/untils/internal/models"
@@ -12,10 +13,26 @@ type CheckParams struct {
 	MonitorCheckID  int64
 	Subject         string
 	PreviousResults []*models.GetPreviousResultsWithCheckRow
+	Schema          models.MonitorSchemaData
 }
 
 func (c CheckParams) UserMessageString() string {
-	return "## Subject:\n" + c.Subject + "\n\n## Previous results: \n" + c.PreviousResultsString()
+	var b strings.Builder
+	b.WriteString("## Subject:\n")
+	b.WriteString(c.Subject)
+	b.WriteString("\n\n## Previous results:\n")
+	b.WriteString(c.PreviousResultsString())
+
+	if !c.Schema.Zero() {
+		schemaJSON, err := json.Marshal(c.Schema)
+		if err == nil {
+			b.WriteString("\n## Monitor schema:\n")
+			b.Write(schemaJSON)
+			b.WriteString("\n")
+		}
+	}
+
+	return b.String()
 }
 
 func (c CheckParams) PreviousResultsString() string {

@@ -4,7 +4,6 @@ import (
 	"context"
 	_ "embed"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/alexpls/untils/internal/browser"
@@ -29,15 +28,22 @@ func newChecker(service *Service) *checker {
 //go:embed checker_prompt.md
 var checkerPrompt string
 
-func (c *checker) perform(ctx context.Context, params *CheckParams) (*models.CheckResult, error) {
+func (c *checker) perform(ctx context.Context, params *CheckParams) (*models.CheckResultWithSchema, error) {
 	var err error
 
 	workflowStart := time.Now()
 	c.service.logger.DebugContext(ctx, "checker workflow started")
 
-	var previousResult *models.GetPreviousResultsWithCheckRow
-	if len(params.PreviousResults) > 0 {
-		previousResult = params.PreviousResults[0]
+	// var previousResult *models.GetPreviousResultsWithCheckRow
+	// if len(params.PreviousResults) > 0 {
+	// 	previousResult = params.PreviousResults[0]
+	// }
+
+	var responseSchema map[string]any
+	if params.Schema.Zero() {
+		responseSchema = jsonSchema(models.CheckResultWithSchema{})
+	} else {
+		responseSchema = jsonSchema(models.CheckResult{})
 	}
 
 	if err = c.conversation.start(ctx, params.UserID, params.MonitorCheckID, models.LlmConversationsSourceCheck); err != nil {
@@ -65,10 +71,10 @@ func (c *checker) perform(ctx context.Context, params *CheckParams) (*models.Che
 		return nil, fmt.Errorf("failed to log user message: %w", logErr)
 	}
 
-	res, runErr := runAgent[models.CheckResult](ctx, c.service, agentRunOptions[models.CheckResult]{
+	return runAgent(ctx, c.service, agentRunOptions[models.CheckResultWithSchema]{
 		model:          modelReasoning,
 		responseName:   "CheckResult",
-		responseSchema: jsonSchema(models.CheckResult{}),
+		responseSchema: responseSchema,
 		tools: []ToolDefinition{
 			browserWaitTool.definition(),
 			browserNavigateTool.definition(),
@@ -79,18 +85,47 @@ func (c *checker) perform(ctx context.Context, params *CheckParams) (*models.Che
 		maxTurns:          99,
 		conversation:      c.conversation,
 		toolExecutor:      c.executeToolCall,
-		validate: func(res *models.CheckResult) string {
-			if previousResult == nil {
-				return ""
+		validate: func(res *models.CheckResultWithSchema) string {
+			if res.Success && params.Schema.Zero() && res.Schema.Zero() {
+				return "error: schema: must be provided"
 			}
-			if res.DifferentToPrevious && sameResultStr(res.ResultPlaintext, previousResult.MonitorResultsWithLatestCheck.Result) {
-				return "error: different_to_previous is true but result_plaintext is the same as the previous result"
+
+			if err := res.Schema.Validate(); err != nil {
+				return "error: schema: " + err.Error()
 			}
+
+			if res.Success && len(res.Updates) == 0 {
+				return "error: updates: must contain at least one item when success is true"
+			}
+
+			if err := res.Updates.Validate(); err != nil {
+				return "error: updates: " + err.Error()
+			}
+
+			var schemaForValidation models.MonitorSchemaData
+			if !res.Schema.Zero() {
+				schemaForValidation = res.Schema
+			} else if !params.Schema.Zero() {
+				schemaForValidation = params.Schema
+			} else {
+				panic("no schema either in the response or in the params of this check")
+			}
+
+			if err := res.Updates.ValidateAgainstSchema(schemaForValidation); err != nil {
+				return "error: updates: " + err.Error()
+			}
+
+			// TODO: sanity check to make sure that the same result as last time hasn't been returned
+			// if previousResult == nil {
+			// 	return ""
+			// }
+			// if res.DifferentToPrevious && sameResultStr(res.ResultPlaintext, previousResult.MonitorResultsWithLatestCheck.Result) {
+			// 	return "error: different_to_previous is true but result_plaintext is the same as the previous result"
+			// }
+
 			return ""
 		},
 	})
-	err = runErr
-	return res, runErr
 }
 
 func (c *checker) executeToolCall(ctx context.Context, call ToolCall) (string, error) {
@@ -135,11 +170,4 @@ func (c *checker) executeToolCall(ctx context.Context, call ToolCall) (string, e
 	}
 	c.service.logger.DebugContext(ctx, "tool call completed", "tool", name, "duration", time.Since(toolStart))
 	return result, err
-}
-
-func sameResultStr(a, b string) bool {
-	san := func(s string) string {
-		return strings.ToLower(strings.Trim(s, " "))
-	}
-	return san(a) == san(b)
 }

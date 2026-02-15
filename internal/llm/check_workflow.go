@@ -15,7 +15,7 @@ func (s *Service) NewCheckWorkflow() *CheckWorkflow {
 	return &CheckWorkflow{service: s}
 }
 
-func (w *CheckWorkflow) Run(ctx context.Context, params *CheckParams) (*models.CheckResult, error) {
+func (w *CheckWorkflow) Run(ctx context.Context, params *CheckParams) (*models.CheckResultWithSchema, error) {
 	llmEvent, _ := logging.GetOrCreateFromContext(ctx, newLLMEvent)
 	defer llmEvent.finish()
 

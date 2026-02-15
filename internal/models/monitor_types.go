@@ -20,11 +20,19 @@ type Date struct {
 	PastTenseVerb string `json:"past_tense_verb"`
 }
 
+type CheckResultBase struct {
+	Success             bool                  `json:"success"`
+	Reason              string                `json:"reason"`
+	DifferentToPrevious bool                  `json:"different_to_previous"`
+	Updates             MonitorUpdateDataList `json:"updates"`
+	Citations           Citations             `json:"citations"` // TODO: change to Sources
+}
+
 type CheckResult struct {
-	Success             bool      `json:"success"`
-	Reason              string    `json:"reason"`
-	DifferentToPrevious bool      `json:"different_to_previous"`
-	ResultPlaintext     string    `json:"result_plaintext"`
-	Date                Date      `json:"date"`
-	Citations           Citations `json:"citations"` // TODO: change to Sources
+	CheckResultBase
+}
+
+type CheckResultWithSchema struct {
+	CheckResultBase
+	Schema MonitorSchemaData `json:"schema"`
 }

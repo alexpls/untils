@@ -8,11 +8,44 @@ import (
 	"time"
 
 	"github.com/alexpls/untils/internal/logging"
+	"github.com/alexpls/untils/internal/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestCheckerEasySubject(t *testing.T) {
+func TestCheckerEasySubjectWithoutSchema(t *testing.T) {
+	t.Parallel()
+
+	deps := newTestDeps(t)
+	ctx := t.Context()
+
+	checker := newChecker(deps.service)
+
+	events := make(logging.Events)
+	ctx = logging.ContextWithEvents(ctx, events)
+	llmEvent := logging.GetOrCreate(events, newLLMEvent)
+	defer llmEvent.finish()
+
+	res, err := checker.perform(ctx, &CheckParams{
+		UserID:         deps.fixtures.User.ID,
+		MonitorCheckID: deps.fixtures.Check.ID,
+		Subject:        "Latest album by Tool (use wikipedia, include schema fields 'Title', 'Release date', and 'Link')",
+		Schema:         models.MonitorSchemaData{}, // intentionally zero
+	})
+	require.NoError(t, err)
+	assert.Equal(t, string(models.MonitorSchemaFieldTypeText), res.Schema.Fields.GetValue("Title"))
+	assert.Equal(t, string(models.MonitorSchemaFieldTypeDate), res.Schema.Fields.GetValue("Release date"))
+	assert.Equal(t, string(models.MonitorSchemaFieldTypeURL), res.Schema.Fields.GetValue("Link"))
+	require.Len(t, res.Updates, 1)
+
+	update := res.Updates[0]
+
+	assert.Equal(t, "Fear Inoculum", update.Fields.GetValue("Title"))
+	assert.Equal(t, "2019-08-30", update.Fields.GetValue("Release date"))
+	assert.Equal(t, "https://en.wikipedia.org/wiki/Fear_Inoculum", update.Fields.GetValue("Link"))
+}
+
+func TestCheckerEasySubjectWithSchema(t *testing.T) {
 	t.Parallel()
 
 	deps := newTestDeps(t)
@@ -29,12 +62,33 @@ func TestCheckerEasySubject(t *testing.T) {
 		UserID:         deps.fixtures.User.ID,
 		MonitorCheckID: deps.fixtures.Check.ID,
 		Subject:        "Latest album by Tool (use wikipedia)",
+		Schema: models.MonitorSchemaData{
+			Headline: "{{Album name}}",
+			Subtitle: "Release date: {{Release date}}",
+			Fields: models.MonitorSchemaFields{
+				{
+					Type: "text",
+					Name: "Album name",
+				},
+				{
+					Type: "date",
+					Name: "Release date",
+				},
+				{
+					Type: "url",
+					Name: "Link",
+				},
+			},
+		},
 	})
 	require.NoError(t, err)
+	require.Len(t, res.Updates, 1)
 
-	assert.Contains(t, res.ResultPlaintext, "Fear Inoculum")
-	assert.Contains(t, res.Citations[0].URL, "wikipedia.org")
-	assert.Contains(t, res.Citations[0].FaviconURL, "wikipedia.org/static/favicon/wikipedia.ico")
+	update := res.Updates[0]
+
+	assert.Equal(t, "Fear Inoculum", update.Fields.GetValue("Album name"))
+	assert.Equal(t, "2019-08-30", update.Fields.GetValue("Release date"))
+	assert.Equal(t, "https://en.wikipedia.org/wiki/Fear_Inoculum", update.Fields.GetValue("Link"))
 }
 
 func TestCheckerContextCancellation(t *testing.T) {
