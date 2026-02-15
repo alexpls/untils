@@ -27,12 +27,10 @@ things related to code generation, db migrations, testing, linting, etc.
 
 ## Database
 
-You can view the database schema in ./internal/models/schema.sql - if you modify
-one of the queries, get SQLc to regenerate it with the corresponding mise task.
-
-To connect to the database, use `psql postgresql://root:root@localhost:54324/untils_dev`
-
-I don't like to yell at the database, lowercase the SQL you write.
+- You can view the database schema in ./internal/models/schema.sql - never modify this directly,
+  use the mise tasks instead.
+- To connect to the database, use `psql postgresql://root:root@localhost:54324/untils_dev`.
+- I don't like to yell at the database, lowercase any SQL you write.
 
 ## Development server
 
