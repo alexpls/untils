@@ -115,6 +115,16 @@ func TestMonitorSchemaDataValidate(t *testing.T) {
 			errContains: []string{`headline references unknown field "Unknown"`},
 		},
 		{
+			name: "invalid malformed headline template",
+			data: MonitorSchemaData{
+				Headline: "{{Title",
+				Fields: MonitorSchemaFields{
+					{Type: MonitorSchemaFieldTypeText, Name: "Title"},
+				},
+			},
+			errContains: []string{"headline template is invalid"},
+		},
+		{
 			name: "invalid subtitle static text",
 			data: MonitorSchemaData{
 				Headline: "{{Title}}",
@@ -135,6 +145,17 @@ func TestMonitorSchemaDataValidate(t *testing.T) {
 				},
 			},
 			errContains: []string{`subtitle references unknown field "Date"`},
+		},
+		{
+			name: "invalid malformed subtitle template",
+			data: MonitorSchemaData{
+				Headline: "{{Title}}",
+				Subtitle: "Published {{Date",
+				Fields: MonitorSchemaFields{
+					{Type: MonitorSchemaFieldTypeText, Name: "Title"},
+				},
+			},
+			errContains: []string{"subtitle template is invalid"},
 		},
 	}
 

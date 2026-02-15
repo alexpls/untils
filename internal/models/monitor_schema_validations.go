@@ -4,16 +4,13 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
-	"regexp"
 	"strings"
 	"time"
+
+	"github.com/alexpls/untils/internal/tinytemplate"
 )
 
 const maxMonitorSchemaFields = 10
-
-// TODO: actually implement template parsing somewhere else, and then use
-// it here for our validation, too.
-var templateFieldRefRegexp = regexp.MustCompile(`{{\s*([^{}]+?)\s*}}`)
 
 func (d MonitorUpdateDataList) Validate() error {
 	var errs []error
@@ -211,14 +208,18 @@ func validateMonitorFields[T any](
 }
 
 func validateTemplateRefs(fieldLabel, template string, validFieldNames map[string]struct{}) []error {
-	refs := templateFieldRefRegexp.FindAllStringSubmatch(template, -1)
+	tt, err := tinytemplate.Parse(template)
+	if err != nil {
+		return []error{fmt.Errorf("%s template is invalid: %w", fieldLabel, err)}
+	}
+
+	refs := tt.References()
 	if len(refs) == 0 {
 		return []error{fmt.Errorf("%s must reference at least one field", fieldLabel)}
 	}
 
 	var errs []error
-	for _, ref := range refs {
-		name := strings.TrimSpace(ref[1])
+	for _, name := range refs {
 		if _, ok := validFieldNames[name]; !ok {
 			errs = append(errs, fmt.Errorf("%s references unknown field %q", fieldLabel, name))
 		}

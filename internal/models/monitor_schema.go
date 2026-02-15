@@ -1,5 +1,11 @@
 package models
 
+import (
+	"strings"
+
+	"github.com/alexpls/untils/internal/tinytemplate"
+)
+
 type MonitorSchemaData struct {
 	Headline string              `json:"headline"`
 	Subtitle string              `json:"subtitle"`
@@ -38,6 +44,17 @@ type MonitorUpdateField struct {
 
 type MonitorUpdateFields []MonitorUpdateField
 
+func (d MonitorSchemaData) RenderHeadline(fields MonitorUpdateFields) (string, error) {
+	return fields.ResolveTemplate(d.Headline)
+}
+
+func (d MonitorSchemaData) RenderSubtitle(fields MonitorUpdateFields) (string, error) {
+	if strings.TrimSpace(d.Subtitle) == "" {
+		return "", nil
+	}
+	return fields.ResolveTemplate(d.Subtitle)
+}
+
 func (f MonitorSchemaFields) GetValue(name string) string {
 	for _, field := range f {
 		if field.Name == name {
@@ -48,10 +65,29 @@ func (f MonitorSchemaFields) GetValue(name string) string {
 }
 
 func (f MonitorUpdateFields) GetValue(name string) string {
-	for _, field := range f {
-		if field.Name == name {
-			return field.Value
-		}
+	value, ok := f.LookupValue(name)
+	if ok {
+		return value
 	}
 	return ""
+}
+
+func (f MonitorUpdateFields) LookupValue(name string) (string, bool) {
+	for _, field := range f {
+		if field.Name == name {
+			return field.Value, true
+		}
+	}
+	return "", false
+}
+
+func (f MonitorUpdateFields) ResolveTemplate(template string) (string, error) {
+	tt, err := tinytemplate.Parse(template)
+	if err != nil {
+		return "", err
+	}
+
+	return tt.RenderFunc(func(name string) (string, bool) {
+		return f.LookupValue(name)
+	})
 }
