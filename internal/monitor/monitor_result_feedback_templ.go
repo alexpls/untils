@@ -16,7 +16,7 @@ import (
 )
 
 type monitorResultFeedbackViewData struct {
-	result           *models.MonitorResultsWithLatestCheck
+	result           *models.MonitorResult
 	formValues       CreateMonitorResultFeedbackParams
 	validationErrors validation.ValidationErrors
 }

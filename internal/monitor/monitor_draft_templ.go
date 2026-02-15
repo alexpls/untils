@@ -19,7 +19,7 @@ import (
 
 type MonitorDraftData struct {
 	Monitor                       *models.Monitor
-	ResultPreview                 *models.MonitorResultsWithLatestCheck
+	ResultPreview                 *models.MonitorResult
 	InProgressCheck               *models.MonitorCheck
 	InProgressCheckTimelineEvents []*models.GetTimelineEventsBySourceIDRow
 	ValidationErrors              validation.ValidationErrors

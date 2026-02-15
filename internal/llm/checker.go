@@ -34,10 +34,10 @@ func (c *checker) perform(ctx context.Context, params *CheckParams) (*models.Che
 	workflowStart := time.Now()
 	c.service.logger.DebugContext(ctx, "checker workflow started")
 
-	// var previousResult *models.GetPreviousResultsWithCheckRow
-	// if len(params.PreviousResults) > 0 {
-	// 	previousResult = params.PreviousResults[0]
-	// }
+	var previousResult *models.GetPreviousResultsWithCheckRow
+	if len(params.PreviousResults) > 0 {
+		previousResult = params.PreviousResults[0]
+	}
 
 	var responseSchema map[string]any
 	if params.Schema.Zero() {
@@ -115,17 +115,27 @@ func (c *checker) perform(ctx context.Context, params *CheckParams) (*models.Che
 				return "error: updates: " + err.Error()
 			}
 
-			// TODO: sanity check to make sure that the same result as last time hasn't been returned
-			// if previousResult == nil {
-			// 	return ""
-			// }
-			// if res.DifferentToPrevious && sameResultStr(res.ResultPlaintext, previousResult.MonitorResultsWithLatestCheck.Result) {
-			// 	return "error: different_to_previous is true but result_plaintext is the same as the previous result"
-			// }
+			if differentToPreviousMismatch(res, previousResult) {
+				return "error: different_to_previous is true but returned update fields are the same as the previous result"
+			}
 
 			return ""
 		},
 	})
+}
+
+func differentToPreviousMismatch(res *models.CheckResultWithSchema, previousResult *models.GetPreviousResultsWithCheckRow) bool {
+	if previousResult == nil || !res.DifferentToPrevious || len(res.Updates) == 0 {
+		return false
+	}
+
+	for _, update := range res.Updates {
+		if !models.MonitorUpdateFieldsEqual(update.Fields, previousResult.MonitorResult.Data.Fields) {
+			return false
+		}
+	}
+
+	return true
 }
 
 func (c *checker) executeToolCall(ctx context.Context, call ToolCall) (string, error) {

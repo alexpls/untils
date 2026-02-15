@@ -63,12 +63,9 @@ templ MonitorsList(data MonitorsListData) {
 										<div class="line-clamp-2">
 											{ mon.LatestResult }
 										</div>
-										if !mon.LatestResultDate.IsZero() {
+										if mon.LatestResultSubtitle != "" {
 											<div class="text-muted">
-												if mon.LatestResultDatePastTenseVerb != "" {
-													{ mon.LatestResultDatePastTenseVerb }
-												}
-												{ components.FormatDate(ctx, mon.LatestResultDate) }
+												{ mon.LatestResultSubtitle }
 											</div>
 										}
 									} else {

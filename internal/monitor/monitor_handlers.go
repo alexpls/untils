@@ -528,7 +528,7 @@ func (h *Handlers) monitorDraftViewData(
 	values UpdateMonitorDraftParams,
 	validationErrs validation.ValidationErrors,
 ) (MonitorDraftData, error) {
-	var preview *models.MonitorResultsWithLatestCheck
+	var preview *models.MonitorResult
 	if mon.Status == models.MonitorStatusReady {
 		res, err := h.service.queries.ListMonitorResults(ctx, h.service.db, mon.ID)
 		if err != nil {

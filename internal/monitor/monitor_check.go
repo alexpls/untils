@@ -156,14 +156,29 @@ func (s *Service) PerformMonitorCheck(
 		return fmt.Errorf("getting user: %w", err)
 	}
 
-	latest, err := db.WithTxV(s.db, ctx, func(tx pgx.Tx) ([]*models.GetPreviousResultsWithCheckRow, error) {
-		latest, err := s.queries.GetPreviousResultsWithCheck(ctx, tx, monitor.ID)
+	type priorMonitorState struct {
+		previousResults []*models.GetPreviousResultsWithCheckRow
+		schema          models.MonitorSchemaData
+	}
+
+	priorState, err := db.WithTxV(s.db, ctx, func(tx pgx.Tx) (*priorMonitorState, error) {
+		previousResults, err := s.queries.GetPreviousResultsWithCheck(ctx, tx, monitor.ID)
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
-				latest = nil
+				previousResults = nil
 			} else {
 				return nil, fmt.Errorf("getting previous results: %w", err)
 			}
+		}
+
+		var schema models.MonitorSchemaData
+		storedSchema, err := s.queries.GetMonitorSchema(ctx, tx, monitor.ID)
+		if err != nil {
+			if !errors.Is(err, pgx.ErrNoRows) {
+				return nil, fmt.Errorf("getting monitor schema: %w", err)
+			}
+		} else {
+			schema = storedSchema.Data
 		}
 
 		// Mark check as 'checking' BEFORE scheduling next check, because
@@ -180,7 +195,10 @@ func (s *Service) PerformMonitorCheck(
 			}
 		}
 
-		return latest, nil
+		return &priorMonitorState{
+			previousResults: previousResults,
+			schema:          schema,
+		}, nil
 	})
 	if err != nil {
 		return err
@@ -192,7 +210,8 @@ func (s *Service) PerformMonitorCheck(
 		UserID:          userID,
 		MonitorCheckID:  check.ID,
 		Subject:         monitor.Subject.String,
-		PreviousResults: latest,
+		PreviousResults: priorState.previousResults,
+		Schema:          priorState.schema,
 	})
 	if err != nil {
 		if cerr := s.queries.UpdateMonitorCheckFailed(ctx, s.db, &models.UpdateMonitorCheckFailedParams{
@@ -207,7 +226,27 @@ func (s *Service) PerformMonitorCheck(
 	monitorCheckResult := &models.CheckResult{
 		CheckResultBase: result.CheckResultBase,
 	}
-	createMonitorResultParams := CheckResultToCreateMonitorResultParams(check.MonitorID, result)
+	schemaToPersist := priorState.schema
+	if schemaToPersist.Zero() {
+		schemaToPersist = result.Schema
+	}
+	confirmedAt := time.Now()
+
+	createMonitorResultParams := make([]*models.CreateMonitorResultParams, 0, len(result.Updates))
+	for _, update := range result.Updates {
+		params, err := MonitorUpdateToCreateMonitorResultParams(
+			check.MonitorID,
+			check.ID,
+			confirmedAt,
+			schemaToPersist,
+			update,
+			&result.Citations,
+		)
+		if err != nil {
+			return fmt.Errorf("building monitor result params: %w", err)
+		}
+		createMonitorResultParams = append(createMonitorResultParams, params)
+	}
 
 	err = db.WithTx(s.db, ctx, func(tx pgx.Tx) error {
 		if err := s.validateMonitorsSameVersion(ctx, tx, monitor); err != nil {
@@ -225,29 +264,28 @@ func (s *Service) PerformMonitorCheck(
 			return fmt.Errorf("updating monitor check to success status: %w", err)
 		}
 
-		if result.DifferentToPrevious || len(latest) == 0 {
-			newResult, err := s.queries.CreateMonitorResult(ctx, tx, createMonitorResultParams)
-			if err != nil {
-				return fmt.Errorf("creating monitor result: %w", err)
-			}
-			if err := s.queries.LinkCheckToResult(ctx, tx, &models.LinkCheckToResultParams{
-				CheckID: check.ID,
-				ResultID: pgtype.Int8{
-					Int64: newResult.ID,
-					Valid: true,
-				},
+		if priorState.schema.Zero() && !schemaToPersist.Zero() {
+			if _, err := s.queries.UpsertMonitorSchema(ctx, tx, &models.UpsertMonitorSchemaParams{
+				MonitorID: monitor.ID,
+				Data:      schemaToPersist,
 			}); err != nil {
-				return fmt.Errorf("linking check to result: %w", err)
+				return fmt.Errorf("upserting monitor schema: %w", err)
+			}
+		}
+
+		if result.DifferentToPrevious || len(priorState.previousResults) == 0 {
+			for _, params := range createMonitorResultParams {
+				if _, err := s.queries.CreateMonitorResult(ctx, tx, params); err != nil {
+					return fmt.Errorf("creating monitor result: %w", err)
+				}
 			}
 		} else {
-			if err := s.queries.LinkCheckToResult(ctx, tx, &models.LinkCheckToResultParams{
-				CheckID: check.ID,
-				ResultID: pgtype.Int8{
-					Int64: latest[0].MonitorResultsWithLatestCheck.ID,
-					Valid: true,
-				},
+			if err := s.queries.UpdateMonitorResultLastConfirmed(ctx, tx, &models.UpdateMonitorResultLastConfirmedParams{
+				CheckID:         check.ID,
+				ConfirmedAt:     confirmedAt,
+				MonitorResultID: priorState.previousResults[0].MonitorResult.ID,
 			}); err != nil {
-				return fmt.Errorf("linking check to result: %w", err)
+				return fmt.Errorf("updating monitor result confirmation: %w", err)
 			}
 		}
 
@@ -259,13 +297,18 @@ func (s *Service) PerformMonitorCheck(
 
 	if result.DifferentToPrevious {
 		lastResult := "(none)"
-		if len(latest) > 0 {
-			lastResult = latest[0].MonitorResultsWithLatestCheck.Result
+		if len(priorState.previousResults) > 0 {
+			lastResult = priorState.previousResults[0].MonitorResult.Headline
+		}
+
+		newResult := ""
+		if len(createMonitorResultParams) > 0 {
+			newResult = createMonitorResultParams[len(createMonitorResultParams)-1].Headline
 		}
 
 		if err = s.SendNotifications(ctx, SendNotificationsParams{
 			Monitor:   monitor,
-			NewResult: createMonitorResultParams.Result,
+			NewResult: newResult,
 			OldResult: lastResult,
 		}); err != nil {
 			return err

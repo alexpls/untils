@@ -91,3 +91,27 @@ func (f MonitorUpdateFields) ResolveTemplate(template string) (string, error) {
 		return f.LookupValue(name)
 	})
 }
+
+func MonitorUpdateFieldsEqual(a, b MonitorUpdateFields) bool {
+	if len(a) != len(b) {
+		return false
+	}
+
+	valuesByField := make(map[string]string, len(a))
+	for _, field := range a {
+		valuesByField[monitorUpdateFieldKey(field)] = field.Value
+	}
+
+	for _, field := range b {
+		value, ok := valuesByField[monitorUpdateFieldKey(field)]
+		if !ok || value != field.Value {
+			return false
+		}
+	}
+
+	return true
+}
+
+func monitorUpdateFieldKey(field MonitorUpdateField) string {
+	return string(field.Type) + "\x00" + field.Name
+}

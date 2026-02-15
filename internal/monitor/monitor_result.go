@@ -11,7 +11,7 @@ type CreateMonitorResultFeedbackParams struct {
 	Feedback string `json:"feedback"`
 }
 
-func (s *Service) CreateMonitorResultFeedback(ctx context.Context, userID int64, result *models.MonitorResultsWithLatestCheck, params CreateMonitorResultFeedbackParams) error {
+func (s *Service) CreateMonitorResultFeedback(ctx context.Context, userID int64, result *models.MonitorResult, params CreateMonitorResultFeedbackParams) error {
 	if err := s.validate.Struct(params); err != nil {
 		return err
 	}

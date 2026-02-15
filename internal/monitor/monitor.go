@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/alexpls/untils/internal/db"
@@ -180,53 +179,33 @@ func (s *Service) ValidateMonitor(ctx context.Context, monitor *models.Monitor) 
 	return err
 }
 
-func CheckResultToCreateMonitorResultParams(monitorID int64, res *models.CheckResultWithSchema) *models.CreateMonitorResultParams {
-	var result string
-	var resultDate *time.Time
-	resultDatePastTenseVerb := pgtype.Text{}
+func MonitorUpdateToCreateMonitorResultParams(
+	monitorID int64,
+	checkID int64,
+	confirmedAt time.Time,
+	schema models.MonitorSchemaData,
+	update models.MonitorUpdateData,
+	citations *models.Citations,
+) (*models.CreateMonitorResultParams, error) {
+	headline, err := schema.RenderHeadline(update.Fields)
+	if err != nil {
+		return nil, fmt.Errorf("rendering headline: %w", err)
+	}
 
-	latestUpdate := checkResultLatestUpdate(res)
-	if latestUpdate != nil {
-		renderedHeadline, err := res.Schema.RenderHeadline(latestUpdate.Fields)
-		if err == nil {
-			result = renderedHeadline
-		} else if len(latestUpdate.Fields) > 0 {
-			// Fall back so we still have a user-visible result string.
-			result = latestUpdate.Fields[0].Value
-		}
-
-		for _, field := range latestUpdate.Fields {
-			if field.Type != models.MonitorSchemaFieldTypeDate {
-				continue
-			}
-
-			fieldName := strings.TrimSpace(field.Name)
-			if fieldName != "" {
-				resultDatePastTenseVerb = pgtype.Text{String: fieldName, Valid: true}
-			}
-
-			parsed, err := time.Parse("2006-01-02", field.Value)
-			if err == nil {
-				resultDate = &parsed
-			}
-			break
-		}
+	subtitle, err := schema.RenderSubtitle(update.Fields)
+	if err != nil {
+		return nil, fmt.Errorf("rendering subtitle: %w", err)
 	}
 
 	return &models.CreateMonitorResultParams{
-		MonitorID:         monitorID,
-		Result:            result,
-		Citations:         &res.Citations,
-		Date:              resultDate,
-		DatePastTenseVerb: resultDatePastTenseVerb,
-	}
-}
-
-func checkResultLatestUpdate(res *models.CheckResultWithSchema) *models.MonitorUpdateData {
-	if res == nil || len(res.Updates) == 0 {
-		return nil
-	}
-	return &res.Updates[len(res.Updates)-1]
+		MonitorID:            monitorID,
+		LastConfirmedCheckID: checkID,
+		LastConfirmedAt:      confirmedAt,
+		Data:                 update,
+		Headline:             headline,
+		Subtitle:             subtitle,
+		Citations:            citations,
+	}, nil
 }
 
 func (s *Service) ActivateMonitorFromPreview(ctx context.Context, user *models.User, monitorID int64) (*models.Monitor, error) {
@@ -367,11 +346,14 @@ func (s *Service) UpdateMonitorDraft(ctx context.Context, userID, monitorID int6
 }
 
 func (s *Service) deleteMonitorRelations(ctx context.Context, tx models.DBTX, monitorID int64) error {
+	if err := s.queries.DeleteMonitorResults(ctx, tx, monitorID); err != nil {
+		return fmt.Errorf("deleting monitor results: %w", err)
+	}
 	if err := s.queries.DeleteMonitorChecks(ctx, tx, monitorID); err != nil {
 		return fmt.Errorf("deleting monitor checks: %w", err)
 	}
-	if err := s.queries.DeleteMonitorResults(ctx, tx, monitorID); err != nil {
-		return fmt.Errorf("deleting monitor results: %w", err)
+	if err := s.queries.DeleteMonitorSchema(ctx, tx, monitorID); err != nil {
+		return fmt.Errorf("deleting monitor schema: %w", err)
 	}
 	return nil
 }

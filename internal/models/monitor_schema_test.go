@@ -105,3 +105,62 @@ func TestMonitorSchemaDataRenderSubtitleEmpty(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "", subtitle)
 }
+
+func TestMonitorUpdateFieldsEqual(t *testing.T) {
+	base := MonitorUpdateFields{
+		{
+			MonitorSchemaField: MonitorSchemaField{Type: MonitorSchemaFieldTypeText, Name: "Title"},
+			Value:              "Fear Inoculum",
+		},
+		{
+			MonitorSchemaField: MonitorSchemaField{Type: MonitorSchemaFieldTypeDate, Name: "Release date"},
+			Value:              "2019-08-30",
+		},
+		{
+			MonitorSchemaField: MonitorSchemaField{Type: MonitorSchemaFieldTypeURL, Name: "Link"},
+			Value:              "https://en.wikipedia.org/wiki/Fear_Inoculum",
+		},
+	}
+
+	reordered := MonitorUpdateFields{
+		base[2],
+		base[0],
+		base[1],
+	}
+
+	differentValue := MonitorUpdateFields{
+		base[0],
+		base[1],
+		{
+			MonitorSchemaField: MonitorSchemaField{Type: MonitorSchemaFieldTypeURL, Name: "Link"},
+			Value:              "https://example.com",
+		},
+	}
+
+	missingField := MonitorUpdateFields{
+		base[0],
+		base[1],
+	}
+
+	// Missing Title field with an empty value should not be treated as equal.
+	missingFieldWithEmptyValue := MonitorUpdateFields{
+		{
+			MonitorSchemaField: MonitorSchemaField{Type: MonitorSchemaFieldTypeDate, Name: "Release date"},
+			Value:              "2019-08-30",
+		},
+		{
+			MonitorSchemaField: MonitorSchemaField{Type: MonitorSchemaFieldTypeURL, Name: "Link"},
+			Value:              "https://en.wikipedia.org/wiki/Fear_Inoculum",
+		},
+		{
+			MonitorSchemaField: MonitorSchemaField{Type: MonitorSchemaFieldTypeText, Name: "Different"},
+			Value:              "",
+		},
+	}
+
+	require.True(t, MonitorUpdateFieldsEqual(base, base))
+	require.True(t, MonitorUpdateFieldsEqual(base, reordered))
+	require.False(t, MonitorUpdateFieldsEqual(base, differentValue))
+	require.False(t, MonitorUpdateFieldsEqual(base, missingField))
+	require.False(t, MonitorUpdateFieldsEqual(base, missingFieldWithEmptyValue))
+}

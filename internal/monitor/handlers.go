@@ -119,7 +119,7 @@ func (cpr *ConditionalPatchRenderer) Handle(w http.ResponseWriter, r *http.Reque
 	}
 }
 
-func (h *Handlers) monitorResultFromPath(w http.ResponseWriter, r *http.Request, mon *models.Monitor) *models.MonitorResultsWithLatestCheck {
+func (h *Handlers) monitorResultFromPath(w http.ResponseWriter, r *http.Request, mon *models.Monitor) *models.MonitorResult {
 	resultID := resultIDFromPath(r)
 	if resultID == 0 {
 		http.NotFound(w, r)

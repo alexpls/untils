@@ -33,10 +33,13 @@ sql:
               type: "Citations"
               pointer: true
 
-          - column: "monitor_results_with_latest_check.citations"
+          - column: "monitor_results.data"
             go_type:
-              type: "Citations"
-              pointer: true
+              type: "MonitorUpdateData"
+
+          - column: "monitor_schemas.data"
+            go_type:
+              type: "MonitorSchemaData"
 
           - column: "monitor_checks.result"
             go_type:

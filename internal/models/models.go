@@ -269,7 +269,6 @@ type MonitorCheck struct {
 	FailureReason pgtype.Text
 	DoneAt        *time.Time
 	Result        *CheckResult
-	ResultID      pgtype.Int8
 }
 
 type MonitorNotifier struct {
@@ -280,27 +279,23 @@ type MonitorNotifier struct {
 }
 
 type MonitorResult struct {
-	ID                int64
-	MonitorID         int64
-	Result            string
-	Date              *time.Time
-	DatePastTenseVerb pgtype.Text
-	Citations         *Citations
-	CreatedAt         time.Time
-	Feedback          pgtype.Text
-}
-
-type MonitorResultsWithLatestCheck struct {
 	ID                   int64
 	MonitorID            int64
-	Result               string
-	Date                 *time.Time
-	DatePastTenseVerb    pgtype.Text
 	Citations            *Citations
 	CreatedAt            time.Time
 	Feedback             pgtype.Text
-	LatestConfirmationAt *time.Time
-	LatestCheckID        pgtype.Int8
+	LastConfirmedCheckID int64
+	LastConfirmedAt      time.Time
+	Data                 MonitorUpdateData
+	Headline             string
+	Subtitle             string
+}
+
+type MonitorSchema struct {
+	ID        int64
+	MonitorID int64
+	Data      MonitorSchemaData
+	CreatedAt time.Time
 }
 
 type PushoverUserToken struct {

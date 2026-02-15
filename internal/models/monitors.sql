@@ -1,8 +1,8 @@
 -- name: ListMonitorsWithResults :many
 with latest_result as (
-    select distinct on (monitor_id) monitor_id, result, date, date_past_tense_verb, created_at
+    select distinct on (monitor_id) monitor_id, headline, subtitle, created_at
     from monitor_results
-    order by monitor_id, created_at desc
+    order by monitor_id, created_at desc, id desc
 ),
 next_check as (
     select distinct on (monitor_id) monitor_id, scheduled_for
@@ -22,9 +22,8 @@ select
     m.subject::text as subject,
     m.check_frequency_minutes,
     m.created_at,
-    coalesce(mr.result, '') as latest_result,
-    coalesce(mr.date, '0001-01-01 00:00:00 +0000') as latest_result_date,
-    coalesce(mr.date_past_tense_verb, '') as latest_result_date_past_tense_verb,
+    coalesce(mr.headline, '') as latest_result,
+    coalesce(mr.subtitle, '') as latest_result_subtitle,
     coalesce(mr.created_at, '0001-01-01 00:00:00 +0000') as latest_result_created_at,
     coalesce(mc.scheduled_for, '0001-01-01 00:00:00 +0000') as next_check_scheduled_for,
     (cc.monitor_id is not null)::boolean as currently_checking
@@ -146,34 +145,34 @@ set status = 'success', result = @result, done_at = now()
 where id = @id;
 
 -- name: GetLatestMonitorResult :one
-select * from monitor_results_with_latest_check
+select * from monitor_results
 where monitor_id = @monitor_id
-order by created_at desc
+order by created_at desc, id desc
 limit 1;
 
 -- name: GetPreviousResultsWithCheck :many
 select sqlc.embed(mr), sqlc.embed(mc)
-from monitor_results_with_latest_check mr
-inner join monitor_checks mc on mc.id = mr.latest_check_id
+from monitor_results mr
+inner join monitor_checks mc on mc.id = mr.last_confirmed_check_id
 where mr.monitor_id = @monitor_id
-order by mr.created_at desc
+order by mr.created_at desc, mr.id desc
 limit 10;
 
 -- name: ListMonitorResults :many
-select * from monitor_results_with_latest_check
+select * from monitor_results
 where monitor_id = @monitor_id
-order by created_at desc;
+order by created_at desc, id desc;
 
 -- name: GetMonitorResult :one
-select * from monitor_results_with_latest_check
+select * from monitor_results
 where monitor_id = @monitor_id
 and id = @result_id;
 
 -- name: GetMonitorResultByCheckID :one
-select mr.*
-from monitor_results_with_latest_check mr
-inner join monitor_checks mc on mc.result_id = mr.id
-where mc.id = @check_id
+select *
+from monitor_results
+where last_confirmed_check_id = @check_id
+order by created_at desc, id desc
 limit 1;
 
 -- name: DeleteMonitorChecks :exec
@@ -185,14 +184,34 @@ delete from monitor_results
 where monitor_id = @monitor_id;
 
 -- name: CreateMonitorResult :one
-insert into monitor_results (monitor_id, result, date, date_past_tense_verb, citations, created_at)
-values (@monitor_id, @result, @date, @date_past_tense_verb, @citations, now())
+insert into monitor_results (
+    monitor_id,
+    last_confirmed_check_id,
+    last_confirmed_at,
+    data,
+    headline,
+    subtitle,
+    citations,
+    created_at
+)
+values (
+    @monitor_id,
+    @last_confirmed_check_id,
+    @last_confirmed_at,
+    @data,
+    @headline,
+    @subtitle,
+    @citations,
+    now()
+)
 returning *;
 
--- name: LinkCheckToResult :exec
-update monitor_checks
-set result_id = @result_id
-where id = @check_id;
+-- name: UpdateMonitorResultLastConfirmed :exec
+update monitor_results
+set
+    last_confirmed_check_id = @check_id,
+    last_confirmed_at = @confirmed_at
+where id = @monitor_result_id;
 
 -- name: UpdateMonitorResultWithFeedback :exec
 update monitor_results
@@ -204,16 +223,30 @@ select
     mon.id::bigint as monitor_id,
     res.id::bigint as result_id,
     mon.subject,
-    res.result,
+    res.headline,
     res.created_at,
-    res.date,
-    res.date_past_tense_verb
+    res.subtitle
 from monitor_results res
 left join monitors mon on mon.id = res.monitor_id
 where mon.status = 'active'
 and mon.user_id = @user_id
 order by res.created_at desc
 limit 7;
+
+-- name: GetMonitorSchema :one
+select * from monitor_schemas
+where monitor_id = @monitor_id;
+
+-- name: UpsertMonitorSchema :one
+insert into monitor_schemas (monitor_id, data, created_at)
+values (@monitor_id, @data, now())
+on conflict (monitor_id) do update
+set data = excluded.data, created_at = now()
+returning *;
+
+-- name: DeleteMonitorSchema :exec
+delete from monitor_schemas
+where monitor_id = @monitor_id;
 
 -- name: BumpMonitorVersion :exec
 update monitors set updated_at = now() where id = @monitor_id;
