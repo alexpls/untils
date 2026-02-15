@@ -14,6 +14,7 @@
 - [ ] Feedback: it's not obvious at all that there are multiple ways to receive notifications.
 - [ ] Feedback: "start monitoring now" button should probably just say "Activate".
 - [ ] Feedback: it's not clear that the "feedback" option goes to the LLM to influence future results. People were trying to give feedback about the application itself in that field.
+  - [ ] Feature: change this to "corrections" instead of "feedback", and let the actual response text be corrected. It's annoying to prompt your way to the response shape you want when you could instead just correct it yourself and have the LLM learn from it.
 - [ ] Feature: "fire and forget" way to set up monitors, if you don't wanna sit around waiting to confirm that the first check looks good
 - [ ] Improvement: make it clearer what the purpose of the preview is. I've had feedback that it's confusing that it's showing something that's already happened, which isn't something that the user wants to be notified about _now_.
 
