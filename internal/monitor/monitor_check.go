@@ -204,6 +204,11 @@ func (s *Service) PerformMonitorCheck(
 		return fmt.Errorf("prompting llm: %w", err)
 	}
 
+	monitorCheckResult := &models.CheckResult{
+		CheckResultBase: result.CheckResultBase,
+	}
+	createMonitorResultParams := CheckResultToCreateMonitorResultParams(check.MonitorID, result)
+
 	err = db.WithTx(s.db, ctx, func(tx pgx.Tx) error {
 		if err := s.validateMonitorsSameVersion(ctx, tx, monitor); err != nil {
 			return err
@@ -215,14 +220,13 @@ func (s *Service) PerformMonitorCheck(
 
 		if err := s.queries.UpdateMonitorCheckSuccess(ctx, tx, &models.UpdateMonitorCheckSuccessParams{
 			ID:     check.ID,
-			Result: result,
+			Result: monitorCheckResult,
 		}); err != nil {
 			return fmt.Errorf("updating monitor check to success status: %w", err)
 		}
 
 		if result.DifferentToPrevious || len(latest) == 0 {
-			params := CheckResultToCreateMonitorResultParams(check.MonitorID, result)
-			newResult, err := s.queries.CreateMonitorResult(ctx, tx, params)
+			newResult, err := s.queries.CreateMonitorResult(ctx, tx, createMonitorResultParams)
 			if err != nil {
 				return fmt.Errorf("creating monitor result: %w", err)
 			}
@@ -261,7 +265,7 @@ func (s *Service) PerformMonitorCheck(
 
 		if err = s.SendNotifications(ctx, SendNotificationsParams{
 			Monitor:   monitor,
-			NewResult: result.ResultPlaintext,
+			NewResult: createMonitorResultParams.Result,
 			OldResult: lastResult,
 		}); err != nil {
 			return err

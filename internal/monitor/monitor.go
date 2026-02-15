@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/alexpls/untils/internal/db"
@@ -179,30 +180,53 @@ func (s *Service) ValidateMonitor(ctx context.Context, monitor *models.Monitor) 
 	return err
 }
 
-func CheckResultToCreateMonitorResultParams(monitorID int64, res *models.CheckResult) *models.CreateMonitorResultParams {
-	resultDate := pgtype.Timestamptz{Time: time.Time{}, Valid: false}
-	resultDatePastTenseVerb := pgtype.Text{String: "", Valid: false}
+func CheckResultToCreateMonitorResultParams(monitorID int64, res *models.CheckResultWithSchema) *models.CreateMonitorResultParams {
+	var result string
+	var resultDate *time.Time
+	resultDatePastTenseVerb := pgtype.Text{}
 
-	if res.Date.Date != "" {
-		parsed, err := time.Parse("2006-01-02", res.Date.Date)
+	latestUpdate := checkResultLatestUpdate(res)
+	if latestUpdate != nil {
+		renderedHeadline, err := res.Schema.RenderHeadline(latestUpdate.Fields)
 		if err == nil {
-			resultDate.Time = parsed
-			resultDate.Valid = true
+			result = renderedHeadline
+		} else if len(latestUpdate.Fields) > 0 {
+			// Fall back so we still have a user-visible result string.
+			result = latestUpdate.Fields[0].Value
+		}
 
-			if res.Date.PastTenseVerb != "" {
-				resultDatePastTenseVerb.String = res.Date.PastTenseVerb
-				resultDatePastTenseVerb.Valid = true
+		for _, field := range latestUpdate.Fields {
+			if field.Type != models.MonitorSchemaFieldTypeDate {
+				continue
 			}
+
+			fieldName := strings.TrimSpace(field.Name)
+			if fieldName != "" {
+				resultDatePastTenseVerb = pgtype.Text{String: fieldName, Valid: true}
+			}
+
+			parsed, err := time.Parse("2006-01-02", field.Value)
+			if err == nil {
+				resultDate = &parsed
+			}
+			break
 		}
 	}
 
 	return &models.CreateMonitorResultParams{
 		MonitorID:         monitorID,
-		Result:            res.ResultPlaintext,
+		Result:            result,
 		Citations:         &res.Citations,
-		Date:              &resultDate.Time,
+		Date:              resultDate,
 		DatePastTenseVerb: resultDatePastTenseVerb,
 	}
+}
+
+func checkResultLatestUpdate(res *models.CheckResultWithSchema) *models.MonitorUpdateData {
+	if res == nil || len(res.Updates) == 0 {
+		return nil
+	}
+	return &res.Updates[len(res.Updates)-1]
 }
 
 func (s *Service) ActivateMonitorFromPreview(ctx context.Context, user *models.User, monitorID int64) (*models.Monitor, error) {
