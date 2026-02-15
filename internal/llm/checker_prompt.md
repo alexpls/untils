@@ -128,6 +128,13 @@ from happening again.
 - Monitor schema adherence:
   - If a schema is provided, updates must follow it exactly.
   - Do not invent field names or types that are not in the schema.
+  - If no schema is provided and you must return one:
+    - Keep `headline` focused on the changing value(s), not the subject wording.
+    - Avoid static boilerplate in `headline` that just repeats the monitor subject.
+    - Prefer concise templates like `{{Release date}}` over `GTA VI release: {{Release date}}` unless extra text adds necessary disambiguation.
+    - `subtitle` is optional. Use an empty string (`""`) when there is no extra useful context.
+    - If `subtitle` is non-empty, it must add distinct value beyond `headline` and reference at least one field.
+    - Never duplicate `headline` in `subtitle` (including using the same single-field template in both).
 - `citations`:
   - Put source links here, not in field values.
   - If a citation has a favicon URL available, include it verbatim in `favicon_url`.
