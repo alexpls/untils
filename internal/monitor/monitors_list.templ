@@ -6,6 +6,7 @@ import (
 
 	"github.com/alexpls/untils/internal/components"
 	"github.com/alexpls/untils/internal/components/icons"
+	"github.com/alexpls/untils/internal/monitorfieldrenderers"
 	"github.com/alexpls/untils/internal/models"
 	"github.com/alexpls/untils/internal/pagination"
 	"github.com/starfederation/datastar-go/datastar"
@@ -33,6 +34,7 @@ templ MonitorsListPage(data MonitorsListData) {
 }
 
 templ MonitorsList(data MonitorsListData) {
+	{{ renderCtx := components.MonitorFieldsRenderContext(ctx) }}
 	<div id="monitors-list" data-effect={ datastar.GetSSE("/app/monitors?sse=true&%s%s", data.Pagination.CurrentPageParams().Encode(), demoParam(ctx)) }>
 		if len(data.Monitors) > 0 {
 			<div class="overflow-x-auto">
@@ -60,8 +62,8 @@ templ MonitorsList(data MonitorsListData) {
 								</td>
 								<td class="min-w-70">
 									{{
-										headline := mon.Data.Fields.MustRenderTemplate(mon.Headline)
-										subtitle := mon.Data.Fields.MustRenderTemplate(mon.Subtitle)
+										headline := mon.Data.Fields.MustRenderTemplate(mon.Headline, monitorfieldrenderers.TextRenderer{}, renderCtx)
+										subtitle := mon.Data.Fields.MustRenderTemplate(mon.Subtitle, monitorfieldrenderers.TextRenderer{}, renderCtx)
 									}}
 									<div class="line-clamp-2">
 										{ headline }

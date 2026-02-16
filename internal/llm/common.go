@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/alexpls/untils/internal/models"
+	"github.com/alexpls/untils/internal/must"
 )
 
 type CheckParams struct {
@@ -20,7 +21,7 @@ func (c CheckParams) UserMessageString() string {
 	var b strings.Builder
 	b.WriteString("## Subject:\n")
 	b.WriteString(c.Subject)
-	b.WriteString("\n\n## Previous results:\n")
+	b.WriteString("\n\n## Previous results (JSON):\n")
 	b.WriteString(c.PreviousResultsString())
 
 	if !c.Schema.Zero() {
@@ -38,7 +39,7 @@ func (c CheckParams) UserMessageString() string {
 func (c CheckParams) PreviousResultsString() string {
 	var prevs strings.Builder
 	for _, pr := range c.PreviousResults {
-		prevs.WriteString(pr.MonitorResult.Markdown(c.Schema))
+		prevs.WriteString(must.NoErrVal(pr.MonitorResult.PromptJSON(c.Schema)))
 		prevs.WriteString("\n")
 	}
 	return prevs.String()

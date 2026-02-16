@@ -5,6 +5,8 @@ import (
 
 	"github.com/alexpls/untils/internal/components"
 	"github.com/alexpls/untils/internal/components/icons"
+	"github.com/alexpls/untils/internal/datefmt"
+	"github.com/alexpls/untils/internal/monitorfieldrenderers"
 	"github.com/alexpls/untils/internal/models"
 	"github.com/starfederation/datastar-go/datastar"
 )
@@ -69,6 +71,7 @@ templ monitorActivityWidget(data MonitorActivityWidgetData) {
 						</div>
 					} else {
 						<div class="p-2 md:px-4">
+							{{ renderCtx := components.MonitorFieldsRenderContext(ctx) }}
 							@components.Timeline() {
 								for _, item := range data.Items {
 									@components.TimelineItem(
@@ -76,8 +79,8 @@ templ monitorActivityWidget(data MonitorActivityWidgetData) {
 										monitorActivityWidgetTimelineItemSide(item),
 									) {
 										{{
-											headline := item.Data.Fields.MustRenderTemplate(item.Headline)
-											subtitle := item.Data.Fields.MustRenderTemplate(item.Subtitle)
+											headline := item.Data.Fields.MustRenderTemplate(item.Headline, monitorfieldrenderers.TextRenderer{}, renderCtx)
+											subtitle := item.Data.Fields.MustRenderTemplate(item.Subtitle, monitorfieldrenderers.TextRenderer{}, renderCtx)
 										}}
 										<div>{ headline }</div>
 										if subtitle != "" {
@@ -124,7 +127,7 @@ func (d CheckStatsWidgetData) DailyCheckCountsTimeSeries() components.TimeSeries
 		}
 		ts[i] = components.TimeSeriesPoint{
 			Label:   row.Day.Time.Format("Mon"),
-			Tooltip: fmt.Sprintf("%s: %d %s", row.Day.Time.Format("Jan 2, 2006"), count, suffix),
+			Tooltip: fmt.Sprintf("%s: %d %s", row.Day.Time.Format(datefmt.DateLayout), count, suffix),
 			Value:   count,
 		}
 	}

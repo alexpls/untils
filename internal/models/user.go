@@ -10,9 +10,13 @@ func (u *User) Now() time.Time {
 // Location returns the user's timezone. Falls back to UTC
 // if none is available.
 func (u *User) Location() *time.Location {
-	loc, err := time.LoadLocation(u.Timezone)
+	return LocationFromTimezone(u.Timezone)
+}
+
+func LocationFromTimezone(timezone string) *time.Location {
+	loc, err := time.LoadLocation(timezone)
 	if err != nil {
-		loc = time.UTC
+		return time.UTC
 	}
 	return loc
 }

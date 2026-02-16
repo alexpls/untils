@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/alexpls/untils/internal/datefmt"
 	"github.com/alexpls/untils/internal/models"
 	"github.com/alexpls/untils/internal/reqcontext"
 	"github.com/alexpls/untils/internal/validation"
@@ -22,6 +23,14 @@ func CurrentUser(ctx context.Context) *models.User {
 	return u
 }
 
+func MonitorFieldsRenderContext(ctx context.Context) models.MonitorFieldsRenderContext {
+	user := CurrentUser(ctx)
+	if user == nil {
+		return models.MonitorFieldsRenderContext{}
+	}
+	return models.MonitorFieldsRenderContext{Timezone: user.Timezone}
+}
+
 func TimezoneFromCookie(ctx context.Context) string {
 	tz, _ := reqcontext.TimezoneFromContext(ctx)
 	return tz
@@ -32,39 +41,26 @@ func AssetURL(path string) string {
 }
 
 func FormatDateTime(ctx context.Context, t time.Time) string {
-	user, ok := reqcontext.UserFromContext(ctx)
-	timezone := time.UTC
-	if ok {
-		if loc, err := time.LoadLocation(user.Timezone); err == nil {
-			timezone = loc
-		}
-	}
-	localTime := t.In(timezone)
+	localTime := t.In(userLocation(ctx))
 	return localTime.Format("Jan 2, 2006 at 3:04 PM")
 }
 
 func FormatDate(ctx context.Context, t time.Time) string {
-	user, ok := reqcontext.UserFromContext(ctx)
-	timezone := time.UTC
-	if ok {
-		if loc, err := time.LoadLocation(user.Timezone); err == nil {
-			timezone = loc
-		}
-	}
-	localTime := t.In(timezone)
-	return localTime.Format("Jan 2, 2006")
+	localTime := t.In(userLocation(ctx))
+	return localTime.Format(datefmt.DateLayout)
 }
 
 func FormatTime(ctx context.Context, t time.Time) string {
-	user, ok := reqcontext.UserFromContext(ctx)
-	timezone := time.UTC
-	if ok {
-		if loc, err := time.LoadLocation(user.Timezone); err == nil {
-			timezone = loc
-		}
-	}
-	localTime := t.In(timezone)
+	localTime := t.In(userLocation(ctx))
 	return localTime.Format("3:04:05 PM")
+}
+
+func userLocation(ctx context.Context) *time.Location {
+	user := CurrentUser(ctx)
+	if user == nil {
+		return time.UTC
+	}
+	return user.Location()
 }
 
 func ValidationError(data validation.HasValidationErrors, field string) string {

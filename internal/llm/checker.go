@@ -86,12 +86,14 @@ func (c *checker) perform(ctx context.Context, params *CheckParams) (*models.Che
 		conversation:      c.conversation,
 		toolExecutor:      c.executeToolCall,
 		validate: func(res *models.CheckResultWithSchema) string {
-			if res.Success && params.Schema.Zero() && res.Schema.Zero() {
-				return "error: schema: must be provided"
-			}
+			if params.Schema.Zero() {
+				if res.Success && res.Schema.Zero() {
+					return "error: schema: must be provided"
+				}
 
-			if err := res.Schema.Validate(); err != nil {
-				return "error: schema: " + err.Error()
+				if err := res.Schema.Validate(); err != nil {
+					return "error: schema: " + err.Error()
+				}
 			}
 
 			if res.Success && len(res.Updates) == 0 {

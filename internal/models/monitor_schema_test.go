@@ -53,7 +53,11 @@ func TestMonitorUpdateFieldsResolveTemplate(t *testing.T) {
 		},
 	}
 
-	resolved, err := fields.RenderTemplate("{{Title}} released on {{Release date}}")
+	resolved, err := fields.RenderTemplate(
+		"{{Title}} released on {{Release date}}",
+		testMonitorFieldsRenderer{render: func(field MonitorUpdateField) string { return field.Value }},
+		MonitorFieldsRenderContext{},
+	)
 	require.NoError(t, err)
 	require.Equal(t, "Fear Inoculum released on 2019-08-30", resolved)
 }
@@ -66,7 +70,11 @@ func TestMonitorUpdateFieldsResolveTemplateMissingField(t *testing.T) {
 		},
 	}
 
-	_, err := fields.RenderTemplate("{{Release date}}")
+	_, err := fields.RenderTemplate(
+		"{{Release date}}",
+		testMonitorFieldsRenderer{render: func(field MonitorUpdateField) string { return field.Value }},
+		MonitorFieldsRenderContext{},
+	)
 	require.ErrorContains(t, err, `missing value for field "Release date"`)
 }
 
@@ -86,11 +94,11 @@ func TestMonitorSchemaDataRenderHeadlineAndSubtitle(t *testing.T) {
 		},
 	}
 
-	headline, err := schema.RenderHeadline(fields)
+	headline, err := schema.RenderHeadline(fields, testMonitorFieldsRenderer{render: func(field MonitorUpdateField) string { return field.Value }}, MonitorFieldsRenderContext{})
 	require.NoError(t, err)
 	require.Equal(t, "Fear Inoculum", headline)
 
-	subtitle, err := schema.RenderSubtitle(fields)
+	subtitle, err := schema.RenderSubtitle(fields, testMonitorFieldsRenderer{render: func(field MonitorUpdateField) string { return field.Value }}, MonitorFieldsRenderContext{})
 	require.NoError(t, err)
 	require.Equal(t, "Released: 2019-08-30", subtitle)
 }
@@ -101,9 +109,43 @@ func TestMonitorSchemaDataRenderSubtitleEmpty(t *testing.T) {
 		Subtitle: "",
 	}
 
-	subtitle, err := schema.RenderSubtitle(MonitorUpdateFields{})
+	subtitle, err := schema.RenderSubtitle(MonitorUpdateFields{}, testMonitorFieldsRenderer{render: func(field MonitorUpdateField) string { return field.Value }}, MonitorFieldsRenderContext{})
 	require.NoError(t, err)
 	require.Equal(t, "", subtitle)
+}
+
+func TestMonitorSchemaDataRenderWithCustomRenderer(t *testing.T) {
+	schema := MonitorSchemaData{
+		Headline: "{{Title}}",
+		Subtitle: "Released: {{Release date}}",
+	}
+	fields := MonitorUpdateFields{
+		{
+			MonitorSchemaField: MonitorSchemaField{Type: MonitorSchemaFieldTypeText, Name: "Title"},
+			Value:              "Fear Inoculum",
+		},
+		{
+			MonitorSchemaField: MonitorSchemaField{Type: MonitorSchemaFieldTypeDate, Name: "Release date"},
+			Value:              "2019-08-30",
+		},
+	}
+
+	renderer := testMonitorFieldsRenderer{
+		render: func(field MonitorUpdateField) string {
+			if field.Type == MonitorSchemaFieldTypeDate {
+				return "Aug 30, 2019"
+			}
+			return field.Value
+		},
+	}
+
+	headline, err := schema.RenderHeadline(fields, renderer, MonitorFieldsRenderContext{})
+	require.NoError(t, err)
+	require.Equal(t, "Fear Inoculum", headline)
+
+	subtitle, err := schema.RenderSubtitle(fields, renderer, MonitorFieldsRenderContext{})
+	require.NoError(t, err)
+	require.Equal(t, "Released: Aug 30, 2019", subtitle)
 }
 
 func TestMonitorUpdateFieldsEqual(t *testing.T) {
@@ -163,4 +205,12 @@ func TestMonitorUpdateFieldsEqual(t *testing.T) {
 	require.False(t, MonitorUpdateFieldsEqual(base, differentValue))
 	require.False(t, MonitorUpdateFieldsEqual(base, missingField))
 	require.False(t, MonitorUpdateFieldsEqual(base, missingFieldWithEmptyValue))
+}
+
+type testMonitorFieldsRenderer struct {
+	render func(field MonitorUpdateField) string
+}
+
+func (r testMonitorFieldsRenderer) RenderField(_ MonitorFieldsRenderContext, field MonitorUpdateField) string {
+	return r.render(field)
 }

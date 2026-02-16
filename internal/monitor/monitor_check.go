@@ -11,6 +11,7 @@ import (
 	"github.com/alexpls/untils/internal/errortypes"
 	"github.com/alexpls/untils/internal/llm"
 	"github.com/alexpls/untils/internal/models"
+	"github.com/alexpls/untils/internal/monitorfieldrenderers"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/riverqueue/river"
@@ -232,10 +233,13 @@ func (s *Service) PerformMonitorCheck(
 	}
 	confirmedAt := time.Now()
 
+	renderer := monitorfieldrenderers.TextRenderer{}
+	renderCtx := models.MonitorFieldsRenderContext{Timezone: user.Timezone}
+
 	createMonitorResultParams := make([]*models.CreateMonitorResultParams, 0, len(result.Updates))
 	createdResultHeadlines := make([]string, 0, len(result.Updates))
 	for _, update := range result.Updates {
-		headline, err := schemaToPersist.RenderHeadline(update.Fields)
+		headline, err := schemaToPersist.RenderHeadline(update.Fields, renderer, renderCtx)
 		if err != nil {
 			return fmt.Errorf("rendering headline: %w", err)
 		}
@@ -304,7 +308,11 @@ func (s *Service) PerformMonitorCheck(
 	if result.DifferentToPrevious {
 		lastResult := "(none)"
 		if len(priorState.previousResults) > 0 {
-			lastResult, err = schemaToPersist.RenderHeadline(priorState.previousResults[0].MonitorResult.Data.Fields)
+			lastResult, err = schemaToPersist.RenderHeadline(
+				priorState.previousResults[0].MonitorResult.Data.Fields,
+				renderer,
+				renderCtx,
+			)
 			if err != nil {
 				return fmt.Errorf("rendering previous headline: %w", err)
 			}

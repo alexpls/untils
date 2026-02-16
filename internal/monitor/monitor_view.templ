@@ -7,6 +7,7 @@ import (
 
 	"github.com/alexpls/untils/internal/components"
 	"github.com/alexpls/untils/internal/components/icons"
+	"github.com/alexpls/untils/internal/monitorfieldrenderers"
 	"github.com/alexpls/untils/internal/models"
 	"github.com/starfederation/datastar-go/datastar"
 )
@@ -136,10 +137,11 @@ templ InProgressCheckTimelineItem(data InProgressCheckTimelineItemViewData) {
 
 templ monitorResultTimelineItem(schema models.MonitorSchemaData, result *models.MonitorResult, allowFeedback bool) {
 	{{
-		headline := result.Data.Fields.MustRenderTemplate(schema.Headline)
+		renderCtx := components.MonitorFieldsRenderContext(ctx)
+		headline := result.Data.Fields.MustRenderTemplate(schema.Headline, monitorfieldrenderers.TextRenderer{}, renderCtx)
 		subtitle := ""
 		if strings.TrimSpace(schema.Subtitle) != "" {
-			subtitle = result.Data.Fields.MustRenderTemplate(schema.Subtitle)
+			subtitle = result.Data.Fields.MustRenderTemplate(schema.Subtitle, monitorfieldrenderers.TextRenderer{}, renderCtx)
 		}
 	}}
 	@components.TimelineItem(monitorResultHeading(headline), nil) {
