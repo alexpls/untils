@@ -71,13 +71,11 @@ drop view if exists monitor_results_with_latest_check;
 
 alter table monitor_checks drop column result_id;
 
--- add new data col and denormalized headline + subtitle
+-- add new data col and denormalized
 
 alter table monitor_results add column data jsonb not null default '{}'::jsonb;
-alter table monitor_results add column headline text not null default '';
-alter table monitor_results add column subtitle text not null default '';
 
--- migrate data + denormalized headline/subtitle
+-- migrate data
 
 with monitor_settings as (
     select
@@ -118,12 +116,7 @@ set data = jsonb_build_object(
         )
         else '[]'::jsonb
     end
-),
-headline = coalesce(mr.result, ''),
-subtitle = case
-    when ms.date_field_name is not null and mr.date is not null then ms.date_field_name || ': ' || to_char(mr.date at time zone 'utc', 'yyyy-mm-dd')
-    else ''
-end
+)
 from monitor_settings ms
 where ms.monitor_id = mr.monitor_id;
 
@@ -175,5 +168,3 @@ alter table monitor_results drop column result;
 alter table monitor_results drop column date;
 alter table monitor_results drop column date_past_tense_verb;
 alter table monitor_results alter column data drop default;
-alter table monitor_results alter column headline drop default;
-alter table monitor_results alter column subtitle drop default;

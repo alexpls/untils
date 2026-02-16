@@ -106,6 +106,16 @@ func (s *Service) ValidateMonitor(ctx context.Context, monitor *models.Monitor) 
 		return fmt.Errorf("getting previous results: %w", err)
 	}
 
+	var schema models.MonitorSchemaData
+	storedSchema, err := s.queries.GetMonitorSchema(ctx, s.db, monitor.ID)
+	if err != nil {
+		if !errors.Is(err, pgx.ErrNoRows) {
+			return fmt.Errorf("getting monitor schema: %w", err)
+		}
+	} else {
+		schema = storedSchema.Data
+	}
+
 	triage := s.llm.NewTriageWorkflow()
 
 	trigageRes, err := triage.Run(ctx, &llm.CheckParams{
@@ -113,6 +123,7 @@ func (s *Service) ValidateMonitor(ctx context.Context, monitor *models.Monitor) 
 		MonitorID:       monitor.ID,
 		Subject:         monitor.Subject.String,
 		PreviousResults: prevs,
+		Schema:          schema,
 	})
 	if err != nil {
 		return fmt.Errorf("triage workflow: %w", err)
@@ -183,27 +194,14 @@ func MonitorUpdateToCreateMonitorResultParams(
 	monitorID int64,
 	checkID int64,
 	confirmedAt time.Time,
-	schema models.MonitorSchemaData,
 	update models.MonitorUpdateData,
 	citations *models.Citations,
 ) (*models.CreateMonitorResultParams, error) {
-	headline, err := schema.RenderHeadline(update.Fields)
-	if err != nil {
-		return nil, fmt.Errorf("rendering headline: %w", err)
-	}
-
-	subtitle, err := schema.RenderSubtitle(update.Fields)
-	if err != nil {
-		return nil, fmt.Errorf("rendering subtitle: %w", err)
-	}
-
 	return &models.CreateMonitorResultParams{
 		MonitorID:            monitorID,
 		LastConfirmedCheckID: checkID,
 		LastConfirmedAt:      confirmedAt,
 		Data:                 update,
-		Headline:             headline,
-		Subtitle:             subtitle,
 		Citations:            citations,
 	}, nil
 }

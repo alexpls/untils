@@ -17,6 +17,7 @@ import (
 
 type monitorResultFeedbackViewData struct {
 	result           *models.MonitorResult
+	schema           models.MonitorSchemaData
 	formValues       CreateMonitorResultFeedbackParams
 	validationErrors validation.ValidationErrors
 }
@@ -90,7 +91,7 @@ func monitorResultFeedbackForm(data monitorResultFeedbackViewData) templ.Compone
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("@post('/app/monitors/%d/results/%d/feedback')", data.result.MonitorID, data.result.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_result_feedback.templ`, Line: 30, Col: 118}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_result_feedback.templ`, Line: 31, Col: 118}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -100,7 +101,7 @@ func monitorResultFeedbackForm(data monitorResultFeedbackViewData) templ.Compone
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = monitorResultTimelineItem(data.result, false).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = monitorResultTimelineItem(data.schema, data.result, false).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -133,7 +134,7 @@ func monitorResultFeedbackForm(data monitorResultFeedbackViewData) templ.Compone
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(data.formValues.Feedback)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_result_feedback.templ`, Line: 49, Col: 30}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_result_feedback.templ`, Line: 50, Col: 30}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -151,7 +152,7 @@ func monitorResultFeedbackForm(data monitorResultFeedbackViewData) templ.Compone
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(errStr)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_result_feedback.templ`, Line: 51, Col: 53}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_result_feedback.templ`, Line: 52, Col: 53}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {

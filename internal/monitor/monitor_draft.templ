@@ -12,6 +12,7 @@ import (
 type MonitorDraftData struct {
 	Monitor                       *models.Monitor
 	ResultPreview                 *models.MonitorResult
+	Schema                        models.MonitorSchemaData
 	InProgressCheck               *models.MonitorCheck
 	InProgressCheckTimelineEvents []*models.GetTimelineEventsBySourceIDRow
 	ValidationErrors              validation.ValidationErrors
@@ -161,7 +162,7 @@ templ MonitorDraftView(data MonitorDraftData) {
 									<p class="text-success">Preview successful</p>
 									<div>
 										<ul>
-											@monitorResultTimelineItem(data.ResultPreview, true)
+											@monitorResultTimelineItem(data.Schema, data.ResultPreview, true)
 										</ul>
 									</div>
 								</div>

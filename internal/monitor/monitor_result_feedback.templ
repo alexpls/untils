@@ -9,6 +9,7 @@ import (
 
 type monitorResultFeedbackViewData struct {
 	result           *models.MonitorResult
+	schema           models.MonitorSchemaData
 	formValues       CreateMonitorResultFeedbackParams
 	validationErrors validation.ValidationErrors
 }
@@ -32,7 +33,7 @@ templ monitorResultFeedbackForm(data monitorResultFeedbackViewData) {
 		<h3 class="text-lg font-bold">Provide feedback to improve the next result</h3>
 		<div class="bg-base-300 px-6 py-4 mt-4 shadow rounded -rotate-1 scale-95">
 			<ul>
-				@monitorResultTimelineItem(data.result, false)
+				@monitorResultTimelineItem(data.schema, data.result, false)
 			</ul>
 		</div>
 		<div class="mt-4">

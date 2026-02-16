@@ -3,6 +3,7 @@ package monitor
 import (
 	"fmt"
 	"net/url"
+	"strings"
 
 	"github.com/alexpls/untils/internal/components"
 	"github.com/alexpls/untils/internal/components/icons"
@@ -13,6 +14,7 @@ import (
 type MonitorViewData struct {
 	Monitor                       *models.Monitor
 	Results                       []*models.MonitorResult
+	Schema                        models.MonitorSchemaData
 	NextScheduledCheck            *models.MonitorCheck
 	InProgressCheck               *models.MonitorCheck
 	InProgressCheckTimelineEvents []*models.GetTimelineEventsBySourceIDRow
@@ -97,7 +99,7 @@ templ MonitorPage(data MonitorViewData) {
 					})
 				}
 				for _, result := range data.Results {
-					@monitorResultTimelineItem(result, true)
+					@monitorResultTimelineItem(data.Schema, result, true)
 				}
 				<li>
 					@components.TimelineItem(monitorCreatedTimelineHeading(data.Monitor), nil)
@@ -132,11 +134,18 @@ templ InProgressCheckTimelineItem(data InProgressCheckTimelineItemViewData) {
 	}
 }
 
-templ monitorResultTimelineItem(result *models.MonitorResult, allowFeedback bool) {
-	@components.TimelineItem(monitorResultHeading(result), nil) {
-		if result.Subtitle != "" {
+templ monitorResultTimelineItem(schema models.MonitorSchemaData, result *models.MonitorResult, allowFeedback bool) {
+	{{
+		headline := result.Data.Fields.MustRenderTemplate(schema.Headline)
+		subtitle := ""
+		if strings.TrimSpace(schema.Subtitle) != "" {
+			subtitle = result.Data.Fields.MustRenderTemplate(schema.Subtitle)
+		}
+	}}
+	@components.TimelineItem(monitorResultHeading(headline), nil) {
+		if subtitle != "" {
 			<div class="text-sm">
-				{ result.Subtitle }
+				{ subtitle }
 			</div>
 		}
 		<div class="pt-2 text-sm text-base-content/60 flex space-x-4">
@@ -209,9 +218,9 @@ templ monitorResultTimelineItem(result *models.MonitorResult, allowFeedback bool
 	}
 }
 
-templ monitorResultHeading(result *models.MonitorResult) {
+templ monitorResultHeading(headline string) {
 	<div class="text-lg font-semibold">
-		{ result.Headline }
+		{ headline }
 	</div>
 }
 

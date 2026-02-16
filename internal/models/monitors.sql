@@ -1,8 +1,10 @@
 -- name: ListMonitorsWithResults :many
-with latest_result as (
-    select distinct on (monitor_id) monitor_id, headline, subtitle, created_at
-    from monitor_results
-    order by monitor_id, created_at desc, id desc
+with schema as (
+    select
+        distinct on (monitor_id) monitor_id,
+        data->>'headline'::text as headline,
+        data->>'subtitle'::text as subtitle
+    from monitor_schemas
 ),
 next_check as (
     select distinct on (monitor_id) monitor_id, scheduled_for
@@ -22,13 +24,22 @@ select
     m.subject::text as subject,
     m.check_frequency_minutes,
     m.created_at,
-    coalesce(mr.headline, '') as latest_result,
-    coalesce(mr.subtitle, '') as latest_result_subtitle,
+    coalesce(sc.headline::text, '')::text as headline,
+    coalesce(sc.subtitle::text, '')::text as subtitle,
+    coalesce(mr.data, '{"fields": []}'::jsonb) as data,
     coalesce(mr.created_at, '0001-01-01 00:00:00 +0000') as latest_result_created_at,
     coalesce(mc.scheduled_for, '0001-01-01 00:00:00 +0000') as next_check_scheduled_for,
     (cc.monitor_id is not null)::boolean as currently_checking
 from monitors m
-left join latest_result mr on mr.monitor_id = m.id
+left join schema sc on sc.monitor_id = m.id
+-- using a subquery instead of a cte so sqlc can grab a reference to the monitor_results.data
+-- type and override it via config. this doesn't work with ctes.
+-- https://github.com/sqlc-dev/sqlc/issues/3438 should fix this.
+left join (
+    select distinct on (monitor_id) monitor_id, data, created_at
+    from monitor_results
+    order by monitor_id, created_at desc, id desc
+) mr on mr.monitor_id = m.id
 left join next_check mc on mc.monitor_id = m.id
 left join current_check cc on cc.monitor_id = m.id
 where m.user_id = @user_id
@@ -189,8 +200,6 @@ insert into monitor_results (
     last_confirmed_check_id,
     last_confirmed_at,
     data,
-    headline,
-    subtitle,
     citations,
     created_at
 )
@@ -199,8 +208,6 @@ values (
     @last_confirmed_check_id,
     @last_confirmed_at,
     @data,
-    @headline,
-    @subtitle,
     @citations,
     now()
 )
@@ -223,11 +230,13 @@ select
     mon.id::bigint as monitor_id,
     res.id::bigint as result_id,
     mon.subject,
-    res.headline,
+    coalesce(ms.data->>'headline'::text, '')::text as headline,
     res.created_at,
-    res.subtitle
+    coalesce(ms.data->>'subtitle'::text, '')::text as subtitle,
+    res.data
 from monitor_results res
 left join monitors mon on mon.id = res.monitor_id
+left join monitor_schemas ms on ms.monitor_id = mon.id
 where mon.status = 'active'
 and mon.user_id = @user_id
 order by res.created_at desc

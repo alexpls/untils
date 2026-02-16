@@ -233,12 +233,17 @@ func (s *Service) PerformMonitorCheck(
 	confirmedAt := time.Now()
 
 	createMonitorResultParams := make([]*models.CreateMonitorResultParams, 0, len(result.Updates))
+	createdResultHeadlines := make([]string, 0, len(result.Updates))
 	for _, update := range result.Updates {
+		headline, err := schemaToPersist.RenderHeadline(update.Fields)
+		if err != nil {
+			return fmt.Errorf("rendering headline: %w", err)
+		}
+
 		params, err := MonitorUpdateToCreateMonitorResultParams(
 			check.MonitorID,
 			check.ID,
 			confirmedAt,
-			schemaToPersist,
 			update,
 			&result.Citations,
 		)
@@ -246,6 +251,7 @@ func (s *Service) PerformMonitorCheck(
 			return fmt.Errorf("building monitor result params: %w", err)
 		}
 		createMonitorResultParams = append(createMonitorResultParams, params)
+		createdResultHeadlines = append(createdResultHeadlines, headline)
 	}
 
 	err = db.WithTx(s.db, ctx, func(tx pgx.Tx) error {
@@ -298,12 +304,15 @@ func (s *Service) PerformMonitorCheck(
 	if result.DifferentToPrevious {
 		lastResult := "(none)"
 		if len(priorState.previousResults) > 0 {
-			lastResult = priorState.previousResults[0].MonitorResult.Headline
+			lastResult, err = schemaToPersist.RenderHeadline(priorState.previousResults[0].MonitorResult.Data.Fields)
+			if err != nil {
+				return fmt.Errorf("rendering previous headline: %w", err)
+			}
 		}
 
 		newResult := ""
-		if len(createMonitorResultParams) > 0 {
-			newResult = createMonitorResultParams[len(createMonitorResultParams)-1].Headline
+		if len(createdResultHeadlines) > 0 {
+			newResult = createdResultHeadlines[len(createdResultHeadlines)-1]
 		}
 
 		if err = s.SendNotifications(ctx, SendNotificationsParams{

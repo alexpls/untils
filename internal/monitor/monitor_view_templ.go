@@ -11,6 +11,7 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"fmt"
 	"net/url"
+	"strings"
 
 	"github.com/alexpls/untils/internal/components"
 	"github.com/alexpls/untils/internal/components/icons"
@@ -21,6 +22,7 @@ import (
 type MonitorViewData struct {
 	Monitor                       *models.Monitor
 	Results                       []*models.MonitorResult
+	Schema                        models.MonitorSchemaData
 	NextScheduledCheck            *models.MonitorCheck
 	InProgressCheck               *models.MonitorCheck
 	InProgressCheckTimelineEvents []*models.GetTimelineEventsBySourceIDRow
@@ -104,7 +106,7 @@ func MonitorSidebarLayout(monitor *models.Monitor, pageType MonitorPageType) tem
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(components.FormatDate(ctx, monitor.CreatedAt))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_view.templ`, Line: 49, Col: 66}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_view.templ`, Line: 51, Col: 66}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -149,7 +151,7 @@ func MonitorSidebarLayout(monitor *models.Monitor, pageType MonitorPageType) tem
 			var templ_7745c5c3_Var7 templ.SafeURL
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinURLErrs(fmt.Sprintf("/app/monitors/%d", monitor.ID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_view.templ`, Line: 58, Col: 56}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_view.templ`, Line: 60, Col: 56}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
@@ -184,7 +186,7 @@ func MonitorSidebarLayout(monitor *models.Monitor, pageType MonitorPageType) tem
 			var templ_7745c5c3_Var10 templ.SafeURL
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinURLErrs(fmt.Sprintf("/app/monitors/%d/checks", monitor.ID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_view.templ`, Line: 64, Col: 63}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_view.templ`, Line: 66, Col: 63}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
@@ -219,7 +221,7 @@ func MonitorSidebarLayout(monitor *models.Monitor, pageType MonitorPageType) tem
 			var templ_7745c5c3_Var13 templ.SafeURL
 			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinURLErrs(fmt.Sprintf("/app/monitors/%d/notifications", monitor.ID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_view.templ`, Line: 70, Col: 69}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_view.templ`, Line: 72, Col: 69}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 			if templ_7745c5c3_Err != nil {
@@ -254,7 +256,7 @@ func MonitorSidebarLayout(monitor *models.Monitor, pageType MonitorPageType) tem
 			var templ_7745c5c3_Var16 templ.SafeURL
 			templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinURLErrs(fmt.Sprintf("/app/monitors/%d/settings", monitor.ID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_view.templ`, Line: 76, Col: 64}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_view.templ`, Line: 78, Col: 64}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 			if templ_7745c5c3_Err != nil {
@@ -326,7 +328,7 @@ func MonitorPage(data MonitorViewData) templ.Component {
 			var templ_7745c5c3_Var19 string
 			templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(datastar.GetSSE("/app/monitors/%d?sse=true", data.Monitor.ID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_view.templ`, Line: 91, Col: 175}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_view.templ`, Line: 93, Col: 175}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 			if templ_7745c5c3_Err != nil {
@@ -358,7 +360,7 @@ func MonitorPage(data MonitorViewData) templ.Component {
 					}
 				}
 				for _, result := range data.Results {
-					templ_7745c5c3_Err = monitorResultTimelineItem(result, true).Render(ctx, templ_7745c5c3_Buffer)
+					templ_7745c5c3_Err = monitorResultTimelineItem(data.Schema, result, true).Render(ctx, templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -496,7 +498,7 @@ func InProgressCheckTimelineItem(data InProgressCheckTimelineItemViewData) templ
 	})
 }
 
-func monitorResultTimelineItem(result *models.MonitorResult, allowFeedback bool) templ.Component {
+func monitorResultTimelineItem(schema models.MonitorSchemaData, result *models.MonitorResult, allowFeedback bool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -517,6 +519,11 @@ func monitorResultTimelineItem(result *models.MonitorResult, allowFeedback bool)
 			templ_7745c5c3_Var24 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
+		headline := result.Data.Fields.MustRenderTemplate(schema.Headline)
+		subtitle := ""
+		if strings.TrimSpace(schema.Subtitle) != "" {
+			subtitle = result.Data.Fields.MustRenderTemplate(schema.Subtitle)
+		}
 		templ_7745c5c3_Var25 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -529,15 +536,15 @@ func monitorResultTimelineItem(result *models.MonitorResult, allowFeedback bool)
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			if result.Subtitle != "" {
+			if subtitle != "" {
 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "<div class=\"text-sm\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var26 string
-				templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(result.Subtitle)
+				templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(subtitle)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_view.templ`, Line: 139, Col: 21}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_view.templ`, Line: 148, Col: 14}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 				if templ_7745c5c3_Err != nil {
@@ -555,7 +562,7 @@ func monitorResultTimelineItem(result *models.MonitorResult, allowFeedback bool)
 			var templ_7745c5c3_Var27 templ.SafeURL
 			templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinURLErrs(fmt.Sprintf("/app/checks/%d", result.LastConfirmedCheckID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_view.templ`, Line: 148, Col: 73}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_view.templ`, Line: 157, Col: 73}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 			if templ_7745c5c3_Err != nil {
@@ -568,7 +575,7 @@ func monitorResultTimelineItem(result *models.MonitorResult, allowFeedback bool)
 			var templ_7745c5c3_Var28 string
 			templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(components.FormatDateTime(ctx, result.LastConfirmedAt))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_view.templ`, Line: 149, Col: 62}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_view.templ`, Line: 158, Col: 62}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 			if templ_7745c5c3_Err != nil {
@@ -591,7 +598,7 @@ func monitorResultTimelineItem(result *models.MonitorResult, allowFeedback bool)
 					var templ_7745c5c3_Var29 templ.SafeURL
 					templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinURLErrs(citation.URL)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_view.templ`, Line: 162, Col: 28}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_view.templ`, Line: 171, Col: 28}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 					if templ_7745c5c3_Err != nil {
@@ -604,7 +611,7 @@ func monitorResultTimelineItem(result *models.MonitorResult, allowFeedback bool)
 					var templ_7745c5c3_Var30 string
 					templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(citation.PageTitle + " | " + citation.WebsiteTitle)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_view.templ`, Line: 163, Col: 67}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_view.templ`, Line: 172, Col: 67}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
 					if templ_7745c5c3_Err != nil {
@@ -622,7 +629,7 @@ func monitorResultTimelineItem(result *models.MonitorResult, allowFeedback bool)
 						var templ_7745c5c3_Var31 string
 						templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs(citationFaviconProxiedURL(citation))
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_view.templ`, Line: 169, Col: 56}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_view.templ`, Line: 178, Col: 56}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
 						if templ_7745c5c3_Err != nil {
@@ -635,7 +642,7 @@ func monitorResultTimelineItem(result *models.MonitorResult, allowFeedback bool)
 						var templ_7745c5c3_Var32 string
 						templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs(citation.WebsiteTitle)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_view.templ`, Line: 169, Col: 86}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_view.templ`, Line: 178, Col: 86}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
 						if templ_7745c5c3_Err != nil {
@@ -653,7 +660,7 @@ func monitorResultTimelineItem(result *models.MonitorResult, allowFeedback bool)
 						var templ_7745c5c3_Var33 string
 						templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(citation.WebsiteTitle[0:1])
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_view.templ`, Line: 171, Col: 83}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_view.templ`, Line: 180, Col: 83}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
 						if templ_7745c5c3_Err != nil {
@@ -700,7 +707,7 @@ func monitorResultTimelineItem(result *models.MonitorResult, allowFeedback bool)
 					var templ_7745c5c3_Var34 string
 					templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.JoinStringErrs(datastar.GetSSE("/app/monitors/%d/results/%d/feedback", result.MonitorID, result.ID))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_view.templ`, Line: 190, Col: 107}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_view.templ`, Line: 199, Col: 107}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var34))
 					if templ_7745c5c3_Err != nil {
@@ -718,7 +725,7 @@ func monitorResultTimelineItem(result *models.MonitorResult, allowFeedback bool)
 					var templ_7745c5c3_Var35 string
 					templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinStringErrs(result.Feedback.String)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_view.templ`, Line: 200, Col: 36}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_view.templ`, Line: 209, Col: 36}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
 					if templ_7745c5c3_Err != nil {
@@ -731,7 +738,7 @@ func monitorResultTimelineItem(result *models.MonitorResult, allowFeedback bool)
 					var templ_7745c5c3_Var36 string
 					templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.JoinStringErrs(datastar.GetSSE("/app/monitors/%d/results/%d/feedback", result.MonitorID, result.ID))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_view.templ`, Line: 203, Col: 107}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_view.templ`, Line: 212, Col: 107}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var36))
 					if templ_7745c5c3_Err != nil {
@@ -745,7 +752,7 @@ func monitorResultTimelineItem(result *models.MonitorResult, allowFeedback bool)
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = components.TimelineItem(monitorResultHeading(result), nil).Render(templ.WithChildren(ctx, templ_7745c5c3_Var25), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = components.TimelineItem(monitorResultHeading(headline), nil).Render(templ.WithChildren(ctx, templ_7745c5c3_Var25), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -753,7 +760,7 @@ func monitorResultTimelineItem(result *models.MonitorResult, allowFeedback bool)
 	})
 }
 
-func monitorResultHeading(result *models.MonitorResult) templ.Component {
+func monitorResultHeading(headline string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -779,9 +786,9 @@ func monitorResultHeading(result *models.MonitorResult) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var38 string
-		templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinStringErrs(result.Headline)
+		templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinStringErrs(headline)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_view.templ`, Line: 214, Col: 19}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_view.templ`, Line: 223, Col: 12}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var38))
 		if templ_7745c5c3_Err != nil {
@@ -823,7 +830,7 @@ func monitorCreatedTimelineHeading(mon *models.Monitor) templ.Component {
 		var templ_7745c5c3_Var40 string
 		templ_7745c5c3_Var40, templ_7745c5c3_Err = templ.JoinStringErrs(components.FormatDate(ctx, mon.CreatedAt))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_view.templ`, Line: 220, Col: 53}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_view.templ`, Line: 229, Col: 53}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var40))
 		if templ_7745c5c3_Err != nil {

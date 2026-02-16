@@ -287,8 +287,6 @@ type MonitorResult struct {
 	LastConfirmedCheckID int64
 	LastConfirmedAt      time.Time
 	Data                 MonitorUpdateData
-	Headline             string
-	Subtitle             string
 }
 
 type MonitorSchema struct {

@@ -45,14 +45,14 @@ type MonitorUpdateField struct {
 type MonitorUpdateFields []MonitorUpdateField
 
 func (d MonitorSchemaData) RenderHeadline(fields MonitorUpdateFields) (string, error) {
-	return fields.ResolveTemplate(d.Headline)
+	return fields.RenderTemplate(d.Headline)
 }
 
 func (d MonitorSchemaData) RenderSubtitle(fields MonitorUpdateFields) (string, error) {
 	if strings.TrimSpace(d.Subtitle) == "" {
 		return "", nil
 	}
-	return fields.ResolveTemplate(d.Subtitle)
+	return fields.RenderTemplate(d.Subtitle)
 }
 
 func (f MonitorSchemaFields) GetValue(name string) string {
@@ -81,7 +81,7 @@ func (f MonitorUpdateFields) LookupValue(name string) (string, bool) {
 	return "", false
 }
 
-func (f MonitorUpdateFields) ResolveTemplate(template string) (string, error) {
+func (f MonitorUpdateFields) RenderTemplate(template string) (string, error) {
 	tt, err := tinytemplate.Parse(template)
 	if err != nil {
 		return "", err
@@ -90,6 +90,14 @@ func (f MonitorUpdateFields) ResolveTemplate(template string) (string, error) {
 	return tt.RenderFunc(func(name string) (string, bool) {
 		return f.LookupValue(name)
 	})
+}
+
+func (f MonitorUpdateFields) MustRenderTemplate(template string) string {
+	rendered, err := f.RenderTemplate(template)
+	if err != nil {
+		panic(err)
+	}
+	return rendered
 }
 
 func MonitorUpdateFieldsEqual(a, b MonitorUpdateFields) bool {

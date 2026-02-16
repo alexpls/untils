@@ -75,7 +75,14 @@ templ monitorActivityWidget(data MonitorActivityWidgetData) {
 										monitorActivityWidgetTimelineItemHeading(item),
 										monitorActivityWidgetTimelineItemSide(item),
 									) {
-										{ item.Headline }
+										{{
+											headline := item.Data.Fields.MustRenderTemplate(item.Headline)
+											subtitle := item.Data.Fields.MustRenderTemplate(item.Subtitle)
+										}}
+										<div>{ headline }</div>
+										if subtitle != "" {
+											<div class="text-muted">{ subtitle }</div>
+										}
 									}
 								}
 							}

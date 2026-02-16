@@ -5,13 +5,18 @@ import (
 	"strings"
 )
 
-func (mr MonitorResult) Markdown() string {
+func (mr MonitorResult) Markdown(schema MonitorSchemaData) string {
 	var sb strings.Builder
 
-	_, _ = fmt.Fprintf(&sb, "**Result:** %s\n\n", mr.Headline)
+	headline := mr.Data.Fields.MustRenderTemplate(schema.Headline)
+	_, _ = fmt.Fprintf(&sb, "**Result:** %s\n\n", headline)
 
-	if mr.Subtitle != "" {
-		_, _ = fmt.Fprintf(&sb, "**Result subtitle:** %s\n", mr.Subtitle)
+	subtitle := ""
+	if strings.TrimSpace(schema.Subtitle) != "" {
+		subtitle = mr.Data.Fields.MustRenderTemplate(schema.Subtitle)
+	}
+	if subtitle != "" {
+		_, _ = fmt.Fprintf(&sb, "**Result subtitle:** %s\n", subtitle)
 	}
 
 	_, _ = sb.WriteString("**Result fields:**\n")

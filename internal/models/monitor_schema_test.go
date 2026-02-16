@@ -53,7 +53,7 @@ func TestMonitorUpdateFieldsResolveTemplate(t *testing.T) {
 		},
 	}
 
-	resolved, err := fields.ResolveTemplate("{{Title}} released on {{Release date}}")
+	resolved, err := fields.RenderTemplate("{{Title}} released on {{Release date}}")
 	require.NoError(t, err)
 	require.Equal(t, "Fear Inoculum released on 2019-08-30", resolved)
 }
@@ -66,7 +66,7 @@ func TestMonitorUpdateFieldsResolveTemplateMissingField(t *testing.T) {
 		},
 	}
 
-	_, err := fields.ResolveTemplate("{{Release date}}")
+	_, err := fields.RenderTemplate("{{Release date}}")
 	require.ErrorContains(t, err, `missing value for field "Release date"`)
 }
 

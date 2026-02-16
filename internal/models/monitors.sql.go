@@ -112,8 +112,6 @@ insert into monitor_results (
     last_confirmed_check_id,
     last_confirmed_at,
     data,
-    headline,
-    subtitle,
     citations,
     created_at
 )
@@ -123,11 +121,9 @@ values (
     $3,
     $4,
     $5,
-    $6,
-    $7,
     now()
 )
-returning id, monitor_id, citations, created_at, feedback, last_confirmed_check_id, last_confirmed_at, data, headline, subtitle
+returning id, monitor_id, citations, created_at, feedback, last_confirmed_check_id, last_confirmed_at, data
 `
 
 type CreateMonitorResultParams struct {
@@ -135,8 +131,6 @@ type CreateMonitorResultParams struct {
 	LastConfirmedCheckID int64
 	LastConfirmedAt      time.Time
 	Data                 MonitorUpdateData
-	Headline             string
-	Subtitle             string
 	Citations            *Citations
 }
 
@@ -146,8 +140,6 @@ func (q *Queries) CreateMonitorResult(ctx context.Context, db DBTX, arg *CreateM
 		arg.LastConfirmedCheckID,
 		arg.LastConfirmedAt,
 		arg.Data,
-		arg.Headline,
-		arg.Subtitle,
 		arg.Citations,
 	)
 	var i MonitorResult
@@ -160,8 +152,6 @@ func (q *Queries) CreateMonitorResult(ctx context.Context, db DBTX, arg *CreateM
 		&i.LastConfirmedCheckID,
 		&i.LastConfirmedAt,
 		&i.Data,
-		&i.Headline,
-		&i.Subtitle,
 	)
 	return &i, err
 }
@@ -374,7 +364,7 @@ func (q *Queries) GetLastScheduledCheckTime(ctx context.Context, db DBTX, monito
 }
 
 const getLatestMonitorResult = `-- name: GetLatestMonitorResult :one
-select id, monitor_id, citations, created_at, feedback, last_confirmed_check_id, last_confirmed_at, data, headline, subtitle from monitor_results
+select id, monitor_id, citations, created_at, feedback, last_confirmed_check_id, last_confirmed_at, data from monitor_results
 where monitor_id = $1
 order by created_at desc, id desc
 limit 1
@@ -392,8 +382,6 @@ func (q *Queries) GetLatestMonitorResult(ctx context.Context, db DBTX, monitorID
 		&i.LastConfirmedCheckID,
 		&i.LastConfirmedAt,
 		&i.Data,
-		&i.Headline,
-		&i.Subtitle,
 	)
 	return &i, err
 }
@@ -469,7 +457,7 @@ func (q *Queries) GetMonitorCheckStats(ctx context.Context, db DBTX, userID int6
 }
 
 const getMonitorResult = `-- name: GetMonitorResult :one
-select id, monitor_id, citations, created_at, feedback, last_confirmed_check_id, last_confirmed_at, data, headline, subtitle from monitor_results
+select id, monitor_id, citations, created_at, feedback, last_confirmed_check_id, last_confirmed_at, data from monitor_results
 where monitor_id = $1
 and id = $2
 `
@@ -491,14 +479,12 @@ func (q *Queries) GetMonitorResult(ctx context.Context, db DBTX, arg *GetMonitor
 		&i.LastConfirmedCheckID,
 		&i.LastConfirmedAt,
 		&i.Data,
-		&i.Headline,
-		&i.Subtitle,
 	)
 	return &i, err
 }
 
 const getMonitorResultByCheckID = `-- name: GetMonitorResultByCheckID :one
-select id, monitor_id, citations, created_at, feedback, last_confirmed_check_id, last_confirmed_at, data, headline, subtitle
+select id, monitor_id, citations, created_at, feedback, last_confirmed_check_id, last_confirmed_at, data
 from monitor_results
 where last_confirmed_check_id = $1
 order by created_at desc, id desc
@@ -517,8 +503,6 @@ func (q *Queries) GetMonitorResultByCheckID(ctx context.Context, db DBTX, checkI
 		&i.LastConfirmedCheckID,
 		&i.LastConfirmedAt,
 		&i.Data,
-		&i.Headline,
-		&i.Subtitle,
 	)
 	return &i, err
 }
@@ -564,7 +548,7 @@ func (q *Queries) GetNextMonitorCheck(ctx context.Context, db DBTX, monitorID in
 }
 
 const getPreviousResultsWithCheck = `-- name: GetPreviousResultsWithCheck :many
-select mr.id, mr.monitor_id, mr.citations, mr.created_at, mr.feedback, mr.last_confirmed_check_id, mr.last_confirmed_at, mr.data, mr.headline, mr.subtitle, mc.id, mc.monitor_id, mc.status, mc.scheduled_for, mc.failure_reason, mc.done_at, mc.result
+select mr.id, mr.monitor_id, mr.citations, mr.created_at, mr.feedback, mr.last_confirmed_check_id, mr.last_confirmed_at, mr.data, mc.id, mc.monitor_id, mc.status, mc.scheduled_for, mc.failure_reason, mc.done_at, mc.result
 from monitor_results mr
 inner join monitor_checks mc on mc.id = mr.last_confirmed_check_id
 where mr.monitor_id = $1
@@ -595,8 +579,6 @@ func (q *Queries) GetPreviousResultsWithCheck(ctx context.Context, db DBTX, moni
 			&i.MonitorResult.LastConfirmedCheckID,
 			&i.MonitorResult.LastConfirmedAt,
 			&i.MonitorResult.Data,
-			&i.MonitorResult.Headline,
-			&i.MonitorResult.Subtitle,
 			&i.MonitorCheck.ID,
 			&i.MonitorCheck.MonitorID,
 			&i.MonitorCheck.Status,
@@ -677,11 +659,13 @@ select
     mon.id::bigint as monitor_id,
     res.id::bigint as result_id,
     mon.subject,
-    res.headline,
+    coalesce(ms.data->>'headline'::text, '')::text as headline,
     res.created_at,
-    res.subtitle
+    coalesce(ms.data->>'subtitle'::text, '')::text as subtitle,
+    res.data
 from monitor_results res
 left join monitors mon on mon.id = res.monitor_id
+left join monitor_schemas ms on ms.monitor_id = mon.id
 where mon.status = 'active'
 and mon.user_id = $1
 order by res.created_at desc
@@ -695,6 +679,7 @@ type ListMonitorActivityRow struct {
 	Headline  string
 	CreatedAt time.Time
 	Subtitle  string
+	Data      MonitorUpdateData
 }
 
 func (q *Queries) ListMonitorActivity(ctx context.Context, db DBTX, userID int64) ([]*ListMonitorActivityRow, error) {
@@ -713,6 +698,7 @@ func (q *Queries) ListMonitorActivity(ctx context.Context, db DBTX, userID int64
 			&i.Headline,
 			&i.CreatedAt,
 			&i.Subtitle,
+			&i.Data,
 		); err != nil {
 			return nil, err
 		}
@@ -791,7 +777,7 @@ func (q *Queries) ListMonitorNotifiers(ctx context.Context, db DBTX, monitorID i
 }
 
 const listMonitorResults = `-- name: ListMonitorResults :many
-select id, monitor_id, citations, created_at, feedback, last_confirmed_check_id, last_confirmed_at, data, headline, subtitle from monitor_results
+select id, monitor_id, citations, created_at, feedback, last_confirmed_check_id, last_confirmed_at, data from monitor_results
 where monitor_id = $1
 order by created_at desc, id desc
 `
@@ -814,8 +800,6 @@ func (q *Queries) ListMonitorResults(ctx context.Context, db DBTX, monitorID int
 			&i.LastConfirmedCheckID,
 			&i.LastConfirmedAt,
 			&i.Data,
-			&i.Headline,
-			&i.Subtitle,
 		); err != nil {
 			return nil, err
 		}
@@ -828,10 +812,12 @@ func (q *Queries) ListMonitorResults(ctx context.Context, db DBTX, monitorID int
 }
 
 const listMonitorsWithResults = `-- name: ListMonitorsWithResults :many
-with latest_result as (
-    select distinct on (monitor_id) monitor_id, headline, subtitle, created_at
-    from monitor_results
-    order by monitor_id, created_at desc, id desc
+with schema as (
+    select
+        distinct on (monitor_id) monitor_id,
+        data->>'headline'::text as headline,
+        data->>'subtitle'::text as subtitle
+    from monitor_schemas
 ),
 next_check as (
     select distinct on (monitor_id) monitor_id, scheduled_for
@@ -851,13 +837,19 @@ select
     m.subject::text as subject,
     m.check_frequency_minutes,
     m.created_at,
-    coalesce(mr.headline, '') as latest_result,
-    coalesce(mr.subtitle, '') as latest_result_subtitle,
+    coalesce(sc.headline::text, '')::text as headline,
+    coalesce(sc.subtitle::text, '')::text as subtitle,
+    coalesce(mr.data, '{"fields": []}'::jsonb) as data,
     coalesce(mr.created_at, '0001-01-01 00:00:00 +0000') as latest_result_created_at,
     coalesce(mc.scheduled_for, '0001-01-01 00:00:00 +0000') as next_check_scheduled_for,
     (cc.monitor_id is not null)::boolean as currently_checking
 from monitors m
-left join latest_result mr on mr.monitor_id = m.id
+left join schema sc on sc.monitor_id = m.id
+left join (
+    select distinct on (monitor_id) monitor_id, data, created_at
+    from monitor_results
+    order by monitor_id, created_at desc, id desc
+) mr on mr.monitor_id = m.id
 left join next_check mc on mc.monitor_id = m.id
 left join current_check cc on cc.monitor_id = m.id
 where m.user_id = $1
@@ -877,13 +869,17 @@ type ListMonitorsWithResultsRow struct {
 	Subject               string
 	CheckFrequencyMinutes int32
 	CreatedAt             time.Time
-	LatestResult          string
-	LatestResultSubtitle  string
+	Headline              string
+	Subtitle              string
+	Data                  MonitorUpdateData
 	LatestResultCreatedAt time.Time
 	NextCheckScheduledFor time.Time
 	CurrentlyChecking     bool
 }
 
+// using a subquery instead of a cte so sqlc can grab a reference to the monitor_results.data
+// type and override it via config. this doesn't work with ctes.
+// https://github.com/sqlc-dev/sqlc/issues/3438 should fix this.
 func (q *Queries) ListMonitorsWithResults(ctx context.Context, db DBTX, arg *ListMonitorsWithResultsParams) ([]*ListMonitorsWithResultsRow, error) {
 	rows, err := db.Query(ctx, listMonitorsWithResults, arg.UserID, arg.RowOffset, arg.PageSize)
 	if err != nil {
@@ -899,8 +895,9 @@ func (q *Queries) ListMonitorsWithResults(ctx context.Context, db DBTX, arg *Lis
 			&i.Subject,
 			&i.CheckFrequencyMinutes,
 			&i.CreatedAt,
-			&i.LatestResult,
-			&i.LatestResultSubtitle,
+			&i.Headline,
+			&i.Subtitle,
+			&i.Data,
 			&i.LatestResultCreatedAt,
 			&i.NextCheckScheduledFor,
 			&i.CurrentlyChecking,
