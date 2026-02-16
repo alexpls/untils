@@ -23,6 +23,10 @@
 - [ ] Feature: Allow switching API providers between x.ai and OpenAI on startup
 - [ ] Improvement: 25% of the produced binary is OpenAI's bloated SDK. I only use one endpoint, could move away from the SDK and call it directly with HTTP?
 
+### Result relevancy
+
+- [ ] Have some docs that the LLM can consult on demand for how to format things, and a general index that it can use to pull up docs. e.g. a doc about formatting fields for podcast episodes could be that the headline should be "#{{Episode number}} - {{Episode title}}" and subtitle should be "Released {{Release date}}".
+
 ### Misc
 
 - [ ] Feature: User signup

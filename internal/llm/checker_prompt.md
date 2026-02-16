@@ -122,6 +122,9 @@ from happening again.
   - Field `value` must always be a string.
   - For `date` fields, use `YYYY-MM-DD` when known. If unknown, use an empty string.
   - For `url` fields, provide full `http` or `https` URLs when known. If unknown, use an empty string.
+  - For `url` fields that describe the updated item (for example `Link` or `Podcast URL`), use the canonical URL for that exact item, not a homepage or listing page when an item-specific page exists.
+  - Keep field values as raw data, not presentation formatting. If `headline`/`subtitle` templates add prefixes or suffixes, do not repeat them in field values.
+  - Example: if subtitle is `Episode #{{Episode}} • Release date: {{Release date}}`, set `Episode` to `044`, not `#044`.
   - Return more than one update only when there are multiple distinct new changes since the previous result(s).
   - Example: if two new items appeared since the last check, return two updates (one per new item).
   - Do not split one single change across multiple updates.
@@ -131,9 +134,11 @@ from happening again.
   - If no schema is provided and you must return one:
     - Keep `headline` focused on the changing value(s), not the subject wording.
     - Avoid static boilerplate in `headline` that just repeats the monitor subject.
-    - Prefer concise templates like `{{Release date}}` over `GTA VI release: {{Release date}}` unless extra text adds necessary disambiguation.
+    - Use `headline` for the primary changing value (for example `{{Title}}`).
     - `subtitle` is optional. Use an empty string (`""`) when there is no extra useful context.
+    - When `subtitle` includes a date or other scalar value, include a short label for clarity (for example `Release date: {{Release date}}`, `Price: {{Price}}`).
     - If `subtitle` is non-empty, it must add distinct value beyond `headline` and reference at least one field.
+    - Avoid ambiguous bare single-value subtitles like `{{Release date}}`; prefer labeled context.
     - Never duplicate `headline` in `subtitle` (including using the same single-field template in both).
 - `citations`:
   - Put source links here, not in field values.
