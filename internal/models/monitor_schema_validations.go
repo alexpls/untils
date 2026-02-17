@@ -10,7 +10,7 @@ import (
 	"github.com/alexpls/untils/internal/tinytemplate"
 )
 
-const maxMonitorSchemaFields = 10
+const maxMonitorSchemaFields = 16
 
 func (d MonitorUpdateDataList) Validate() error {
 	var errs []error
@@ -178,8 +178,6 @@ func validateMonitorFields[T any](
 	}
 
 	fieldNames := make(map[string]struct{}, len(fields))
-	urlFieldCount := 0
-
 	for i, field := range fields {
 		if err := validateField(field); err != nil {
 			errs = append(errs, fmt.Errorf("fields[%d]: %w", i, err))
@@ -195,13 +193,6 @@ func validateMonitorFields[T any](
 			}
 		}
 
-		if schemaField.Type == MonitorSchemaFieldTypeURL {
-			urlFieldCount++
-		}
-	}
-
-	if urlFieldCount > 1 {
-		errs = append(errs, errors.New("only one url field is allowed"))
 	}
 
 	return fieldNames, errs

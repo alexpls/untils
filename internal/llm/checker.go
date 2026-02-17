@@ -35,6 +35,7 @@ func (c *checker) perform(ctx context.Context, params *CheckParams) (*models.Che
 	c.service.logger.DebugContext(ctx, "checker workflow started")
 
 	var previousResult *models.GetPreviousResultsWithCheckRow
+	isFirstCheck := len(params.PreviousResults) == 0
 	if len(params.PreviousResults) > 0 {
 		previousResult = params.PreviousResults[0]
 	}
@@ -117,6 +118,14 @@ func (c *checker) perform(ctx context.Context, params *CheckParams) (*models.Che
 				return "error: updates: " + err.Error()
 			}
 
+			if firstCheckUpdateCountMismatch(res, isFirstCheck) {
+				return "error: first check must return exactly one update when success is true"
+			}
+
+			if duplicateUpdatesMismatch(res) {
+				return "error: updates: duplicate updates are not allowed"
+			}
+
 			if differentToPreviousMismatch(res, previousResult) {
 				return "error: different_to_previous is true but returned update fields are the same as the previous result"
 			}
@@ -124,6 +133,30 @@ func (c *checker) perform(ctx context.Context, params *CheckParams) (*models.Che
 			return ""
 		},
 	})
+}
+
+func firstCheckUpdateCountMismatch(res *models.CheckResultWithSchema, isFirstCheck bool) bool {
+	if !isFirstCheck || !res.Success {
+		return false
+	}
+
+	return len(res.Updates) != 1
+}
+
+func duplicateUpdatesMismatch(res *models.CheckResultWithSchema) bool {
+	if len(res.Updates) < 2 {
+		return false
+	}
+
+	for i := 0; i < len(res.Updates); i++ {
+		for j := i + 1; j < len(res.Updates); j++ {
+			if models.MonitorUpdateFieldsEqual(res.Updates[i].Fields, res.Updates[j].Fields) {
+				return true
+			}
+		}
+	}
+
+	return false
 }
 
 func differentToPreviousMismatch(res *models.CheckResultWithSchema, previousResult *models.GetPreviousResultsWithCheckRow) bool {

@@ -3,12 +3,11 @@ package monitor
 import (
 	"fmt"
 	"net/url"
-	"strings"
 
 	"github.com/alexpls/untils/internal/components"
 	"github.com/alexpls/untils/internal/components/icons"
-	"github.com/alexpls/untils/internal/monitorfieldrenderers"
 	"github.com/alexpls/untils/internal/models"
+	"github.com/alexpls/untils/internal/monitorfieldrenderers"
 	"github.com/starfederation/datastar-go/datastar"
 )
 
@@ -68,19 +67,19 @@ templ MonitorSidebarLayout(monitor *models.Monitor, pageType MonitorPageType) {
 					>
 						Checks
 					</a>
-				<a
-					class={ "block", "w-full", "rounded", templ.KV("bg-base-100", pageType == MonitorPageTypeNotifications), "px-4", "py-2", "text-muted", "text-sm", "hover:bg-base-100", "transition-colors" }
-					href={ fmt.Sprintf("/app/monitors/%d/notifications", monitor.ID) }
-				>
-					Notifications
-				</a>
-				<a
-					class={ "block", "w-full", "rounded", templ.KV("bg-base-100", pageType == MonitorPageTypeSettings), "px-4", "py-2", "text-muted", "text-sm", "hover:bg-base-100", "transition-colors" }
-					href={ fmt.Sprintf("/app/monitors/%d/settings", monitor.ID) }
-				>
-					Settings
-				</a>
-			</div>
+					<a
+						class={ "block", "w-full", "rounded", templ.KV("bg-base-100", pageType == MonitorPageTypeNotifications), "px-4", "py-2", "text-muted", "text-sm", "hover:bg-base-100", "transition-colors" }
+						href={ fmt.Sprintf("/app/monitors/%d/notifications", monitor.ID) }
+					>
+						Notifications
+					</a>
+					<a
+						class={ "block", "w-full", "rounded", templ.KV("bg-base-100", pageType == MonitorPageTypeSettings), "px-4", "py-2", "text-muted", "text-sm", "hover:bg-base-100", "transition-colors" }
+						href={ fmt.Sprintf("/app/monitors/%d/settings", monitor.ID) }
+					>
+						Settings
+					</a>
+				</div>
 			</div>
 			<div class="col-span-1 lg:col-span-8">
 				{ children... }
@@ -137,11 +136,12 @@ templ InProgressCheckTimelineItem(data InProgressCheckTimelineItemViewData) {
 
 templ monitorResultTimelineItem(schema models.MonitorSchemaData, result *models.MonitorResult, allowFeedback bool) {
 	{{
+		renderer := monitorfieldrenderers.TextRenderer{}
 		renderCtx := components.MonitorFieldsRenderContext(ctx)
-		headline := result.Data.Fields.MustRenderTemplate(schema.Headline, monitorfieldrenderers.TextRenderer{}, renderCtx)
+		headline := result.Data.Fields.MustRenderTemplate(schema.Headline, renderer, renderCtx)
 		subtitle := ""
-		if strings.TrimSpace(schema.Subtitle) != "" {
-			subtitle = result.Data.Fields.MustRenderTemplate(schema.Subtitle, monitorfieldrenderers.TextRenderer{}, renderCtx)
+		if schema.Subtitle != "" {
+			subtitle = result.Data.Fields.MustRenderTemplate(schema.Subtitle, renderer, renderCtx)
 		}
 	}}
 	@components.TimelineItem(monitorResultHeading(headline), nil) {
@@ -150,6 +150,26 @@ templ monitorResultTimelineItem(schema models.MonitorSchemaData, result *models.
 				{ subtitle }
 			</div>
 		}
+		<div class="pt-2">
+			<table class="table table-sm">
+				<thead>
+					<tr>
+						for _, field := range result.Data.Fields {
+							<th>
+								{ field.Name }
+							</th>
+						}
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						for _, field := range result.Data.Fields {
+							<td>{ field.Value }</td>
+						}
+					</tr>
+				</tbody>
+			</table>
+		</div>
 		<div class="pt-2 text-sm text-base-content/60 flex space-x-4">
 			<div>
 				<div class="font-semibold uppercase text-xs">

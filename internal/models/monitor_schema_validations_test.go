@@ -67,9 +67,9 @@ func TestMonitorSchemaDataValidate(t *testing.T) {
 			name: "invalid too many fields",
 			data: MonitorSchemaData{
 				Headline: "{{Field01}}",
-				Fields:   makeFields(11),
+				Fields:   makeFields(17),
 			},
-			errContains: []string{"a maximum of 10 fields is allowed"},
+			errContains: []string{"a maximum of 16 fields is allowed"},
 		},
 		{
 			name: "invalid duplicate field names",
@@ -83,7 +83,7 @@ func TestMonitorSchemaDataValidate(t *testing.T) {
 			errContains: []string{`duplicate field name "Title"`},
 		},
 		{
-			name: "invalid more than one url field",
+			name: "valid more than one url field",
 			data: MonitorSchemaData{
 				Headline: "{{Title}}",
 				Fields: MonitorSchemaFields{
@@ -92,7 +92,6 @@ func TestMonitorSchemaDataValidate(t *testing.T) {
 					{Type: MonitorSchemaFieldTypeURL, Name: "Link two"},
 				},
 			},
-			errContains: []string{"only one url field is allowed"},
 		},
 		{
 			name: "invalid headline must reference field",
@@ -264,9 +263,9 @@ func TestMonitorUpdateDataValidate(t *testing.T) {
 		{
 			name: "invalid too many fields",
 			data: MonitorUpdateData{
-				Fields: makeFields(11),
+				Fields: makeFields(17),
 			},
-			errContains: []string{"a maximum of 10 fields is allowed"},
+			errContains: []string{"a maximum of 16 fields is allowed"},
 		},
 		{
 			name: "invalid duplicate field names",
@@ -285,7 +284,7 @@ func TestMonitorUpdateDataValidate(t *testing.T) {
 			errContains: []string{`duplicate field name "Title"`},
 		},
 		{
-			name: "invalid more than one url field",
+			name: "valid more than one url field",
 			data: MonitorUpdateData{
 				Fields: []MonitorUpdateField{
 					{
@@ -298,7 +297,6 @@ func TestMonitorUpdateDataValidate(t *testing.T) {
 					},
 				},
 			},
-			errContains: []string{"only one url field is allowed"},
 		},
 		{
 			name: "invalid nested field validation is surfaced",

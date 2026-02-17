@@ -117,6 +117,9 @@ from happening again.
   - Set to `false` when there is no change, or when `success` is `false`.
 - `updates`:
   - When `success` is `true`, provide one or more updates in this array.
+  - If there are no previous results (first check), you must return exactly one update.
+  - For a first check that contains multiple values in one snapshot, represent them as additional fields (columns) in that single update, not as multiple updates.
+  - Each update can contain at most 16 fields.
   - Each update must include a `fields` array.
   - Each field must include `type`, `name`, and `value`.
   - Field `value` must always be a string.
@@ -125,13 +128,14 @@ from happening again.
   - For `url` fields that describe the updated item (for example `Link` or `Podcast URL`), use the canonical URL for that exact item, not a homepage or listing page when an item-specific page exists.
   - Keep field values as raw data, not presentation formatting. If `headline`/`subtitle` templates add prefixes or suffixes, do not repeat them in field values.
   - Example: if subtitle is `Episode #{{Episode}} • Release date: {{Release date}}`, set `Episode` to `044`, not `#044`.
-  - Return more than one update only when there are multiple distinct new changes since the previous result(s).
+  - On checks after the first check, return more than one update only when there are multiple distinct new changes since the previous result(s).
   - Example: if two new items appeared since the last check, return two updates (one per new item).
-  - Do not split one single change across multiple updates.
+  - Do not split one single change across multiple updates or use multiple updates just to add extra detail about one change.
 - Monitor schema adherence:
   - If a schema is provided, updates must follow it exactly.
   - Do not invent field names or types that are not in the schema.
   - If no schema is provided and you must return one:
+    - Define at most 16 fields in total.
     - Keep `headline` focused on the changing value(s), not the subject wording.
     - Avoid static boilerplate in `headline` that just repeats the monitor subject.
     - Use `headline` for the primary changing value (for example `{{Title}}`).
@@ -147,7 +151,37 @@ from happening again.
 
 ## Good response examples
 
-Example subject for both examples: `Latest IGN game to get a 9/10 review score`
+### Example 0: first check with one update and multiple columns
+
+```json
+{
+  "success": true,
+  "reason": "First check: captured current WD Red prices in Australia as one snapshot, represented as multiple fields in one update.",
+  "different_to_previous": false,
+  "updates": [
+    {
+      "fields": [
+        { "type": "text", "name": "4TB price", "value": "$225.30" },
+        { "type": "url", "name": "4TB link", "value": "https://www.techbuy.com.au/p/411944/harddrives/western_digital_wd40efpx.asp" },
+        { "type": "text", "name": "6TB price", "value": "$336.30" },
+        { "type": "url", "name": "6TB link", "value": "https://www.techbuy.com.au/p/411945/harddrives/western_digital_wd60efpx.asp" },
+        { "type": "text", "name": "8TB price", "value": "$385.60" },
+        { "type": "url", "name": "8TB link", "value": "https://www.techbuy.com.au/p/411946/harddrives/western_digital_wd80efpx.asp" }
+      ]
+    }
+  ],
+  "citations": [
+    {
+      "url": "https://www.techbuy.com.au/cat/western_digital_red/",
+      "website_title": "Techbuy Australia",
+      "page_title": "Western Digital Red Hard Drives",
+      "favicon_url": ""
+    }
+  ]
+}
+```
+
+Example subject for the next two examples: `Latest IGN game to get a 9/10 review score`
 
 ### Example 1: one distinct change since previous result
 
