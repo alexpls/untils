@@ -106,14 +106,9 @@ func (s *Service) ValidateMonitor(ctx context.Context, monitor *models.Monitor) 
 		return fmt.Errorf("getting previous results: %w", err)
 	}
 
-	var schema models.MonitorSchemaData
-	storedSchema, err := s.queries.GetMonitorSchema(ctx, s.db, monitor.ID)
+	schema, err := s.getMonitorSchemaData(ctx, s.db, monitor.ID)
 	if err != nil {
-		if !errors.Is(err, pgx.ErrNoRows) {
-			return fmt.Errorf("getting monitor schema: %w", err)
-		}
-	} else {
-		schema = storedSchema.Data
+		return err
 	}
 
 	triage := s.llm.NewTriageWorkflow()
@@ -196,7 +191,7 @@ func MonitorUpdateToCreateMonitorResultParams(
 	confirmedAt time.Time,
 	update models.MonitorUpdateData,
 	citations *models.Citations,
-) (*models.CreateMonitorResultParams, error) {
+) *models.CreateMonitorResultParams {
 	return &models.CreateMonitorResultParams{
 		MonitorID:            monitorID,
 		LastConfirmedCheckID: checkID,
@@ -205,7 +200,7 @@ func MonitorUpdateToCreateMonitorResultParams(
 		Subtitle:             update.Subtitle,
 		Data:                 update,
 		Citations:            citations,
-	}, nil
+	}
 }
 
 func (s *Service) ActivateMonitorFromPreview(ctx context.Context, user *models.User, monitorID int64) (*models.Monitor, error) {
@@ -356,6 +351,17 @@ func (s *Service) deleteMonitorRelations(ctx context.Context, tx models.DBTX, mo
 		return fmt.Errorf("deleting monitor schema: %w", err)
 	}
 	return nil
+}
+
+func (s *Service) getMonitorSchemaData(ctx context.Context, tx models.DBTX, monitorID int64) (models.MonitorSchemaData, error) {
+	storedSchema, err := s.queries.GetMonitorSchema(ctx, tx, monitorID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return models.MonitorSchemaData{}, nil
+		}
+		return models.MonitorSchemaData{}, fmt.Errorf("getting monitor schema: %w", err)
+	}
+	return storedSchema.Data, nil
 }
 
 // SetMonitorPaused pauses or unpauses a monitor.

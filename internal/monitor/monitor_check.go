@@ -173,13 +173,9 @@ func (s *Service) PerformMonitorCheck(
 		}
 
 		var schema models.MonitorSchemaData
-		storedSchema, err := s.queries.GetMonitorSchema(ctx, tx, monitor.ID)
+		schema, err = s.getMonitorSchemaData(ctx, tx, monitor.ID)
 		if err != nil {
-			if !errors.Is(err, pgx.ErrNoRows) {
-				return nil, fmt.Errorf("getting monitor schema: %w", err)
-			}
-		} else {
-			schema = storedSchema.Data
+			return nil, err
 		}
 
 		// Mark check as 'checking' BEFORE scheduling next check, because
@@ -244,16 +240,13 @@ func (s *Service) PerformMonitorCheck(
 			return fmt.Errorf("rendering headline: %w", err)
 		}
 
-		params, err := MonitorUpdateToCreateMonitorResultParams(
+		params := MonitorUpdateToCreateMonitorResultParams(
 			check.MonitorID,
 			check.ID,
 			confirmedAt,
 			update,
 			&result.Citations,
 		)
-		if err != nil {
-			return fmt.Errorf("building monitor result params: %w", err)
-		}
 		createMonitorResultParams = append(createMonitorResultParams, params)
 		createdResultHeadlines = append(createdResultHeadlines, headline)
 	}
