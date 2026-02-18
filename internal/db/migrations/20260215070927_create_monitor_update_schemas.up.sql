@@ -110,13 +110,17 @@ with monitor_settings as (
     select
         mon.monitor_id,
         (
-            select nullif(btrim(mr2.date_past_tense_verb), '')
-            from monitor_results mr2
-            where mr2.monitor_id = mon.monitor_id
-                and mr2.date is not null
-                and nullif(btrim(mr2.date_past_tense_verb), '') is not null
-            order by mr2.created_at desc, mr2.id desc
-            limit 1
+            select
+                upper(left(latest.raw_name, 1)) || substring(latest.raw_name from 2)
+            from (
+                select nullif(btrim(mr2.date_past_tense_verb), '') as raw_name
+                from monitor_results mr2
+                where mr2.monitor_id = mon.monitor_id
+                    and mr2.date is not null
+                    and nullif(btrim(mr2.date_past_tense_verb), '') is not null
+                order by mr2.created_at desc, mr2.id desc
+                limit 1
+            ) latest
         ) as date_field_name
     from (
         select distinct monitor_id
@@ -161,13 +165,17 @@ with monitor_settings as (
     select
         mon.monitor_id,
         (
-            select nullif(btrim(mr2.date_past_tense_verb), '')
-            from monitor_results mr2
-            where mr2.monitor_id = mon.monitor_id
-                and mr2.date is not null
-                and nullif(btrim(mr2.date_past_tense_verb), '') is not null
-            order by mr2.created_at desc, mr2.id desc
-            limit 1
+            select
+                upper(left(latest.raw_name, 1)) || substring(latest.raw_name from 2)
+            from (
+                select nullif(btrim(mr2.date_past_tense_verb), '') as raw_name
+                from monitor_results mr2
+                where mr2.monitor_id = mon.monitor_id
+                    and mr2.date is not null
+                    and nullif(btrim(mr2.date_past_tense_verb), '') is not null
+                order by mr2.created_at desc, mr2.id desc
+                limit 1
+            ) latest
         ) as date_field_name
     from (
         select distinct monitor_id
