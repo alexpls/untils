@@ -312,6 +312,16 @@ ALTER SEQUENCE public.monitor_notifiers_id_seq OWNED BY public.monitor_notifiers
 
 
 --
+-- Name: monitor_result_checks; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.monitor_result_checks (
+    monitor_result_id bigint NOT NULL,
+    monitor_check_id bigint NOT NULL
+);
+
+
+--
 -- Name: monitor_results; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -700,6 +710,14 @@ ALTER TABLE ONLY public.monitor_notifiers
 
 
 --
+-- Name: monitor_result_checks monitor_result_checks_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.monitor_result_checks
+    ADD CONSTRAINT monitor_result_checks_pkey PRIMARY KEY (monitor_result_id, monitor_check_id);
+
+
+--
 -- Name: monitor_results monitor_results_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -841,6 +859,13 @@ CREATE UNIQUE INDEX idx_monitor_notifiers_monitor_id_type ON public.monitor_noti
 
 
 --
+-- Name: idx_monitor_result_checks_check_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_monitor_result_checks_check_id ON public.monitor_result_checks USING btree (monitor_check_id);
+
+
+--
 -- Name: idx_monitor_results_monitor_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -960,6 +985,22 @@ ALTER TABLE ONLY public.monitor_checks
 
 ALTER TABLE ONLY public.monitor_notifiers
     ADD CONSTRAINT monitor_notifiers_monitor_id_fkey FOREIGN KEY (monitor_id) REFERENCES public.monitors(id) ON DELETE CASCADE;
+
+
+--
+-- Name: monitor_result_checks monitor_result_checks_monitor_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.monitor_result_checks
+    ADD CONSTRAINT monitor_result_checks_monitor_check_id_fkey FOREIGN KEY (monitor_check_id) REFERENCES public.monitor_checks(id) ON DELETE CASCADE;
+
+
+--
+-- Name: monitor_result_checks monitor_result_checks_monitor_result_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.monitor_result_checks
+    ADD CONSTRAINT monitor_result_checks_monitor_result_id_fkey FOREIGN KEY (monitor_result_id) REFERENCES public.monitor_results(id) ON DELETE CASCADE;
 
 
 --

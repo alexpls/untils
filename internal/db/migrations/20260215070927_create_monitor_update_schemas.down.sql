@@ -4,10 +4,22 @@ alter table monitor_checks
 create index idx_monitor_checks_result_id on monitor_checks(result_id);
 create index idx_monitor_checks_monitor_id_result_id on monitor_checks(monitor_id, result_id);
 
+with ranked_links as (
+    select
+        mrc.monitor_check_id,
+        mrc.monitor_result_id,
+        row_number() over (
+            partition by mrc.monitor_check_id
+            order by mr.created_at desc, mr.id desc
+        ) as rn
+    from monitor_result_checks mrc
+    join monitor_results mr on mr.id = mrc.monitor_result_id
+)
 update monitor_checks mc
-set result_id = mr.id
-from monitor_results mr
-where mc.id = mr.last_confirmed_check_id;
+set result_id = rl.monitor_result_id
+from ranked_links rl
+where rl.monitor_check_id = mc.id
+and rl.rn = 1;
 
 alter table monitor_results
     add column result text null,
@@ -81,6 +93,9 @@ left join latest_checks lc on lc.result_id = mr.id;
 
 alter table monitor_results drop column last_confirmed_check_id;
 alter table monitor_results drop column last_confirmed_at;
+
+drop table if exists monitor_result_checks;
+
 alter table monitor_results drop column headline;
 alter table monitor_results drop column subtitle;
 alter table monitor_results drop column data;

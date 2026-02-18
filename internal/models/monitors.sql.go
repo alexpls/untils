@@ -166,6 +166,22 @@ func (q *Queries) CreateMonitorResult(ctx context.Context, db DBTX, arg *CreateM
 	return &i, err
 }
 
+const createMonitorResultCheck = `-- name: CreateMonitorResultCheck :exec
+insert into monitor_result_checks (monitor_result_id, monitor_check_id)
+values ($1, $2)
+on conflict (monitor_result_id, monitor_check_id) do nothing
+`
+
+type CreateMonitorResultCheckParams struct {
+	MonitorResultID int64
+	MonitorCheckID  int64
+}
+
+func (q *Queries) CreateMonitorResultCheck(ctx context.Context, db DBTX, arg *CreateMonitorResultCheckParams) error {
+	_, err := db.Exec(ctx, createMonitorResultCheck, arg.MonitorResultID, arg.MonitorCheckID)
+	return err
+}
+
 const deleteMonitor = `-- name: DeleteMonitor :exec
 delete from monitors
 where user_id = $1 and id = $2
@@ -497,32 +513,6 @@ func (q *Queries) GetMonitorResult(ctx context.Context, db DBTX, arg *GetMonitor
 	return &i, err
 }
 
-const getMonitorResultByCheckID = `-- name: GetMonitorResultByCheckID :one
-select id, monitor_id, citations, created_at, feedback, last_confirmed_check_id, last_confirmed_at, headline, subtitle, data
-from monitor_results
-where last_confirmed_check_id = $1
-order by created_at desc, id desc
-limit 1
-`
-
-func (q *Queries) GetMonitorResultByCheckID(ctx context.Context, db DBTX, checkID int64) (*MonitorResult, error) {
-	row := db.QueryRow(ctx, getMonitorResultByCheckID, checkID)
-	var i MonitorResult
-	err := row.Scan(
-		&i.ID,
-		&i.MonitorID,
-		&i.Citations,
-		&i.CreatedAt,
-		&i.Feedback,
-		&i.LastConfirmedCheckID,
-		&i.LastConfirmedAt,
-		&i.Headline,
-		&i.Subtitle,
-		&i.Data,
-	)
-	return &i, err
-}
-
 const getMonitorSchema = `-- name: GetMonitorSchema :one
 select id, monitor_id, data, created_at from monitor_schemas
 where monitor_id = $1
@@ -801,6 +791,45 @@ order by created_at desc, id desc
 
 func (q *Queries) ListMonitorResults(ctx context.Context, db DBTX, monitorID int64) ([]*MonitorResult, error) {
 	rows, err := db.Query(ctx, listMonitorResults, monitorID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []*MonitorResult
+	for rows.Next() {
+		var i MonitorResult
+		if err := rows.Scan(
+			&i.ID,
+			&i.MonitorID,
+			&i.Citations,
+			&i.CreatedAt,
+			&i.Feedback,
+			&i.LastConfirmedCheckID,
+			&i.LastConfirmedAt,
+			&i.Headline,
+			&i.Subtitle,
+			&i.Data,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listMonitorResultsByCheckID = `-- name: ListMonitorResultsByCheckID :many
+select mr.id, mr.monitor_id, mr.citations, mr.created_at, mr.feedback, mr.last_confirmed_check_id, mr.last_confirmed_at, mr.headline, mr.subtitle, mr.data
+from monitor_results mr
+join monitor_result_checks mrc on mrc.monitor_result_id = mr.id
+where mrc.monitor_check_id = $1
+order by mr.created_at desc, mr.id desc
+`
+
+func (q *Queries) ListMonitorResultsByCheckID(ctx context.Context, db DBTX, checkID int64) ([]*MonitorResult, error) {
+	rows, err := db.Query(ctx, listMonitorResultsByCheckID, checkID)
 	if err != nil {
 		return nil, err
 	}

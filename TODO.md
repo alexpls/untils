@@ -3,6 +3,7 @@
 ### Monitor results
 
 - [ ] Feature: Checks should be able to produce multiple results
+- [ ] Feature: Merge multiple per-check result notifications into one grouped notification payload.
 - [ ] Improvement: special logic when checking prices for things, should include things like finding the cheapest price and reporting on it. Not including multiple store names.
 - [ ] Feature: handle future dates better. At the moment with the 'past tense' date requirement, release dates are referred to in the past tense, even though they haven't happened yet.
 

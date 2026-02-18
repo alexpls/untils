@@ -12,7 +12,7 @@ type CheckViewData struct {
 	Check     *models.GetCheckWithMonitorRow
 	Messages  []*models.LLMParsedMessage
 	ToolCalls []models.LLMToolCall
-	Result    *models.MonitorResult
+	Results   []*models.MonitorResult
 }
 
 templ CheckViewPage(data CheckViewData) {
@@ -64,9 +64,11 @@ templ CheckView(data CheckViewData) {
 				</div>
 				<div class="p-4 bg-base-100 rounded border border-base-content/10">
 					<div class="font-semibold uppercase text-xs mb-3">Result</div>
-					if data.Result != nil {
+					if len(data.Results) > 0 {
 						<ul>
-							@monitorResultTimelineItem(data.Result, true)
+							for _, result := range data.Results {
+								@monitorResultTimelineItem(result, true)
+							}
 						</ul>
 					}
 					if data.Check.Result.Reason != "" {

@@ -85,16 +85,16 @@ func (h *Handlers) ViewCheck(w http.ResponseWriter, r *http.Request, user *model
 			messages := conv.Messages.Parse()
 			toolCalls := conv.Messages.ExtractToolCalls()
 
-			result, err := h.service.queries.GetMonitorResultByCheckID(r.Context(), h.service.db, checkID)
-			if err != nil && !errors.Is(err, pgx.ErrNoRows) {
-				return nil, fmt.Errorf("getting monitor result: %w", err)
+			results, err := h.service.queries.ListMonitorResultsByCheckID(r.Context(), h.service.db, checkID)
+			if err != nil {
+				return nil, fmt.Errorf("getting monitor results: %w", err)
 			}
 
 			data := CheckViewData{
 				Check:     check,
 				Messages:  messages,
 				ToolCalls: toolCalls,
-				Result:    result,
+				Results:   results,
 			}
 
 			if patch {

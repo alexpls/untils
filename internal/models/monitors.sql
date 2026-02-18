@@ -171,12 +171,13 @@ select * from monitor_results
 where monitor_id = @monitor_id
 and id = @result_id;
 
--- name: GetMonitorResultByCheckID :one
-select *
-from monitor_results
-where last_confirmed_check_id = @check_id
-order by created_at desc, id desc
-limit 1;
+-- name: ListMonitorResultsByCheckID :many
+select mr.*
+from monitor_results mr
+join monitor_result_checks mrc on mrc.monitor_result_id = mr.id
+where mrc.monitor_check_id = @check_id
+order by mr.created_at desc, mr.id desc
+;
 
 -- name: DeleteMonitorChecks :exec
 delete from monitor_checks
@@ -208,6 +209,11 @@ values (
     now()
 )
 returning *;
+
+-- name: CreateMonitorResultCheck :exec
+insert into monitor_result_checks (monitor_result_id, monitor_check_id)
+values (@monitor_result_id, @monitor_check_id)
+on conflict (monitor_result_id, monitor_check_id) do nothing;
 
 -- name: UpdateMonitorResultLastConfirmed :exec
 update monitor_results

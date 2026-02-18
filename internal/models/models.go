@@ -291,6 +291,11 @@ type MonitorResult struct {
 	Data                 MonitorUpdateData
 }
 
+type MonitorResultCheck struct {
+	MonitorResultID int64
+	MonitorCheckID  int64
+}
+
 type MonitorSchema struct {
 	ID        int64
 	MonitorID int64

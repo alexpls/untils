@@ -278,11 +278,26 @@ func (s *Service) PerformMonitorCheck(
 
 		if result.DifferentToPrevious || len(priorState.previousResults) == 0 {
 			for _, params := range createMonitorResultParams {
-				if _, err := s.queries.CreateMonitorResult(ctx, tx, params); err != nil {
+				createdResult, err := s.queries.CreateMonitorResult(ctx, tx, params)
+				if err != nil {
 					return fmt.Errorf("creating monitor result: %w", err)
+				}
+
+				if err := s.queries.CreateMonitorResultCheck(ctx, tx, &models.CreateMonitorResultCheckParams{
+					MonitorResultID: createdResult.ID,
+					MonitorCheckID:  check.ID,
+				}); err != nil {
+					return fmt.Errorf("creating monitor result check link: %w", err)
 				}
 			}
 		} else {
+			if err := s.queries.CreateMonitorResultCheck(ctx, tx, &models.CreateMonitorResultCheckParams{
+				MonitorResultID: priorState.previousResults[0].MonitorResult.ID,
+				MonitorCheckID:  check.ID,
+			}); err != nil {
+				return fmt.Errorf("creating monitor result check link: %w", err)
+			}
+
 			if err := s.queries.UpdateMonitorResultLastConfirmed(ctx, tx, &models.UpdateMonitorResultLastConfirmedParams{
 				CheckID:         check.ID,
 				ConfirmedAt:     confirmedAt,
@@ -307,17 +322,14 @@ func (s *Service) PerformMonitorCheck(
 			}
 		}
 
-		newResult := ""
-		if len(createdResultHeadlines) > 0 {
-			newResult = createdResultHeadlines[len(createdResultHeadlines)-1]
-		}
-
-		if err = s.SendNotifications(ctx, SendNotificationsParams{
-			Monitor:   monitor,
-			NewResult: newResult,
-			OldResult: lastResult,
-		}); err != nil {
-			return err
+		for _, newResult := range createdResultHeadlines {
+			if err = s.SendNotifications(ctx, SendNotificationsParams{
+				Monitor:   monitor,
+				NewResult: newResult,
+				OldResult: lastResult,
+			}); err != nil {
+				return err
+			}
 		}
 	}
 

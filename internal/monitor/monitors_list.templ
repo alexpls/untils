@@ -65,13 +65,17 @@ templ MonitorsList(data MonitorsListData) {
 										headline := mon.Data.Fields.MustRenderTemplate(mon.Headline, monitorfieldrenderers.TextRenderer{}, renderCtx)
 										subtitle := mon.Data.Fields.MustRenderTemplate(mon.Subtitle, monitorfieldrenderers.TextRenderer{}, renderCtx)
 									}}
-									<div class="line-clamp-2">
-										{ headline }
-									</div>
-									if subtitle != "" {
-										<div class="text-muted">
-											{ subtitle }
+									if headline == "" && subtitle == "" {
+										@noneSpan()
+									} else {
+										<div class="line-clamp-2">
+											{ headline }
 										</div>
+										if subtitle != "" {
+											<div class="text-muted">
+												{ subtitle }
+											</div>
+										}
 									}
 								</td>
 								<td class="text-muted min-w-38 tabular-nums">
