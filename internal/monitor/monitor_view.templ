@@ -160,7 +160,7 @@ templ monitorResultTimelineItem(result *models.MonitorResult, allowFeedback bool
 				<tbody>
 					<tr>
 						for _, field := range result.Data.Fields {
-							<td>{ field.Value }</td>
+							<td>{ renderer.RenderField(renderCtx, field) }</td>
 						}
 					</tr>
 				</tbody>

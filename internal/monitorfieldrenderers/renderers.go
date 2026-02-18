@@ -29,6 +29,13 @@ func formatDateValue(ctx models.MonitorFieldsRenderContext, value string) string
 		return ""
 	}
 
+	// we don't use IsZero() on the parsed value because this is a quicker check
+	// for zero values, and doesn't require us to additionally parse the date
+	// in the UTC location to check that it's zero without any offset applied
+	if value == "0001-01-01" {
+		return ""
+	}
+
 	loc := models.LocationFromTimezone(ctx.Timezone)
 
 	parsed, err := time.ParseInLocation("2006-01-02", trimmed, loc)
