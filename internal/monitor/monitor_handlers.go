@@ -3,7 +3,6 @@ package monitor
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 
@@ -12,7 +11,6 @@ import (
 	"github.com/alexpls/untils/internal/models"
 	"github.com/alexpls/untils/internal/pagination"
 	"github.com/alexpls/untils/internal/validation"
-	"github.com/jackc/pgx/v5"
 	"github.com/starfederation/datastar-go/datastar"
 )
 
@@ -427,16 +425,8 @@ func (h *Handlers) ViewResultFeedbackModal(w http.ResponseWriter, r *http.Reques
 
 	sse := datastar.NewSSE(w, r)
 
-	schema, err := h.monitorSchema(r.Context(), mon.ID)
-	if err != nil {
-		h.logger.ErrorContext(r.Context(), "error getting monitor schema", "error", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
-
 	data := monitorResultFeedbackViewData{
 		result: result,
-		schema: schema,
 		formValues: CreateMonitorResultFeedbackParams{
 			Feedback: result.Feedback.String,
 		},
@@ -470,16 +460,8 @@ func (h *Handlers) UpdateResultFeedback(w http.ResponseWriter, r *http.Request, 
 		if valErrs := validation.MapValidationErrors(err); valErrs != nil {
 			sse := datastar.NewSSE(w, r)
 
-			schema, schemaErr := h.monitorSchema(r.Context(), mon.ID)
-			if schemaErr != nil {
-				h.logger.ErrorContext(r.Context(), "error getting monitor schema", "error", schemaErr)
-				http.Error(w, "Internal server error", http.StatusInternalServerError)
-				return
-			}
-
 			data := monitorResultFeedbackViewData{
 				result:           result,
-				schema:           schema,
 				formValues:       params,
 				validationErrors: valErrs,
 			}
@@ -559,11 +541,6 @@ func (h *Handlers) monitorDraftViewData(
 		preview = res[0]
 	}
 
-	schema, err := h.monitorSchema(ctx, mon.ID)
-	if err != nil {
-		return MonitorDraftData{}, err
-	}
-
 	check, err := h.service.GetInProgressMonitorCheck(ctx, mon)
 	if err != nil {
 		return MonitorDraftData{}, err
@@ -578,7 +555,7 @@ func (h *Handlers) monitorDraftViewData(
 		if err == nil {
 			timelineEvents = events
 		}
-		// Ignore pgx.ErrNoRows - events may not exist yet
+		// Ignore not-found cases - events may not exist yet.
 	}
 
 	notifiers, err := h.monitorNotifierViewData(ctx, mon, userID)
@@ -590,7 +567,6 @@ func (h *Handlers) monitorDraftViewData(
 		Monitor:                       mon,
 		Values:                        values,
 		ResultPreview:                 preview,
-		Schema:                        schema,
 		InProgressCheck:               check,
 		InProgressCheckTimelineEvents: timelineEvents,
 		ValidationErrors:              validationErrs,
@@ -600,11 +576,6 @@ func (h *Handlers) monitorDraftViewData(
 
 func (h *Handlers) monitorViewData(ctx context.Context, mon *models.Monitor, userID int64) (MonitorViewData, error) {
 	results, err := h.service.queries.ListMonitorResults(ctx, h.service.db, mon.ID)
-	if err != nil {
-		return MonitorViewData{}, err
-	}
-
-	schema, err := h.monitorSchema(ctx, mon.ID)
 	if err != nil {
 		return MonitorViewData{}, err
 	}
@@ -628,7 +599,7 @@ func (h *Handlers) monitorViewData(ctx context.Context, mon *models.Monitor, use
 		if err == nil {
 			timelineEvents = events
 		}
-		// Ignore pgx.ErrNoRows - events may not exist yet
+		// Ignore not-found cases - events may not exist yet.
 	}
 
 	notifiers, err := h.monitorNotifierViewData(ctx, mon, userID)
@@ -639,23 +610,11 @@ func (h *Handlers) monitorViewData(ctx context.Context, mon *models.Monitor, use
 	return MonitorViewData{
 		Monitor:                       mon,
 		Results:                       results,
-		Schema:                        schema,
 		NextScheduledCheck:            nextScheduled,
 		InProgressCheck:               inProgressCheck,
 		InProgressCheckTimelineEvents: timelineEvents,
 		Notifiers:                     notifiers,
 	}, nil
-}
-
-func (h *Handlers) monitorSchema(ctx context.Context, monitorID int64) (models.MonitorSchemaData, error) {
-	schema, err := h.service.queries.GetMonitorSchema(ctx, h.service.db, monitorID)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return models.MonitorSchemaData{}, nil
-		}
-		return models.MonitorSchemaData{}, err
-	}
-	return schema.Data, nil
 }
 
 func (h *Handlers) monitorNotifierViewData(ctx context.Context, mon *models.Monitor, userID int64) (notifiers []*MonitorNotifierViewData, err error) {

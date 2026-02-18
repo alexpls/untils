@@ -201,6 +201,8 @@ func MonitorUpdateToCreateMonitorResultParams(
 		MonitorID:            monitorID,
 		LastConfirmedCheckID: checkID,
 		LastConfirmedAt:      confirmedAt,
+		Headline:             update.Headline,
+		Subtitle:             update.Subtitle,
 		Data:                 update,
 		Citations:            citations,
 	}, nil

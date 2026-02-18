@@ -70,18 +70,8 @@ func (d MonitorUpdateDataList) ValidateAgainstSchema(schema MonitorSchemaData) e
 func (d MonitorSchemaData) Validate() error {
 	var errs []error
 
-	fieldNameSet, fieldErrs := validateMonitorSchemaFields(d.Fields)
+	_, fieldErrs := validateMonitorSchemaFields(d.Fields)
 	errs = append(errs, fieldErrs...)
-
-	if strings.TrimSpace(d.Headline) == "" {
-		errs = append(errs, errors.New("headline is required"))
-	} else {
-		errs = append(errs, validateTemplateRefs("headline", d.Headline, fieldNameSet)...)
-	}
-
-	if strings.TrimSpace(d.Subtitle) != "" {
-		errs = append(errs, validateTemplateRefs("subtitle", d.Subtitle, fieldNameSet)...)
-	}
 
 	return errors.Join(errs...)
 }
@@ -103,11 +93,20 @@ func (d MonitorSchemaField) Validate() error {
 }
 
 func (d MonitorUpdateData) Validate() error {
-	// TODO: validate against schema to make sure it matches well
 	var errs []error
 
-	_, fieldErrs := validateMonitorUpdateFields(d.Fields)
+	fieldNameSet, fieldErrs := validateMonitorUpdateFields(d.Fields)
 	errs = append(errs, fieldErrs...)
+
+	if strings.TrimSpace(d.Headline) == "" {
+		errs = append(errs, errors.New("headline is required"))
+	} else {
+		errs = append(errs, validateTemplateRefs("headline", d.Headline, fieldNameSet, false)...)
+	}
+
+	if strings.TrimSpace(d.Subtitle) != "" {
+		errs = append(errs, validateTemplateRefs("subtitle", d.Subtitle, fieldNameSet, false)...)
+	}
 
 	return errors.Join(errs...)
 }
@@ -198,14 +197,19 @@ func validateMonitorFields[T any](
 	return fieldNames, errs
 }
 
-func validateTemplateRefs(fieldLabel, template string, validFieldNames map[string]struct{}) []error {
+func validateTemplateRefs(
+	fieldLabel string,
+	template string,
+	validFieldNames map[string]struct{},
+	requireFieldRef bool,
+) []error {
 	tt, err := tinytemplate.Parse(template)
 	if err != nil {
 		return []error{fmt.Errorf("%s template is invalid: %w", fieldLabel, err)}
 	}
 
 	refs := tt.References()
-	if len(refs) == 0 {
+	if requireFieldRef && len(refs) == 0 {
 		return []error{fmt.Errorf("%s must reference at least one field", fieldLabel)}
 	}
 

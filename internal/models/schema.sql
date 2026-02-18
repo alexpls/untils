@@ -323,6 +323,8 @@ CREATE TABLE public.monitor_results (
     feedback text,
     last_confirmed_check_id bigint NOT NULL,
     last_confirmed_at timestamp with time zone NOT NULL,
+    headline text NOT NULL,
+    subtitle text DEFAULT ''::text NOT NULL,
     data jsonb NOT NULL
 );
 

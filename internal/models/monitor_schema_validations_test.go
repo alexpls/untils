@@ -26,17 +26,14 @@ func TestMonitorSchemaDataValidate(t *testing.T) {
 		{
 			name: "valid minimum schema",
 			data: MonitorSchemaData{
-				Headline: "{{Title}}",
 				Fields: MonitorSchemaFields{
 					{Type: MonitorSchemaFieldTypeText, Name: "Title"},
 				},
 			},
 		},
 		{
-			name: "valid with optional subtitle",
+			name: "valid with multiple field types",
 			data: MonitorSchemaData{
-				Headline: "{{Title}}",
-				Subtitle: "Release: {{Release date}}",
 				Fields: MonitorSchemaFields{
 					{Type: MonitorSchemaFieldTypeText, Name: "Title"},
 					{Type: MonitorSchemaFieldTypeDate, Name: "Release date"},
@@ -45,36 +42,22 @@ func TestMonitorSchemaDataValidate(t *testing.T) {
 			},
 		},
 		{
-			name: "invalid missing headline",
-			data: MonitorSchemaData{
-				Fields: MonitorSchemaFields{
-					{Type: MonitorSchemaFieldTypeText, Name: "Title"},
-				},
-			},
-			errContains: []string{"headline is required"},
-		},
-		{
 			name: "invalid no fields",
-			data: MonitorSchemaData{
-				Headline: "{{Title}}",
-			},
+			data: MonitorSchemaData{},
 			errContains: []string{
 				"at least one field is required",
-				`headline references unknown field "Title"`,
 			},
 		},
 		{
 			name: "invalid too many fields",
 			data: MonitorSchemaData{
-				Headline: "{{Field01}}",
-				Fields:   makeFields(17),
+				Fields: makeFields(17),
 			},
 			errContains: []string{"a maximum of 16 fields is allowed"},
 		},
 		{
 			name: "invalid duplicate field names",
 			data: MonitorSchemaData{
-				Headline: "{{Title}}",
 				Fields: MonitorSchemaFields{
 					{Type: MonitorSchemaFieldTypeText, Name: "Title"},
 					{Type: MonitorSchemaFieldTypeDate, Name: "Title"},
@@ -85,76 +68,12 @@ func TestMonitorSchemaDataValidate(t *testing.T) {
 		{
 			name: "valid more than one url field",
 			data: MonitorSchemaData{
-				Headline: "{{Title}}",
 				Fields: MonitorSchemaFields{
 					{Type: MonitorSchemaFieldTypeText, Name: "Title"},
 					{Type: MonitorSchemaFieldTypeURL, Name: "Link one"},
 					{Type: MonitorSchemaFieldTypeURL, Name: "Link two"},
 				},
 			},
-		},
-		{
-			name: "invalid headline must reference field",
-			data: MonitorSchemaData{
-				Headline: "Static headline",
-				Fields: MonitorSchemaFields{
-					{Type: MonitorSchemaFieldTypeText, Name: "Title"},
-				},
-			},
-			errContains: []string{"headline must reference at least one field"},
-		},
-		{
-			name: "invalid headline unknown ref",
-			data: MonitorSchemaData{
-				Headline: "{{Unknown}}",
-				Fields: MonitorSchemaFields{
-					{Type: MonitorSchemaFieldTypeText, Name: "Title"},
-				},
-			},
-			errContains: []string{`headline references unknown field "Unknown"`},
-		},
-		{
-			name: "invalid malformed headline template",
-			data: MonitorSchemaData{
-				Headline: "{{Title",
-				Fields: MonitorSchemaFields{
-					{Type: MonitorSchemaFieldTypeText, Name: "Title"},
-				},
-			},
-			errContains: []string{"headline template is invalid"},
-		},
-		{
-			name: "invalid subtitle static text",
-			data: MonitorSchemaData{
-				Headline: "{{Title}}",
-				Subtitle: "Static subtitle",
-				Fields: MonitorSchemaFields{
-					{Type: MonitorSchemaFieldTypeText, Name: "Title"},
-				},
-			},
-			errContains: []string{"subtitle must reference at least one field"},
-		},
-		{
-			name: "invalid subtitle unknown ref",
-			data: MonitorSchemaData{
-				Headline: "{{Title}}",
-				Subtitle: "Published {{Date}}",
-				Fields: MonitorSchemaFields{
-					{Type: MonitorSchemaFieldTypeText, Name: "Title"},
-				},
-			},
-			errContains: []string{`subtitle references unknown field "Date"`},
-		},
-		{
-			name: "invalid malformed subtitle template",
-			data: MonitorSchemaData{
-				Headline: "{{Title}}",
-				Subtitle: "Published {{Date",
-				Fields: MonitorSchemaFields{
-					{Type: MonitorSchemaFieldTypeText, Name: "Title"},
-				},
-			},
-			errContains: []string{"subtitle template is invalid"},
 		},
 	}
 
@@ -237,6 +156,8 @@ func TestMonitorUpdateDataValidate(t *testing.T) {
 		{
 			name: "valid update",
 			data: MonitorUpdateData{
+				Headline: "{{Title}}",
+				Subtitle: "Release date: {{Release date}}",
 				Fields: []MonitorUpdateField{
 					{
 						MonitorSchemaField: MonitorSchemaField{Type: MonitorSchemaFieldTypeText, Name: "Title"},
@@ -255,21 +176,38 @@ func TestMonitorUpdateDataValidate(t *testing.T) {
 		},
 		{
 			name: "invalid no fields",
-			data: MonitorUpdateData{},
+			data: MonitorUpdateData{
+				Headline: "{{Title}}",
+			},
 			errContains: []string{
 				"at least one field is required",
+				`headline references unknown field "Title"`,
 			},
+		},
+		{
+			name: "invalid missing headline",
+			data: MonitorUpdateData{
+				Fields: []MonitorUpdateField{
+					{
+						MonitorSchemaField: MonitorSchemaField{Type: MonitorSchemaFieldTypeText, Name: "Title"},
+						Value:              "Mewgenics",
+					},
+				},
+			},
+			errContains: []string{"headline is required"},
 		},
 		{
 			name: "invalid too many fields",
 			data: MonitorUpdateData{
-				Fields: makeFields(17),
+				Headline: "{{Field01}}",
+				Fields:   makeFields(17),
 			},
 			errContains: []string{"a maximum of 16 fields is allowed"},
 		},
 		{
 			name: "invalid duplicate field names",
 			data: MonitorUpdateData{
+				Headline: "{{Title}}",
 				Fields: []MonitorUpdateField{
 					{
 						MonitorSchemaField: MonitorSchemaField{Type: MonitorSchemaFieldTypeText, Name: "Title"},
@@ -286,6 +224,7 @@ func TestMonitorUpdateDataValidate(t *testing.T) {
 		{
 			name: "valid more than one url field",
 			data: MonitorUpdateData{
+				Headline: "Latest links",
 				Fields: []MonitorUpdateField{
 					{
 						MonitorSchemaField: MonitorSchemaField{Type: MonitorSchemaFieldTypeURL, Name: "Link one"},
@@ -301,6 +240,7 @@ func TestMonitorUpdateDataValidate(t *testing.T) {
 		{
 			name: "invalid nested field validation is surfaced",
 			data: MonitorUpdateData{
+				Headline: "{{Release date}}",
 				Fields: []MonitorUpdateField{
 					{
 						MonitorSchemaField: MonitorSchemaField{Type: MonitorSchemaFieldTypeDate, Name: "Release date"},
@@ -309,6 +249,73 @@ func TestMonitorUpdateDataValidate(t *testing.T) {
 				},
 			},
 			errContains: []string{`is not a valid date (YYYY-MM-DD)`},
+		},
+		{
+			name: "invalid headline unknown ref",
+			data: MonitorUpdateData{
+				Headline: "{{Unknown}}",
+				Fields: []MonitorUpdateField{
+					{
+						MonitorSchemaField: MonitorSchemaField{Type: MonitorSchemaFieldTypeText, Name: "Title"},
+						Value:              "Mewgenics",
+					},
+				},
+			},
+			errContains: []string{`headline references unknown field "Unknown"`},
+		},
+		{
+			name: "invalid malformed headline template",
+			data: MonitorUpdateData{
+				Headline: "{{Title",
+				Fields: []MonitorUpdateField{
+					{
+						MonitorSchemaField: MonitorSchemaField{Type: MonitorSchemaFieldTypeText, Name: "Title"},
+						Value:              "Mewgenics",
+					},
+				},
+			},
+			errContains: []string{"headline template is invalid"},
+		},
+		{
+			name: "valid static subtitle",
+			data: MonitorUpdateData{
+				Headline: "{{Title}}",
+				Subtitle: "From canonical source",
+				Fields: []MonitorUpdateField{
+					{
+						MonitorSchemaField: MonitorSchemaField{Type: MonitorSchemaFieldTypeText, Name: "Title"},
+						Value:              "Mewgenics",
+					},
+				},
+			},
+		},
+		{
+			name: "invalid subtitle unknown ref",
+			data: MonitorUpdateData{
+				Headline: "{{Title}}",
+				Subtitle: "Released {{Unknown}}",
+				Fields: []MonitorUpdateField{
+					{
+						MonitorSchemaField: MonitorSchemaField{Type: MonitorSchemaFieldTypeText, Name: "Title"},
+						Value:              "Mewgenics",
+					},
+				},
+			},
+			errContains: []string{`subtitle references unknown field "Unknown"`},
+		},
+		{
+			name: "invalid malformed subtitle template",
+			data: MonitorUpdateData{
+				Headline: "{{Title}}",
+				Subtitle: "Released {{Title",
+				Fields: []MonitorUpdateField{
+					{
+						MonitorSchemaField: MonitorSchemaField{Type: MonitorSchemaFieldTypeText, Name: "Title"},
+						Value:              "Mewgenics",
+					},
+				},
+			},
+			errContains: []string{"subtitle template is invalid"},
 		},
 	}
 
@@ -331,8 +338,6 @@ func TestMonitorUpdateDataValidate(t *testing.T) {
 
 func TestMonitorUpdateDataListValidateAgainstSchema(t *testing.T) {
 	schema := MonitorSchemaData{
-		Headline: "{{Title}}",
-		Subtitle: "Release: {{Release date}}",
 		Fields: MonitorSchemaFields{
 			{Type: MonitorSchemaFieldTypeText, Name: "Title"},
 			{Type: MonitorSchemaFieldTypeDate, Name: "Release date"},

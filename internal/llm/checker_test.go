@@ -63,8 +63,6 @@ func TestCheckerEasySubjectWithSchema(t *testing.T) {
 		MonitorCheckID: deps.fixtures.Check.ID,
 		Subject:        "Latest album by Tool (use wikipedia)",
 		Schema: models.MonitorSchemaData{
-			Headline: "{{Album name}}",
-			Subtitle: "Release date: {{Release date}}",
 			Fields: models.MonitorSchemaFields{
 				{
 					Type: "text",

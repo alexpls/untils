@@ -286,6 +286,8 @@ type MonitorResult struct {
 	Feedback             pgtype.Text
 	LastConfirmedCheckID int64
 	LastConfirmedAt      time.Time
+	Headline             string
+	Subtitle             string
 	Data                 MonitorUpdateData
 }
 

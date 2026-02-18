@@ -13,7 +13,6 @@ type CheckViewData struct {
 	Messages  []*models.LLMParsedMessage
 	ToolCalls []models.LLMToolCall
 	Result    *models.MonitorResult
-	Schema    models.MonitorSchemaData
 }
 
 templ CheckViewPage(data CheckViewData) {
@@ -67,7 +66,7 @@ templ CheckView(data CheckViewData) {
 					<div class="font-semibold uppercase text-xs mb-3">Result</div>
 					if data.Result != nil {
 						<ul>
-							@monitorResultTimelineItem(data.Schema, data.Result, true)
+							@monitorResultTimelineItem(data.Result, true)
 						</ul>
 					}
 					if data.Check.Result.Reason != "" {

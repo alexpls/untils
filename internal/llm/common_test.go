@@ -13,8 +13,6 @@ func TestCheckParamsUserMessageStringIncludesSchema(t *testing.T) {
 	msg := (CheckParams{
 		Subject: "Latest album by Tool",
 		Schema: models.MonitorSchemaData{
-			Headline: "{{Album name}}",
-			Subtitle: "Release date: {{Release date}}",
 			Fields: models.MonitorSchemaFields{
 				{Type: models.MonitorSchemaFieldTypeText, Name: "Album name"},
 				{Type: models.MonitorSchemaFieldTypeDate, Name: "Release date"},
@@ -25,7 +23,6 @@ func TestCheckParamsUserMessageStringIncludesSchema(t *testing.T) {
 
 	require.Contains(t, msg, "## Subject:\nLatest album by Tool")
 	require.Contains(t, msg, "## Monitor schema:")
-	require.Contains(t, msg, `"headline":"{{Album name}}"`)
 	require.Contains(t, msg, `"name":"Album name"`)
 }
 
@@ -45,7 +42,6 @@ func TestCheckParamsPreviousResultsStringIncludesJSONPayload(t *testing.T) {
 
 	msg := (CheckParams{
 		Schema: models.MonitorSchemaData{
-			Headline: "{{Title}}",
 			Fields: models.MonitorSchemaFields{
 				{Type: models.MonitorSchemaFieldTypeText, Name: "Title"},
 			},
@@ -53,7 +49,11 @@ func TestCheckParamsPreviousResultsStringIncludesJSONPayload(t *testing.T) {
 		PreviousResults: []*models.GetPreviousResultsWithCheckRow{
 			{
 				MonitorResult: models.MonitorResult{
+					Headline: "{{Title}}",
+					Subtitle: "Release date: {{Release date}}",
 					Data: models.MonitorUpdateData{
+						Headline: "{{Title}}",
+						Subtitle: "Release date: {{Release date}}",
 						Fields: models.MonitorUpdateFields{
 							{
 								MonitorSchemaField: models.MonitorSchemaField{
@@ -72,8 +72,10 @@ func TestCheckParamsPreviousResultsStringIncludesJSONPayload(t *testing.T) {
 		},
 	}).PreviousResultsString()
 
-	require.Contains(t, msg, `"schema":`)
-	require.Contains(t, msg, `"data":{"fields":[`)
+	require.Contains(t, msg, `"headline":"{{Title}}"`)
+	require.Contains(t, msg, `"subtitle":"Release date: {{Release date}}"`)
+	require.Contains(t, msg, `"data":{"headline":"{{Title}}"`)
+	require.Contains(t, msg, `"fields":[`)
 	require.Contains(t, msg, `"latest_check_ran_at":`)
 	require.Contains(t, msg, `"user_feedback":"Use canonical source pages"`)
 	require.Contains(t, msg, `"sources_used":["https://example.com/item"]`)

@@ -2,12 +2,15 @@ package models
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/alexpls/untils/internal/tinytemplate"
 )
 
 type MonitorUpdateData struct {
-	Fields MonitorUpdateFields `json:"fields"`
+	Headline string              `json:"headline"`
+	Subtitle string              `json:"subtitle"`
+	Fields   MonitorUpdateFields `json:"fields"`
 }
 
 type MonitorUpdateDataList []MonitorUpdateData
@@ -85,6 +88,23 @@ func (f MonitorUpdateFields) MustRenderTemplate(
 		panic(err)
 	}
 	return rendered
+}
+
+func (d MonitorUpdateData) RenderHeadline(
+	renderer MonitorFieldsRenderer,
+	renderCtx MonitorFieldsRenderContext,
+) (string, error) {
+	return d.Fields.RenderTemplate(d.Headline, renderer, renderCtx)
+}
+
+func (d MonitorUpdateData) RenderSubtitle(
+	renderer MonitorFieldsRenderer,
+	renderCtx MonitorFieldsRenderContext,
+) (string, error) {
+	if strings.TrimSpace(d.Subtitle) == "" {
+		return "", nil
+	}
+	return d.Fields.RenderTemplate(d.Subtitle, renderer, renderCtx)
 }
 
 func MonitorUpdateFieldsEqual(a, b MonitorUpdateFields) bool {

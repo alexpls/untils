@@ -14,7 +14,6 @@ import (
 type MonitorViewData struct {
 	Monitor                       *models.Monitor
 	Results                       []*models.MonitorResult
-	Schema                        models.MonitorSchemaData
 	NextScheduledCheck            *models.MonitorCheck
 	InProgressCheck               *models.MonitorCheck
 	InProgressCheckTimelineEvents []*models.GetTimelineEventsBySourceIDRow
@@ -99,7 +98,7 @@ templ MonitorPage(data MonitorViewData) {
 					})
 				}
 				for _, result := range data.Results {
-					@monitorResultTimelineItem(data.Schema, result, true)
+					@monitorResultTimelineItem(result, true)
 				}
 				<li>
 					@components.TimelineItem(monitorCreatedTimelineHeading(data.Monitor), nil)
@@ -134,15 +133,12 @@ templ InProgressCheckTimelineItem(data InProgressCheckTimelineItemViewData) {
 	}
 }
 
-templ monitorResultTimelineItem(schema models.MonitorSchemaData, result *models.MonitorResult, allowFeedback bool) {
+templ monitorResultTimelineItem(result *models.MonitorResult, allowFeedback bool) {
 	{{
 		renderer := monitorfieldrenderers.TextRenderer{}
 		renderCtx := components.MonitorFieldsRenderContext(ctx)
-		headline := result.Data.Fields.MustRenderTemplate(schema.Headline, renderer, renderCtx)
-		subtitle := ""
-		if schema.Subtitle != "" {
-			subtitle = result.Data.Fields.MustRenderTemplate(schema.Subtitle, renderer, renderCtx)
-		}
+		headline := result.MustRenderHeadline(renderer, renderCtx)
+		subtitle := result.MustRenderSubtitle(renderer, renderCtx)
 	}}
 	@components.TimelineItem(monitorResultHeading(headline), nil) {
 		if subtitle != "" {

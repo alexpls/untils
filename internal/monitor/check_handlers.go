@@ -90,17 +90,11 @@ func (h *Handlers) ViewCheck(w http.ResponseWriter, r *http.Request, user *model
 				return nil, fmt.Errorf("getting monitor result: %w", err)
 			}
 
-			schema, err := h.monitorSchema(r.Context(), check.MonitorID)
-			if err != nil {
-				return nil, fmt.Errorf("getting monitor schema: %w", err)
-			}
-
 			data := CheckViewData{
 				Check:     check,
 				Messages:  messages,
 				ToolCalls: toolCalls,
 				Result:    result,
-				Schema:    schema,
 			}
 
 			if patch {

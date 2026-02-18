@@ -120,7 +120,10 @@ from happening again.
   - If there are no previous results (first check), you must return exactly one update.
   - For a first check that contains multiple values in one snapshot, represent them as additional fields (columns) in that single update, not as multiple updates.
   - Each update can contain at most 16 fields.
-  - Each update must include a `fields` array.
+  - Each update must include `headline`, `subtitle`, and a `fields` array.
+  - `headline` is required and must be a non-empty string.
+  - `subtitle` can be an empty string (`""`).
+  - If referencing any field values in `headline` or `subtitle`, use template syntax (for example `{{Title}}`), not hardcoded copied values.
   - Each field must include `type`, `name`, and `value`.
   - Field `value` must always be a string.
   - For `date` fields, use `YYYY-MM-DD` when known. If unknown, use an empty string.
@@ -134,14 +137,17 @@ from happening again.
 - Monitor schema adherence:
   - If a schema is provided, updates must follow it exactly.
   - Do not invent field names or types that are not in the schema.
+  - A schema only defines fields (name/type). `headline` and `subtitle` are per-update outputs and may evolve each check.
+  - Prefer using templated variables in `headline`/`subtitle` when referencing field values, as this localizes better for user preferences.
   - If no schema is provided and you must return one:
     - Define at most 16 fields in total.
+  - Headline/subtitle quality:
     - Keep `headline` focused on the changing value(s), not the subject wording.
     - Avoid static boilerplate in `headline` that just repeats the monitor subject.
     - Use `headline` for the primary changing value (for example `{{Title}}`).
     - `subtitle` is optional. Use an empty string (`""`) when there is no extra useful context.
     - When `subtitle` includes a date or other scalar value, include a short label for clarity (for example `Release date: {{Release date}}`, `Price: {{Price}}`).
-    - If `subtitle` is non-empty, it must add distinct value beyond `headline` and reference at least one field.
+    - If `subtitle` is non-empty, it should add distinct value beyond `headline`.
     - Avoid ambiguous bare single-value subtitles like `{{Release date}}`; prefer labeled context.
     - Never duplicate `headline` in `subtitle` (including using the same single-field template in both).
 - `citations`:
@@ -160,6 +166,8 @@ from happening again.
   "different_to_previous": false,
   "updates": [
     {
+      "headline": "{{4TB price}} / {{6TB price}} / {{8TB price}}",
+      "subtitle": "",
       "fields": [
         { "type": "text", "name": "4TB price", "value": "$225.30" },
         { "type": "url", "name": "4TB link", "value": "https://www.techbuy.com.au/p/411944/harddrives/western_digital_wd40efpx.asp" },
@@ -192,6 +200,8 @@ Example subject for the next two examples: `Latest IGN game to get a 9/10 review
   "different_to_previous": true,
   "updates": [
     {
+      "headline": "{{Title}}",
+      "subtitle": "Release date: {{Release date}}",
       "fields": [
         { "type": "text", "name": "Title", "value": "Reanimal" },
         { "type": "date", "name": "Release date", "value": "2026-02-14" },
@@ -223,6 +233,8 @@ Example subject for the next two examples: `Latest IGN game to get a 9/10 review
   "different_to_previous": true,
   "updates": [
     {
+      "headline": "{{Title}}",
+      "subtitle": "Release date: {{Release date}}",
       "fields": [
         { "type": "text", "name": "Title", "value": "Mewgenics" },
         { "type": "date", "name": "Release date", "value": "2026-02-11" },
@@ -234,6 +246,8 @@ Example subject for the next two examples: `Latest IGN game to get a 9/10 review
       ]
     },
     {
+      "headline": "{{Title}}",
+      "subtitle": "Release date: {{Release date}}",
       "fields": [
         { "type": "text", "name": "Title", "value": "Reanimal" },
         { "type": "date", "name": "Release date", "value": "2026-02-14" },

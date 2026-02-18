@@ -239,7 +239,7 @@ func (s *Service) PerformMonitorCheck(
 	createMonitorResultParams := make([]*models.CreateMonitorResultParams, 0, len(result.Updates))
 	createdResultHeadlines := make([]string, 0, len(result.Updates))
 	for _, update := range result.Updates {
-		headline, err := schemaToPersist.RenderHeadline(update.Fields, renderer, renderCtx)
+		headline, err := update.RenderHeadline(renderer, renderCtx)
 		if err != nil {
 			return fmt.Errorf("rendering headline: %w", err)
 		}
@@ -308,11 +308,7 @@ func (s *Service) PerformMonitorCheck(
 	if result.DifferentToPrevious {
 		lastResult := "(none)"
 		if len(priorState.previousResults) > 0 {
-			lastResult, err = schemaToPersist.RenderHeadline(
-				priorState.previousResults[0].MonitorResult.Data.Fields,
-				renderer,
-				renderCtx,
-			)
+			lastResult, err = priorState.previousResults[0].MonitorResult.RenderHeadline(renderer, renderCtx)
 			if err != nil {
 				return fmt.Errorf("rendering previous headline: %w", err)
 			}

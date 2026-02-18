@@ -73,6 +73,8 @@ alter table monitor_checks drop column result_id;
 
 -- add new data col and denormalized
 
+alter table monitor_results add column headline text;
+alter table monitor_results add column subtitle text not null default '';
 alter table monitor_results add column data jsonb not null default '{}'::jsonb;
 
 -- migrate data
@@ -95,7 +97,13 @@ with monitor_settings as (
     ) mon
 )
 update monitor_results mr
-set data = jsonb_build_object(
+set
+    headline = '{{Result}}',
+    subtitle = case
+        when ms.date_field_name is not null then ms.date_field_name || ': {{' || ms.date_field_name || '}}'
+        else ''
+    end,
+    data = jsonb_build_object(
     'fields',
     jsonb_build_array(
         jsonb_build_object(
@@ -120,6 +128,8 @@ set data = jsonb_build_object(
 from monitor_settings ms
 where ms.monitor_id = mr.monitor_id;
 
+alter table monitor_results alter column headline set not null;
+
 with monitor_settings as (
     select
         mon.monitor_id,
@@ -141,11 +151,6 @@ insert into monitor_schemas (monitor_id, data)
 select
     ms.monitor_id,
     jsonb_build_object(
-        'headline', '{{Result}}',
-        'subtitle', case
-            when ms.date_field_name is not null then ms.date_field_name || ': {{' || ms.date_field_name || '}}'
-            else ''
-        end,
         'fields',
         jsonb_build_array(
             jsonb_build_object(
