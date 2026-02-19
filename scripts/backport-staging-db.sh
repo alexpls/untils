@@ -22,7 +22,7 @@ LOCAL_DB_PASSWORD="root"
 LOCAL_DB_NAME="untils_dev"
 LOCAL_DB_ADMIN_DB="postgres"
 
-DUMP_FILE="/tmp/untils_staging_dump_$$.sql"
+DUMP_FILE="./tmp/untils_staging_dump_$$.sql"
 
 echo "==> Dumping staging database from ${REMOTE_HOST}..."
 ssh "${REMOTE_HOST}" "sudo docker exec ${REMOTE_CONTAINER} pg_dump -U ${REMOTE_DB_USER} -d ${REMOTE_DB_NAME} --clean --if-exists" > "${DUMP_FILE}"
@@ -45,8 +45,5 @@ PGPASSWORD="${LOCAL_DB_PASSWORD}" psql \
     -U "${LOCAL_DB_USER}" \
     -d "${LOCAL_DB_NAME}" \
     -f "${DUMP_FILE}"
-
-echo "==> Cleaning up..."
-rm -f "${DUMP_FILE}"
 
 echo "==> Done! Staging database has been imported to local ${LOCAL_DB_NAME}."
