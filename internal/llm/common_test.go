@@ -39,6 +39,7 @@ func TestCheckParamsPreviousResultsStringIncludesJSONPayload(t *testing.T) {
 	citations := models.Citations{
 		{URL: "https://example.com/item"},
 	}
+	doneAt := time.Date(2026, 2, 16, 15, 4, 0, 0, time.UTC)
 
 	msg := (CheckParams{
 		Schema: models.MonitorSchemaData{
@@ -64,9 +65,11 @@ func TestCheckParamsPreviousResultsStringIncludesJSONPayload(t *testing.T) {
 							},
 						},
 					},
-					LastConfirmedAt: time.Date(2026, 2, 16, 15, 4, 0, 0, time.UTC),
-					Feedback:        pgtype.Text{String: "Use canonical source pages", Valid: true},
-					Citations:       &citations,
+					Feedback:  pgtype.Text{String: "Use canonical source pages", Valid: true},
+					Citations: &citations,
+				},
+				MonitorCheck: models.MonitorCheck{
+					DoneAt: &doneAt,
 				},
 			},
 		},

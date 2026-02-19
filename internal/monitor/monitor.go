@@ -187,19 +187,15 @@ func (s *Service) ValidateMonitor(ctx context.Context, monitor *models.Monitor) 
 
 func MonitorUpdateToCreateMonitorResultParams(
 	monitorID int64,
-	checkID int64,
-	confirmedAt time.Time,
 	update models.MonitorUpdateData,
 	citations *models.Citations,
 ) *models.CreateMonitorResultParams {
 	return &models.CreateMonitorResultParams{
-		MonitorID:            monitorID,
-		LastConfirmedCheckID: checkID,
-		LastConfirmedAt:      confirmedAt,
-		Headline:             update.Headline,
-		Subtitle:             update.Subtitle,
-		Data:                 update,
-		Citations:            citations,
+		MonitorID: monitorID,
+		Headline:  update.Headline,
+		Subtitle:  update.Subtitle,
+		Data:      update,
+		Citations: citations,
 	}
 }
 

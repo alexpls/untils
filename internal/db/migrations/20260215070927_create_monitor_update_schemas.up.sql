@@ -68,32 +68,6 @@ from ranked_checks rc
 where rc.rn = 1
 on conflict (monitor_result_id, monitor_check_id) do nothing;
 
-alter table monitor_results add column last_confirmed_check_id bigint references monitor_checks(id);
-alter table monitor_results add column last_confirmed_at timestamptz;
-
-with latest_checks as (
-    select distinct on (mrc.monitor_result_id)
-        mrc.monitor_result_id as result_id,
-        mc.id as check_id,
-        coalesce(mc.done_at, mr.created_at) as confirmed_at
-    from monitor_result_checks mrc
-    join monitor_checks mc on mc.id = mrc.monitor_check_id
-    join monitor_results mr on mr.id = mrc.monitor_result_id
-    order by
-        mrc.monitor_result_id,
-        coalesce(mc.done_at, mr.created_at) desc,
-        mc.id desc
-)
-update monitor_results mr
-set
-    last_confirmed_check_id = lc.check_id,
-    last_confirmed_at = lc.confirmed_at
-from latest_checks lc
-where lc.result_id = mr.id;
-
-alter table monitor_results alter column last_confirmed_check_id set not null;
-alter table monitor_results alter column last_confirmed_at set not null;
-
 drop view if exists monitor_results_with_latest_check;
 
 alter table monitor_checks drop column result_id;

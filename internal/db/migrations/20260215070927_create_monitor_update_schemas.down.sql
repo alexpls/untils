@@ -91,9 +91,6 @@ select
 from monitor_results mr
 left join latest_checks lc on lc.result_id = mr.id;
 
-alter table monitor_results drop column last_confirmed_check_id;
-alter table monitor_results drop column last_confirmed_at;
-
 drop table if exists monitor_result_checks;
 
 alter table monitor_results drop column headline;

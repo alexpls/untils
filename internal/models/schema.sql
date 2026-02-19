@@ -331,8 +331,6 @@ CREATE TABLE public.monitor_results (
     citations jsonb DEFAULT '[]'::jsonb NOT NULL,
     created_at timestamp with time zone NOT NULL,
     feedback text,
-    last_confirmed_check_id bigint NOT NULL,
-    last_confirmed_at timestamp with time zone NOT NULL,
     headline text NOT NULL,
     subtitle text DEFAULT ''::text NOT NULL,
     data jsonb NOT NULL
@@ -1001,14 +999,6 @@ ALTER TABLE ONLY public.monitor_result_checks
 
 ALTER TABLE ONLY public.monitor_result_checks
     ADD CONSTRAINT monitor_result_checks_monitor_result_id_fkey FOREIGN KEY (monitor_result_id) REFERENCES public.monitor_results(id) ON DELETE CASCADE;
-
-
---
--- Name: monitor_results monitor_results_last_confirmed_check_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.monitor_results
-    ADD CONSTRAINT monitor_results_last_confirmed_check_id_fkey FOREIGN KEY (last_confirmed_check_id) REFERENCES public.monitor_checks(id);
 
 
 --

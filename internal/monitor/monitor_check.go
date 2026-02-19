@@ -227,8 +227,6 @@ func (s *Service) PerformMonitorCheck(
 	if schemaToPersist.Zero() {
 		schemaToPersist = result.Schema
 	}
-	confirmedAt := time.Now()
-
 	renderer := monitorfieldrenderers.TextRenderer{}
 	renderCtx := models.MonitorFieldsRenderContext{Timezone: user.Timezone}
 
@@ -242,8 +240,6 @@ func (s *Service) PerformMonitorCheck(
 
 		params := MonitorUpdateToCreateMonitorResultParams(
 			check.MonitorID,
-			check.ID,
-			confirmedAt,
 			update,
 			&result.Citations,
 		)
@@ -296,14 +292,6 @@ func (s *Service) PerformMonitorCheck(
 				MonitorCheckID:  check.ID,
 			}); err != nil {
 				return fmt.Errorf("creating monitor result check link: %w", err)
-			}
-
-			if err := s.queries.UpdateMonitorResultLastConfirmed(ctx, tx, &models.UpdateMonitorResultLastConfirmedParams{
-				CheckID:         check.ID,
-				ConfirmedAt:     confirmedAt,
-				MonitorResultID: priorState.previousResults[0].MonitorResult.ID,
-			}); err != nil {
-				return fmt.Errorf("updating monitor result confirmation: %w", err)
 			}
 		}
 

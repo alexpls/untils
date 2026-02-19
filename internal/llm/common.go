@@ -39,7 +39,7 @@ func (c CheckParams) UserMessageString() string {
 func (c CheckParams) PreviousResultsString() string {
 	var prevs strings.Builder
 	for _, pr := range c.PreviousResults {
-		prevs.WriteString(must.NoErrVal(pr.MonitorResult.PromptJSON()))
+		prevs.WriteString(must.NoErrVal(pr.PromptJSON()))
 		prevs.WriteString("\n")
 	}
 	return prevs.String()

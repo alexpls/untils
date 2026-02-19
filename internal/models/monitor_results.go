@@ -4,9 +4,23 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 )
 
 func (mr MonitorResult) PromptJSON() (string, error) {
+	return monitorResultPromptJSON(mr, mr.CreatedAt)
+}
+
+func (mrwc GetPreviousResultsWithCheckRow) PromptJSON() (string, error) {
+	latestCheckRanAt := mrwc.MonitorResult.CreatedAt
+	if mrwc.MonitorCheck.DoneAt != nil {
+		latestCheckRanAt = *mrwc.MonitorCheck.DoneAt
+	}
+
+	return monitorResultPromptJSON(mrwc.MonitorResult, latestCheckRanAt)
+}
+
+func monitorResultPromptJSON(mr MonitorResult, latestCheckRanAt time.Time) (string, error) {
 	payload := struct {
 		Headline         string            `json:"headline"`
 		Subtitle         string            `json:"subtitle"`
@@ -18,7 +32,7 @@ func (mr MonitorResult) PromptJSON() (string, error) {
 		Headline:         mr.Headline,
 		Subtitle:         mr.Subtitle,
 		Data:             mr.Data,
-		LatestCheckRanAt: mr.LastConfirmedAt.Format("January 2, 2006 at 3:04 PM"),
+		LatestCheckRanAt: latestCheckRanAt.Format("January 2, 2006 at 3:04 PM"),
 	}
 
 	if mr.Feedback.Valid {

@@ -575,7 +575,7 @@ func (h *Handlers) monitorDraftViewData(
 }
 
 func (h *Handlers) monitorViewData(ctx context.Context, mon *models.Monitor, userID int64) (MonitorViewData, error) {
-	results, err := h.service.queries.ListMonitorResults(ctx, h.service.db, mon.ID)
+	results, err := h.service.queries.ListMonitorResultsWithLatestCheck(ctx, h.service.db, mon.ID)
 	if err != nil {
 		return MonitorViewData{}, err
 	}

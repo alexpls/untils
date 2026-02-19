@@ -3,6 +3,7 @@ package monitor
 import (
 	"fmt"
 	"net/url"
+	"time"
 
 	"github.com/alexpls/untils/internal/components"
 	"github.com/alexpls/untils/internal/components/icons"
@@ -13,7 +14,7 @@ import (
 
 type MonitorViewData struct {
 	Monitor                       *models.Monitor
-	Results                       []*models.MonitorResult
+	Results                       []*models.ListMonitorResultsWithLatestCheckRow
 	NextScheduledCheck            *models.MonitorCheck
 	InProgressCheck               *models.MonitorCheck
 	InProgressCheckTimelineEvents []*models.GetTimelineEventsBySourceIDRow
@@ -98,7 +99,7 @@ templ MonitorPage(data MonitorViewData) {
 					})
 				}
 				for _, result := range data.Results {
-					@monitorResultTimelineItem(result, true)
+					@monitorResultTimelineItemWithLatestCheck(result.MonitorResult, true, result.LatestCheckID, *result.LatestCheckDoneAt)
 				}
 				<li>
 					@components.TimelineItem(monitorCreatedTimelineHeading(data.Monitor), nil)
@@ -134,6 +135,10 @@ templ InProgressCheckTimelineItem(data InProgressCheckTimelineItemViewData) {
 }
 
 templ monitorResultTimelineItem(result *models.MonitorResult, allowFeedback bool) {
+	@monitorResultTimelineItemWithLatestCheck(*result, allowFeedback, 0, result.CreatedAt)
+}
+
+templ monitorResultTimelineItemWithLatestCheck(result models.MonitorResult, allowFeedback bool, latestCheckID int64, latestCheckAt time.Time) {
 	{{
 		renderer := monitorfieldrenderers.TextRenderer{}
 		renderCtx := components.MonitorFieldsRenderContext(ctx)
@@ -152,9 +157,13 @@ templ monitorResultTimelineItem(result *models.MonitorResult, allowFeedback bool
 					Latest check
 				</div>
 				<div>
-					<a href={ fmt.Sprintf("/app/checks/%d", result.LastConfirmedCheckID) } class="link-hover">
-						{ components.FormatDateTime(ctx, result.LastConfirmedAt) }
-					</a>
+					if latestCheckID > 0 {
+						<a href={ fmt.Sprintf("/app/checks/%d", latestCheckID) } class="link-hover">
+							{ components.FormatDateTime(ctx, latestCheckAt) }
+						</a>
+					} else {
+						{ components.FormatDateTime(ctx, latestCheckAt) }
+					}
 				</div>
 			</div>
 			<div>

@@ -156,7 +156,14 @@ limit 1;
 -- name: GetPreviousResultsWithCheck :many
 select sqlc.embed(mr), sqlc.embed(mc)
 from monitor_results mr
-inner join monitor_checks mc on mc.id = mr.last_confirmed_check_id
+join lateral (
+    select mc.*
+    from monitor_result_checks mrc
+    join monitor_checks mc on mc.id = mrc.monitor_check_id
+    where mrc.monitor_result_id = mr.id
+    order by mc.done_at desc nulls last, mc.id desc
+    limit 1
+) mc on true
 where mr.monitor_id = @monitor_id
 order by mr.created_at desc, mr.id desc
 limit 10;
@@ -165,6 +172,24 @@ limit 10;
 select * from monitor_results
 where monitor_id = @monitor_id
 order by created_at desc, id desc;
+
+-- name: ListMonitorResultsWithLatestCheck :many
+select
+    sqlc.embed(mr),
+    mc.id as latest_check_id,
+    mc.done_at as latest_check_done_at
+from monitor_results mr
+join lateral (
+    select mc.id, mc.done_at
+    from monitor_result_checks mrc
+    join monitor_checks mc on mc.id = mrc.monitor_check_id
+    where mrc.monitor_result_id = mr.id
+    and mc.done_at is not null
+    order by mc.done_at desc nulls last, mc.id desc
+    limit 1
+) mc on true
+where mr.monitor_id = @monitor_id
+order by mr.created_at desc, mr.id desc;
 
 -- name: GetMonitorResult :one
 select * from monitor_results
@@ -190,8 +215,6 @@ where monitor_id = @monitor_id;
 -- name: CreateMonitorResult :one
 insert into monitor_results (
     monitor_id,
-    last_confirmed_check_id,
-    last_confirmed_at,
     headline,
     subtitle,
     data,
@@ -200,8 +223,6 @@ insert into monitor_results (
 )
 values (
     @monitor_id,
-    @last_confirmed_check_id,
-    @last_confirmed_at,
     @headline,
     @subtitle,
     @data,
@@ -214,13 +235,6 @@ returning *;
 insert into monitor_result_checks (monitor_result_id, monitor_check_id)
 values (@monitor_result_id, @monitor_check_id)
 on conflict (monitor_result_id, monitor_check_id) do nothing;
-
--- name: UpdateMonitorResultLastConfirmed :exec
-update monitor_results
-set
-    last_confirmed_check_id = @check_id,
-    last_confirmed_at = @confirmed_at
-where id = @monitor_result_id;
 
 -- name: UpdateMonitorResultWithFeedback :exec
 update monitor_results
