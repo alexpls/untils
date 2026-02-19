@@ -37,3 +37,82 @@ func fixtureInProgressCheckTimelineItemData() *monitor.InProgressCheckTimelineIt
 		},
 	}
 }
+
+func fixtureMonitorDraftPreviewingData() *monitor.MonitorDraftData {
+	timelineItemData := fixtureInProgressCheckTimelineItemData()
+
+	return &monitor.MonitorDraftData{
+		Monitor: &models.Monitor{
+			ID:      4242,
+			Status:  models.MonitorStatusPreviewing,
+			Subject: pgtype.Text{Valid: true, String: "Find major changes in the Kubernetes release notes"},
+		},
+		InProgressCheck:               timelineItemData.Check,
+		InProgressCheckTimelineEvents: timelineItemData.TimelineEvents,
+		Notifiers: []*monitor.MonitorNotifierViewData{
+			{
+				Integration: &models.UserIntegrationsRow{
+					Name:       models.NotifierPushover,
+					Configured: true,
+				},
+			},
+			{
+				Integration: &models.UserIntegrationsRow{
+					Name:       models.NotifierEmail,
+					Configured: true,
+				},
+			},
+		},
+	}
+}
+
+func fixtureMonitorDraftReadyData() *monitor.MonitorDraftData {
+	now := time.Now()
+
+	return &monitor.MonitorDraftData{
+		Monitor: &models.Monitor{
+			ID:      4243,
+			Status:  models.MonitorStatusReady,
+			Subject: pgtype.Text{Valid: true, String: "Find major changes in the Kubernetes release notes"},
+		},
+		ResultPreview: &models.MonitorResult{
+			ID:        1001,
+			MonitorID: 4243,
+			CreatedAt: now.Add(-2 * time.Minute),
+			Headline:  "{{Summary}}",
+			Subtitle:  "Source: {{Release notes URL}}",
+			Data: models.MonitorUpdateData{
+				Fields: models.MonitorUpdateFields{
+					{
+						MonitorSchemaField: models.MonitorSchemaField{
+							Type: models.MonitorSchemaFieldTypeText,
+							Name: "Summary",
+						},
+						Value: "Kubernetes v1.35 release notes published",
+					},
+					{
+						MonitorSchemaField: models.MonitorSchemaField{
+							Type: models.MonitorSchemaFieldTypeURL,
+							Name: "Release notes URL",
+						},
+						Value: "https://kubernetes.io/releases/",
+					},
+				},
+			},
+		},
+		Notifiers: []*monitor.MonitorNotifierViewData{
+			{
+				Integration: &models.UserIntegrationsRow{
+					Name:       models.NotifierPushover,
+					Configured: true,
+				},
+			},
+			{
+				Integration: &models.UserIntegrationsRow{
+					Name:       models.NotifierEmail,
+					Configured: true,
+				},
+			},
+		},
+	}
+}

@@ -23,142 +23,144 @@ func (m MonitorDraftData) GetValidationErrors() validation.ValidationErrors {
 	return m.ValidationErrors
 }
 
-func monitorLoading(mon *models.Monitor) bool {
-	return mon.Status == models.MonitorStatusPreviewing || mon.Status == models.MonitorStatusValidating
-}
-
 templ MonitorDraftPage(data MonitorDraftData) {
 	@components.AppLayout("Draft: "+data.Monitor.Subject.String, []components.Breadcrumb{
 		{Title: "Dashboard", Href: "/app"},
 		{Title: "Monitors", Href: "/app/monitors"},
 	}) {
 		@monitorNewHeading()
-		@MonitorDraftView(data)
+		<div class="mt-7">
+			@MonitorDraftView(data)
+		</div>
 	}
 }
 
+templ FieldsetTitle(title string) {
+	<div class="flex items-center text-muted uppercase text-xs font-bold mb-2">
+		<span>{ title }</span>
+		<div class="ml-2 flex-1 border-t border-base-content/10"></div>
+	</div>
+}
+
 templ MonitorDraftView(data MonitorDraftData) {
-	<div class="max-w-lg px-6 mx-auto" id="monitor-draft-view" data-effect={ datastar.GetSSE("/app/monitors/%d?sse=true", data.Monitor.ID) }>
-		<div class="mt-8">
-			<form data-on:submit={ datastar.PostSSE("/app/monitors/%d", data.Monitor.ID) }>
-				<fieldset class="fieldset">
-					<textarea
-						if monitorLoading(data.Monitor) {
-							disabled
-						}
-						name="Subject"
-						class={ templ.Classes(
-								monitorSubjectTextareaViewTransition(),
-								"textarea", "textarea-xl",
-								templ.KV("textarea-error", components.ValidationError(data, "Subject") != ""),
-								"field-sizing-content", "resize-none",
-								"w-full", "min-h-lh", "max-h-[4lh]",
-								"disabled:border-base-content/20",
-							) }
-						placeholder="Type here..."
-						data-bind:_subject.current
-						data-signals:_subject.initial={ templ.JSONString(data.Monitor.Subject.String) }
-						data-computed:_subject.changed="$_subject.current !== $_subject.initial"
-						data-computed:subject="$_subject.current"
-						data-on:focus="$_subject.updating = true"
-						data-on:blur="$_subject.updating = false"
-						data-on:keydown={ fmt.Sprintf(`
-							if (evt.key === 'Enter') {
-								evt.preventDefault();
-								@post('/app/monitors/%d')
-							}
-						`, data.Monitor.ID) }
-					>{ data.Monitor.Subject.String }</textarea>
-					if err := components.ValidationError(data, "Subject"); err != "" {
-						<p class="label text-error mt-1">{ err }</p>
-					}
-					<div
-						class="overflow-hidden max-h-0 transition-all duration-500"
-						data-class="{'max-h-96': $_subject.updating || $_subject.changed}"
-					>
-						<button
-							class="mt-2 btn btn-primary btn-lg w-full"
-							type="submit"
-							data-on:click="
-								if (!$_subject.changed) {
-									evt.preventDefault();
-									el.form.elements['Subject'].focus();
-								}
-							"
-						>
-							<span class="mr-1">Change it</span>
-						</button>
-					</div>
-				</fieldset>
-			</form>
-		</div>
-		<div class="mt-4">
-			<div class="bg-base-100 border border-base-content/20 rounded">
-				<div class="p-3 space-y-3 border-b border-base-content/10">
-					switch data.Monitor.Status {
-						case models.MonitorStatusValidating:
-							<div class="flex items-start">
-								@icons.Loader(icons.IconParams{
-									Size:    18,
-									Classes: templ.Classes("shrink-0", "mt-1", "animate-spin"),
-								})
-								<span class="ml-2">Validating subject...</span>
-							</div>
-						case models.MonitorStatusRejected:
-							<div class="flex items-start text-error">
-								@icons.TriangleAlert(icons.IconParams{
-									Size:    18,
-									Classes: templ.Classes("shrink-0", "mt-1"),
-								})
-								<span class="ml-2">
-									<strong>Rejected:</strong>
-									if data.Monitor.RejectedReason.String != "" {
-										{ data.Monitor.RejectedReason.String }
-									} else {
-										Subject is not valid.
+	<div class="grid grid-cols-12 lg:gap-x-8 mx-auto max-w-5xl px-2 py-4" id="monitor-draft-view" data-effect={ datastar.GetSSE("/app/monitors/%d?sse=true", data.Monitor.ID) }>
+		<div class="col-span-12 lg:col-span-7">
+			<div class="py-4 bg-base-100 border border-base-content/20 rounded">
+				<form data-on:submit={ datastar.PostSSE("/app/monitors/%d", data.Monitor.ID) }>
+					<fieldset class="fieldset px-4">
+						@FieldsetTitle("Subject")
+						<textarea
+							name="Subject"
+							class={ templ.Classes(
+										monitorSubjectTextareaViewTransition(),
+										"textarea", "textarea-xl",
+										templ.KV("textarea-error", components.ValidationError(data, "Subject") != ""),
+										"field-sizing-content", "resize-none",
+										"w-full", "min-h-lh", "max-h-[4lh]",
+										"disabled:border-base-content/20",
+										"rounded-lg",
+									) }
+							placeholder="Type here..."
+							data-bind:_subject.current
+							data-signals:_subject.initial={ templ.JSONString(data.Monitor.Subject.String) }
+							data-computed:_subject.changed="$_subject.current !== $_subject.initial"
+							data-computed:subject="$_subject.current"
+							data-on:focus="$_subject.updating = true"
+							data-on:blur="$_subject.updating = false"
+							data-on:keydown={ fmt.Sprintf(`
+									if (evt.key === 'Enter') {
+										evt.preventDefault();
+										@post('/app/monitors/%d')
 									}
-								</span>
-							</div>
-						default:
-							<div class="flex items-start text-success">
-								@icons.CircleCheck(icons.IconParams{
-									Size:    18,
-									Classes: templ.Classes("shrink-0", "mt-1"),
-								})
-								<span class="ml-2">Subject valid</span>
-							</div>
-					}
+								`, data.Monitor.ID) }
+						>{ data.Monitor.Subject.String }</textarea>
+						if err := components.ValidationError(data, "Subject"); err != "" {
+							<p class="label text-error mt-1">{ err }</p>
+						}
+						if data.Monitor.Status == models.MonitorStatusPreviewing || data.Monitor.Status == models.MonitorStatusReady {
+							<p class="label text-success ml-2">
+								@icons.CircleCheck(icons.IconParams{Size: 14})
+								Subject valid
+							</p>
+						}
+						<div
+							class="overflow-hidden max-h-0 transition-all duration-500"
+							data-class="{'max-h-96': $_subject.updating || $_subject.changed}"
+						>
+							<button
+								class="mt-2 btn btn-primary btn-lg w-full"
+								type="submit"
+								data-on:click="
+										if (!$_subject.changed) {
+											evt.preventDefault();
+											el.form.elements['Subject'].focus();
+										}
+									"
+							>
+								<span class="mr-1">Change it</span>
+							</button>
+						</div>
+					</fieldset>
+				</form>
+				<div class="mt-4 space-y-6 px-4">
+					<div>
+						@FieldsetTitle("Check frequency")
+						<div class="space-y-1 mt-2">
+							@FrequencyPicker(data.Monitor)
+						</div>
+					</div>
+					<div>
+						@FieldsetTitle("Notifications")
+						<div class="space-y-1">
+							@MonitorNotificationsList(MonitorNotificationsViewData{
+								Monitor:   data.Monitor,
+								Notifiers: data.Notifiers,
+							})
+						</div>
+					</div>
 				</div>
-				<div class="p-3 space-y-3 border-b border-base-content/10">
+			</div>
+		</div>
+		<div class="col-span-12 lg:col-span-5 mt-2 lg:mt-0">
+			<div class="bg-base-200 rounded border border-base-content/10">
+				<div class="border-b border-base-content/10 p-3 py-2 rounded-t">
 					switch data.Monitor.Status {
 						case models.MonitorStatusPreviewing:
 							<div class="flex items-start">
 								@icons.Loader(icons.IconParams{
 									Size:    18,
-									Classes: templ.Classes("shrink-0", "mt-1", "animate-spin"),
+									Classes: templ.Classes("shrink-0", "mt-1", "mr-2", "animate-spin"),
 								})
-								<div class="ml-2">
-									<p>Previewing...</p>
-									if data.InProgressCheck != nil && len(data.InProgressCheckTimelineEvents) > 0 {
-										<div>
-											<ul>
-												@InProgressCheckTimelineItem(InProgressCheckTimelineItemViewData{
-													Check:          data.InProgressCheck,
-													TimelineEvents: data.InProgressCheckTimelineEvents,
-												})
-											</ul>
-										</div>
-									}
-								</div>
+								<span>Previewing...</span>
 							</div>
 						case models.MonitorStatusReady:
 							<div class="flex items-start">
 								@icons.CircleCheck(icons.IconParams{
 									Size:    18,
-									Classes: templ.Classes("shrink-0", "mt-1", "text-success"),
+									Classes: templ.Classes("shrink-0", "mt-1", "mr-2", "text-success"),
 								})
+								<span class="text-success">First check complete</span>
+							</div>
+					}
+				</div>
+				<div>
+					switch data.Monitor.Status {
+						case models.MonitorStatusPreviewing:
+							<div class="flex items-start px-3">
+								if data.InProgressCheck != nil && len(data.InProgressCheckTimelineEvents) > 0 {
+									<div>
+										<ul>
+											@InProgressCheckTimelineItem(InProgressCheckTimelineItemViewData{
+												Check:          data.InProgressCheck,
+												TimelineEvents: data.InProgressCheckTimelineEvents,
+											})
+										</ul>
+									</div>
+								}
+							</div>
+						case models.MonitorStatusReady:
+							<div class="flex items-start">
 								<div class="ml-2">
-									<p class="text-success">Preview successful</p>
 									<div>
 										<ul>
 											@monitorResultTimelineItem(data.ResultPreview, true)
@@ -166,72 +168,39 @@ templ MonitorDraftView(data MonitorDraftData) {
 									</div>
 								</div>
 							</div>
-						default:
-							<div class="flex items-start">
-								@icons.Spacer(icons.IconParams{
-									Size:    18,
-									Classes: templ.Classes("shrink-0", "mt-1"),
-								})
-								<div class="ml-2">
-									<p class="text-base-content/30">Previewing the first check</p>
-								</div>
-							</div>
 					}
 				</div>
-				<div class="p-3 space-y-3">
-					switch data.Monitor.Status {
-						case models.MonitorStatusReady:
-							<div class="flex items-start">
-								@icons.CircleCheck(icons.IconParams{
-									Size:    18,
-									Classes: templ.Classes("shrink-0", "mt-1", "text-success"),
-								})
-								<div class="ml-2 w-full">
-									<p class="text-success">Ready to go</p>
-									<div class="muted mt-1">
-										When a new result is found&hellip;
-									</div>
-									<div class="space-y-1 mt-2">
-										@MonitorNotificationsList(MonitorNotificationsViewData{
-											Monitor:   data.Monitor,
-											Notifiers: data.Notifiers,
-										})
-									</div>
-								</div>
-							</div>
-						default:
-							<div class="flex items-start">
-								@icons.Spacer(icons.IconParams{
-									Size:    18,
-									Classes: templ.Classes("shrink-0", "mt-1"),
-								})
-								<div class="ml-2 w-full text-base-content/30">
-									Ready to go
-								</div>
-							</div>
-					}
+				{{ monitorNotReady := data.Monitor.Status != models.MonitorStatusReady }}
+				if monitorNotReady {
+					<div class="p-3 py-1.5 border-t border-t-base-content/10 rounded-b text-xs flex">
+						<div>
+							<label class="label">
+								<input type="checkbox" class="checkbox checkbox-sm"/>
+								<span>TODO: Automatically activate when the preview finishes</span>
+							</label>
+						</div>
+					</div>
+				}
+				<div>
+					<button
+						class={ "btn", "btn-primary", "btn-lg", "w-full", "flex", "items-center", "flex-1", "rounded-t-none" }
+						disabled?={ monitorNotReady }
+						data-on:click={ datastar.PostSSE("/app/monitors/%d/activate", data.Monitor.ID) }
+					>
+						<span>Activate monitor</span>
+						@icons.ArrowRight(icons.IconParams{Size: 15})
+					</button>
 				</div>
 			</div>
 		</div>
-		if data.Monitor.Status == models.MonitorStatusReady {
-			<div class="mt-6">
-				<button
-					class="btn btn-primary btn-lg w-full mt-2 flex items-center"
-					data-on:click={ datastar.PostSSE("/app/monitors/%d/activate", data.Monitor.ID) }
-				>
-					<span>Start monitoring now</span>
-					@icons.ArrowRight(icons.IconParams{Size: 15})
-				</button>
-			</div>
-		}
-		<div class="py-12 text-center">
-			<button
-				data-on:click={ datastar.DeleteSSE("/app/monitors/%d", data.Monitor.ID) }
-				class="text-sm link link-hover"
-			>
-				Discard this draft
-			</button>
-		</div>
+	</div>
+	<div class="py-12 text-center">
+		<button
+			data-on:click={ datastar.DeleteSSE("/app/monitors/%d", data.Monitor.ID) }
+			class="text-sm link link-hover"
+		>
+			Discard this monitor
+		</button>
 	</div>
 }
 

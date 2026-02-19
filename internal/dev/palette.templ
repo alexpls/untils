@@ -19,13 +19,23 @@ templ PalettePage() {
 		},
 	}) {
 		<div class="p-4">
-			@example("FrequencyPicker") {
-				@monitor.FrequencyPicker(monitorStub())
+			<div class="max-w-sm">
+				@example("FrequencyPicker") {
+					@monitor.FrequencyPicker(monitorStub())
+				}
+			</div>
+			<div class="max-w-sm">
+				@example("InProgressCheckTimelineItem") {
+					<ul>
+						@monitor.InProgressCheckTimelineItem(*fixtureInProgressCheckTimelineItemData())
+					</ul>
+				}
+			</div>
+			@example("MonitorDraftView (previewing)") {
+				@monitor.MonitorDraftView(*fixtureMonitorDraftPreviewingData())
 			}
-			@example("InProgressCheckTimelineItem") {
-				<ul>
-					@monitor.InProgressCheckTimelineItem(*fixtureInProgressCheckTimelineItemData())
-				</ul>
+			@example("MonitorDraftView (ready)") {
+				@monitor.MonitorDraftView(*fixtureMonitorDraftReadyData())
 			}
 		</div>
 	}
@@ -33,7 +43,7 @@ templ PalettePage() {
 
 templ example(title string) {
 	<h2 class="text-xl font-bold mt-3">{ title }</h2>
-	<div class="max-w-sm border border-red-500/40 border-dashed mt-2">
+	<div class="border border-red-500/40 border-dashed mt-2">
 		{ children... }
 	</div>
 }

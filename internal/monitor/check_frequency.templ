@@ -3,7 +3,7 @@ package monitor
 import (
 	"fmt"
 	"github.com/alexpls/untils/internal/models"
-	"github.com/starfederation/datastar-go/datastar"
+	"strings"
 	"unicode"
 	"unicode/utf8"
 )
@@ -13,37 +13,46 @@ templ FrequencyPicker(monitor *models.Monitor) {
 		<div class="w-full max-w-full">
 			{{
 				selectedIndex := 0
+				optionCount := len(FrequencyOptions)
+				frequencyValues := make([]string, optionCount)
+				scope := fmt.Sprintf("_frequency_%d", monitor.ID)
+				indexSignal := fmt.Sprintf("%s.index", scope)
+				paddingSignal := fmt.Sprintf("$%s.padding", scope)
 				for i, opt := range FrequencyOptions {
+					frequencyValues[i] = fmt.Sprintf("%d", opt.Minutes)
 					if monitor.CheckFrequencyMinutes == opt.Minutes {
 						selectedIndex = i
-						break
 					}
 				}
+				frequencyValuesLiteral := "[" + strings.Join(frequencyValues, ",") + "]"
+				postFrequencyJS := fmt.Sprintf("@post('/app/monitors/%d/frequency', {payload: {frequency: minutes}})", monitor.ID)
+				updateFrequencyFromSliderJS := fmt.Sprintf("const idx = Number(el.value); const minutes = %s[idx]; if (minutes !== undefined) { $frequency = minutes; }", frequencyValuesLiteral)
+				updateAndPostFrequencyFromSliderJS := fmt.Sprintf("const idx = Number(el.value); const minutes = %s[idx]; if (minutes !== undefined) { $frequency = minutes; %s; }", frequencyValuesLiteral, postFrequencyJS)
+				updatePaddingJS := fmt.Sprintf("%s = Math.floor((el.offsetWidth / %d) / 2)", paddingSignal, optionCount)
 			}}
 			<input
 				name="frequency"
 				type="range"
 				min="0"
-				max={ len(FrequencyOptions) - 1 }
+				max={ optionCount - 1 }
 				value={ selectedIndex }
 				step="1"
 				class="range [--range-fill:0] w-full"
-				data-init="$_frequencies = [];"
-				data-bind="_frequencyIndex"
-				data-effect="$frequency = $_frequencies[$_frequencyIndex]; $_frequenciesPadding = Math.floor((el.offsetWidth / $_frequencies.length) / 2)"
-				data-on:resize__window__debounce.50ms="$_frequenciesPadding = Math.floor((el.offsetWidth / $_frequencies.length) / 2)"
-				data-style:padding-left="$_frequenciesPadding + 'px'"
-				data-style:padding-right="$_frequenciesPadding + 'px'"
-				data-on-signal-patch={ datastar.PostSSE("/app/monitors/%d/frequency", monitor.ID) }
-				data-on-signal-patch-filter="{include: /frequencyIndex/}"
+				data-signals:frequency={ fmt.Sprintf("%d", monitor.CheckFrequencyMinutes) }
+				data-bind={ indexSignal }
+				data-effect={ updatePaddingJS }
+				data-on:input={ updateFrequencyFromSliderJS }
+				data-on:input__debounce.120ms={ updateAndPostFrequencyFromSliderJS }
+				data-on:resize__window__debounce.50ms={ updatePaddingJS }
+				data-style:padding-left={ fmt.Sprintf("%s + 'px'", paddingSignal) }
+				data-style:padding-right={ fmt.Sprintf("%s + 'px'", paddingSignal) }
 			/>
 			<div class="flex justify-between px-2.5 text-sm">
 				for i, opt := range FrequencyOptions {
 					<span
 						class="flex-1 pt-2 text-center text-xs md:text-sm cursor-pointer transition-all"
-						data-class={ fmt.Sprintf("{'font-bold': $_frequencyIndex == %d, 'text-muted': $_frequencyIndex != %d}", i, i) }
-						data-init={ fmt.Sprintf("$_frequencies[%d] = %d", i, opt.Minutes) }
-						data-on:click={ fmt.Sprintf("$_frequencyIndex = %d", i) }
+						data-class={ fmt.Sprintf("{'font-bold': $%s == %d, 'text-muted': $%s != %d}", indexSignal, i, indexSignal, i) }
+						data-on:click={ fmt.Sprintf("$%s = %d; const minutes = %d; $frequency = minutes; %s", indexSignal, i, opt.Minutes, postFrequencyJS) }
 					>{ capitalize(opt.Label) }</span>
 				}
 			</div>

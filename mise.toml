@@ -63,7 +63,6 @@ run = "bun run watch-css"
 run = "bun run watch-js"
 
 [tasks.dev]
-env.TEMPL_DEV_MODE=true
 run = { task = "dev:watch:*" }
 
 [tasks."db:reset"]

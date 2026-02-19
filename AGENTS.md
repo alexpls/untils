@@ -42,3 +42,9 @@ When the development server is running, Templ files will be generated when modif
 
 You may use the Chrome MCP server to access the website at address
 http://untils.localhost:7331/app and log in by clicking the dev mode button.
+
+## Writing UI copy
+
+- Prefer impersonal, non-agentive phrasing for user-facing text.
+- Avoid first-person references like "we", "our", or "us".
+- Use direct product behavior language, for example: "notifications will be sent when it changes."

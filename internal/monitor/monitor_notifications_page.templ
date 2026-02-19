@@ -30,7 +30,7 @@ templ MonitorNotificationsView(data MonitorNotificationsViewData) {
 }
 
 templ MonitorNotificationsList(data MonitorNotificationsViewData) {
-	<ul id="monitor-notifications-list" class="mt-3 max-w-md list border border-base-content/10 rounded">
+	<ul id="monitor-notifications-list" class="list border border-base-content/10 rounded">
 		for _, notifier := range data.Notifiers {
 			<li class="list-row flex justify-between items-center">
 				<div>
