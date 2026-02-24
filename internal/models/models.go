@@ -259,6 +259,7 @@ type Monitor struct {
 	UpdatedAt             time.Time
 	CreatedAt             time.Time
 	CheckFrequencyMinutes int32
+	AutoActivate          bool
 }
 
 type MonitorCheck struct {

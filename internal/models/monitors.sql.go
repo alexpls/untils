@@ -24,7 +24,7 @@ func (q *Queries) BumpMonitorVersion(ctx context.Context, db DBTX, monitorID int
 const createMonitor = `-- name: CreateMonitor :one
 insert into monitors (user_id, subject, status, updated_at, created_at)
 values ($1, $2, 'validating', now(), now())
-returning id, user_id, status, subject, rejected_reason, updated_at, created_at, check_frequency_minutes
+returning id, user_id, status, subject, rejected_reason, updated_at, created_at, check_frequency_minutes, auto_activate
 `
 
 type CreateMonitorParams struct {
@@ -44,6 +44,7 @@ func (q *Queries) CreateMonitor(ctx context.Context, db DBTX, arg *CreateMonitor
 		&i.UpdatedAt,
 		&i.CreatedAt,
 		&i.CheckFrequencyMinutes,
+		&i.AutoActivate,
 	)
 	return &i, err
 }
@@ -403,7 +404,7 @@ func (q *Queries) GetLatestMonitorResult(ctx context.Context, db DBTX, monitorID
 }
 
 const getMonitor = `-- name: GetMonitor :one
-select id, user_id, status, subject, rejected_reason, updated_at, created_at, check_frequency_minutes from monitors
+select id, user_id, status, subject, rejected_reason, updated_at, created_at, check_frequency_minutes, auto_activate from monitors
 where user_id = $1 and id = $2
 `
 
@@ -424,6 +425,7 @@ func (q *Queries) GetMonitor(ctx context.Context, db DBTX, arg *GetMonitorParams
 		&i.UpdatedAt,
 		&i.CreatedAt,
 		&i.CheckFrequencyMinutes,
+		&i.AutoActivate,
 	)
 	return &i, err
 }
@@ -1058,7 +1060,7 @@ const updateMonitorCheckFrequency = `-- name: UpdateMonitorCheckFrequency :one
 update monitors
 set check_frequency_minutes = $1, updated_at = now()
 where id = $2
-returning id, user_id, status, subject, rejected_reason, updated_at, created_at, check_frequency_minutes
+returning id, user_id, status, subject, rejected_reason, updated_at, created_at, check_frequency_minutes, auto_activate
 `
 
 type UpdateMonitorCheckFrequencyParams struct {
@@ -1078,6 +1080,7 @@ func (q *Queries) UpdateMonitorCheckFrequency(ctx context.Context, db DBTX, arg 
 		&i.UpdatedAt,
 		&i.CreatedAt,
 		&i.CheckFrequencyMinutes,
+		&i.AutoActivate,
 	)
 	return &i, err
 }
@@ -1118,7 +1121,7 @@ const updateMonitorDraft = `-- name: UpdateMonitorDraft :one
 update monitors
 set subject = $1, updated_at = now()
 where user_id = $2 and id = $3 and status != 'active'
-returning id, user_id, status, subject, rejected_reason, updated_at, created_at, check_frequency_minutes
+returning id, user_id, status, subject, rejected_reason, updated_at, created_at, check_frequency_minutes, auto_activate
 `
 
 type UpdateMonitorDraftParams struct {
@@ -1139,6 +1142,7 @@ func (q *Queries) UpdateMonitorDraft(ctx context.Context, db DBTX, arg *UpdateMo
 		&i.UpdatedAt,
 		&i.CreatedAt,
 		&i.CheckFrequencyMinutes,
+		&i.AutoActivate,
 	)
 	return &i, err
 }
@@ -1163,7 +1167,7 @@ const updateMonitorStatus = `-- name: UpdateMonitorStatus :one
 update monitors
 set status = $1, updated_at = now()
 where user_id = $2 and id = $3
-returning id, user_id, status, subject, rejected_reason, updated_at, created_at, check_frequency_minutes
+returning id, user_id, status, subject, rejected_reason, updated_at, created_at, check_frequency_minutes, auto_activate
 `
 
 type UpdateMonitorStatusParams struct {
@@ -1184,6 +1188,7 @@ func (q *Queries) UpdateMonitorStatus(ctx context.Context, db DBTX, arg *UpdateM
 		&i.UpdatedAt,
 		&i.CreatedAt,
 		&i.CheckFrequencyMinutes,
+		&i.AutoActivate,
 	)
 	return &i, err
 }
@@ -1192,7 +1197,7 @@ const updateMonitorToReady = `-- name: UpdateMonitorToReady :one
 update monitors
 set status = 'ready', subject = $1, updated_at = now()
 where user_id = $2 and id = $3
-returning id, user_id, status, subject, rejected_reason, updated_at, created_at, check_frequency_minutes
+returning id, user_id, status, subject, rejected_reason, updated_at, created_at, check_frequency_minutes, auto_activate
 `
 
 type UpdateMonitorToReadyParams struct {
@@ -1213,6 +1218,31 @@ func (q *Queries) UpdateMonitorToReady(ctx context.Context, db DBTX, arg *Update
 		&i.UpdatedAt,
 		&i.CreatedAt,
 		&i.CheckFrequencyMinutes,
+		&i.AutoActivate,
+	)
+	return &i, err
+}
+
+const updateMonitorToggleAutoActivate = `-- name: UpdateMonitorToggleAutoActivate :one
+update monitors
+set auto_activate = not auto_activate
+where id = $1
+returning id, user_id, status, subject, rejected_reason, updated_at, created_at, check_frequency_minutes, auto_activate
+`
+
+func (q *Queries) UpdateMonitorToggleAutoActivate(ctx context.Context, db DBTX, monitorID int64) (*Monitor, error) {
+	row := db.QueryRow(ctx, updateMonitorToggleAutoActivate, monitorID)
+	var i Monitor
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Status,
+		&i.Subject,
+		&i.RejectedReason,
+		&i.UpdatedAt,
+		&i.CreatedAt,
+		&i.CheckFrequencyMinutes,
+		&i.AutoActivate,
 	)
 	return &i, err
 }

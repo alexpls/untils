@@ -173,12 +173,7 @@ templ MonitorDraftView(data MonitorDraftData) {
 				{{ monitorNotReady := data.Monitor.Status != models.MonitorStatusReady }}
 				if monitorNotReady {
 					<div class="p-3 py-1.5 border-t border-t-base-content/10 rounded-b text-xs flex">
-						<div>
-							<label class="label">
-								<input type="checkbox" class="checkbox checkbox-sm"/>
-								<span>TODO: Automatically activate when the preview finishes</span>
-							</label>
-						</div>
+						@MonitorAutoActivateForm(data.Monitor)
 					</div>
 				}
 				<div>
@@ -202,6 +197,20 @@ templ MonitorDraftView(data MonitorDraftData) {
 			Discard this monitor
 		</button>
 	</div>
+}
+
+templ MonitorAutoActivateForm(monitor *models.Monitor) {
+	<form id="monitor-auto-activate-form">
+		<label class="label">
+			<input
+				type="checkbox"
+				class="checkbox checkbox-sm"
+				checked?={ monitor.AutoActivate }
+				data-on:change={ fmt.Sprintf("@post('/app/monitors/%d/toggle_auto_activate', { payload: null })", monitor.ID) }
+			/>
+			<span>Automatically activate when the preview finishes</span>
+		</label>
+	</form>
 }
 
 css monitorSubjectTextareaViewTransition() {

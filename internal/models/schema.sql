@@ -399,7 +399,8 @@ CREATE TABLE public.monitors (
     rejected_reason text,
     updated_at timestamp with time zone NOT NULL,
     created_at timestamp with time zone NOT NULL,
-    check_frequency_minutes integer DEFAULT 1440 NOT NULL
+    check_frequency_minutes integer DEFAULT 1440 NOT NULL,
+    auto_activate boolean DEFAULT false NOT NULL
 );
 
 

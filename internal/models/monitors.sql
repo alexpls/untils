@@ -82,6 +82,12 @@ set check_frequency_minutes = @check_frequency_minutes, updated_at = now()
 where id = @monitor_id
 returning *;
 
+-- name: UpdateMonitorToggleAutoActivate :one
+update monitors
+set auto_activate = not auto_activate
+where id = @monitor_id
+returning *;
+
 -- name: GetMonitorCheck :one
 select * from monitor_checks
 where id = @id;
@@ -339,6 +345,7 @@ limit 1;
 update monitor_checks
 set scheduled_for = @scheduled_for
 where id = @id;
+
 
 -- name: RescheduleRiverJobNow :exec
 update river_job

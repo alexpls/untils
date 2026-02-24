@@ -170,19 +170,35 @@ func (s *Service) ValidateMonitor(ctx context.Context, monitor *models.Monitor) 
 		return err
 	}
 
-	// TODO: go back to the triager if the check fails
-
 	if err = s.PerformMonitorCheck(ctx, monitor.UserID, check, false, userFeedback); err != nil {
+		// TODO: go back to the triager if the check fails
 		return fmt.Errorf("performing monitor check: %w", err)
 	}
 
-	_, err = s.queries.UpdateMonitorToReady(ctx, s.db, &models.UpdateMonitorToReadyParams{
-		MonitorID: monitor.ID,
-		UserID:    monitor.UserID,
-		Subject:   monitor.Subject,
-	})
+	return db.WithTx(s.db, ctx, func(tx pgx.Tx) error {
+		user, err := s.queries.GetUser(ctx, tx, monitor.ID)
+		if err != nil {
+			return err
+		}
 
-	return err
+		monitor, err := s.queries.UpdateMonitorToReady(ctx, tx, &models.UpdateMonitorToReadyParams{
+			MonitorID: monitor.ID,
+			UserID:    monitor.UserID,
+			Subject:   monitor.Subject,
+		})
+		if err != nil {
+			return err
+		}
+
+		if monitor.AutoActivate {
+			_, err = s.activateMonitorFromPreviewTx(ctx, tx, user, monitor.ID)
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
 }
 
 func MonitorUpdateToCreateMonitorResultParams(
@@ -200,6 +216,12 @@ func MonitorUpdateToCreateMonitorResultParams(
 }
 
 func (s *Service) ActivateMonitorFromPreview(ctx context.Context, user *models.User, monitorID int64) (*models.Monitor, error) {
+	return db.WithTxV(s.db, ctx, func(tx pgx.Tx) (*models.Monitor, error) {
+		return s.activateMonitorFromPreviewTx(ctx, tx, user, monitorID)
+	})
+}
+
+func (s *Service) activateMonitorFromPreviewTx(ctx context.Context, tx pgx.Tx, user *models.User, monitorID int64) (*models.Monitor, error) {
 	monitor, err := s.GetMonitor(ctx, user.ID, monitorID)
 	if err != nil {
 		return nil, fmt.Errorf("getting monitor: %w", err)
@@ -209,26 +231,24 @@ func (s *Service) ActivateMonitorFromPreview(ctx context.Context, user *models.U
 		return nil, err
 	}
 
-	return db.WithTxV(s.db, ctx, func(tx pgx.Tx) (*models.Monitor, error) {
-		res, err := s.queries.GetLatestMonitorResult(ctx, tx, monitorID)
-		if err != nil {
-			return nil, fmt.Errorf("getting latest monitor result: %w", err)
-		}
+	res, err := s.queries.GetLatestMonitorResult(ctx, tx, monitorID)
+	if err != nil {
+		return nil, fmt.Errorf("getting latest monitor result: %w", err)
+	}
 
-		fromTime := res.CreatedAt.In(user.Location())
-		nextCheckTime := nextCheckTime(monitor.CheckFrequencyMinutes, fromTime)
+	fromTime := res.CreatedAt.In(user.Location())
+	nextCheckTime := nextCheckTime(monitor.CheckFrequencyMinutes, fromTime)
 
-		if _, err := s.scheduleMonitorCheckTx(ctx, tx, monitor, nextCheckTime); err != nil {
-			return nil, fmt.Errorf("scheduling check: %w", err)
-		}
+	if _, err := s.scheduleMonitorCheckTx(ctx, tx, monitor, nextCheckTime); err != nil {
+		return nil, fmt.Errorf("scheduling check: %w", err)
+	}
 
-		monitor, err := s.updateMonitorStatus(ctx, tx, monitor, models.MonitorStatusActive)
-		if err != nil {
-			return nil, fmt.Errorf("activating monitor: %w", err)
-		}
+	monitor, err = s.updateMonitorStatus(ctx, tx, monitor, models.MonitorStatusActive)
+	if err != nil {
+		return nil, fmt.Errorf("activating monitor: %w", err)
+	}
 
-		return monitor, nil
-	})
+	return monitor, nil
 }
 
 type UpdateMonitorDraftParams struct {

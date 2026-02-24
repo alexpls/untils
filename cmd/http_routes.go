@@ -35,11 +35,11 @@ func (a *app) routes() http.Handler {
 	mux.HandleFunc("GET /app/monitors/{monitor_id}/settings", a.requireAuth(a.monitorHandlers.ViewMonitorSettings))
 	mux.HandleFunc("POST /app/monitors/{monitor_id}", a.requireAuth(a.monitorHandlers.UpdateMonitor))
 	mux.HandleFunc("DELETE /app/monitors/{monitor_id}", a.requireAuth(a.monitorHandlers.DeleteMonitor))
-
 	mux.HandleFunc("POST /app/monitors/{monitor_id}/pause", a.requireAuth(a.monitorHandlers.PauseMonitor))
 	mux.HandleFunc("POST /app/monitors/{monitor_id}/unpause", a.requireAuth(a.monitorHandlers.UnpauseMonitor))
 	mux.HandleFunc("POST /app/monitors/{monitor_id}/activate", a.requireAuth(a.monitorHandlers.ActivateMonitor))
 	mux.HandleFunc("POST /app/monitors/{monitor_id}/frequency", a.requireAuth(a.monitorHandlers.UpdateMonitorCheckFrequency))
+	mux.HandleFunc("POST /app/monitors/{monitor_id}/toggle_auto_activate", a.requireAuth(a.monitorHandlers.UpdateMonitorToggleAutoActivate))
 	mux.HandleFunc("POST /app/monitors/{monitor_id}/notifiers/{type}", a.requireAuth(a.monitorHandlers.UpdateMonitorNotifier))
 	mux.HandleFunc("DELETE /app/monitors/{monitor_id}/notifiers/{type}", a.requireAuth(a.monitorHandlers.DeleteMonitorNotifier))
 	mux.HandleFunc("GET /app/monitors/{monitor_id}/results/{result_id}/feedback", a.requireAuth(a.monitorHandlers.ViewResultFeedbackModal))

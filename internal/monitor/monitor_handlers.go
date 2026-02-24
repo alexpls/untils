@@ -185,18 +185,38 @@ func (h *Handlers) UpdateMonitorCheckFrequency(w http.ResponseWriter, r *http.Re
 		return
 	}
 	if err := r.Body.Close(); err != nil {
-		h.logger.Error("error closing response body", "error", err)
+		h.logger.ErrorContext(r.Context(), "error closing response body", "error", err)
 	}
 
 	if _, err := h.service.UpdateMonitorCheckFrequency(r.Context(), mon, UpdateMonitorFrequencyParams{
 		CheckFrequencyMinutes: signals.Frequency,
 	}); err != nil {
-		h.logger.Error("error updating monitor frequency", "error", err)
+		h.logger.ErrorContext(r.Context(), "error updating monitor frequency", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
+}
+
+func (h *Handlers) UpdateMonitorToggleAutoActivate(w http.ResponseWriter, r *http.Request, user *models.User) {
+	mon := h.monitorFromPath(w, r, user)
+	if mon == nil {
+		return
+	}
+
+	updatedMon, err := h.service.queries.UpdateMonitorToggleAutoActivate(r.Context(), h.service.db, mon.ID)
+	if err != nil {
+		h.logger.ErrorContext(r.Context(), "error updating monitor to toggle auto activate", "error", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	sse := datastar.NewSSE(w, r)
+	if err := sse.PatchElementTempl(MonitorAutoActivateForm(updatedMon)); err != nil {
+		h.logger.ErrorContext(sse.Context(), "error patching monitor auto activate form", "error", err)
+		return
+	}
 }
 
 // UpdateMonitor handles POST /app/monitors/{id}
