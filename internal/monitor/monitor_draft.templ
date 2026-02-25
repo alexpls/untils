@@ -43,9 +43,9 @@ templ FieldsetTitle(title string) {
 }
 
 templ MonitorDraftView(data MonitorDraftData) {
-	<div class="grid grid-cols-12 lg:gap-x-8 mx-auto max-w-5xl px-2 py-4" id="monitor-draft-view" data-effect={ datastar.GetSSE("/app/monitors/%d?sse=true", data.Monitor.ID) }>
+	<div class="grid grid-cols-12 lg:gap-x-8 mx-auto max-w-5xl px-2 lg:px-8 py-4" id="monitor-draft-view" data-effect={ datastar.GetSSE("/app/monitors/%d?sse=true", data.Monitor.ID) }>
 		<div class="col-span-12 lg:col-span-7">
-			<div class="py-4 bg-base-100 border border-base-content/20 rounded">
+			<div class="py-4 bg-base-100 border border-base-content/20 rounded shadow-lg">
 				<form data-on:submit={ datastar.PostSSE("/app/monitors/%d", data.Monitor.ID) }>
 					<fieldset class="fieldset px-4">
 						@FieldsetTitle("Subject")
@@ -102,7 +102,7 @@ templ MonitorDraftView(data MonitorDraftData) {
 						</div>
 					</fieldset>
 				</form>
-				<div class="mt-4 space-y-6 px-4">
+				<div class="mt-4 space-y-8 px-4">
 					<div>
 						@FieldsetTitle("Check frequency")
 						<div class="space-y-1 mt-2">
@@ -122,7 +122,7 @@ templ MonitorDraftView(data MonitorDraftData) {
 			</div>
 		</div>
 		<div class="col-span-12 lg:col-span-5 mt-2 lg:mt-0">
-			<div class="bg-base-200 rounded border border-base-content/10">
+			<div class="bg-base-200 rounded border border-base-content/10 shadow-lg">
 				<div class="border-b border-base-content/10 p-3 py-2 rounded-t">
 					switch data.Monitor.Status {
 						case models.MonitorStatusPreviewing:
@@ -139,34 +139,28 @@ templ MonitorDraftView(data MonitorDraftData) {
 									Size:    18,
 									Classes: templ.Classes("shrink-0", "mt-1", "mr-2", "text-success"),
 								})
-								<span class="text-success">First check complete</span>
+								<span class="text-success">Preview complete</span>
 							</div>
 					}
 				</div>
 				<div>
 					switch data.Monitor.Status {
 						case models.MonitorStatusPreviewing:
-							<div class="flex items-start px-3">
+							<div class="flex items-start ml-1 px-4 pb-2">
 								if data.InProgressCheck != nil && len(data.InProgressCheckTimelineEvents) > 0 {
-									<div>
-										<ul>
-											@InProgressCheckTimelineItem(InProgressCheckTimelineItemViewData{
-												Check:          data.InProgressCheck,
-												TimelineEvents: data.InProgressCheckTimelineEvents,
-											})
-										</ul>
-									</div>
+									<ul>
+										@InProgressCheckTimelineItem(InProgressCheckTimelineItemViewData{
+											Check:          data.InProgressCheck,
+											TimelineEvents: data.InProgressCheckTimelineEvents,
+										})
+									</ul>
 								}
 							</div>
 						case models.MonitorStatusReady:
-							<div class="flex items-start">
-								<div class="ml-2">
-									<div>
-										<ul>
-											@monitorResultTimelineItem(data.ResultPreview, true)
-										</ul>
-									</div>
-								</div>
+							<div class="flex items-start ml-1 px-4 pb-2">
+								<ul>
+									@monitorResultTimelineItem(data.ResultPreview, true)
+								</ul>
 							</div>
 					}
 				</div>
