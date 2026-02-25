@@ -23,3 +23,10 @@ func (h *Handlers) ViewPalette(w http.ResponseWriter, r *http.Request, _ *models
 		h.logger.Error("error rendering palette", "error", err)
 	}
 }
+
+func (h *Handlers) ViewMonitorDraftPalette(w http.ResponseWriter, r *http.Request, _ *models.User) {
+	component := MonitorDraftPalettePage()
+	if err := component.Render(r.Context(), w); err != nil {
+		h.logger.Error("error rendering monitor draft palette", "error", err)
+	}
+}

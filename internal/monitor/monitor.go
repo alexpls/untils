@@ -176,7 +176,7 @@ func (s *Service) ValidateMonitor(ctx context.Context, monitor *models.Monitor) 
 	}
 
 	return db.WithTx(s.db, ctx, func(tx pgx.Tx) error {
-		user, err := s.queries.GetUser(ctx, tx, monitor.ID)
+		user, err := s.queries.GetUser(ctx, tx, monitor.UserID)
 		if err != nil {
 			return err
 		}

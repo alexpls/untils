@@ -19,6 +19,9 @@ templ PalettePage() {
 		},
 	}) {
 		<div class="p-4">
+			@example("Monitor draft") {
+				<a class="btn" href="/app/dev/palette/monitor_draft">Open monitor draft palette</a>
+			}
 			<div class="max-w-sm">
 				@example("FrequencyPicker") {
 					@monitor.FrequencyPicker(monitorStub())
@@ -31,6 +34,32 @@ templ PalettePage() {
 					</ul>
 				}
 			</div>
+		</div>
+	}
+}
+
+templ MonitorDraftPalettePage() {
+	@components.AppLayout("Palette: Monitor draft", []components.Breadcrumb{
+		components.Breadcrumb{
+			Title: "Dev",
+			Href:  "#noop",
+		},
+		components.Breadcrumb{
+			Title: "Palette",
+			Href:  "/app/dev/palette",
+		},
+		components.Breadcrumb{
+			Title: "Monitor draft",
+			Href:  "/app/dev/palette/monitor_draft",
+		},
+	}) {
+		<div class="p-4">
+			@example("MonitorDraftView (validating)") {
+				@monitor.MonitorDraftView(*fixtureMonitorDraftValidatingData())
+			}
+			@example("MonitorDraftView (rejected)") {
+				@monitor.MonitorDraftView(*fixtureMonitorDraftRejectedData())
+			}
 			@example("MonitorDraftView (previewing)") {
 				@monitor.MonitorDraftView(*fixtureMonitorDraftPreviewingData())
 			}

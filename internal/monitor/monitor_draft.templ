@@ -77,12 +77,6 @@ templ MonitorDraftView(data MonitorDraftData) {
 						if err := components.ValidationError(data, "Subject"); err != "" {
 							<p class="label text-error mt-1">{ err }</p>
 						}
-						if data.Monitor.Status == models.MonitorStatusPreviewing || data.Monitor.Status == models.MonitorStatusReady {
-							<p class="label text-success ml-2">
-								@icons.CircleCheck(icons.IconParams{Size: 14})
-								Subject valid
-							</p>
-						}
 						<div
 							class="overflow-hidden max-h-0 transition-all duration-500"
 							data-class="{'max-h-96': $_subject.updating || $_subject.changed}"
@@ -125,21 +119,62 @@ templ MonitorDraftView(data MonitorDraftData) {
 			<div class="bg-base-200 rounded border border-base-content/10 shadow-lg">
 				<div class="border-b border-base-content/10 p-3 py-2 rounded-t">
 					switch data.Monitor.Status {
+						case models.MonitorStatusValidating:
+							<div class="flex items-start">
+								@icons.Loader(icons.IconParams{
+									Size:    18,
+									Classes: templ.Classes("shrink-0", "mt-1", "mr-2", "animate-spin"),
+								})
+								<span>Validating subject...</span>
+							</div>
+						case models.MonitorStatusRejected:
+							<div class="flex items-start text-error">
+								@icons.TriangleAlert(icons.IconParams{
+									Size:    18,
+									Classes: templ.Classes("shrink-0", "mt-1", "mr-2"),
+								})
+								<span>Invalid subject</span>
+							</div>
+							if data.Monitor.RejectedReason.Valid && data.Monitor.RejectedReason.String != "" {
+								<div class="text-error text-sm mt-2">
+									{ data.Monitor.RejectedReason.String }
+								</div>
+							}
+						case models.MonitorStatusPreviewing, models.MonitorStatusReady:
+							<div class="flex items-start text-success">
+								@icons.CircleCheck(icons.IconParams{
+									Size:    18,
+									Classes: templ.Classes("shrink-0", "mt-1", "mr-2"),
+								})
+								<span>Subject valid</span>
+							</div>
+					}
+				</div>
+				<div class="border-b border-base-content/10 p-3 py-2 rounded-t">
+					switch data.Monitor.Status {
+						case models.MonitorStatusValidating, models.MonitorStatusRejected:
+							<div class="flex items-start text-muted">
+								@icons.Spacer(icons.IconParams{
+									Size:    18,
+									Classes: templ.Classes("shrink-0", "mt-1", "mr-2"),
+								})
+								<span>Waiting to preview</span>
+							</div>
 						case models.MonitorStatusPreviewing:
 							<div class="flex items-start">
 								@icons.Loader(icons.IconParams{
 									Size:    18,
 									Classes: templ.Classes("shrink-0", "mt-1", "mr-2", "animate-spin"),
 								})
-								<span>Previewing...</span>
+								<span>Previewing&hellip;</span>
 							</div>
 						case models.MonitorStatusReady:
-							<div class="flex items-start">
+							<div class="flex items-start text-success">
 								@icons.CircleCheck(icons.IconParams{
 									Size:    18,
-									Classes: templ.Classes("shrink-0", "mt-1", "mr-2", "text-success"),
+									Classes: templ.Classes("shrink-0", "mt-1", "mr-2"),
 								})
-								<span class="text-success">Preview complete</span>
+								<span>Previewed</span>
 							</div>
 					}
 				</div>
@@ -166,7 +201,7 @@ templ MonitorDraftView(data MonitorDraftData) {
 				</div>
 				{{ monitorNotReady := data.Monitor.Status != models.MonitorStatusReady }}
 				if monitorNotReady {
-					<div class="p-3 py-1.5 border-t border-t-base-content/10 rounded-b text-xs flex">
+					<div class="p-3 py-2 border-t border-t-base-content/10 rounded-b text-xs flex justify-center">
 						@MonitorAutoActivateForm(data.Monitor)
 					</div>
 				}
@@ -202,7 +237,7 @@ templ MonitorAutoActivateForm(monitor *models.Monitor) {
 				checked?={ monitor.AutoActivate }
 				data-on:change={ fmt.Sprintf("@post('/app/monitors/%d/toggle_auto_activate', { payload: null })", monitor.ID) }
 			/>
-			<span>Automatically activate when the preview finishes</span>
+			<span>Automatically activate when ready</span>
 		</label>
 	</form>
 }

@@ -66,6 +66,55 @@ func fixtureMonitorDraftPreviewingData() *monitor.MonitorDraftData {
 	}
 }
 
+func fixtureMonitorDraftValidatingData() *monitor.MonitorDraftData {
+	return &monitor.MonitorDraftData{
+		Monitor: &models.Monitor{
+			ID:      4244,
+			Status:  models.MonitorStatusValidating,
+			Subject: pgtype.Text{Valid: true, String: "Find major changes in the Kubernetes release notes"},
+		},
+		Notifiers: []*monitor.MonitorNotifierViewData{
+			{
+				Integration: &models.UserIntegrationsRow{
+					Name:       models.NotifierPushover,
+					Configured: true,
+				},
+			},
+			{
+				Integration: &models.UserIntegrationsRow{
+					Name:       models.NotifierEmail,
+					Configured: true,
+				},
+			},
+		},
+	}
+}
+
+func fixtureMonitorDraftRejectedData() *monitor.MonitorDraftData {
+	return &monitor.MonitorDraftData{
+		Monitor: &models.Monitor{
+			ID:             4245,
+			Status:         models.MonitorStatusRejected,
+			Subject:        pgtype.Text{Valid: true, String: "Find major changes in the Kubernetes release notes"},
+			RejectedReason: pgtype.Text{Valid: true, String: "This isn't an objective fact that can be monitored reliably. Lorem ipsum dolor sit amet. Lorem ipsum ipsum dolor sit amet."},
+		},
+		Notifiers: []*monitor.MonitorNotifierViewData{
+			{
+				Integration: &models.UserIntegrationsRow{
+					Name:       models.NotifierPushover,
+					Configured: true,
+				},
+			},
+			{
+				Integration: &models.UserIntegrationsRow{
+					Name:       models.NotifierEmail,
+					Configured: true,
+				},
+			},
+		},
+	}
+}
+
 func fixtureMonitorDraftReadyData() *monitor.MonitorDraftData {
 	now := time.Now()
 

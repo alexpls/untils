@@ -63,6 +63,7 @@ func (a *app) routes() http.Handler {
 
 	// dev
 	mux.Handle("GET /app/dev/palette", a.requireAuth(a.devHandlers.ViewPalette))
+	mux.Handle("GET /app/dev/palette/monitor_draft", a.requireAuth(a.devHandlers.ViewMonitorDraftPalette))
 
 	// middleware
 	csrf := http.NewCrossOriginProtection()
