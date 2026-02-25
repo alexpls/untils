@@ -64,7 +64,7 @@ type app struct {
 	devHandlers         *dev.Handlers
 }
 
-func createApp(c *config) (*app, context.Context, func()) {
+func createApp(c *config) (*app, context.Context, context.CancelFunc, func()) {
 	ctx, cancelFn := context.WithCancel(
 		reqcontext.ContextWithBuildVersion(
 			reqcontext.ContextWithEnv(context.Background(), c.env), c.buildVersion,
@@ -221,5 +221,5 @@ func createApp(c *config) (*app, context.Context, func()) {
 		dbCloser()
 	}
 
-	return a, ctx, closer
+	return a, ctx, cancelFn, closer
 }

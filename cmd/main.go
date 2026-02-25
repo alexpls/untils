@@ -19,7 +19,7 @@ func main() {
 		defer stop()
 
 		globalCfg, c := parseServe()
-		a, appCtx, appCloser := createApp(globalCfg)
+		a, appCtx, cancelAppCtx, appCloser := createApp(globalCfg)
 		defer appCloser()
 
 		addr := fmt.Sprintf(":%d", c.port)
@@ -44,7 +44,10 @@ func main() {
 		case <-ctx.Done():
 			a.logger.InfoContext(appCtx, "http server received shutdown signal")
 
-			tctx, cancel := context.WithTimeout(appCtx, 5*time.Second)
+			// Cancel app context first so long-lived handlers (e.g. SSE streams) exit quickly.
+			cancelAppCtx()
+
+			tctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 			defer cancel()
 
 			if err := srv.Shutdown(tctx); err != nil {
@@ -59,7 +62,7 @@ func main() {
 	case "seed":
 		globalCfg := parseSeed()
 
-		a, _, appCloser := createApp(globalCfg)
+		a, _, _, appCloser := createApp(globalCfg)
 		defer appCloser()
 
 		a.seed()

@@ -46,21 +46,14 @@ go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
 go install github.com/riverqueue/river/cmd/river@latest
 go install github.com/a-h/templ/cmd/templ@latest
 go install golang.org/x/tools/gopls@latest
-go install github.com/bokwoon95/wgo@latest
 curl -sSfL https://golangci-lint.run/install.sh | sh -s -- -b $(go env GOPATH)/bin v2.9.0
 '''
 
-[tasks."dev:watch:server"]
+[tasks."dev:watch:app"]
 run = """
-wgo -file=.go -xfile=_test.go go build -o ./tmp/serve ./cmd :: ./tmp/serve serve \
-    -env "$ENV" -db "$PG_URL" -xai-key "$XAI_KEY" -openai-key "$OPENAI_KEY" \
-    -pushover-key "$PUSHOVER_KEY" -brave-key "$BRAVE_KEY" | tee dev.log
-"""
-
-[tasks."dev:watch:templ"]
-run = """
-pkill -f 'templ generate' || true
-templ generate --watch --proxy="http://localhost:4200" --open-browser=false
+templ generate --watch --proxy="http://localhost:4200" --open-browser=false \
+    --ignore-pattern='.*_templ\\.go$' \
+    --cmd './scripts/dev-watch-app.sh'
 """
 
 [tasks."dev:watch:css"]
