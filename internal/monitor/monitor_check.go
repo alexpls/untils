@@ -248,7 +248,7 @@ func (s *Service) PerformMonitorCheck(
 	}
 
 	err = db.WithTx(s.db, ctx, func(tx pgx.Tx) error {
-		if err := s.validateMonitorsSameVersion(ctx, tx, monitor); err != nil {
+		if err := s.validateMonitorSubjectUnchanged(ctx, tx, monitor); err != nil {
 			return err
 		}
 

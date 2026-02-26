@@ -138,7 +138,7 @@ func (s *Service) ValidateMonitor(ctx context.Context, monitor *models.Monitor) 
 	var check *models.MonitorCheck
 
 	if err := db.WithTx(s.db, ctx, func(tx pgx.Tx) error {
-		if err := s.validateMonitorsSameVersion(ctx, tx, monitor); err != nil {
+		if err := s.validateMonitorSubjectUnchanged(ctx, tx, monitor); err != nil {
 			return err
 		}
 

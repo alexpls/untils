@@ -82,40 +82,40 @@ func (e *ErrInvalidToken) Is(target error) bool {
 	return ok
 }
 
-// ErrVersionMismatch represents a monitor version mismatch error.
-type ErrVersionMismatch struct {
+// ErrSubjectMismatch represents a monitor mismatch error used for stale check/triage writes.
+type ErrSubjectMismatch struct {
 	MonitorID1 int64
 	MonitorID2 int64
-	UpdatedAt1 string
-	UpdatedAt2 string
+	Subject1   string
+	Subject2   string
 }
 
-func NewErrVersionMismatch(mon1, mon2 *models.Monitor) *ErrVersionMismatch {
-	return &ErrVersionMismatch{
+func NewErrSubjectMismatch(mon1, mon2 *models.Monitor) *ErrSubjectMismatch {
+	return &ErrSubjectMismatch{
 		MonitorID1: mon1.ID,
 		MonitorID2: mon2.ID,
-		UpdatedAt1: mon1.UpdatedAt.String(),
-		UpdatedAt2: mon2.UpdatedAt.String(),
+		Subject1:   mon1.Subject.String,
+		Subject2:   mon2.Subject.String,
 	}
 }
 
-func (e *ErrVersionMismatch) Error() string {
+func (e *ErrSubjectMismatch) Error() string {
 	return fmt.Sprintf(
-		"monitors version mismatch. id %d != %d or updated_at %s != %s",
+		"monitor subject mismatch. id %d != %d or subject %q != %q",
 		e.MonitorID1, e.MonitorID2,
-		e.UpdatedAt1, e.UpdatedAt2)
+		e.Subject1, e.Subject2)
 }
 
-func (e *ErrVersionMismatch) HTTPCode() int {
+func (e *ErrSubjectMismatch) HTTPCode() int {
 	return http.StatusConflict
 }
 
-func (e *ErrVersionMismatch) HTTPMessage() string {
+func (e *ErrSubjectMismatch) HTTPMessage() string {
 	return "resource has been modified, please reload and try again"
 }
 
-func (e *ErrVersionMismatch) Is(target error) bool {
-	_, ok := target.(*ErrVersionMismatch)
+func (e *ErrSubjectMismatch) Is(target error) bool {
+	_, ok := target.(*ErrSubjectMismatch)
 	return ok
 }
 
