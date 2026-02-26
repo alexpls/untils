@@ -141,7 +141,7 @@ func (s *Service) PerformMonitorCheck(
 
 	monitor, err := s.GetMonitor(ctx, userID, check.MonitorID)
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
+		if errors.Is(err, &errortypes.ResourceNotFoundError{}) {
 			s.logger.WarnContext(ctx, "tried to perform a check on a non-existent monitor", "monitor_id", check.MonitorID)
 			return nil
 		}
