@@ -61,6 +61,7 @@ templ MonitorDraftView(data MonitorDraftData) {
 										"rounded-lg",
 									) }
 							placeholder="Type here..."
+							data-ignore-morph
 							data-bind:_subject.current
 							data-signals:_subject.initial={ templ.JSONString(data.Monitor.Subject.String) }
 							data-computed:_subject.changed="$_subject.current !== $_subject.initial"

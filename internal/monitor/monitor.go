@@ -197,7 +197,7 @@ func (s *Service) ValidateMonitor(ctx context.Context, monitor *models.Monitor) 
 		}
 
 		if monitor.AutoActivate {
-			_, err = s.activateMonitorFromPreviewTx(ctx, tx, user, monitor.ID)
+			_, err = s.activateMonitorFromPreviewTx(ctx, tx, user, monitor)
 			if err != nil {
 				return err
 			}
@@ -223,21 +223,29 @@ func MonitorUpdateToCreateMonitorResultParams(
 
 func (s *Service) ActivateMonitorFromPreview(ctx context.Context, user *models.User, monitorID int64) (*models.Monitor, error) {
 	return db.WithTxV(s.db, ctx, func(tx pgx.Tx) (*models.Monitor, error) {
-		return s.activateMonitorFromPreviewTx(ctx, tx, user, monitorID)
+		monitor, err := s.queries.GetMonitor(ctx, tx, &models.GetMonitorParams{
+			UserID: user.ID,
+			ID:     monitorID,
+		})
+		if err != nil {
+			if errors.Is(err, pgx.ErrNoRows) {
+				return nil, &errortypes.ResourceNotFoundError{Resource: "monitor", ID: monitorID}
+			}
+			return nil, fmt.Errorf("getting monitor: %w", err)
+		}
+
+		return s.activateMonitorFromPreviewTx(ctx, tx, user, monitor)
 	})
 }
 
-func (s *Service) activateMonitorFromPreviewTx(ctx context.Context, tx pgx.Tx, user *models.User, monitorID int64) (*models.Monitor, error) {
-	monitor, err := s.GetMonitor(ctx, user.ID, monitorID)
-	if err != nil {
-		return nil, fmt.Errorf("getting monitor: %w", err)
-	}
+func (s *Service) activateMonitorFromPreviewTx(ctx context.Context, tx pgx.Tx, user *models.User, monitor *models.Monitor) (*models.Monitor, error) {
+	var err error
 
 	if err = validateMonitorTransition(monitor.Status, models.MonitorStatusActive); err != nil {
 		return nil, err
 	}
 
-	res, err := s.queries.GetLatestMonitorResult(ctx, tx, monitorID)
+	res, err := s.queries.GetLatestMonitorResult(ctx, tx, monitor.ID)
 	if err != nil {
 		return nil, fmt.Errorf("getting latest monitor result: %w", err)
 	}
