@@ -59,9 +59,11 @@ func (w *ValidateMonitorWorker) Work(ctx context.Context, job *river.Job[Validat
 	}
 
 	if err = w.service.ValidateMonitor(ctx, mon); err != nil {
-		var er *errortypes.InvalidMonitorStatusTransitionError
-		if errors.As(err, &er) {
+		if er, found := errors.AsType[*errortypes.InvalidMonitorStatusTransitionError](err); found {
 			return river.JobCancel(er)
+		}
+		if isStaleMonitorWorkError(err) {
+			return river.JobCancel(err)
 		}
 		logger.ErrorContext(ctx, "failed to validate monitor", "error", err)
 		return err

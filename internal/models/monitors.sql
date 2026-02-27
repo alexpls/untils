@@ -133,6 +133,11 @@ delete from monitor_checks
 where monitor_id = @monitor_id
 and status in ('scheduled');
 
+-- name: DeleteStaleChecks :exec
+delete from monitor_checks
+where monitor_id = @monitor_id
+and status in ('scheduled', 'checking');
+
 -- name: CreateMonitorCheck :one
 insert into monitor_checks (monitor_id, status, scheduled_for, done_at, result)
 values (@monitor_id, @status, @scheduled_for, @done_at, @result)
@@ -353,3 +358,20 @@ set scheduled_at = now(), state = 'available'
 where kind = 'check'
 and args->>'monitor_check_id' = @check_id::text
 and state = 'scheduled';
+
+-- name: ListCheckRiverJobIDsByMonitorID :many
+select rj.id
+from river_job rj
+join monitor_checks mc on rj.args->>'monitor_check_id' = mc.id::text
+where rj.kind = 'check'
+and rj.finalized_at is null
+and mc.monitor_id = @monitor_id
+order by rj.id asc;
+
+-- name: ListValidateDraftRiverJobIDsByMonitorID :many
+select id
+from river_job
+where kind = 'validate_draft'
+and finalized_at is null
+and args->>'monitor_id' = @monitor_id::text
+order by id asc;

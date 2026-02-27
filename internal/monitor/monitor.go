@@ -68,14 +68,20 @@ func (s *Service) CreateMonitor(ctx context.Context, params CreateMonitorParams)
 }
 
 func (s *Service) DeleteMonitor(ctx context.Context, userID, monitorID int64) error {
-	err := s.queries.DeleteMonitor(ctx, s.db, &models.DeleteMonitorParams{
-		UserID:    userID,
-		MonitorID: monitorID,
+	return db.WithTx(s.db, ctx, func(tx pgx.Tx) error {
+		if err := s.cancelMonitorJobsTx(ctx, tx, monitorID); err != nil {
+			return fmt.Errorf("cancelling monitor jobs: %w", err)
+		}
+
+		if err := s.queries.DeleteMonitor(ctx, tx, &models.DeleteMonitorParams{
+			UserID:    userID,
+			MonitorID: monitorID,
+		}); err != nil {
+			return fmt.Errorf("deleting monitor: %w", err)
+		}
+
+		return nil
 	})
-	if err != nil {
-		return fmt.Errorf("deleting monitor: %w", err)
-	}
-	return nil
 }
 
 // TODO: the "validate" name should be more like triage now to align with package llm
@@ -281,6 +287,14 @@ func (s *Service) updateMonitorDraftAndRevalidate(
 			return nil, err
 		}
 
+		if err = s.cancelMonitorJobsTx(ctx, tx, mon.ID); err != nil {
+			return nil, fmt.Errorf("cancelling monitor jobs: %w", err)
+		}
+
+		if err = s.queries.DeleteStaleChecks(ctx, tx, mon.ID); err != nil {
+			return nil, fmt.Errorf("deleting stale checks: %w", err)
+		}
+
 		if mon, err = s.updateMonitorStatus(ctx, tx, mon, models.MonitorStatusValidating); err != nil {
 			return nil, err
 		}
@@ -401,6 +415,10 @@ func (s *Service) SetMonitorPaused(ctx context.Context, user *models.User, monit
 
 	return db.WithTxV(s.db, ctx, func(tx pgx.Tx) (*models.Monitor, error) {
 		if paused {
+			if err := s.cancelMonitorJobsTx(ctx, tx, monitorID); err != nil {
+				return nil, fmt.Errorf("cancelling monitor jobs: %w", err)
+			}
+
 			if err := s.queries.DeleteScheduledChecks(ctx, tx, monitorID); err != nil {
 				return nil, fmt.Errorf("deleting scheduled checks: %w", err)
 			}

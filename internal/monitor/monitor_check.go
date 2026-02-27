@@ -143,7 +143,7 @@ func (s *Service) PerformMonitorCheck(
 	if err != nil {
 		if errors.Is(err, &errortypes.ResourceNotFoundError{}) {
 			s.logger.WarnContext(ctx, "tried to perform a check on a non-existent monitor", "monitor_id", check.MonitorID)
-			return nil
+			return err
 		}
 		return fmt.Errorf("getting monitor: %w", err)
 	}

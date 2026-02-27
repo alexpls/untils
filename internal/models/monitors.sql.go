@@ -260,6 +260,17 @@ func (q *Queries) DeleteScheduledChecks(ctx context.Context, db DBTX, monitorID 
 	return err
 }
 
+const deleteStaleChecks = `-- name: DeleteStaleChecks :exec
+delete from monitor_checks
+where monitor_id = $1
+and status in ('scheduled', 'checking')
+`
+
+func (q *Queries) DeleteStaleChecks(ctx context.Context, db DBTX, monitorID int64) error {
+	_, err := db.Exec(ctx, deleteStaleChecks, monitorID)
+	return err
+}
+
 const getCheckWithMonitor = `-- name: GetCheckWithMonitor :one
 select
     mc.id as check_id,
@@ -591,6 +602,36 @@ func (q *Queries) GetPreviousResultsWithCheck(ctx context.Context, db DBTX, moni
 			return nil, err
 		}
 		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listCheckRiverJobIDsByMonitorID = `-- name: ListCheckRiverJobIDsByMonitorID :many
+select rj.id
+from river_job rj
+join monitor_checks mc on rj.args->>'monitor_check_id' = mc.id::text
+where rj.kind = 'check'
+and rj.finalized_at is null
+and mc.monitor_id = $1
+order by rj.id asc
+`
+
+func (q *Queries) ListCheckRiverJobIDsByMonitorID(ctx context.Context, db DBTX, monitorID int64) ([]int64, error) {
+	rows, err := db.Query(ctx, listCheckRiverJobIDsByMonitorID, monitorID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []int64
+	for rows.Next() {
+		var id int64
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		items = append(items, id)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
@@ -990,6 +1031,35 @@ func (q *Queries) ListMonitorsWithResults(ctx context.Context, db DBTX, arg *Lis
 			return nil, err
 		}
 		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listValidateDraftRiverJobIDsByMonitorID = `-- name: ListValidateDraftRiverJobIDsByMonitorID :many
+select id
+from river_job
+where kind = 'validate_draft'
+and finalized_at is null
+and args->>'monitor_id' = $1::text
+order by id asc
+`
+
+func (q *Queries) ListValidateDraftRiverJobIDsByMonitorID(ctx context.Context, db DBTX, monitorID string) ([]int64, error) {
+	rows, err := db.Query(ctx, listValidateDraftRiverJobIDsByMonitorID, monitorID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []int64
+	for rows.Next() {
+		var id int64
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		items = append(items, id)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
