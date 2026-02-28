@@ -111,27 +111,22 @@ func parseMigrate() *migrateConfig {
 }
 
 func buildVersion() string {
-	var revision, date string
+	var revision string
 	buildInfo, ok := debug.ReadBuildInfo()
 	if !ok {
 		return "unknown"
 	}
 
 	for _, setting := range buildInfo.Settings {
-		if revision != "" && date != "" {
-			break
-		}
-		switch setting.Key {
-		case "vcs.revision":
+		if setting.Key == "vcs.revision" {
 			revision = setting.Value[0:7]
-		case "vcs.time":
-			date = setting.Value
+			break
 		}
 	}
 
-	if revision == "" && date == "" {
+	if revision == "" {
 		return "unknown"
 	}
 
-	return revision + " " + date
+	return revision
 }
