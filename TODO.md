@@ -13,12 +13,9 @@
 
 ### Monitor previews
 
-- [ ] Feedback: it's unclear that the monitor isn't already ready to go when it's being previewed. When the first "preview" result comes in there's an assumption that the thing is already active.
 - [ ] Feedback: it's unclear how often email notifications will be sent. People don't wanna get spammed so this should be much more obvious.
 - [ ] Feedback: observation: non-technical people don't care so much about "how often it checks". They just care about "how often it notifies".
 - [ ] Feedback: it's not obvious at all that there are multiple ways to receive notifications.
-- [ ] Feedback: "start monitoring now" button should probably just say "Activate".
-- [ ] Feature: "fire and forget" way to set up monitors, if you don't wanna sit around waiting to confirm that the first check looks good
 - [ ] Improvement: make it clearer what the purpose of the preview is. I've had feedback that it's confusing that it's showing something that's already happened, which isn't something that the user wants to be notified about _now_.
 
 ### AI SDKs
@@ -45,6 +42,9 @@
 
 ## Done
 
+- [x] Feedback: it's unclear that the monitor isn't already ready to go when it's being previewed. When the first "preview" result comes in there's an assumption that the thing is already active.
+- [x] Feedback: "start monitoring now" button should probably just say "Activate".
+- [x] Feature: "fire and forget" way to set up monitors, if you don't wanna sit around waiting to confirm that the first check looks good
 - [x] Improvement: Triage workflow should document steps it took to get to a satisfactory answer so future workflows can do them too - possibly able to skip making new searches this way and just re-request existing URLs?
 - [x] Feature: Checks should be able to produce multiple results
 - [x] Feature: handle future dates better. At the moment with the 'past tense' date requirement, release dates are referred to in the past tense, even though they haven't happened yet.
