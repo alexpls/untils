@@ -62,22 +62,19 @@ func (t *axTree) tidy() {
 // flattenNodesWhere removes nodes matching the predicate, reparenting their
 // children to their parent.
 func (t *axTree) flattenNodesWhere(predicate func(*axNode) bool) {
-	matchingIDs := make([]string, 0)
-	for id, node := range t.Nodes {
-		if predicate(node) {
-			matchingIDs = append(matchingIDs, id)
-		}
-	}
-
-	for _, id := range matchingIDs {
+	for _, id := range t.nodeIDsInTreeOrder() {
 		node := t.Nodes[id]
 		if node == nil {
 			continue // already removed
+		}
+		if !predicate(node) {
+			continue
 		}
 		parent := node.parent(t)
 		if parent == nil {
 			continue // don't remove root
 		}
+
 		t.reparentChildren(node, parent)
 		t.remove(node)
 	}
@@ -121,12 +118,57 @@ func (t *axTree) remove(node *axNode) {
 }
 
 func (t *axTree) reparentChildren(node *axNode, newParent *axNode) {
+	// Replace the removed node in-place with its children so sibling order
+	// remains stable and related content keeps context.
+	parentIdx := -1
+	for i, childID := range newParent.ChildIDs {
+		if childID == node.NodeID {
+			parentIdx = i
+			break
+		}
+	}
+
 	for _, child := range node.children(t) {
 		child.ParentID = newParent.NodeID
 	}
 
-	newParent.ChildIDs = append(newParent.ChildIDs, node.ChildIDs...)
+	if parentIdx == -1 {
+		newParent.ChildIDs = append(newParent.ChildIDs, node.ChildIDs...)
+	} else {
+		newChildIDs := make([]string, 0, len(newParent.ChildIDs)-1+len(node.ChildIDs))
+		newChildIDs = append(newChildIDs, newParent.ChildIDs[:parentIdx]...)
+		newChildIDs = append(newChildIDs, node.ChildIDs...)
+		newChildIDs = append(newChildIDs, newParent.ChildIDs[parentIdx+1:]...)
+		newParent.ChildIDs = newChildIDs
+	}
+
 	node.ChildIDs = []string{}
+}
+
+// nodeIDsInTreeOrder returns node IDs in depth-first document order.
+func (t *axTree) nodeIDsInTreeOrder() []string {
+	if t.RootID == "" {
+		return nil
+	}
+
+	ordered := make([]string, 0, len(t.Nodes))
+	stack := []string{t.RootID}
+	for len(stack) > 0 {
+		id := stack[len(stack)-1]
+		stack = stack[:len(stack)-1]
+
+		node := t.Nodes[id]
+		if node == nil {
+			continue
+		}
+		ordered = append(ordered, id)
+
+		for i := len(node.ChildIDs) - 1; i >= 0; i-- {
+			stack = append(stack, node.ChildIDs[i])
+		}
+	}
+
+	return ordered
 }
 
 // axNode is a node in our internal accessibility tree representation

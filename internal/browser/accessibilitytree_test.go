@@ -12,6 +12,23 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestFlattenNodesWherePreservesSiblingOrder(t *testing.T) {
+	tree := axTree{
+		RootID: "root",
+		Nodes: map[string]*axNode{
+			"root": {NodeID: "root", Role: "RootWebArea", ChildIDs: []string{"a", "g", "c"}},
+			"a":    {NodeID: "a", ParentID: "root", Role: "heading", Name: "A"},
+			"g":    {NodeID: "g", ParentID: "root", Role: "generic", ChildIDs: []string{"b1", "b2"}},
+			"b1":   {NodeID: "b1", ParentID: "g", Role: "heading", Name: "B1"},
+			"b2":   {NodeID: "b2", ParentID: "g", Role: "heading", Name: "B2"},
+			"c":    {NodeID: "c", ParentID: "root", Role: "heading", Name: "C"},
+		},
+	}
+
+	tree.flattenNodesWhere(func(n *axNode) bool { return n.Role == "generic" })
+	require.Equal(t, []string{"a", "b1", "b2", "c"}, tree.Nodes["root"].ChildIDs)
+}
+
 func TestFormatEnergexAccessibilityTree(t *testing.T) {
 	var tree axTree
 	require.NoError(t, json.Unmarshal(energexAxTreeFixture(t), &tree))
