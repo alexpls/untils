@@ -3,8 +3,7 @@
 ### Monitor results
 
 - [ ] Feature: Merge multiple per-check result notifications into one grouped notification payload.
-- [ ] Improvement: special logic when checking prices for things, should include things like finding the cheapest price and reporting on it. Not including multiple store names.
-  - [ ] Have some docs that the LLM can consult on demand for how to format things, and a general index that it can use to pull up docs. e.g. a doc about formatting fields for podcast episodes could be that the headline should be "#{{Episode number}} - {{Episode title}}" and subtitle should be "Released {{Release date}}".
+- [ ] Improvement: add instructions for checking prices for things, should include things like finding the cheapest price and reporting on it. Not including multiple store names.
 - [ ] Feature: Result corrections
   - [ ] Feature: hide results that were bad, and feed them back to LLM
   - [ ] Feedback: it's not clear that the "feedback" option goes to the LLM to influence future results. People were trying to give feedback about the application itself in that field.
@@ -42,6 +41,7 @@
 
 ## Done
 
+- [x] Have some docs that the LLM can consult on demand for how to format things, and a general index that it can use to pull up docs. e.g. a doc about formatting fields for podcast episodes could be that the headline should be "#{{Episode number}} - {{Episode title}}" and subtitle should be "Released {{Release date}}".
 - [x] Feedback: it's unclear that the monitor isn't already ready to go when it's being previewed. When the first "preview" result comes in there's an assumption that the thing is already active.
 - [x] Feedback: "start monitoring now" button should probably just say "Activate".
 - [x] Feature: "fire and forget" way to set up monitors, if you don't wanna sit around waiting to confirm that the first check looks good
