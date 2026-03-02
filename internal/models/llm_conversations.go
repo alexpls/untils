@@ -131,6 +131,28 @@ func (c LLMToolCall) SearchRequestParams() *SearchRequestParams {
 	return &params
 }
 
+type ReadInstructionParams struct {
+	Name string `json:"name"`
+}
+
+func (p ReadInstructionParams) Equal(other any) bool {
+	if o, ok := other.(ReadInstructionParams); ok {
+		return p.Name == o.Name
+	}
+	return false
+}
+
+func (c LLMToolCall) ReadInstructionParams() *ReadInstructionParams {
+	if c.Name != "read_instruction" {
+		return nil
+	}
+	var params ReadInstructionParams
+	if err := json.Unmarshal([]byte(c.Arguments), &params); err != nil {
+		return nil
+	}
+	return &params
+}
+
 // LLMToolMessageBody represents the body of a tool role message.
 type LLMToolMessageBody struct {
 	CallID string `json:"call_id"`

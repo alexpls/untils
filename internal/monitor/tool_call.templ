@@ -7,6 +7,7 @@ import (
 	"github.com/alexpls/untils/internal/components"
 	"github.com/alexpls/untils/internal/components/icons"
 	"github.com/alexpls/untils/internal/models"
+	"strings"
 )
 
 // toolCallTimelineItem renders a tool call as a timeline item, with optional
@@ -37,6 +38,8 @@ templ toolCallDisplay(call models.LLMToolCall) {
 		Browsing <a href={ templ.SafeURL(params.URL) } target="_blank" rel="noreferrer noopener" class="link">{ host }</a>
 	} else if params := call.SearchRequestParams(); params != nil {
 		Searching for "{ params.Query }"
+	} else if params := call.ReadInstructionParams(); params != nil {
+		Reading instructions for "{ strings.ToLower(params.Name) }"
 	} else if call.Name == "browser_click" {
 		Clicking on a link
 	} else if call.Name == "browser_wait" {

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/alexpls/untils/internal/browser"
+	"github.com/alexpls/untils/internal/llm/instructions"
 	"github.com/alexpls/untils/internal/models"
 )
 
@@ -62,7 +63,7 @@ func (c *checker) perform(ctx context.Context, params *CheckParams) (*models.Che
 		}
 	}()
 
-	systemMsg := checkerPrompt
+	systemMsg := checkerPrompt + "\n## Instructions index\n\n" + instructions.Registry.Index()
 	userMsg := params.UserMessageString()
 
 	if logErr := c.conversation.addSystem(ctx, systemMsg); logErr != nil {
@@ -81,6 +82,7 @@ func (c *checker) perform(ctx context.Context, params *CheckParams) (*models.Che
 			browserNavigateTool.definition(),
 			browserClickTool.definition(),
 			searchTool.definition(),
+			readInstructionTool.definition(),
 		},
 		parallelToolCalls: false,
 		maxTurns:          99,

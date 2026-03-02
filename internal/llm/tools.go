@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/alexpls/untils/internal/browser"
+	"github.com/alexpls/untils/internal/llm/instructions"
 	"github.com/alexpls/untils/internal/logging"
 	"github.com/alexpls/untils/internal/models"
 	"github.com/alexpls/untils/internal/search"
@@ -18,6 +19,7 @@ var toolRegistry = map[string]toolBuilder{
 	browserClickTool.name:    browserClickTool.build,
 	browserWaitTool.name:     browserWaitTool.build,
 	searchTool.name:          searchTool.build,
+	readInstructionTool.name: readInstructionTool.build,
 }
 
 // toolContext provides dependencies that tools need for execution.
@@ -194,6 +196,21 @@ var searchTool = tool[models.SearchRequestParams]{
 	validate: func(tc *toolContext, params models.SearchRequestParams) string {
 		return noDuplicateCallsValidator(tc, params, "searching with the same query twice is not allowed. "+
 			"try adjusting the query or using an existing result from a previous search")
+	},
+}
+
+var readInstructionTool = tool[models.ReadInstructionParams]{
+	name:        "read_instruction",
+	description: "Retrieve the instructions for the given name",
+	execute: func(tc *toolContext, params models.ReadInstructionParams) (string, error) {
+		content, err := instructions.Registry.Body(params.Name)
+		if err != nil {
+			return "", err
+		}
+		return content, nil
+	},
+	validate: func(tc *toolContext, params models.ReadInstructionParams) string {
+		return noDuplicateCallsValidator(tc, params, "reading the same instruction more than once is not allowed")
 	},
 }
 
