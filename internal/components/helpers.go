@@ -85,6 +85,11 @@ func BuildVersion(ctx context.Context) string {
 	return reqcontext.BuildVersionFromContext(ctx)
 }
 
+func FlashAlert(ctx context.Context) string {
+	alert, _ := reqcontext.FlashAlertFromContext(ctx)
+	return alert
+}
+
 func MaskSecret(str string) string {
 	visibleChars := 3
 	maskChar := "•"

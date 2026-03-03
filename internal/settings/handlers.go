@@ -14,6 +14,7 @@ import (
 	"github.com/alexpls/untils/internal/errortypes"
 	"github.com/alexpls/untils/internal/models"
 	"github.com/alexpls/untils/internal/pushover"
+	"github.com/alexpls/untils/internal/session"
 	"github.com/alexpls/untils/internal/validation"
 	"github.com/starfederation/datastar-go/datastar"
 )
@@ -30,6 +31,7 @@ type Handlers struct {
 	db             db.DB
 	pushoverStore  *pushover.Store
 	pushoverClient *pushover.Client
+	sessionManager *session.Manager
 	auth           AuthService
 	logger         *slog.Logger
 }
@@ -40,6 +42,7 @@ func NewHandlers(
 	db db.DB,
 	pushoverStore *pushover.Store,
 	pushoverClient *pushover.Client,
+	sessionManager *session.Manager,
 	auth AuthService,
 	logger *slog.Logger,
 ) *Handlers {
@@ -48,6 +51,7 @@ func NewHandlers(
 		db:             db,
 		pushoverStore:  pushoverStore,
 		pushoverClient: pushoverClient,
+		sessionManager: sessionManager,
 		auth:           auth,
 		logger:         logger,
 	}
@@ -122,6 +126,14 @@ func (h *Handlers) UpdatePassword(w http.ResponseWriter, r *http.Request, user *
 		}
 
 		h.logger.ErrorContext(r.Context(), "error updating user password", "error", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	sess := session.FromRequest(r)
+	sess.Data.SetFlash(session.FlashTypeAlert, "Password changed.")
+	if err := h.sessionManager.Save(r); err != nil {
+		h.logger.ErrorContext(r.Context(), "error saving session with password update flash", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}

@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/alexpls/untils/internal/models"
+	"github.com/alexpls/untils/internal/reqcontext"
 )
 
 type Handlers struct {
@@ -28,5 +29,13 @@ func (h *Handlers) ViewMonitorDraftPalette(w http.ResponseWriter, r *http.Reques
 	component := MonitorDraftPalettePage()
 	if err := component.Render(r.Context(), w); err != nil {
 		h.logger.Error("error rendering monitor draft palette", "error", err)
+	}
+}
+
+func (h *Handlers) ViewFlashPalette(w http.ResponseWriter, r *http.Request, _ *models.User) {
+	ctx := reqcontext.ContextWithFlashAlert(r.Context(), "Password changed")
+	component := FlashPalettePage()
+	if err := component.Render(ctx, w); err != nil {
+		h.logger.Error("error rendering flash palette", "error", err)
 	}
 }

@@ -22,6 +22,9 @@ templ PalettePage() {
 			@example("Monitor draft") {
 				<a class="btn" href="/app/dev/palette/monitor_draft">Open monitor draft palette</a>
 			}
+			@example("Flash alert") {
+				<a class="btn" href="/app/dev/palette/flash">Open flash palette</a>
+			}
 			<div class="max-w-sm">
 				@example("FrequencyPicker") {
 					@monitor.FrequencyPicker(monitorStub())
@@ -34,6 +37,28 @@ templ PalettePage() {
 					</ul>
 				}
 			</div>
+		</div>
+	}
+}
+
+templ FlashPalettePage() {
+	@components.AppLayout("Palette: Flash", []components.Breadcrumb{
+		components.Breadcrumb{
+			Title: "Dev",
+			Href:  "#noop",
+		},
+		components.Breadcrumb{
+			Title: "Palette",
+			Href:  "/app/dev/palette",
+		},
+		components.Breadcrumb{
+			Title: "Flash",
+			Href:  "/app/dev/palette/flash",
+		},
+	}) {
+		@components.HeaderCentered("Flash")
+		<div class="p-4">
+			<p class="text-sm text-muted">This page injects a flash alert into request context on every load.</p>
 		</div>
 	}
 }

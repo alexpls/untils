@@ -16,6 +16,7 @@ const (
 	tzKey
 	envKey
 	demoKey
+	flashAlertKey
 )
 
 func ContextWithBuildVersion(ctx context.Context, buildVersion string) context.Context {
@@ -70,4 +71,13 @@ func ContextWithDemo(ctx context.Context) context.Context {
 func DemoFromContext(ctx context.Context) bool {
 	demo, _ := ctx.Value(demoKey).(bool)
 	return demo
+}
+
+func ContextWithFlashAlert(ctx context.Context, message string) context.Context {
+	return context.WithValue(ctx, flashAlertKey, message)
+}
+
+func FlashAlertFromContext(ctx context.Context) (string, bool) {
+	message, ok := ctx.Value(flashAlertKey).(string)
+	return message, ok
 }

@@ -66,6 +66,7 @@ func (a *app) routes() http.Handler {
 	// dev
 	mux.Handle("GET /app/dev/palette", a.requireAuth(a.devHandlers.ViewPalette))
 	mux.Handle("GET /app/dev/palette/monitor_draft", a.requireAuth(a.devHandlers.ViewMonitorDraftPalette))
+	mux.Handle("GET /app/dev/palette/flash", a.requireAuth(a.devHandlers.ViewFlashPalette))
 
 	// middleware
 	csrf := http.NewCrossOriginProtection()
@@ -74,6 +75,6 @@ func (a *app) routes() http.Handler {
 	return applyMiddleware(mux,
 		a.setRequestID, csrf.Handler,
 		a.setTimezoneContext, sess.Handler,
-		a.setUserContext, a.logRequests,
+		a.setFlashContext, a.setUserContext, a.logRequests,
 	)
 }

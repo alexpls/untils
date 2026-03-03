@@ -186,7 +186,7 @@ func createApp(c *config) (*app, context.Context, context.CancelFunc, func()) {
 
 	a.authHandlers = auth.NewHandlers(a.auth, a.sessionManager, a.logger.With("source", "auth.handlers"))
 
-	a.settingsHandlers = settings.NewHandlers(a.queries, a.db, a.pushoverStore, a.pushoverClient, a.auth, a.logger.With("source", "settings.handlers"))
+	a.settingsHandlers = settings.NewHandlers(a.queries, a.db, a.pushoverStore, a.pushoverClient, a.sessionManager, a.auth, a.logger.With("source", "settings.handlers"))
 
 	a.devHandlers = dev.NewHandlers(a.logger.With("source", "dev.handlers"))
 

@@ -91,6 +91,21 @@ func (a *app) setUserContext(next http.Handler) http.Handler {
 	})
 }
 
+func (a *app) setFlashContext(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		sess := session.FromRequest(r)
+		alert := sess.Data.PopFlash(session.FlashTypeAlert)
+		if alert != "" {
+			if err := a.sessionManager.Save(r); err != nil {
+				a.logger.ErrorContext(r.Context(), "error saving session after consuming flash", "error", err)
+			}
+			r = r.WithContext(reqcontext.ContextWithFlashAlert(r.Context(), alert))
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
 func (a *app) setTimezoneContext(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var tz string

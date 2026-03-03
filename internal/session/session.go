@@ -33,3 +33,19 @@ type SessionData struct {
 func (sd *SessionData) IsSignedIn() bool {
 	return sd.UserID > 0
 }
+
+func (sd *SessionData) SetFlash(kind Flash, message string) {
+	if sd.Flash == nil {
+		sd.Flash = map[Flash]string{}
+	}
+	sd.Flash[kind] = message
+}
+
+func (sd *SessionData) PopFlash(kind Flash) string {
+	if sd.Flash == nil {
+		return ""
+	}
+	message := sd.Flash[kind]
+	delete(sd.Flash, kind)
+	return message
+}
