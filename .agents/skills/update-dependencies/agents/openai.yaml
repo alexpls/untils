@@ -1,0 +1,4 @@
+interface:
+  display_name: "Update Dependencies"
+  short_description: "Update Go, Bun, Datastar vendor, and pinned tooling versions"
+  default_prompt: "Update dependencies in this repo, including Go modules, Bun packages, vendored Datastar, and other pinned tooling/workflow versions; then run validation checks and summarize changes."
