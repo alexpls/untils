@@ -197,12 +197,12 @@ func toolCallDisplay(call models.LLMToolCall) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		} else if call.Name == "browser_click" {
+		} else if call.Name == models.LLMToolNameBrowserClick {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "Clicking on a link")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		} else if call.Name == "browser_wait" {
+		} else if call.Name == models.LLMToolNameBrowserWait {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "Waiting for the page to load")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -244,9 +244,9 @@ func toolCallDisplayText(call models.LLMToolCall) string {
 		return fmt.Sprintf("Searching for %q", params.Query)
 	}
 	switch call.Name {
-	case "browser_click":
+	case models.LLMToolNameBrowserClick:
 		return "Clicking on a link"
-	case "browser_wait":
+	case models.LLMToolNameBrowserWait:
 		return "Waiting for the page to load"
 	default:
 		return fmt.Sprintf("Running %s", call.Name)

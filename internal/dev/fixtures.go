@@ -15,22 +15,22 @@ func fixtureInProgressCheckTimelineItemData() *monitor.InProgressCheckTimelineIt
 		Check: &models.MonitorCheck{},
 		TimelineEvents: []*models.GetTimelineEventsBySourceIDRow{
 			{
-				Name:      "search_request",
+				Name:      models.LLMToolNameSearchRequest,
 				Arguments: `{"query":"list of the best example websites"}`,
 				At:        pgtype.Timestamptz{Time: now.Add(-60 * time.Second), Valid: true},
 			},
 			{
-				Name:      "search_request",
+				Name:      models.LLMToolNameSearchRequest,
 				Arguments: `{"query":"text text text text text text text text text text"}`,
 				At:        pgtype.Timestamptz{Time: now.Add(-50 * time.Second), Valid: true},
 			},
 			{
-				Name:      "browser_navigate",
+				Name:      models.LLMToolNameBrowserNavigate,
 				Arguments: `{"url":"https://example.com/pricing"}`,
 				At:        pgtype.Timestamptz{Time: now.Add(-40 * time.Second), Valid: true},
 			},
 			{
-				Name:      "browser_click",
+				Name:      models.LLMToolNameBrowserClick,
 				Arguments: "",
 				At:        pgtype.Timestamptz{Time: now.Add(-30 * time.Second), Valid: true},
 			},

@@ -4,10 +4,13 @@ import (
 	"context"
 	_ "embed"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/alexpls/untils/internal/browser"
 	"github.com/alexpls/untils/internal/llm/instructions"
+	llmtools "github.com/alexpls/untils/internal/llm/tools"
+	"github.com/alexpls/untils/internal/logging"
 	"github.com/alexpls/untils/internal/models"
 )
 
@@ -16,7 +19,7 @@ type checker struct {
 	conversation  *dbConversation
 	browserCtx    *browser.BrowserCtx
 	browserCancel context.CancelFunc
-	priorCalls    []toolCall
+	priorCalls    []llmtools.Call
 }
 
 func newChecker(service *Service) *checker {
@@ -63,7 +66,9 @@ func (c *checker) perform(ctx context.Context, params *CheckParams) (*models.Che
 		}
 	}()
 
-	systemMsg := checkerPrompt + "\n## Instructions index\n\n" + instructions.Registry.Index()
+	toolUsage := llmtools.Registry.UsageMarkdown()
+	systemMsg := strings.ReplaceAll(checkerPrompt, "{{TOOLS_USAGE}}", toolUsage) +
+		"\n## Instructions index\n\n" + instructions.Registry.Index()
 	userMsg := params.UserMessageString()
 
 	if logErr := c.conversation.addSystem(ctx, systemMsg); logErr != nil {
@@ -74,16 +79,10 @@ func (c *checker) perform(ctx context.Context, params *CheckParams) (*models.Che
 	}
 
 	return runAgent(ctx, c.service, agentRunOptions[models.CheckResultWithSchema]{
-		model:          modelReasoning,
-		responseName:   "CheckResult",
-		responseSchema: responseSchema,
-		tools: []ToolDefinition{
-			browserWaitTool.definition(),
-			browserNavigateTool.definition(),
-			browserClickTool.definition(),
-			searchTool.definition(),
-			readInstructionTool.definition(),
-		},
+		model:             modelReasoning,
+		responseName:      "CheckResult",
+		responseSchema:    responseSchema,
+		tools:             toProviderTools(llmtools.Registry.Definitions()),
 		parallelToolCalls: false,
 		maxTurns:          99,
 		conversation:      c.conversation,
@@ -182,11 +181,18 @@ func (c *checker) executeToolCall(ctx context.Context, call ToolCall) (string, e
 	toolStart := time.Now()
 	c.service.logger.DebugContext(ctx, "tool call started", "tool", name, "args", args)
 
-	tc := &toolContext{
-		ctx:        ctx,
-		service:    c.service,
-		priorCalls: &c.priorCalls,
-		browser: func() *browser.BrowserCtx {
+	llmEvent, _ := logging.GetOrCreateFromContext(ctx, newLLMEvent)
+
+	tc := &llmtools.Context{
+		Ctx:        ctx,
+		Logger:     c.service.logger,
+		PriorCalls: &c.priorCalls,
+		Search:     c.service.webSearcher.Search,
+		ReadInstruction: func(name string) (string, error) {
+			return instructions.Registry.Body(name)
+		},
+		AddSiteVisited: llmEvent.addSiteVisited,
+		Browser: func() *browser.BrowserCtx {
 			if c.browserCtx == nil {
 				browserInitStart := time.Now()
 				bctx, bcancel := browser.NewBrowser(ctx, c.service.logger)
@@ -197,21 +203,16 @@ func (c *checker) executeToolCall(ctx context.Context, call ToolCall) (string, e
 		},
 	}
 
-	toolBuilder, ok := toolRegistry[name]
-	if !ok {
-		return "", fmt.Errorf("tool does not exist: %s", name)
-	}
-
-	tool, err := toolBuilder(tc, args)
+	tool, err := llmtools.Registry.Build(name, tc, args)
 	if err != nil {
 		return "", err
 	}
 
-	if validation := tool.validate(); validation != "" {
+	if validation := tool.Validate(); validation != "" {
 		return "", fmt.Errorf("error: %s", validation)
 	}
 
-	result, err := tool.call()
+	result, err := tool.Execute()
 	if err == nil {
 		c.priorCalls = append(c.priorCalls, *tool)
 	}

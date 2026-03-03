@@ -74,6 +74,14 @@ type LLMToolCall struct {
 	At        time.Time
 }
 
+const (
+	LLMToolNameBrowserNavigate = "browser_navigate"
+	LLMToolNameBrowserClick    = "browser_click"
+	LLMToolNameBrowserWait     = "browser_wait"
+	LLMToolNameSearchRequest   = "search_request"
+	LLMToolNameReadInstruction = "read_instruction"
+)
+
 // Tool parameter types for parsing Arguments
 
 // ToolParams is implemented by tool parameter types that support equality checking.
@@ -108,7 +116,7 @@ func (p SearchRequestParams) Equal(other any) bool {
 // BrowserNavigateParams parses and returns the parameters for a browser_navigate tool call.
 // Returns nil if the tool call is not browser_navigate or if parsing fails.
 func (c LLMToolCall) BrowserNavigateParams() *BrowserNavigateParams {
-	if c.Name != "browser_navigate" {
+	if c.Name != LLMToolNameBrowserNavigate {
 		return nil
 	}
 	var params BrowserNavigateParams
@@ -121,7 +129,7 @@ func (c LLMToolCall) BrowserNavigateParams() *BrowserNavigateParams {
 // SearchRequestParams parses and returns the parameters for a search_request tool call.
 // Returns nil if the tool call is not search_request or if parsing fails.
 func (c LLMToolCall) SearchRequestParams() *SearchRequestParams {
-	if c.Name != "search_request" {
+	if c.Name != LLMToolNameSearchRequest {
 		return nil
 	}
 	var params SearchRequestParams
@@ -143,7 +151,7 @@ func (p ReadInstructionParams) Equal(other any) bool {
 }
 
 func (c LLMToolCall) ReadInstructionParams() *ReadInstructionParams {
-	if c.Name != "read_instruction" {
+	if c.Name != LLMToolNameReadInstruction {
 		return nil
 	}
 	var params ReadInstructionParams
