@@ -21,6 +21,7 @@ import (
 // AuthService provides user update methods
 type AuthService interface {
 	UpdateUserTimezone(ctx context.Context, userID int64, params auth.UpdateUserTimezoneParams) error
+	UpdateUserPassword(ctx context.Context, userID int64, params auth.UpdateUserPasswordParams) error
 }
 
 // Handlers contains HTTP handlers for settings routes
@@ -65,6 +66,67 @@ func (h *Handlers) ViewSettings(w http.ResponseWriter, r *http.Request, user *mo
 	}).Render(r.Context(), w); err != nil {
 		h.logger.ErrorContext(r.Context(), "error rendering settings component", "error", err)
 	}
+}
+
+// ViewPasswordSettings handles GET /app/settings/password
+func (h *Handlers) ViewPasswordSettings(w http.ResponseWriter, r *http.Request, user *models.User) {
+	if err := ChangePasswordSettings(&ChangePasswordViewModel{}).Render(r.Context(), w); err != nil {
+		h.logger.ErrorContext(r.Context(), "error rendering change password component", "error", err)
+	}
+}
+
+// UpdatePassword handles POST /app/settings/password
+func (h *Handlers) UpdatePassword(w http.ResponseWriter, r *http.Request, user *models.User) {
+	if err := r.ParseForm(); err != nil {
+		h.logger.ErrorContext(r.Context(), "failed to parse form", "error", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	params := auth.UpdateUserPasswordParams{
+		CurrentPassword:         r.FormValue("CurrentPassword"),
+		NewPassword:             r.FormValue("NewPassword"),
+		NewPasswordConfirmation: r.FormValue("NewPasswordConfirmation"),
+	}
+
+	err := h.auth.UpdateUserPassword(r.Context(), user.ID, params)
+	if err != nil {
+		var validationErrs validation.ValidationErrors
+
+		switch {
+		case errors.Is(err, auth.ErrCurrentPasswordIncorrect):
+			validationErrs = validation.ValidationErrors{
+				{
+					Field:   "CurrentPassword",
+					Message: "Current password is incorrect",
+				},
+			}
+		case errors.Is(err, auth.ErrPasswordConfirmationMismatch):
+			validationErrs = validation.ValidationErrors{
+				{
+					Field:   "NewPasswordConfirmation",
+					Message: "Password confirmation does not match",
+				},
+			}
+		default:
+			validationErrs = validation.MapValidationErrors(err)
+		}
+
+		if validationErrs != nil {
+			if renderErr := ChangePasswordSettings(&ChangePasswordViewModel{
+				ValidationErrors: validationErrs,
+			}).Render(r.Context(), w); renderErr != nil {
+				h.logger.ErrorContext(r.Context(), "error rendering settings component", "error", renderErr)
+			}
+			return
+		}
+
+		h.logger.ErrorContext(r.Context(), "error updating user password", "error", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, "/app/settings", http.StatusSeeOther)
 }
 
 // ViewPushoverSettings handles GET /app/settings/pushover

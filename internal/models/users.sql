@@ -26,3 +26,9 @@ update users
 set timezone = @timezone, updated_at = now()
 where id = @user_id
 returning *;
+
+-- name: UpdateUserPasswordHash :one
+update users
+set password_hash = @password_hash, updated_at = now()
+where id = @user_id
+returning *;

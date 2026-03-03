@@ -80,6 +80,32 @@ func (q *Queries) GetUserByEmail(ctx context.Context, db DBTX, email string) (*U
 	return &i, err
 }
 
+const updateUserPasswordHash = `-- name: UpdateUserPasswordHash :one
+update users
+set password_hash = $1, updated_at = now()
+where id = $2
+returning id, email, password_hash, timezone, created_at, updated_at
+`
+
+type UpdateUserPasswordHashParams struct {
+	PasswordHash string
+	UserID       int64
+}
+
+func (q *Queries) UpdateUserPasswordHash(ctx context.Context, db DBTX, arg *UpdateUserPasswordHashParams) (*User, error) {
+	row := db.QueryRow(ctx, updateUserPasswordHash, arg.PasswordHash, arg.UserID)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.PasswordHash,
+		&i.Timezone,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return &i, err
+}
+
 const updateUserTimezone = `-- name: UpdateUserTimezone :one
 update users
 set timezone = $1, updated_at = now()

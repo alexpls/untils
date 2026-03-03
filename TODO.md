@@ -41,6 +41,7 @@
 
 ## Done
 
+- [x] Feature: Change password
 - [x] Have some docs that the LLM can consult on demand for how to format things, and a general index that it can use to pull up docs. e.g. a doc about formatting fields for podcast episodes could be that the headline should be "#{{Episode number}} - {{Episode title}}" and subtitle should be "Released {{Release date}}".
 - [x] Feedback: it's unclear that the monitor isn't already ready to go when it's being previewed. When the first "preview" result comes in there's an assumption that the thing is already active.
 - [x] Feedback: "start monitoring now" button should probably just say "Activate".

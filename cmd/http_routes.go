@@ -53,6 +53,8 @@ func (a *app) routes() http.Handler {
 	// settings
 	mux.HandleFunc("GET /app/settings", a.requireAuth(a.settingsHandlers.ViewSettings))
 	mux.HandleFunc("POST /app/settings/timezone", a.requireAuth(a.settingsHandlers.UpdateTimezone))
+	mux.HandleFunc("GET /app/settings/password", a.requireAuth(a.settingsHandlers.ViewPasswordSettings))
+	mux.HandleFunc("POST /app/settings/password", a.requireAuth(a.settingsHandlers.UpdatePassword))
 	mux.HandleFunc("GET /app/settings/pushover", a.requireAuth(a.settingsHandlers.ViewPushoverSettings))
 	mux.HandleFunc("POST /app/settings/pushover", a.requireAuth(a.settingsHandlers.UpdatePushoverSettings))
 	mux.HandleFunc("DELETE /app/settings/pushover", a.requireAuth(a.settingsHandlers.DeletePushoverSettings))
