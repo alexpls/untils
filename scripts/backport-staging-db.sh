@@ -1,11 +1,13 @@
 #!/bin/bash
 set -euo pipefail
 
+. ./scripts/workspace-env.sh
+
 # Backport staging database to local development environment
 #
 # Prerequisites:
 #   - SSH access to "fed" server
-#   - Local PostgreSQL running on port 54324 (via docker-compose)
+#   - Local PostgreSQL running for the active workspace (via docker compose)
 #
 # Visudo entry for passwordless docker exec on fed:
 #   alex ALL=(ALL) NOPASSWD: /usr/bin/docker exec untils_go-db-1 *
@@ -16,7 +18,7 @@ REMOTE_DB_USER="root"
 REMOTE_DB_NAME="untils_dev"
 
 LOCAL_DB_HOST="localhost"
-LOCAL_DB_PORT="54324"
+LOCAL_DB_PORT="${DB_PORT:-54324}"
 LOCAL_DB_USER="root"
 LOCAL_DB_PASSWORD="root"
 LOCAL_DB_NAME="untils_dev"

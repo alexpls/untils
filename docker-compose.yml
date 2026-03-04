@@ -5,18 +5,18 @@ services:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: root
     ports:
-      - "54324:5432"
+      - "${DB_PORT:-54324}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
   mailpit:
     image: axllent/mailpit
     ports:
-      - 8025:8025
-      - 1025:1025
+      - "${MAILPIT_PORT:-8025}:8025"
+      - "${SMTP_PORT:-1025}:1025"
   riverui:
     image: ghcr.io/riverqueue/riverui:latest
     ports:
-      - 7332:8080
+      - "${RIVERUI_PORT:-7332}:8080"
     environment:
       - DATABASE_URL=postgres://root:root@db:5432/untils_dev?sslmode=disable
 volumes:

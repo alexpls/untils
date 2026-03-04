@@ -1,0 +1,4 @@
+interface:
+  display_name: "Workspace Ops"
+  short_description: "Create, bootstrap, and delete jj workspaces for untils"
+  default_prompt: "Handle workspace operations for this repo, including creating and bootstrapping new jj workspaces and deleting old workspaces cleanly."
