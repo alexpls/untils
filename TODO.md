@@ -30,7 +30,7 @@
 - [ ] Improvement: Pushover form should show a spinner while we're validating the token
 - [ ] Fix: Need an anchored positioning tooltip polyfill for Firefox
 - [ ] Improvement: should be able to checkpoint progress in conversation with LLM and resume it on server restart
-- [ ] Refactor: make new tool creation less of a trek through various parts of the codebase
+- [ ] Refactor: make new tool creation less of a trek through various parts of the codebase. So concretely speaking, try to move as much as possible into the llm/tools package definitions.
 - [ ] Fix: should be able to visit check pages for incomplete checks - but right now that errors
 - [ ] Improvement: The click tool should emit the URL of the new page it landed on as a navigation event so it shows up on the UI
   - [ ] Refactor: "llm_conversations" should probably be renamed to "monitor_events", especially if it's gonna hold more than llm responses in it.
