@@ -35,12 +35,12 @@
 - [ ] Fix: should be able to visit check pages for incomplete checks - but right now that errors
 - [ ] Improvement: The click tool should emit the URL of the new page it landed on as a navigation event so it shows up on the UI
   - [ ] Refactor: "llm_conversations" should probably be renamed to "monitor_events", especially if it's gonna hold more than llm responses in it.
-- [ ] Fix: (requires https://github.com/starfederation/datastar/issues/900 first) event sse should not deliver a message when subscribed to right after a visit to a page. But they should send a message when subscribed to on reentry to a page (e.g. switching back to the tab). On Dashboard page, only the first subscription should use view transitions.
 - [ ] Fix: "check now" when clicked should put the check in some kinda "queued" state, so the user has immediate feedback that their action had an effect, even if a worker may not pick it up for a while.
 - [ ] Improvement: Refusal/check failures should be more obvious. At the moment say if a site returns a net::ERR_HTTP_RESPONSE_CODE_FAILURE the result will be 'no results found' when it should instead be an error
 
 ## Done
 
+- [x] Fix: (requires https://github.com/starfederation/datastar/issues/900 first) event sse should not deliver a message when subscribed to right after a visit to a page. But they should send a message when subscribed to on reentry to a page (e.g. switching back to the tab). On Dashboard page, only the first subscription should use view transitions. (not actually done but I don't remember what I wanted to do here)
 - [x] Feature: Change password
 - [x] Have some docs that the LLM can consult on demand for how to format things, and a general index that it can use to pull up docs. e.g. a doc about formatting fields for podcast episodes could be that the headline should be "#{{Episode number}} - {{Episode title}}" and subtitle should be "Released {{Release date}}".
 - [x] Feedback: it's unclear that the monitor isn't already ready to go when it's being previewed. When the first "preview" result comes in there's an assumption that the thing is already active.
