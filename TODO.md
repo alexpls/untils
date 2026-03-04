@@ -26,7 +26,6 @@
 
 - [ ] Feature: User signup
 - [ ] Improvement: Better use of go context. Should pass it all the way down and rely less on closer functions during app startup/shutdown
-- [ ] Improvement: Pass the user's timezone as context to all prompts
 - [ ] Refactor: Forms should have some helpers extracted
 - [ ] Improvement: Pushover form should show a spinner while we're validating the token
 - [ ] Fix: Need an anchored positioning tooltip polyfill for Firefox
@@ -40,6 +39,7 @@
 
 ## Done
 
+- [x] Improvement: Pass the user's timezone as context to all prompts
 - [x] Fix: (requires https://github.com/starfederation/datastar/issues/900 first) event sse should not deliver a message when subscribed to right after a visit to a page. But they should send a message when subscribed to on reentry to a page (e.g. switching back to the tab). On Dashboard page, only the first subscription should use view transitions. (not actually done but I don't remember what I wanted to do here)
 - [x] Feature: Change password
 - [x] Have some docs that the LLM can consult on demand for how to format things, and a general index that it can use to pull up docs. e.g. a doc about formatting fields for podcast episodes could be that the headline should be "#{{Episode number}} - {{Episode title}}" and subtitle should be "Released {{Release date}}".

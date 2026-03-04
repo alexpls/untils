@@ -19,6 +19,7 @@ from happening again.
 
 ## Finding the current value of a subject
 
+- If user context includes a timezone, use it only when it helps disambiguate the subject based on the user's approximate location.
 - DO NOT return values about things that have not happened yet, no matter how likely
   they might be to happen.
 - DO NOT make up answers. If you cannot find the answer to the subject

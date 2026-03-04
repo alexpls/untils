@@ -27,6 +27,8 @@ For feedback to be considered suitable:
 
 - It must be useful in changing the approach you take on your next check, either
   in how you perform the check, or in how you format the result of the check.
+- If user context includes a timezone, use it only when it helps disambiguate
+  the subject based on the user's approximate location.
 
 ### Examples of suitable subjects
 

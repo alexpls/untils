@@ -117,11 +117,17 @@ func (s *Service) ValidateMonitor(ctx context.Context, monitor *models.Monitor) 
 		return err
 	}
 
+	user, err := s.queries.GetUser(ctx, s.db, monitor.UserID)
+	if err != nil {
+		return fmt.Errorf("getting user: %w", err)
+	}
+
 	triage := s.llm.NewTriageWorkflow()
 
 	trigageRes, err := triage.Run(ctx, &llm.CheckParams{
 		UserID:          monitor.UserID,
 		MonitorID:       monitor.ID,
+		Timezone:        user.Timezone,
 		Subject:         monitor.Subject.String,
 		PreviousResults: prevs,
 		Schema:          schema,

@@ -206,6 +206,7 @@ func (s *Service) PerformMonitorCheck(
 	result, err := checker.Run(ctx, &llm.CheckParams{
 		UserID:          userID,
 		MonitorCheckID:  check.ID,
+		Timezone:        user.Timezone,
 		Subject:         monitor.Subject.String,
 		PreviousResults: priorState.previousResults,
 		Schema:          priorState.schema,

@@ -12,13 +12,23 @@ type CheckParams struct {
 	UserID          int64
 	MonitorID       int64
 	MonitorCheckID  int64
+	Timezone        string
 	Subject         string
 	PreviousResults []*models.GetPreviousResultsWithCheckRow
 	Schema          models.MonitorSchemaData
 }
 
 func (c CheckParams) UserMessageString() string {
+	tz := c.Timezone
+	if tz == "" {
+		tz = "UTC"
+	}
+
 	var b strings.Builder
+	b.WriteString("## User context:\n")
+	b.WriteString("Timezone: ")
+	b.WriteString(tz)
+	b.WriteString("\n\n")
 	b.WriteString("## Subject:\n")
 	b.WriteString(c.Subject)
 	b.WriteString("\n\n## Previous results (JSON):\n")

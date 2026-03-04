@@ -11,7 +11,8 @@ import (
 
 func TestCheckParamsUserMessageStringIncludesSchema(t *testing.T) {
 	msg := (CheckParams{
-		Subject: "Latest album by Tool",
+		Timezone: "Australia/Brisbane",
+		Subject:  "Latest album by Tool",
 		Schema: models.MonitorSchemaData{
 			Fields: models.MonitorSchemaFields{
 				{Type: models.MonitorSchemaFieldTypeText, Name: "Album name"},
@@ -21,6 +22,7 @@ func TestCheckParamsUserMessageStringIncludesSchema(t *testing.T) {
 		},
 	}).UserMessageString()
 
+	require.Contains(t, msg, "## User context:\nTimezone: Australia/Brisbane")
 	require.Contains(t, msg, "## Subject:\nLatest album by Tool")
 	require.Contains(t, msg, "## Monitor schema:")
 	require.Contains(t, msg, `"name":"Album name"`)
@@ -31,6 +33,7 @@ func TestCheckParamsUserMessageStringWithoutSchema(t *testing.T) {
 		Subject: "Latest album by Tool",
 	}).UserMessageString()
 
+	require.Contains(t, msg, "## User context:\nTimezone: UTC")
 	require.Contains(t, msg, "## Subject:\nLatest album by Tool")
 	require.NotContains(t, msg, "## Monitor schema:")
 }
