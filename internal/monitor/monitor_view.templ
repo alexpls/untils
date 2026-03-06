@@ -98,8 +98,8 @@ templ MonitorPage(data MonitorViewData) {
 						TimelineEvents: data.InProgressCheckTimelineEvents,
 					})
 				}
-				for _, result := range data.Results {
-					@monitorResultTimelineItemWithLatestCheck(result.MonitorResult, true, result.LatestCheckID, *result.LatestCheckDoneAt)
+				for i, result := range data.Results {
+					@monitorResultTimelineItemWithLatestCheck(result.MonitorResult, i == 0, true, result.LatestCheckID, *result.LatestCheckDoneAt)
 				}
 				<li>
 					@components.TimelineItem(monitorCreatedTimelineHeading(data.Monitor), nil)
@@ -134,16 +134,17 @@ templ InProgressCheckTimelineItem(data InProgressCheckTimelineItemViewData) {
 	}
 }
 
-templ monitorResultTimelineItem(result *models.MonitorResult, allowFeedback bool) {
-	@monitorResultTimelineItemWithLatestCheck(*result, allowFeedback, 0, result.CreatedAt)
+templ monitorResultTimelineItem(result *models.MonitorResult, allowCorrection bool) {
+	@monitorResultTimelineItemWithLatestCheck(*result, allowCorrection, false, 0, result.CreatedAt)
 }
 
-templ monitorResultTimelineItemWithLatestCheck(result models.MonitorResult, allowFeedback bool, latestCheckID int64, latestCheckAt time.Time) {
+templ monitorResultTimelineItemWithLatestCheck(result models.MonitorResult, allowCorrection bool, allowHide bool, latestCheckID int64, latestCheckAt time.Time) {
 	{{
 		renderer := monitorfieldrenderers.TextRenderer{}
 		renderCtx := components.MonitorFieldsRenderContext(ctx)
 		headline := result.MustRenderHeadline(renderer, renderCtx)
 		subtitle := result.MustRenderSubtitle(renderer, renderCtx)
+		hideAction := "confirm('Hide this result from activity? This cannot be undone.') && " + datastar.PostSSE("/app/monitors/%d/results/%d/hide", result.MonitorID, result.ID)
 	}}
 	@components.TimelineItem(monitorResultHeading(headline), nil) {
 		if subtitle != "" {
@@ -151,7 +152,7 @@ templ monitorResultTimelineItemWithLatestCheck(result models.MonitorResult, allo
 				{ subtitle }
 			</div>
 		}
-		<div class="pt-2 text-sm text-base-content/60 flex space-x-4">
+		<div class="pt-2 text-sm text-base-content/60 flex flex-wrap items-start gap-4">
 			<div>
 				<div class="font-semibold uppercase text-xs">
 					Latest check
@@ -194,29 +195,34 @@ templ monitorResultTimelineItemWithLatestCheck(result models.MonitorResult, allo
 					}
 				</div>
 			</div>
+			if allowHide {
+				<div class="ml-auto">
+					<button class="btn btn-ghost btn-xs" data-on:click={ hideAction }>Hide</button>
+				</div>
+			}
 		</div>
-		if allowFeedback {
-			if result.Feedback.String == "" {
+		if allowCorrection {
+			if result.Correction.String == "" {
 				<div class="mt-2 border py-1 px-2 rounded border-base-content/10 shadow flex items-center text-xs md:text-sm">
 					@icons.Info(icons.IconParams{Size: 16, Classes: templ.Classes("text-muted")})
 					<div class="ml-2 text-muted">
 						Not the result you expected?
 						<button
 							class="inline link font-bold text-start"
-							data-on:click={ datastar.GetSSE("/app/monitors/%d/results/%d/feedback", result.MonitorID, result.ID) }
-						>Provide feedback to improve it.</button>
+							data-on:click={ datastar.GetSSE("/app/monitors/%d/results/%d/correction", result.MonitorID, result.ID) }
+						>Add a correction for the next result.</button>
 					</div>
 				</div>
 			} else {
 				<div class="mt-2 text-muted">
 					<div class="font-semibold uppercase text-xs">
-						Feedback
+						Correction
 					</div>
 					<div class="text-sm">
-						<span>{ result.Feedback.String }</span>
+						<span>{ result.Correction.String }</span>
 						<button
 							class="link-hover cursor-pointer font-bold"
-							data-on:click={ datastar.GetSSE("/app/monitors/%d/results/%d/feedback", result.MonitorID, result.ID) }
+							data-on:click={ datastar.GetSSE("/app/monitors/%d/results/%d/correction", result.MonitorID, result.ID) }
 						>Edit</button>.
 					</div>
 				</div>

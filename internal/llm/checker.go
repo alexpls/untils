@@ -38,11 +38,8 @@ func (c *checker) perform(ctx context.Context, params *CheckParams) (*models.Che
 	workflowStart := time.Now()
 	c.service.logger.DebugContext(ctx, "checker workflow started")
 
-	var previousResult *models.GetPreviousResultsWithCheckRow
+	previousResult := models.LatestVisiblePreviousResult(params.PreviousResults)
 	isFirstCheck := len(params.PreviousResults) == 0
-	if len(params.PreviousResults) > 0 {
-		previousResult = params.PreviousResults[0]
-	}
 
 	var responseSchema map[string]any
 	if params.Schema.Zero() {

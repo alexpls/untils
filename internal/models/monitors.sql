@@ -30,6 +30,7 @@ from monitors m
 left join (
     select distinct on (monitor_id) monitor_id, headline, subtitle, data, created_at
     from monitor_results
+    where hidden = false
     order by monitor_id, created_at desc, id desc
 ) mr on mr.monitor_id = m.id
 left join next_check mc on mc.monitor_id = m.id
@@ -161,6 +162,7 @@ where id = @id;
 -- name: GetLatestMonitorResult :one
 select * from monitor_results
 where monitor_id = @monitor_id
+and hidden = false
 order by created_at desc, id desc
 limit 1;
 
@@ -176,12 +178,14 @@ join lateral (
     limit 1
 ) mc on true
 where mr.monitor_id = @monitor_id
+and (mr.hidden = false or mr.correction is not null)
 order by mr.created_at desc, mr.id desc
 limit 10;
 
 -- name: ListMonitorResults :many
 select * from monitor_results
 where monitor_id = @monitor_id
+and hidden = false
 order by created_at desc, id desc;
 
 -- name: ListMonitorResultsWithLatestCheck :many
@@ -200,6 +204,7 @@ join lateral (
     limit 1
 ) mc on true
 where mr.monitor_id = @monitor_id
+and mr.hidden = false
 order by mr.created_at desc, mr.id desc;
 
 -- name: GetMonitorResult :one
@@ -212,6 +217,7 @@ select mr.*
 from monitor_results mr
 join monitor_result_checks mrc on mrc.monitor_result_id = mr.id
 where mrc.monitor_check_id = @check_id
+and mr.hidden = false
 order by mr.created_at desc, mr.id desc
 ;
 
@@ -247,9 +253,14 @@ insert into monitor_result_checks (monitor_result_id, monitor_check_id)
 values (@monitor_result_id, @monitor_check_id)
 on conflict (monitor_result_id, monitor_check_id) do nothing;
 
--- name: UpdateMonitorResultWithFeedback :exec
+-- name: UpdateMonitorResultCorrection :exec
 update monitor_results
-set feedback = @feedback
+set correction = @result_correction
+where id = @monitor_result_id;
+
+-- name: HideMonitorResult :exec
+update monitor_results
+set hidden = true
 where id = @monitor_result_id;
 
 -- name: ListMonitorActivity :many
@@ -265,6 +276,7 @@ from monitor_results res
 left join monitors mon on mon.id = res.monitor_id
 where mon.status = 'active'
 and mon.user_id = @user_id
+and res.hidden = false
 order by res.created_at desc
 limit 7;
 

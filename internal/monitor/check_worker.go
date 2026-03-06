@@ -60,7 +60,7 @@ func (w *CheckWorker) Work(ctx context.Context, job *river.Job[CheckArgs]) error
 		return err
 	}
 
-	if err = w.service.PerformMonitorCheck(ctx, job.Args.UserID, check, true, ""); err != nil {
+	if err = w.service.PerformMonitorCheck(ctx, job.Args.UserID, check, true); err != nil {
 		if isStaleMonitorWorkError(err) {
 			return river.JobCancel(err)
 		}

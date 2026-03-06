@@ -7,29 +7,38 @@ import (
 	"github.com/alexpls/untils/internal/validation"
 )
 
-type monitorResultFeedbackViewData struct {
+type monitorResultCorrectionViewData struct {
 	result           *models.MonitorResult
-	formValues       CreateMonitorResultFeedbackParams
+	formValues       CreateMonitorResultCorrectionParams
 	validationErrors validation.ValidationErrors
 }
 
-func (d monitorResultFeedbackViewData) GetValidationErrors() validation.ValidationErrors {
+func (d monitorResultCorrectionViewData) GetValidationErrors() validation.ValidationErrors {
 	return d.validationErrors
 }
 
-templ monitorResultFeedback(data monitorResultFeedbackViewData) {
-	<dialog id="feedback-modal" class="modal backdrop-blur-sm" data-init="el.showModal()" data-on:close="setTimeout(() => el.remove(), 500)">
-		@monitorResultFeedbackForm(data)
+templ monitorResultCorrection(data monitorResultCorrectionViewData) {
+	<dialog
+		id="correction-modal"
+		class="modal backdrop-blur-sm"
+		data-ignore-morph
+		data-init="el.showModal()"
+		data-on:close="setTimeout(() => el.remove(), 500)"
+	>
+		@monitorResultCorrectionForm(data)
 	</dialog>
 }
 
-templ monitorResultFeedbackForm(data monitorResultFeedbackViewData) {
+templ monitorResultCorrectionForm(data monitorResultCorrectionViewData) {
 	<form
-		id="feedback-form"
+		id="correction-form"
 		class="modal-box"
-		data-on:submit={ fmt.Sprintf("@post('/app/monitors/%d/results/%d/feedback')", data.result.MonitorID, data.result.ID) }
+		data-on:submit={ fmt.Sprintf("@post('/app/monitors/%d/results/%d/correction')", data.result.MonitorID, data.result.ID) }
 	>
-		<h3 class="text-lg font-bold">Provide feedback to improve the next result</h3>
+		<h3 class="text-lg font-bold">Add a correction for the next result</h3>
+		<p class="mt-2 text-sm text-base-content/70">
+			The current result will be hidden after the correction is submitted.
+		</p>
 		<div class="bg-base-300 px-6 py-4 mt-4 shadow rounded -rotate-1 scale-95">
 			<ul>
 				@monitorResultTimelineItem(data.result, false)
@@ -37,17 +46,17 @@ templ monitorResultFeedbackForm(data monitorResultFeedbackViewData) {
 		</div>
 		<div class="mt-4">
 			<fieldset class="fieldset">
-				<legend class="fieldset-legend">How do you want this result to change?</legend>
+				<legend class="fieldset-legend">What should change in the next result?</legend>
 			</fieldset>
 			<textarea
-				name="feedback"
-				class={ "textarea", "w-full", templ.KV("textarea-error", components.ValidationError(data, "Feedback") != "") }
+				name="correction"
+				class={ "textarea", "w-full", templ.KV("textarea-error", components.ValidationError(data, "Correction") != "") }
 				data-effect="el.selectionStart = el.value.length"
-				placeholder="Type here..."
+				placeholder="Type the correction..."
 				data-init="el.focus()"
-				data-bind:feedback
-			>{ data.formValues.Feedback }</textarea>
-			if errStr := components.ValidationError(data, "Feedback"); errStr != "" {
+				data-bind:correction
+			>{ data.formValues.Correction }</textarea>
+			if errStr := components.ValidationError(data, "Correction"); errStr != "" {
 				<p class="text-sm label text-error mt-1">{ errStr }</p>
 			}
 		</div>
@@ -56,7 +65,7 @@ templ monitorResultFeedbackForm(data monitorResultFeedbackViewData) {
 				class="btn btn-ghost"
 				data-on:click="evt.preventDefault(); el.closest('dialog').close()"
 			>Close</button>
-			<button class="btn btn-primary">Submit</button>
+			<button class="btn btn-primary">Apply correction</button>
 		</div>
 	</form>
 }

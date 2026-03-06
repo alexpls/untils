@@ -280,14 +280,15 @@ type MonitorNotifier struct {
 }
 
 type MonitorResult struct {
-	ID        int64
-	MonitorID int64
-	Citations *Citations
-	CreatedAt time.Time
-	Feedback  pgtype.Text
-	Headline  string
-	Subtitle  string
-	Data      MonitorUpdateData
+	ID         int64
+	MonitorID  int64
+	Citations  *Citations
+	CreatedAt  time.Time
+	Correction pgtype.Text
+	Headline   string
+	Subtitle   string
+	Data       MonitorUpdateData
+	Hidden     bool
 }
 
 type MonitorResultCheck struct {

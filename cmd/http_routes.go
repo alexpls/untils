@@ -42,8 +42,9 @@ func (a *app) routes() http.Handler {
 	mux.HandleFunc("POST /app/monitors/{monitor_id}/toggle_auto_activate", a.requireAuth(a.monitorHandlers.UpdateMonitorToggleAutoActivate))
 	mux.HandleFunc("POST /app/monitors/{monitor_id}/notifiers/{type}", a.requireAuth(a.monitorHandlers.UpdateMonitorNotifier))
 	mux.HandleFunc("DELETE /app/monitors/{monitor_id}/notifiers/{type}", a.requireAuth(a.monitorHandlers.DeleteMonitorNotifier))
-	mux.HandleFunc("GET /app/monitors/{monitor_id}/results/{result_id}/feedback", a.requireAuth(a.monitorHandlers.ViewResultFeedbackModal))
-	mux.HandleFunc("POST /app/monitors/{monitor_id}/results/{result_id}/feedback", a.requireAuth(a.monitorHandlers.UpdateResultFeedback))
+	mux.HandleFunc("GET /app/monitors/{monitor_id}/results/{result_id}/correction", a.requireAuth(a.monitorHandlers.ViewResultCorrectionModal))
+	mux.HandleFunc("POST /app/monitors/{monitor_id}/results/{result_id}/correction", a.requireAuth(a.monitorHandlers.UpdateResultCorrection))
+	mux.HandleFunc("POST /app/monitors/{monitor_id}/results/{result_id}/hide", a.requireAuth(a.monitorHandlers.HideResult))
 
 	// checks
 	mux.HandleFunc("GET /app/checks", a.requireAuth(a.monitorHandlers.ListChecks))

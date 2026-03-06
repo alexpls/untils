@@ -3,6 +3,7 @@ package monitor
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -431,8 +432,8 @@ func (h *Handlers) patchMonitorNotificationsList(sse *datastar.ServerSentEventGe
 	}
 }
 
-// ViewResultFeedbackModal handles GET /app/monitors/{id}/results/{result_id}/feedback
-func (h *Handlers) ViewResultFeedbackModal(w http.ResponseWriter, r *http.Request, user *models.User) {
+// ViewResultCorrectionModal handles GET /app/monitors/{id}/results/{result_id}/correction
+func (h *Handlers) ViewResultCorrectionModal(w http.ResponseWriter, r *http.Request, user *models.User) {
 	mon := h.monitorFromPath(w, r, user)
 	if mon == nil {
 		return
@@ -440,26 +441,31 @@ func (h *Handlers) ViewResultFeedbackModal(w http.ResponseWriter, r *http.Reques
 
 	result := h.monitorResultFromPath(w, r, mon)
 	if result == nil {
+		return
+	}
+
+	if err := h.service.AssertMonitorResultCorrectionAllowed(r.Context(), result); err != nil {
+		http.Error(w, err.Error(), http.StatusConflict)
 		return
 	}
 
 	sse := datastar.NewSSE(w, r)
 
-	data := monitorResultFeedbackViewData{
+	data := monitorResultCorrectionViewData{
 		result: result,
-		formValues: CreateMonitorResultFeedbackParams{
-			Feedback: result.Feedback.String,
+		formValues: CreateMonitorResultCorrectionParams{
+			Correction: result.Correction.String,
 		},
 	}
 
-	comp := monitorResultFeedback(data)
+	comp := monitorResultCorrection(data)
 	if err := sse.PatchElementTempl(comp, datastar.WithSelector("body"), datastar.WithModeAppend()); err != nil {
 		h.logger.ErrorContext(sse.Context(), "error patching element", "error", err)
 	}
 }
 
-// UpdateResultFeedback handles POST /app/monitors/{id}/results/{result_id}/feedback
-func (h *Handlers) UpdateResultFeedback(w http.ResponseWriter, r *http.Request, user *models.User) {
+// UpdateResultCorrection handles POST /app/monitors/{id}/results/{result_id}/correction
+func (h *Handlers) UpdateResultCorrection(w http.ResponseWriter, r *http.Request, user *models.User) {
 	mon := h.monitorFromPath(w, r, user)
 	if mon == nil {
 		return
@@ -470,23 +476,23 @@ func (h *Handlers) UpdateResultFeedback(w http.ResponseWriter, r *http.Request, 
 		return
 	}
 
-	var params CreateMonitorResultFeedbackParams
+	var params CreateMonitorResultCorrectionParams
 	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
-	if err := h.service.CreateMonitorResultFeedback(r.Context(), user.ID, result, params); err != nil {
+	if err := h.service.CreateMonitorResultCorrection(r.Context(), user.ID, result, params); err != nil {
 		if valErrs := validation.MapValidationErrors(err); valErrs != nil {
 			sse := datastar.NewSSE(w, r)
 
-			data := monitorResultFeedbackViewData{
+			data := monitorResultCorrectionViewData{
 				result:           result,
 				formValues:       params,
 				validationErrors: valErrs,
 			}
 
-			comp := monitorResultFeedbackForm(data)
+			comp := monitorResultCorrectionForm(data)
 			if err := sse.PatchElementTempl(comp); err != nil {
 				h.logger.ErrorContext(sse.Context(), "error patching element", "error", err)
 			}
@@ -494,7 +500,40 @@ func (h *Handlers) UpdateResultFeedback(w http.ResponseWriter, r *http.Request, 
 			return
 		}
 
+		if errors.Is(err, ErrMonitorResultCorrectionNotAllowed) {
+			http.Error(w, err.Error(), http.StatusConflict)
+			return
+		}
+
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	sse := datastar.NewSSE(w, r)
+	if err := sseReload(sse); err != nil {
+		h.logger.ErrorContext(sse.Context(), "error reloading", "error", err)
+	}
+}
+
+// HideResult handles POST /app/monitors/{id}/results/{result_id}/hide
+func (h *Handlers) HideResult(w http.ResponseWriter, r *http.Request, user *models.User) {
+	mon := h.monitorFromPath(w, r, user)
+	if mon == nil {
+		return
+	}
+
+	result := h.monitorResultFromPath(w, r, mon)
+	if result == nil {
+		return
+	}
+
+	if err := h.service.HideMonitorResult(r.Context(), user.ID, result); err != nil {
+		if errors.Is(err, ErrMonitorResultHideNotAllowed) {
+			http.Error(w, err.Error(), http.StatusConflict)
+			return
+		}
+
+		_ = errortypes.HandleError(err, w)
 		return
 	}
 

@@ -95,17 +95,6 @@ func (s *Service) ValidateMonitor(ctx context.Context, monitor *models.Monitor) 
 		return fmt.Errorf("updating monitor status: %w", err)
 	}
 
-	// Get the latest result for feedback
-	var userFeedback string
-	latestResult, err := s.queries.GetLatestMonitorResult(ctx, s.db, monitor.ID)
-	if err != nil {
-		if !errors.Is(err, pgx.ErrNoRows) {
-			return fmt.Errorf("getting latest monitor result: %w", err)
-		}
-	} else if latestResult.Feedback.Valid {
-		userFeedback = latestResult.Feedback.String
-	}
-
 	// Get previous results with checks for the triager
 	prevs, err := s.queries.GetPreviousResultsWithCheck(ctx, s.db, monitor.ID)
 	if err != nil {
@@ -182,7 +171,7 @@ func (s *Service) ValidateMonitor(ctx context.Context, monitor *models.Monitor) 
 		return err
 	}
 
-	if err = s.PerformMonitorCheck(ctx, monitor.UserID, check, false, userFeedback); err != nil {
+	if err = s.PerformMonitorCheckWithPreviousResults(ctx, monitor.UserID, check, false, prevs); err != nil {
 		// TODO: go back to the triager if the check fails
 		return fmt.Errorf("performing monitor check: %w", err)
 	}

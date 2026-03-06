@@ -54,6 +54,22 @@ func TestFirstCheckUpdateCountMismatch(t *testing.T) {
 	}
 }
 
+func TestHiddenOnlyHistoryDoesNotCountAsFirstCheck(t *testing.T) {
+	res := checkResult(
+		true,
+		sampleUpdate("Title", "A"),
+		sampleUpdate("Title", "B"),
+	)
+
+	isFirstCheck := len([]*models.GetPreviousResultsWithCheckRow{
+		{
+			MonitorResult: models.MonitorResult{Hidden: true},
+		},
+	}) == 0
+
+	require.False(t, firstCheckUpdateCountMismatch(res, isFirstCheck))
+}
+
 func TestDuplicateUpdatesMismatch(t *testing.T) {
 	tests := []struct {
 		name string

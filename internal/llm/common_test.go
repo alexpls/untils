@@ -68,8 +68,9 @@ func TestCheckParamsPreviousResultsStringIncludesJSONPayload(t *testing.T) {
 							},
 						},
 					},
-					Feedback:  pgtype.Text{String: "Use canonical source pages", Valid: true},
-					Citations: &citations,
+					Correction: pgtype.Text{String: "Use canonical source pages", Valid: true},
+					Hidden:     true,
+					Citations:  &citations,
 				},
 				MonitorCheck: models.MonitorCheck{
 					DoneAt: &doneAt,
@@ -83,6 +84,7 @@ func TestCheckParamsPreviousResultsStringIncludesJSONPayload(t *testing.T) {
 	require.Contains(t, msg, `"data":{"headline":"{{Title}}"`)
 	require.Contains(t, msg, `"fields":[`)
 	require.Contains(t, msg, `"latest_check_ran_at":`)
-	require.Contains(t, msg, `"user_feedback":"Use canonical source pages"`)
+	require.Contains(t, msg, `"correction":"Use canonical source pages"`)
+	require.Contains(t, msg, `"hidden_in_ui":true`)
 	require.Contains(t, msg, `"sources_used":["https://example.com/item"]`)
 }

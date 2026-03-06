@@ -20,13 +20,32 @@ func (mrwc GetPreviousResultsWithCheckRow) PromptJSON() (string, error) {
 	return monitorResultPromptJSON(mrwc.MonitorResult, latestCheckRanAt)
 }
 
+func (mr MonitorResult) IsVisible() bool {
+	return !mr.Hidden
+}
+
+func (mr MonitorResult) CanApplyCorrection(latestVisible *MonitorResult) bool {
+	return latestVisible != nil && mr.ID == latestVisible.ID
+}
+
+func LatestVisiblePreviousResult(previousResults []*GetPreviousResultsWithCheckRow) *GetPreviousResultsWithCheckRow {
+	for _, result := range previousResults {
+		if result.MonitorResult.IsVisible() {
+			return result
+		}
+	}
+
+	return nil
+}
+
 func monitorResultPromptJSON(mr MonitorResult, latestCheckRanAt time.Time) (string, error) {
 	payload := struct {
 		Headline         string            `json:"headline"`
 		Subtitle         string            `json:"subtitle"`
 		Data             MonitorUpdateData `json:"data"`
 		LatestCheckRanAt string            `json:"latest_check_ran_at"`
-		UserFeedback     string            `json:"user_feedback,omitempty"`
+		Correction       string            `json:"correction,omitempty"`
+		HiddenInUI       bool              `json:"hidden_in_ui,omitempty"`
 		SourcesUsed      []string          `json:"sources_used,omitempty"`
 	}{
 		Headline:         mr.Headline,
@@ -35,8 +54,12 @@ func monitorResultPromptJSON(mr MonitorResult, latestCheckRanAt time.Time) (stri
 		LatestCheckRanAt: latestCheckRanAt.Format("January 2, 2006 at 3:04 PM"),
 	}
 
-	if mr.Feedback.Valid {
-		payload.UserFeedback = mr.Feedback.String
+	if mr.Correction.Valid {
+		payload.Correction = mr.Correction.String
+	}
+
+	if mr.Hidden {
+		payload.HiddenInUI = true
 	}
 
 	if mr.Citations != nil && len(*mr.Citations) > 0 {

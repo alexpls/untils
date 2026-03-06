@@ -4,7 +4,7 @@
 
 
 -- Dumped from database version 18.0 (Debian 18.0-1.pgdg13+3)
--- Dumped by pg_dump version 18.2
+-- Dumped by pg_dump version 18.3
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -330,10 +330,11 @@ CREATE TABLE public.monitor_results (
     monitor_id bigint NOT NULL,
     citations jsonb DEFAULT '[]'::jsonb NOT NULL,
     created_at timestamp with time zone NOT NULL,
-    feedback text,
+    correction text,
     headline text NOT NULL,
     subtitle text DEFAULT ''::text NOT NULL,
-    data jsonb NOT NULL
+    data jsonb NOT NULL,
+    hidden boolean DEFAULT false NOT NULL
 );
 
 

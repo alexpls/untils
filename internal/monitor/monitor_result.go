@@ -2,16 +2,21 @@ package monitor
 
 import (
 	"context"
+	"errors"
+	"fmt"
+	"time"
 
+	"github.com/alexpls/untils/internal/db"
 	"github.com/alexpls/untils/internal/models"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-type CreateMonitorResultFeedbackParams struct {
-	Feedback string `json:"feedback"`
+type CreateMonitorResultCorrectionParams struct {
+	Correction string `json:"correction" validate:"required"`
 }
 
-func (s *Service) CreateMonitorResultFeedback(ctx context.Context, userID int64, result *models.MonitorResult, params CreateMonitorResultFeedbackParams) error {
+func (s *Service) CreateMonitorResultCorrection(ctx context.Context, userID int64, result *models.MonitorResult, params CreateMonitorResultCorrectionParams) error {
 	if err := s.validate.Struct(params); err != nil {
 		return err
 	}
@@ -21,23 +26,101 @@ func (s *Service) CreateMonitorResultFeedback(ctx context.Context, userID int64,
 		return err
 	}
 
-	updater := func(ctx context.Context, tx models.DBTX, mon *models.Monitor) (*models.Monitor, error) {
-		err := s.queries.UpdateMonitorResultWithFeedback(ctx, tx, &models.UpdateMonitorResultWithFeedbackParams{
-			MonitorResultID: result.ID,
-			Feedback:        pgtype.Text{Valid: params.Feedback != "", String: params.Feedback},
+	switch mon.Status {
+	case models.MonitorStatusReady:
+		_, err := s.updateMonitorDraftAndRevalidate(ctx, userID, mon.ID, func(ctx context.Context, tx models.DBTX, mon *models.Monitor) (*models.Monitor, error) {
+			if err := s.assertLatestVisibleResult(ctx, tx, result); err != nil {
+				return nil, err
+			}
+
+			if err := s.applyMonitorResultCorrection(ctx, tx, result.ID, params.Correction); err != nil {
+				return nil, err
+			}
+
+			return mon, nil
 		})
-		return mon, err
+		return err
+	case models.MonitorStatusActive:
+		return db.WithTx(s.db, ctx, func(tx pgx.Tx) error {
+			if err := s.assertLatestVisibleResult(ctx, tx, result); err != nil {
+				return err
+			}
+
+			if err := s.applyMonitorResultCorrection(ctx, tx, result.ID, params.Correction); err != nil {
+				return err
+			}
+
+			if err := s.cancelMonitorJobsTx(ctx, tx, mon.ID); err != nil {
+				return fmt.Errorf("cancelling monitor jobs: %w", err)
+			}
+
+			if err := s.queries.DeleteStaleChecks(ctx, tx, mon.ID); err != nil {
+				return fmt.Errorf("deleting stale checks: %w", err)
+			}
+
+			if _, err := s.scheduleMonitorCheckTx(ctx, tx, mon, time.Now()); err != nil {
+				return fmt.Errorf("scheduling replacement check: %w", err)
+			}
+
+			return nil
+		})
+	default:
+		return db.WithTx(s.db, ctx, func(tx pgx.Tx) error {
+			if err := s.assertLatestVisibleResult(ctx, tx, result); err != nil {
+				return err
+			}
+
+			return s.applyMonitorResultCorrection(ctx, tx, result.ID, params.Correction)
+		})
+	}
+}
+
+func (s *Service) AssertMonitorResultCorrectionAllowed(ctx context.Context, result *models.MonitorResult) error {
+	return s.assertLatestVisibleResult(ctx, s.db, result)
+}
+
+func (s *Service) HideMonitorResult(ctx context.Context, userID int64, result *models.MonitorResult) error {
+	mon, err := s.GetMonitor(ctx, userID, result.MonitorID)
+	if err != nil {
+		return err
 	}
 
 	switch mon.Status {
-	case models.MonitorStatusReady:
-		if _, err := s.updateMonitorDraftAndRevalidate(ctx, userID, mon.ID, updater); err != nil {
-			return err
-		}
+	case models.MonitorStatusActive, models.MonitorStatusPaused:
 	default:
-		if _, err := updater(ctx, s.db, mon); err != nil {
-			return err
+		return ErrMonitorResultHideNotAllowed
+	}
+
+	return s.queries.HideMonitorResult(ctx, s.db, result.ID)
+}
+
+func (s *Service) applyMonitorResultCorrection(ctx context.Context, tx models.DBTX, resultID int64, correction string) error {
+	if err := s.queries.UpdateMonitorResultCorrection(ctx, tx, &models.UpdateMonitorResultCorrectionParams{
+		MonitorResultID:  resultID,
+		ResultCorrection: pgtype.Text{Valid: correction != "", String: correction},
+	}); err != nil {
+		return fmt.Errorf("updating monitor result correction: %w", err)
+	}
+
+	if err := s.queries.HideMonitorResult(ctx, tx, resultID); err != nil {
+		return fmt.Errorf("hiding monitor result: %w", err)
+	}
+
+	return nil
+}
+
+func (s *Service) assertLatestVisibleResult(ctx context.Context, tx models.DBTX, result *models.MonitorResult) error {
+	latestResult, err := s.queries.GetLatestMonitorResult(ctx, tx, result.MonitorID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return ErrMonitorResultCorrectionNotAllowed
 		}
+
+		return fmt.Errorf("getting latest visible monitor result: %w", err)
+	}
+
+	if !result.CanApplyCorrection(latestResult) {
+		return ErrMonitorResultCorrectionNotAllowed
 	}
 
 	return nil

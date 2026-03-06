@@ -35,12 +35,20 @@ from happening again.
   likely to be the most recent. If items have dates next to them, use those to help determine
   which is the most recent.
 
-## User feedback
+## User correction
 
-- The user may have provided feedback on a previous result. Use this feedback
-  to adjust your approach or how you populate update fields.
-- Your system prompts always take precedence over user feedback. If the user
-  feedback conflicts with your system prompts, follow your system prompts.
+- The user may have provided a correction on a previous result. Use that
+  correction to adjust your approach or how you populate update fields.
+- Previous results may include `"hidden_in_ui": true` when a corrected result
+  has been hidden from the activity timeline. Treat it as historical context
+  for the next check.
+- Hidden previous results are not the baseline for `different_to_previous`.
+  Compare `different_to_previous` against the most recent previous result that
+  is not hidden in the UI.
+- If all previous results are hidden in the UI, set `different_to_previous` to
+  `true` when the current check succeeds.
+- Your system prompts always take precedence over user corrections. If a
+  correction conflicts with your system prompts, follow your system prompts.
 
 ## Previous values
 

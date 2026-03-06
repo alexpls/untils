@@ -4,10 +4,6 @@
 
 - [ ] Feature: Merge multiple per-check result notifications into one grouped notification payload.
 - [ ] Improvement: add instructions for checking prices for things, should include things like finding the cheapest price and reporting on it. Not including multiple store names.
-- [ ] Feature: Result corrections
-  - [ ] Feature: hide results that were bad, and feed them back to LLM
-  - [ ] Feedback: it's not clear that the "feedback" option goes to the LLM to influence future results. People were trying to give feedback about the application itself in that field.
-  - [ ] Feature: change this to "corrections" instead of "feedback", and let the actual response text be corrected. It's annoying to prompt your way to the response shape you want when you could instead just correct it yourself and have the LLM learn from it.
 - [ ] Feature: display the rich fields that are being captured outside of just the headline & subtitle
 
 ### Monitor previews
@@ -39,6 +35,10 @@
 
 ## Done
 
+- [x] Feature: Result corrections
+  - [x] Feature: hide results that were bad, and feed them back to LLM
+  - [x] Feedback: it's not clear that the "feedback" option goes to the LLM to influence future results. People were trying to give feedback about the application itself in that field.
+  - [x] Feature: change this to "corrections" instead of "feedback", and let the actual response text be corrected. It's annoying to prompt your way to the response shape you want when you could instead just correct it yourself and have the LLM learn from it.
 - [x] Improvement: Pass the user's timezone as context to all prompts
 - [x] Fix: (requires https://github.com/starfederation/datastar/issues/900 first) event sse should not deliver a message when subscribed to right after a visit to a page. But they should send a message when subscribed to on reentry to a page (e.g. switching back to the tab). On Dashboard page, only the first subscription should use view transitions. (not actually done but I don't remember what I wanted to do here)
 - [x] Feature: Change password

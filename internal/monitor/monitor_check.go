@@ -132,7 +132,16 @@ func (s *Service) PerformMonitorCheck(
 	userID int64,
 	check *models.MonitorCheck,
 	scheduleNext bool,
-	userFeedback string,
+) error {
+	return s.PerformMonitorCheckWithPreviousResults(ctx, userID, check, scheduleNext, nil)
+}
+
+func (s *Service) PerformMonitorCheckWithPreviousResults(
+	ctx context.Context,
+	userID int64,
+	check *models.MonitorCheck,
+	scheduleNext bool,
+	previousResultsOverride []*models.GetPreviousResultsWithCheckRow,
 ) error {
 	if slices.Contains(MonitorCheckTerminalStatuses, check.Status) {
 		s.logger.WarnContext(ctx, "tried to perform a monitor check that is already in a terminal status", "check_id", check.ID, "status", check.Status)
@@ -159,16 +168,21 @@ func (s *Service) PerformMonitorCheck(
 
 	type priorMonitorState struct {
 		previousResults []*models.GetPreviousResultsWithCheckRow
+		previousVisible *models.GetPreviousResultsWithCheckRow
 		schema          models.MonitorSchemaData
 	}
 
 	priorState, err := db.WithTxV(s.db, ctx, func(tx pgx.Tx) (*priorMonitorState, error) {
-		previousResults, err := s.queries.GetPreviousResultsWithCheck(ctx, tx, monitor.ID)
-		if err != nil {
-			if errors.Is(err, pgx.ErrNoRows) {
-				previousResults = nil
-			} else {
-				return nil, fmt.Errorf("getting previous results: %w", err)
+		previousResults := previousResultsOverride
+		if previousResults == nil {
+			var err error
+			previousResults, err = s.queries.GetPreviousResultsWithCheck(ctx, tx, monitor.ID)
+			if err != nil {
+				if errors.Is(err, pgx.ErrNoRows) {
+					previousResults = nil
+				} else {
+					return nil, fmt.Errorf("getting previous results: %w", err)
+				}
 			}
 		}
 
@@ -194,6 +208,7 @@ func (s *Service) PerformMonitorCheck(
 
 		return &priorMonitorState{
 			previousResults: previousResults,
+			previousVisible: models.LatestVisiblePreviousResult(previousResults),
 			schema:          schema,
 		}, nil
 	})
@@ -273,7 +288,7 @@ func (s *Service) PerformMonitorCheck(
 			}
 		}
 
-		if result.DifferentToPrevious || len(priorState.previousResults) == 0 {
+		if result.DifferentToPrevious || priorState.previousVisible == nil {
 			for _, params := range createMonitorResultParams {
 				createdResult, err := s.queries.CreateMonitorResult(ctx, tx, params)
 				if err != nil {
@@ -289,7 +304,7 @@ func (s *Service) PerformMonitorCheck(
 			}
 		} else {
 			if err := s.queries.CreateMonitorResultCheck(ctx, tx, &models.CreateMonitorResultCheckParams{
-				MonitorResultID: priorState.previousResults[0].MonitorResult.ID,
+				MonitorResultID: priorState.previousVisible.MonitorResult.ID,
 				MonitorCheckID:  check.ID,
 			}); err != nil {
 				return fmt.Errorf("creating monitor result check link: %w", err)
@@ -304,8 +319,8 @@ func (s *Service) PerformMonitorCheck(
 
 	if result.DifferentToPrevious {
 		lastResult := "(none)"
-		if len(priorState.previousResults) > 0 {
-			lastResult, err = priorState.previousResults[0].MonitorResult.RenderHeadline(renderer, renderCtx)
+		if priorState.previousVisible != nil {
+			lastResult, err = priorState.previousVisible.MonitorResult.RenderHeadline(renderer, renderCtx)
 			if err != nil {
 				return fmt.Errorf("rendering previous headline: %w", err)
 			}
