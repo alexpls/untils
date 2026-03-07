@@ -23,22 +23,27 @@ workspace_hash="$(printf '%s' "${workspace_name}" | cksum | awk '{print $1}')"
 slot=$((workspace_hash % 1000))
 
 if [ "${workspace_name}" = "default" ]; then
-	APP_PORT="4200"
-	DB_PORT="54324"
-	SMTP_PORT="1025"
-	MAILPIT_PORT="8025"
-	RIVERUI_PORT="7332"
+	default_app_port="4200"
+	default_db_port="54324"
+	default_smtp_port="1025"
+	default_mailpit_port="8025"
+	default_riverui_port="7332"
 else
-	APP_PORT="$((4200 + slot))"
-	DB_PORT="$((55000 + slot))"
-	SMTP_PORT="$((11025 + slot))"
-	MAILPIT_PORT="$((18025 + slot))"
-	RIVERUI_PORT="$((17332 + slot))"
+	default_app_port="$((4200 + slot))"
+	default_db_port="$((55000 + slot))"
+	default_smtp_port="$((11025 + slot))"
+	default_mailpit_port="$((18025 + slot))"
+	default_riverui_port="$((17332 + slot))"
 fi
 
-COMPOSE_PROJECT_NAME="untils_${workspace_slug}"
-PG_URL="postgresql://root:root@localhost:${DB_PORT}/untils_dev"
-PG_TEST_URL="postgresql://root:root@localhost:${DB_PORT}/untils_test"
+APP_PORT="${APP_PORT:-$default_app_port}"
+DB_PORT="${DB_PORT:-$default_db_port}"
+SMTP_PORT="${SMTP_PORT:-$default_smtp_port}"
+MAILPIT_PORT="${MAILPIT_PORT:-$default_mailpit_port}"
+RIVERUI_PORT="${RIVERUI_PORT:-$default_riverui_port}"
+COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-untils_${workspace_slug}}"
+PG_URL="${PG_URL:-postgresql://root:root@localhost:${DB_PORT}/untils_dev}"
+PG_TEST_URL="${PG_TEST_URL:-postgresql://root:root@localhost:${DB_PORT}/untils_test}"
 SMTP_HOST="${SMTP_HOST:-127.0.0.1}"
 
 export UNTILS_WORKSPACE_ENV_LOADED=1
