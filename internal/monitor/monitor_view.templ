@@ -144,12 +144,34 @@ templ monitorResultTimelineItemWithLatestCheck(result models.MonitorResult, allo
 		renderCtx := components.MonitorFieldsRenderContext(ctx)
 		headline := result.MustRenderHeadline(renderer, renderCtx)
 		subtitle := result.MustRenderSubtitle(renderer, renderCtx)
+		urlFields := make([]models.MonitorUpdateField, 0, len(result.Data.Fields))
+		for _, field := range result.Data.Fields {
+			if field.Type == models.MonitorSchemaFieldTypeURL && field.Value != "" {
+				urlFields = append(urlFields, field)
+			}
+		}
 		hideAction := "confirm('Hide this result from activity? This cannot be undone.') && " + datastar.PostSSE("/app/monitors/%d/results/%d/hide", result.MonitorID, result.ID)
 	}}
 	@components.TimelineItem(monitorResultHeading(headline), nil) {
 		if subtitle != "" {
 			<div class="text-sm">
 				{ subtitle }
+			</div>
+		}
+		if len(urlFields) > 0 {
+			<div class="mt-2 mb-1 flex flex-wrap gap-2">
+				for _, field := range urlFields {
+					<a
+						class="btn btn-xs btn-soft"
+						href={ field.Value }
+						title={ field.Name }
+						target="_blank"
+						rel="noreferrer noopener"
+					>
+						<span>{ field.Name }</span>
+						@icons.ExternalLink(icons.IconParams{Size: 15})
+					</a>
+				}
 			</div>
 		}
 		<div class="text-xs text-muted border-t border-base-content/10 mt-1 pt-1 flex divide-x divide-base-content/10 *:px-2 *:first:pl-0 *:last:pr-0">
