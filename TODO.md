@@ -1,5 +1,16 @@
 ## To do
 
+### First release: ready for brave self hosters
+
+- [ ] Make sure errors are handled in the LLM path consistently
+- [ ] Add test coverage for important components that are not yet tested
+- [ ] Self hosting special single user mode that doesn't show the usual home page
+- [ ] Results pagination
+- [ ] License
+- [ ] Make the demo user configurable
+- [ ] Remove my personal email from seeds
+- [ ] Documentation: self hosting guide & Readme
+
 ### Monitor results
 
 - [ ] Feature: Merge multiple per-check result notifications into one grouped notification payload.
@@ -13,6 +24,10 @@
 - [ ] Feedback: observation: non-technical people don't care so much about "how often it checks". They just care about "how often it notifies".
 - [ ] Feedback: it's not obvious at all that there are multiple ways to receive notifications.
 - [ ] Improvement: make it clearer what the purpose of the preview is. I've had feedback that it's confusing that it's showing something that's already happened, which isn't something that the user wants to be notified about _now_.
+
+## Monitor checks
+
+- [ ] Improvement: identify ourselves as untils. Respect robots.txt files
 
 ### AI SDKs
 
