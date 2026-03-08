@@ -152,82 +152,57 @@ templ monitorResultTimelineItemWithLatestCheck(result models.MonitorResult, allo
 				{ subtitle }
 			</div>
 		}
-		<div class="pt-2 text-sm text-base-content/60 flex flex-wrap items-start gap-4">
-			<div>
-				<div class="font-semibold uppercase text-xs">
-					Latest check
-				</div>
-				<div>
-					if latestCheckID > 0 {
-						<a href={ fmt.Sprintf("/app/checks/%d", latestCheckID) } class="link-hover">
-							{ components.FormatDateTime(ctx, latestCheckAt) }
-						</a>
-					} else {
-						{ components.FormatDateTime(ctx, latestCheckAt) }
-					}
-				</div>
+		<div class="text-xs text-muted border-t border-base-content/10 mt-1 pt-1 flex divide-x divide-base-content/10 *:px-2 *:first:pl-0 *:last:pr-0">
+			{{ iconParams := icons.IconParams{Size: 14, Classes: templ.Classes("mr-1")} }}
+			<div class="flex items-center justify-center">
+				if result.Citations != nil && len(*result.Citations) > 0 {
+					<div class="flex space-x-1 mr-1">
+						for _, citation := range *result.Citations {
+							<a
+								href={ citation.URL }
+								title={ citation.PageTitle + " | " + citation.WebsiteTitle }
+								target="_blank"
+								rel="noref noopener"
+								class="relative size-4 rounded bg-base-content/10 border border-base-content/40 overflow-hidden flex items-center justify-center"
+							>
+								if citation.FaviconURL != "" {
+									<img src={ citationFaviconProxiedURL(citation) } alt={ citation.WebsiteTitle } class="w-full h-full object-contain"/>
+								} else {
+									<span class="absolute text-xs font-semibold">{ citation.WebsiteTitle[0:1] }</span>
+								}
+							</a>
+						}
+					</div>
+				}
+				<a
+					class="link link-hover flex items-center justify-center"
+					href={ fmt.Sprintf("/app/checks/%d", latestCheckID) }
+				>
+					<span>
+						Checked&nbsp;
+						@components.TimeAgo(fmt.Sprintf("latestCheck%d", latestCheckID), latestCheckAt)
+					</span>
+				</a>
 			</div>
-			<div>
-				<div class="font-semibold uppercase text-xs">
-					Sources
-				</div>
-				<div>
-					if result.Citations != nil && len(*result.Citations) > 0 {
-						<div class="flex space-x-1">
-							for _, citation := range *result.Citations {
-								<a
-									href={ citation.URL }
-									title={ citation.PageTitle + " | " + citation.WebsiteTitle }
-									target="_blank"
-									rel="noref noopener"
-									class="relative w-5 h-5 rounded bg-base-content/10 border border-base-content/40 overflow-hidden flex items-center justify-center"
-								>
-									if citation.FaviconURL != "" {
-										<img src={ citationFaviconProxiedURL(citation) } alt={ citation.WebsiteTitle } class="w-full h-full object-contain"/>
-									} else {
-										<span class="absolute text-xs font-semibold">{ citation.WebsiteTitle[0:1] }</span>
-									}
-								</a>
-							}
-						</div>
-					} else {
-						<div>(none)</div>
-					}
-				</div>
-			</div>
+			if allowCorrection {
+				<button
+					class="link link-hover flex items-center justify-center"
+					data-on:click={ datastar.GetSSE("/app/monitors/%d/results/%d/correction", result.MonitorID, result.ID) }
+				>
+					@icons.Pencil(iconParams)
+					Correct
+				</button>
+			}
 			if allowHide {
-				<div class="ml-auto">
-					<button class="btn btn-ghost btn-xs" data-on:click={ hideAction }>Hide</button>
-				</div>
+				<button
+					class="link link-hover flex items-center justify-center"
+					data-on:click={ hideAction }
+				>
+					@icons.EyeOff(iconParams)
+					Hide
+				</button>
 			}
 		</div>
-		if allowCorrection {
-			if result.Correction.String == "" {
-				<div class="mt-2 border py-1 px-2 rounded border-base-content/10 shadow flex items-center text-xs md:text-sm">
-					@icons.Info(icons.IconParams{Size: 16, Classes: templ.Classes("text-muted")})
-					<div class="ml-2 text-muted">
-						Not the result you expected?
-						<button
-							class="inline link font-bold text-start"
-							data-on:click={ datastar.GetSSE("/app/monitors/%d/results/%d/correction", result.MonitorID, result.ID) }
-						>Add a correction for the next result.</button>
-					</div>
-				</div>
-			} else {
-				<div class="mt-2 text-muted">
-					<div class="font-semibold uppercase text-xs">
-						Correction
-					</div>
-					<div class="text-sm">
-						<span>{ result.Correction.String }</span>
-						<button
-							class="link-hover cursor-pointer font-bold"
-							data-on:click={ datastar.GetSSE("/app/monitors/%d/results/%d/correction", result.MonitorID, result.ID) }
-						>Edit</button>.
-					</div>
-				</div>
-			}
-		}
 	}
 }
 
