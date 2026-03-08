@@ -673,17 +673,17 @@ func monitorResultTimelineItemWithLatestCheck(result models.MonitorResult, allow
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, " <div class=\"text-xs text-muted border-t border-base-content/10 mt-1 pt-1 flex divide-x divide-base-content/10 *:px-2 *:first:pl-0 *:last:pr-0\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, " <div class=\"text-xs text-muted border-t border-base-content/10 mt-1 flex divide-x divide-base-content/10 *:px-2 *:first:pl-0\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			iconParams := icons.IconParams{Size: 14, Classes: templ.Classes("mr-1")}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "<div class=\"flex items-center justify-center\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "<div class=\"flex items-center justify-center py-1.5\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if result.Citations != nil && len(*result.Citations) > 0 {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "<div class=\"flex space-x-1 mr-1\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "<div class=\"flex space-x-1 mr-1.5\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -804,7 +804,7 @@ func monitorResultTimelineItemWithLatestCheck(result models.MonitorResult, allow
 				return templ_7745c5c3_Err
 			}
 			if allowCorrection {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 55, "<button class=\"link link-hover flex items-center justify-center\" data-on:click=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 55, "<button class=\"link link-hover flex items-center justify-center py-1.5\" data-on:click=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -831,7 +831,7 @@ func monitorResultTimelineItemWithLatestCheck(result models.MonitorResult, allow
 				}
 			}
 			if allowHide {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 58, "<button class=\"link link-hover flex items-center justify-center\" data-on:click=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 58, "<button class=\"link link-hover flex items-center justify-center py-1.5\" data-on:click=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

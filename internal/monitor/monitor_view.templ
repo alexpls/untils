@@ -183,11 +183,11 @@ templ monitorResultTimelineItemWithLatestCheck(result models.MonitorResult, allo
 				}
 			</div>
 		}
-		<div class="text-xs text-muted border-t border-base-content/10 mt-1 pt-1 flex divide-x divide-base-content/10 *:px-2 *:first:pl-0 *:last:pr-0">
+		<div class="text-xs text-muted border-t border-base-content/10 mt-1 flex divide-x divide-base-content/10 *:px-2 *:first:pl-0">
 			{{ iconParams := icons.IconParams{Size: 14, Classes: templ.Classes("mr-1")} }}
-			<div class="flex items-center justify-center">
+			<div class="flex items-center justify-center py-1.5">
 				if result.Citations != nil && len(*result.Citations) > 0 {
-					<div class="flex space-x-1 mr-1">
+					<div class="flex space-x-1 mr-1.5">
 						for _, citation := range *result.Citations {
 							<a
 								href={ citation.URL }
@@ -217,7 +217,7 @@ templ monitorResultTimelineItemWithLatestCheck(result models.MonitorResult, allo
 			</div>
 			if allowCorrection {
 				<button
-					class="link link-hover flex items-center justify-center"
+					class="link link-hover flex items-center justify-center py-1.5"
 					data-on:click={ datastar.GetSSE("/app/monitors/%d/results/%d/correction", result.MonitorID, result.ID) }
 				>
 					@icons.Pencil(iconParams)
@@ -226,7 +226,7 @@ templ monitorResultTimelineItemWithLatestCheck(result models.MonitorResult, allo
 			}
 			if allowHide {
 				<button
-					class="link link-hover flex items-center justify-center"
+					class="link link-hover flex items-center justify-center py-1.5"
 					data-on:click={ hideAction }
 				>
 					@icons.EyeOff(iconParams)
