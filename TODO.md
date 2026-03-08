@@ -5,7 +5,6 @@
 - [ ] Make sure errors are handled in the LLM path consistently
 - [ ] Add test coverage for important components that are not yet tested
 - [ ] Self hosting special single user mode that doesn't show the usual home page
-- [ ] Results pagination
 - [ ] License
 - [ ] Make the demo user configurable
 - [ ] Remove my personal email from seeds
@@ -51,6 +50,7 @@
 
 ## Done
 
+- [x] Results pagination
 - [x] Feature: Result corrections
   - [x] Feature: hide results that were bad, and feed them back to LLM
   - [x] Feedback: it's not clear that the "feedback" option goes to the LLM to influence future results. People were trying to give feedback about the application itself in that field.

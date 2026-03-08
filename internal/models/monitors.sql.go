@@ -929,7 +929,14 @@ join lateral (
 where mr.monitor_id = $1
 and mr.hidden = false
 order by mr.created_at desc, mr.id desc
+limit $3 offset $2
 `
+
+type ListMonitorResultsWithLatestCheckParams struct {
+	MonitorID int64
+	RowOffset int32
+	PageSize  int32
+}
 
 type ListMonitorResultsWithLatestCheckRow struct {
 	MonitorResult     MonitorResult
@@ -937,8 +944,8 @@ type ListMonitorResultsWithLatestCheckRow struct {
 	LatestCheckDoneAt *time.Time
 }
 
-func (q *Queries) ListMonitorResultsWithLatestCheck(ctx context.Context, db DBTX, monitorID int64) ([]*ListMonitorResultsWithLatestCheckRow, error) {
-	rows, err := db.Query(ctx, listMonitorResultsWithLatestCheck, monitorID)
+func (q *Queries) ListMonitorResultsWithLatestCheck(ctx context.Context, db DBTX, arg *ListMonitorResultsWithLatestCheckParams) ([]*ListMonitorResultsWithLatestCheckRow, error) {
+	rows, err := db.Query(ctx, listMonitorResultsWithLatestCheck, arg.MonitorID, arg.RowOffset, arg.PageSize)
 	if err != nil {
 		return nil, err
 	}

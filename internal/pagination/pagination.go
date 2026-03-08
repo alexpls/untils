@@ -72,3 +72,13 @@ func (p Pagination) PrevPage() int {
 func (p Pagination) PageSizeWithPeek() int {
 	return p.PageSize + 1
 }
+
+func Peek[T any](items []T, p Pagination) ([]T, Pagination) {
+	// TODO: is Peek the best name for this method? methinks no
+	if len(items) == p.PageSizeWithPeek() {
+		items = items[:p.PageSize]
+		p.HasMore = true
+	}
+
+	return items, p
+}

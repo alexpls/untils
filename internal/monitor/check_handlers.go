@@ -34,10 +34,7 @@ func (h *Handlers) ListChecks(w http.ResponseWriter, r *http.Request, user *mode
 				return nil, err
 			}
 
-			if len(checks) == pag.PageSizeWithPeek() {
-				checks = checks[:pag.PageSize]
-				pag.HasMore = true
-			}
+			checks, pag = pagination.Peek(checks, pag)
 
 			data := ChecksListData{
 				Checks:     checks,

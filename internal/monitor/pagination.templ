@@ -1,0 +1,29 @@
+package monitor
+
+import (
+	"github.com/alexpls/untils/internal/components/icons"
+	"github.com/alexpls/untils/internal/pagination"
+)
+
+templ PaginationControls(p pagination.Pagination, prevHref, nextHref string) {
+	if p.HasNext() || p.HasPrev() {
+		<div class="flex items-center py-12">
+			<div class="join mx-auto">
+				<a
+					class={ "join-item", "btn", templ.KV("btn-disabled", !p.HasPrev()) }
+					href={ prevHref }
+				>
+					@icons.ArrowLeft(icons.IconParams{Size: 15})
+					Prev page
+				</a>
+				<a
+					class={ "join-item", "btn", templ.KV("btn-disabled", !p.HasNext()) }
+					href={ nextHref }
+				>
+					Next page
+					@icons.ArrowRight(icons.IconParams{Size: 15})
+				</a>
+			</div>
+		</div>
+	}
+}

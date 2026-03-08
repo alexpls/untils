@@ -205,7 +205,8 @@ join lateral (
 ) mc on true
 where mr.monitor_id = @monitor_id
 and mr.hidden = false
-order by mr.created_at desc, mr.id desc;
+order by mr.created_at desc, mr.id desc
+limit @page_size offset @row_offset;
 
 -- name: GetMonitorResult :one
 select * from monitor_results

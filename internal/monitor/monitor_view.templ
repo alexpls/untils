@@ -9,12 +9,14 @@ import (
 	"github.com/alexpls/untils/internal/components/icons"
 	"github.com/alexpls/untils/internal/models"
 	"github.com/alexpls/untils/internal/monitorfieldrenderers"
+	"github.com/alexpls/untils/internal/pagination"
 	"github.com/starfederation/datastar-go/datastar"
 )
 
 type MonitorViewData struct {
 	Monitor                       *models.Monitor
 	Results                       []*models.ListMonitorResultsWithLatestCheckRow
+	Pagination                    pagination.Pagination
 	NextScheduledCheck            *models.MonitorCheck
 	InProgressCheck               *models.MonitorCheck
 	InProgressCheckTimelineEvents []*models.GetTimelineEventsBySourceIDRow
@@ -90,7 +92,7 @@ templ MonitorSidebarLayout(monitor *models.Monitor, pageType MonitorPageType) {
 
 templ MonitorPage(data MonitorViewData) {
 	@MonitorSidebarLayout(data.Monitor, MonitorPageTypeActivity) {
-		<div id="monitor-view" class="lg:m-4 px-4 py-2 bg-base-100 rounded border border-base-content/10" data-effect={ datastar.GetSSE("/app/monitors/%d?sse=true", data.Monitor.ID) }>
+		<div id="monitor-view" class="lg:m-4 px-4 py-2 bg-base-100 rounded border border-base-content/10" data-effect={ datastar.GetSSE("/app/monitors/%d?sse=true&%s", data.Monitor.ID, data.Pagination.CurrentPageParams().Encode()) }>
 			@components.Timeline() {
 				if data.InProgressCheck != nil {
 					@InProgressCheckTimelineItem(InProgressCheckTimelineItemViewData{
@@ -101,10 +103,17 @@ templ MonitorPage(data MonitorViewData) {
 				for i, result := range data.Results {
 					@monitorResultTimelineItemWithLatestCheck(result.MonitorResult, i == 0, true, result.LatestCheckID, *result.LatestCheckDoneAt)
 				}
-				<li>
-					@components.TimelineItem(monitorCreatedTimelineHeading(data.Monitor), nil)
-				</li>
+				if !data.Pagination.HasNext() {
+					<li>
+						@components.TimelineItem(monitorCreatedTimelineHeading(data.Monitor), nil)
+					</li>
+				}
 			}
+			@PaginationControls(
+				data.Pagination,
+				monitorActivityPagePath(data.Monitor.ID, data.Pagination.PrevPageParams()),
+				monitorActivityPagePath(data.Monitor.ID, data.Pagination.NextPageParams()),
+			)
 		</div>
 	}
 }
@@ -265,4 +274,8 @@ func citationFaviconProxiedURL(citation models.Citation) string {
 	}
 	params := url.Values{"url": []string{citation.FaviconURL}}
 	return "/app/favicon?" + params.Encode()
+}
+
+func monitorActivityPagePath(monitorID int64, params url.Values) string {
+	return fmt.Sprintf("/app/monitors/%d?%s", monitorID, params.Encode())
 }

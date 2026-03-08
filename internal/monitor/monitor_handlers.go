@@ -15,6 +15,8 @@ import (
 	"github.com/starfederation/datastar-go/datastar"
 )
 
+const monitorActivityPageSize = 50
+
 // ListMonitors handles GET /app/monitors
 func (h *Handlers) ListMonitors(w http.ResponseWriter, r *http.Request, user *models.User) {
 	patcher := ConditionalPatchRenderer{
@@ -36,11 +38,7 @@ func (h *Handlers) ListMonitors(w http.ResponseWriter, r *http.Request, user *mo
 				return nil, err
 			}
 
-			// TODO: move this peeking logic to something more generic in pagination package
-			if len(monitors) == pag.PageSizeWithPeek() {
-				monitors = monitors[:pag.PageSize]
-				pag.HasMore = true
-			}
+			monitors, pag = pagination.Peek(monitors, pag)
 
 			data := MonitorsListData{
 				Monitors:   monitors,
@@ -73,7 +71,7 @@ func (h *Handlers) ViewMonitor(w http.ResponseWriter, r *http.Request, user *mod
 			}
 
 			if freshMon.Status == models.MonitorStatusActive || freshMon.Status == models.MonitorStatusPaused {
-				return h.monitorComponent(r.Context(), freshMon, user.ID)
+				return h.monitorComponent(r.Context(), r, freshMon, user.ID)
 			}
 			return h.renderMonitorDraft(r.Context(), freshMon, user.ID, NewUpdateMonitorDraftParams(freshMon), nil)
 		},
@@ -573,8 +571,8 @@ func (h *Handlers) renderMonitorDraft(
 	return MonitorDraftPage(data), nil
 }
 
-func (h *Handlers) monitorComponent(ctx context.Context, mon *models.Monitor, userID int64) (templ.Component, error) {
-	data, err := h.monitorViewData(ctx, mon, userID)
+func (h *Handlers) monitorComponent(ctx context.Context, r *http.Request, mon *models.Monitor, userID int64) (templ.Component, error) {
+	data, err := h.monitorViewData(ctx, r, mon, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -633,11 +631,18 @@ func (h *Handlers) monitorDraftViewData(
 	}, nil
 }
 
-func (h *Handlers) monitorViewData(ctx context.Context, mon *models.Monitor, userID int64) (MonitorViewData, error) {
-	results, err := h.service.queries.ListMonitorResultsWithLatestCheck(ctx, h.service.db, mon.ID)
+func (h *Handlers) monitorViewData(ctx context.Context, r *http.Request, mon *models.Monitor, userID int64) (MonitorViewData, error) {
+	pag := pagination.PaginationFromRequest(r, monitorActivityPageSize)
+
+	results, err := h.service.queries.ListMonitorResultsWithLatestCheck(ctx, h.service.db, &models.ListMonitorResultsWithLatestCheckParams{
+		MonitorID: mon.ID,
+		PageSize:  int32(pag.PageSizeWithPeek()),
+		RowOffset: int32(pag.Offset()),
+	})
 	if err != nil {
 		return MonitorViewData{}, err
 	}
+	results, pag = pagination.Peek(results, pag)
 
 	nextScheduled, err := h.service.GetNextMonitorCheck(ctx, mon)
 	if err != nil {
@@ -669,6 +674,7 @@ func (h *Handlers) monitorViewData(ctx context.Context, mon *models.Monitor, use
 	return MonitorViewData{
 		Monitor:                       mon,
 		Results:                       results,
+		Pagination:                    pag,
 		NextScheduledCheck:            nextScheduled,
 		InProgressCheck:               inProgressCheck,
 		InProgressCheckTimelineEvents: timelineEvents,

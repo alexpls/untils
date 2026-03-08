@@ -110,26 +110,11 @@ templ MonitorsList(data MonitorsListData) {
 					</tbody>
 				</table>
 			</div>
-			if data.Pagination.HasNext() || data.Pagination.HasPrev() {
-				<div class="flex items-center py-12">
-					<div class="join mx-auto">
-						<a
-							class={ "join-item", "btn", templ.KV("btn-disabled", !data.Pagination.HasPrev()) }
-							href={ "?" + data.Pagination.PrevPageParams().Encode() + demoParam(ctx) }
-						>
-							@icons.ArrowLeft(icons.IconParams{Size: 15})
-							Prev page
-						</a>
-						<a
-							class={ "join-item", "btn", templ.KV("btn-disabled", !data.Pagination.HasNext()) }
-							href={ "?" + data.Pagination.NextPageParams().Encode() + demoParam(ctx) }
-						>
-							Next page
-							@icons.ArrowRight(icons.IconParams{Size: 15})
-						</a>
-					</div>
-				</div>
-			}
+			@PaginationControls(
+				data.Pagination,
+				"?"+data.Pagination.PrevPageParams().Encode()+demoParam(ctx),
+				"?"+data.Pagination.NextPageParams().Encode()+demoParam(ctx),
+			)
 		} else {
 			<div class="p-4">
 				No monitors to show.
