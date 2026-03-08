@@ -15,7 +15,11 @@ import (
 	"github.com/starfederation/datastar-go/datastar"
 )
 
-const monitorActivityPageSize = 50
+const (
+	monitorListPageSize     = 30
+	monitorActivityPageSize = 30
+	monitorChecksPageSize   = 30
+)
 
 // ListMonitors handles GET /app/monitors
 func (h *Handlers) ListMonitors(w http.ResponseWriter, r *http.Request, user *models.User) {
@@ -23,7 +27,7 @@ func (h *Handlers) ListMonitors(w http.ResponseWriter, r *http.Request, user *mo
 		Logger:  h.logger,
 		Updater: func(ctx context.Context) (<-chan struct{}, error) { return h.events.SubscribeUser(ctx, user.ID), nil },
 		Renderer: func(patch bool) (templ.Component, error) {
-			pag := pagination.PaginationFromRequest(r, 30)
+			pag := pagination.PaginationFromRequest(r, monitorListPageSize)
 
 			monitors, err := h.service.queries.ListMonitorsWithResults(
 				r.Context(),
@@ -92,14 +96,23 @@ func (h *Handlers) ViewMonitorChecks(w http.ResponseWriter, r *http.Request, use
 				return nil, fmt.Errorf("monitor not found")
 			}
 
-			checks, err := h.service.queries.ListMonitorChecks(r.Context(), h.service.db, mon.ID)
+			pag := pagination.PaginationFromRequest(r, monitorChecksPageSize)
+
+			checks, err := h.service.queries.ListMonitorChecks(r.Context(), h.service.db, &models.ListMonitorChecksParams{
+				MonitorID: mon.ID,
+				PageSize:  int32(pag.PageSizeWithPeek()),
+				RowOffset: int32(pag.Offset()),
+			})
 			if err != nil {
 				return nil, err
 			}
 
+			checks, pag = pagination.Peek(checks, pag)
+
 			data := MonitorChecksViewData{
-				Monitor: mon,
-				Checks:  checks,
+				Monitor:    mon,
+				Checks:     checks,
+				Pagination: pag,
 			}
 
 			if patch {

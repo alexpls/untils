@@ -773,11 +773,17 @@ const listMonitorChecks = `-- name: ListMonitorChecks :many
 select id, monitor_id, status, scheduled_for, failure_reason, done_at, result from monitor_checks
 where monitor_id = $1
 order by scheduled_for desc
-limit 30
+limit $3 offset $2
 `
 
-func (q *Queries) ListMonitorChecks(ctx context.Context, db DBTX, monitorID int64) ([]*MonitorCheck, error) {
-	rows, err := db.Query(ctx, listMonitorChecks, monitorID)
+type ListMonitorChecksParams struct {
+	MonitorID int64
+	RowOffset int32
+	PageSize  int32
+}
+
+func (q *Queries) ListMonitorChecks(ctx context.Context, db DBTX, arg *ListMonitorChecksParams) ([]*MonitorCheck, error) {
+	rows, err := db.Query(ctx, listMonitorChecks, arg.MonitorID, arg.RowOffset, arg.PageSize)
 	if err != nil {
 		return nil, err
 	}

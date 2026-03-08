@@ -12,12 +12,15 @@ import (
 	"fmt"
 	"github.com/alexpls/untils/internal/components"
 	"github.com/alexpls/untils/internal/models"
+	"github.com/alexpls/untils/internal/pagination"
 	"github.com/starfederation/datastar-go/datastar"
+	"net/url"
 )
 
 type MonitorChecksViewData struct {
-	Monitor *models.Monitor
-	Checks  []*models.MonitorCheck
+	Monitor    *models.Monitor
+	Checks     []*models.MonitorCheck
+	Pagination pagination.Pagination
 }
 
 func MonitorChecksPage(data MonitorChecksViewData) templ.Component {
@@ -93,9 +96,9 @@ func MonitorChecksView(data MonitorChecksViewData) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 string
-		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(datastar.GetSSE("/app/monitors/%d/checks?sse=true", data.Monitor.ID))
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(datastar.GetSSE("/app/monitors/%d/checks?sse=true&%s", data.Monitor.ID, data.Pagination.CurrentPageParams().Encode()))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_checks_view.templ`, Line: 22, Col: 152}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_checks_view.templ`, Line: 25, Col: 201}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -168,7 +171,7 @@ func MonitorChecksView(data MonitorChecksViewData) templ.Component {
 					var templ_7745c5c3_Var5 templ.SafeURL
 					templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinURLErrs(fmt.Sprintf("/app/checks/%d", check.ID))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_checks_view.templ`, Line: 63, Col: 89}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_checks_view.templ`, Line: 66, Col: 89}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 					if templ_7745c5c3_Err != nil {
@@ -186,7 +189,7 @@ func MonitorChecksView(data MonitorChecksViewData) templ.Component {
 					var templ_7745c5c3_Var6 string
 					templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(datastar.PostSSE("/app/checks/%d/run", check.ID))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_checks_view.templ`, Line: 65, Col: 112}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/monitor/monitor_checks_view.templ`, Line: 68, Col: 112}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 					if templ_7745c5c3_Err != nil {
@@ -206,6 +209,14 @@ func MonitorChecksView(data MonitorChecksViewData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
+			templ_7745c5c3_Err = PaginationControls(
+				data.Pagination,
+				monitorChecksPagePath(data.Monitor.ID, data.Pagination.PrevPageParams()),
+				monitorChecksPagePath(data.Monitor.ID, data.Pagination.NextPageParams()),
+			).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 		}
 		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</div></div>")
 		if templ_7745c5c3_Err != nil {
@@ -213,6 +224,10 @@ func MonitorChecksView(data MonitorChecksViewData) templ.Component {
 		}
 		return nil
 	})
+}
+
+func monitorChecksPagePath(monitorID int64, params url.Values) string {
+	return fmt.Sprintf("/app/monitors/%d/checks?%s", monitorID, params.Encode())
 }
 
 var _ = templruntime.GeneratedTemplate
