@@ -5,6 +5,7 @@
 - [ ] Feature: Merge multiple per-check result notifications into one grouped notification payload.
 - [ ] Improvement: add instructions for checking prices for things, should include things like finding the cheapest price and reporting on it. Not including multiple store names.
 - [ ] Feature: display the rich fields that are being captured outside of just the headline & subtitle
+- [ ] Feature: prettier display of links with OpenGraph attributes
 
 ### Monitor previews
 
