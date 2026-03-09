@@ -6,6 +6,7 @@
 - [ ] Add test coverage for important components that are not yet tested
 - [ ] License
 - [ ] Remove my personal email from seeds
+- [ ] Prettier and more informative notifications
 - [ ] Documentation: self hosting guide & Readme
 
 ### Monitor results
