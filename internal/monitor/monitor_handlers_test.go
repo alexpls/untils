@@ -61,7 +61,8 @@ func TestViewMonitorActivityPagination(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	for i := 1; i <= 3; i++ {
+	resultIDs := make([]int64, 0, monitorActivityPageSize+1)
+	for i := 1; i <= monitorActivityPageSize+1; i++ {
 		check, err := deps.service.queries.CreateMonitorCheck(ctx, deps.service.db, &models.CreateMonitorCheckParams{
 			MonitorID:    mon.ID,
 			Status:       models.MonitorCheckStatusScheduled,
@@ -75,9 +76,10 @@ func TestViewMonitorActivityPagination(t *testing.T) {
 		})
 		require.NoError(t, err)
 
+		headline := fmt.Sprintf("Result %d", i)
 		result, err := deps.service.queries.CreateMonitorResult(ctx, deps.service.db, &models.CreateMonitorResultParams{
 			MonitorID: mon.ID,
-			Headline:  fmt.Sprintf("Result %d", i),
+			Headline:  headline,
 			Subtitle:  "",
 			Data:      models.MonitorUpdateData{Fields: models.MonitorUpdateFields{}},
 			Citations: &models.Citations{},
@@ -89,6 +91,8 @@ func TestViewMonitorActivityPagination(t *testing.T) {
 			MonitorCheckID:  check.ID,
 		})
 		require.NoError(t, err)
+
+		resultIDs = append(resultIDs, result.ID)
 	}
 
 	t.Run("first page shows configured page size", func(t *testing.T) {
@@ -99,9 +103,9 @@ func TestViewMonitorActivityPagination(t *testing.T) {
 		page, _ := io.ReadAll(res.Body)
 
 		assert.Equal(t, http.StatusOK, res.StatusCode)
-		assert.Contains(t, string(page), "Result 3")
-		assert.Contains(t, string(page), "Result 2")
-		assert.NotContains(t, string(page), "Result 1")
+		assert.Contains(t, string(page), fmt.Sprintf("/app/monitors/%d/results/%d/hide", mon.ID, resultIDs[len(resultIDs)-1]))
+		assert.Contains(t, string(page), fmt.Sprintf("/app/monitors/%d/results/%d/hide", mon.ID, resultIDs[len(resultIDs)-2]))
+		assert.NotContains(t, string(page), fmt.Sprintf("/app/monitors/%d/results/%d/hide", mon.ID, resultIDs[0]))
 		assert.Contains(t, string(page), fmt.Sprintf("/app/monitors/%d?page=1", mon.ID))
 	})
 
@@ -113,9 +117,9 @@ func TestViewMonitorActivityPagination(t *testing.T) {
 		page, _ := io.ReadAll(res.Body)
 
 		assert.Equal(t, http.StatusOK, res.StatusCode)
-		assert.Contains(t, string(page), "Result 1")
-		assert.NotContains(t, string(page), "Result 2")
-		assert.NotContains(t, string(page), "Result 3")
+		assert.Contains(t, string(page), fmt.Sprintf("/app/monitors/%d/results/%d/hide", mon.ID, resultIDs[0]))
+		assert.NotContains(t, string(page), fmt.Sprintf("/app/monitors/%d/results/%d/hide", mon.ID, resultIDs[len(resultIDs)-1]))
+		assert.NotContains(t, string(page), fmt.Sprintf("/app/monitors/%d/results/%d/hide", mon.ID, resultIDs[len(resultIDs)-2]))
 		assert.Contains(t, string(page), fmt.Sprintf("/app/monitors/%d?page=0", mon.ID))
 	})
 }
@@ -139,8 +143,8 @@ func TestViewMonitorChecksPagination(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	var checkIDs []int64
-	for i := 1; i <= 3; i++ {
+	checkIDs := make([]int64, 0, monitorChecksPageSize+1)
+	for i := 1; i <= monitorChecksPageSize+1; i++ {
 		check, err := deps.service.queries.CreateMonitorCheck(ctx, deps.service.db, &models.CreateMonitorCheckParams{
 			MonitorID:    mon.ID,
 			Status:       models.MonitorCheckStatusScheduled,
@@ -165,8 +169,8 @@ func TestViewMonitorChecksPagination(t *testing.T) {
 		page, _ := io.ReadAll(res.Body)
 
 		assert.Equal(t, http.StatusOK, res.StatusCode)
-		assert.Contains(t, string(page), fmt.Sprintf("/app/checks/%d", checkIDs[2]))
-		assert.Contains(t, string(page), fmt.Sprintf("/app/checks/%d", checkIDs[1]))
+		assert.Contains(t, string(page), fmt.Sprintf("/app/checks/%d", checkIDs[len(checkIDs)-1]))
+		assert.Contains(t, string(page), fmt.Sprintf("/app/checks/%d", checkIDs[len(checkIDs)-2]))
 		assert.NotContains(t, string(page), fmt.Sprintf("/app/checks/%d", checkIDs[0]))
 		assert.Contains(t, string(page), fmt.Sprintf("/app/monitors/%d/checks?page=1", mon.ID))
 	})
@@ -180,8 +184,8 @@ func TestViewMonitorChecksPagination(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, res.StatusCode)
 		assert.Contains(t, string(page), fmt.Sprintf("/app/checks/%d", checkIDs[0]))
-		assert.NotContains(t, string(page), fmt.Sprintf("/app/checks/%d", checkIDs[1]))
-		assert.NotContains(t, string(page), fmt.Sprintf("/app/checks/%d", checkIDs[2]))
+		assert.NotContains(t, string(page), fmt.Sprintf("/app/checks/%d", checkIDs[len(checkIDs)-1]))
+		assert.NotContains(t, string(page), fmt.Sprintf("/app/checks/%d", checkIDs[len(checkIDs)-2]))
 		assert.Contains(t, string(page), fmt.Sprintf("/app/monitors/%d/checks?page=0", mon.ID))
 	})
 }
