@@ -56,7 +56,35 @@ func TestSend(t *testing.T) {
 		require.Equal(t, "notifications@untils.com", call.from)
 		require.Equal(t, []string{"alexpls@fastmail.com"}, call.to)
 		require.Contains(t, string(call.msg), "Subject: A humble test")
+		require.Contains(t, string(call.msg), "Content-Type: text/plain; charset=UTF-8")
 		require.Contains(t, string(call.msg), "it works?")
+	})
+
+	t.Run("sends multipart email when html body is present", func(t *testing.T) {
+		mock := &mockMailSender{}
+		s := NewServiceWithSender(SMTPConfig{
+			Host: "smtp.example.com",
+			Port: 587,
+		}, mock)
+
+		err := s.Send(context.Background(), &SendParams{
+			Recipient: "alexpls@fastmail.com",
+			Subject:   "Multipart test",
+			Body:      "plain text body",
+			HTMLBody:  "<p>html body</p>",
+		})
+
+		require.NoError(t, err)
+		require.Len(t, mock.calls, 1)
+
+		msg := string(mock.calls[0].msg)
+		require.Contains(t, msg, "Subject: Multipart test")
+		require.Contains(t, msg, "MIME-Version: 1.0")
+		require.Contains(t, msg, "Content-Type: multipart/alternative; boundary=")
+		require.Contains(t, msg, "Content-Type: text/plain; charset=UTF-8")
+		require.Contains(t, msg, "Content-Type: text/html; charset=UTF-8")
+		require.Contains(t, msg, "plain text body")
+		require.Contains(t, msg, "<p>html body</p>")
 	})
 
 	t.Run("returns error when sender fails", func(t *testing.T) {

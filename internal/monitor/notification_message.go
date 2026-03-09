@@ -5,39 +5,25 @@ import (
 	"fmt"
 
 	"github.com/alexpls/untils/internal/models"
-	"github.com/alexpls/untils/internal/monitorfieldrenderers"
 	"github.com/alexpls/untils/internal/notifications"
 )
 
-func newResultNotificationMessage(subject, newValue, oldValue string) notifications.MonitorNewResult {
+func newResultNotificationMessage(monitor models.Monitor, newValue, oldValue models.MonitorResult) notifications.MonitorNewResult {
 	return notifications.MonitorNewResult{
-		Subject: subject,
+		Monitor: monitor,
 		New:     newValue,
 		Old:     oldValue,
 	}
 }
 
-func renderNotificationHeadline(result *models.MonitorResult, timezone string) (string, error) {
-	renderer := monitorfieldrenderers.TextRenderer{}
-	renderCtx := models.MonitorFieldsRenderContext{Timezone: timezone}
-
-	headline, err := result.RenderHeadline(renderer, renderCtx)
-	if err != nil {
-		return "", fmt.Errorf("rendering notification headline: %w", err)
-	}
-
-	return headline, nil
-}
-
-func (s *Service) previousVisibleNotificationHeadline(
+func (s *Service) previousVisibleNotificationResult(
 	ctx context.Context,
 	monitorID int64,
 	currentResultID int64,
-	timezone string,
-) (string, error) {
+) (models.MonitorResult, error) {
 	results, err := s.queries.ListMonitorResults(ctx, s.db, monitorID)
 	if err != nil {
-		return "", fmt.Errorf("listing monitor results: %w", err)
+		return models.MonitorResult{}, fmt.Errorf("listing monitor results: %w", err)
 	}
 
 	for i, candidate := range results {
@@ -45,11 +31,15 @@ func (s *Service) previousVisibleNotificationHeadline(
 			continue
 		}
 		if i+1 >= len(results) {
-			return "(none)", nil
+			return emptyNotificationResult(), nil
 		}
 
-		return renderNotificationHeadline(results[i+1], timezone)
+		return *results[i+1], nil
 	}
 
-	return "(none)", nil
+	return emptyNotificationResult(), nil
+}
+
+func emptyNotificationResult() models.MonitorResult {
+	return models.MonitorResult{Headline: "(none)"}
 }

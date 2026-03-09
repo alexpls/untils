@@ -4,12 +4,16 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+
+	"github.com/alexpls/untils/internal/models"
+	"github.com/alexpls/untils/internal/monitorfieldrenderers"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type MonitorNewResult struct {
-	Subject string
-	New     string
-	Old     string
+	Monitor models.Monitor
+	New     models.MonitorResult
+	Old     models.MonitorResult
 }
 
 type RenderedEmail struct {
@@ -47,9 +51,9 @@ func NewEmailTemplateStore() *EmailTemplateStore {
 			Key:  "new_result",
 			Name: "New result",
 			DummyData: MonitorNewResult{
-				Subject: "Kubernetes release notes",
-				New:     "Kubernetes v1.35 release notes published",
-				Old:     "Kubernetes v1.34 release notes published",
+				Monitor: models.Monitor{Subject: pgtype.Text{String: "Kubernetes release notes", Valid: true}},
+				New:     models.MonitorResult{Headline: "Kubernetes v1.35 release notes published"},
+				Old:     models.MonitorResult{Headline: "Kubernetes v1.34 release notes published"},
 			},
 			Render: RenderMonitorNewResultEmail,
 		},
@@ -79,22 +83,31 @@ func RenderMonitorNewResult(ctx context.Context, msg MonitorNewResult) (Rendered
 		return RenderedNotification{}, err
 	}
 
+	pushoverRender, err := RenderMonitorNewResultPushover(msg)
+	if err != nil {
+		return RenderedNotification{}, err
+	}
+
 	return RenderedNotification{
 		Email:    emailRender,
-		Pushover: RenderMonitorNewResultPushover(msg),
+		Pushover: pushoverRender,
 	}, nil
 }
 
-func RenderMonitorNewResultEmail(ctx context.Context, msg MonitorNewResult) (RenderedEmail, error) {
-	subject := fmt.Sprintf("Monitor changed: %s", msg.Subject)
-	textBody := fmt.Sprintf("New: %s\n\nOld: %s", msg.New, msg.Old)
+func RenderMonitorNewResultEmail(ctx context.Context, data MonitorNewResult) (RenderedEmail, error) {
+	subject := fmt.Sprintf("New result: %s", data.Monitor.Subject.String)
+	newHeadline, err := renderMonitorNewResultHeadline(data.New)
+	if err != nil {
+		return RenderedEmail{}, fmt.Errorf("rendering new result headline: %w", err)
+	}
+	oldHeadline, err := renderMonitorNewResultHeadline(data.Old)
+	if err != nil {
+		return RenderedEmail{}, fmt.Errorf("rendering old result headline: %w", err)
+	}
+	textBody := fmt.Sprintf("New: %s\n\nOld: %s", newHeadline, oldHeadline)
 
 	var htmlBody bytes.Buffer
-	if err := MonitorNewResultEmail(MonitorNewResultEmailData{
-		Subject: subject,
-		New:     msg.New,
-		Old:     msg.Old,
-	}).Render(ctx, &htmlBody); err != nil {
+	if err := MonitorNewResultEmail(data).Render(ctx, &htmlBody); err != nil {
 		return RenderedEmail{}, fmt.Errorf("rendering html email: %w", err)
 	}
 
@@ -107,9 +120,36 @@ func RenderMonitorNewResultEmail(ctx context.Context, msg MonitorNewResult) (Ren
 	}, nil
 }
 
-func RenderMonitorNewResultPushover(msg MonitorNewResult) RenderedPushover {
-	return RenderedPushover{
-		Title:   fmt.Sprintf("Monitor changed: %s", msg.Subject),
-		Message: fmt.Sprintf("New: %s\n\nOld: %s", msg.New, msg.Old),
+func RenderMonitorNewResultPushover(msg MonitorNewResult) (RenderedPushover, error) {
+	newHeadline, err := renderMonitorNewResultHeadline(msg.New)
+	if err != nil {
+		return RenderedPushover{}, fmt.Errorf("rendering new result headline: %w", err)
 	}
+	oldHeadline, err := renderMonitorNewResultHeadline(msg.Old)
+	if err != nil {
+		return RenderedPushover{}, fmt.Errorf("rendering old result headline: %w", err)
+	}
+
+	return RenderedPushover{
+		Title:   fmt.Sprintf("New result: %s", msg.Monitor.Subject.String),
+		Message: fmt.Sprintf("New: %s\n\nOld: %s", newHeadline, oldHeadline),
+	}, nil
+}
+
+func renderMonitorNewResultHeadline(result models.MonitorResult) (string, error) {
+	return result.RenderHeadline(monitorfieldrenderers.TextRenderer{}, models.MonitorFieldsRenderContext{})
+}
+
+func monitorResultURLFields(result models.MonitorResult) []models.MonitorUpdateField {
+	urlFields := make([]models.MonitorUpdateField, 0, len(result.Data.Fields))
+	for _, field := range result.Data.Fields {
+		if field.Type == models.MonitorSchemaFieldTypeURL && field.Value != "" {
+			urlFields = append(urlFields, field)
+		}
+	}
+	return urlFields
+}
+
+func monitorResultPagePath(result models.MonitorResult) string {
+	return fmt.Sprintf("/app/monitors/%d", result.MonitorID)
 }

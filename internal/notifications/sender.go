@@ -81,11 +81,15 @@ func (s *Service) sendEmail(ctx context.Context, user *models.User, params SendP
 		Recipient: user.Email,
 		Subject:   rendered.Subject,
 		Body:      rendered.TextBody,
+		HTMLBody:  rendered.HTMLBody,
 	})
 }
 
 func (s *Service) sendPushoverNotification(ctx context.Context, params SendParams) error {
-	rendered := RenderMonitorNewResultPushover(params.Message)
+	rendered, err := RenderMonitorNewResultPushover(params.Message)
+	if err != nil {
+		return fmt.Errorf("rendering pushover notification: %w", err)
+	}
 
 	return s.pushover.Send(ctx, pushover.SendParams{
 		UserID:  params.UserID,

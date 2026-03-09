@@ -1,8 +1,11 @@
 package email
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"mime/multipart"
+	"net/textproto"
 	"net/smtp"
 )
 
@@ -50,13 +53,14 @@ type SendParams struct {
 	Recipient string
 	Subject   string
 	Body      string
+	HTMLBody  string
 }
 
 func (s *Service) Send(ctx context.Context, params *SendParams) error {
-	msg := []byte("To: " + params.Recipient + "\r\n" +
-		"Subject: " + params.Subject + "\r\n" +
-		"\r\n" +
-		params.Body + "\r\n")
+	msg, err := buildMessage(params)
+	if err != nil {
+		return err
+	}
 
 	var auth smtp.Auth = nil
 	if s.auth != nil && s.config.Username != "" {
@@ -73,4 +77,52 @@ func (s *Service) Send(ctx context.Context, params *SendParams) error {
 		return err
 	}
 	return nil
+}
+
+func buildMessage(params *SendParams) ([]byte, error) {
+	if params.HTMLBody == "" {
+		return []byte("To: " + params.Recipient + "\r\n" +
+			"Subject: " + params.Subject + "\r\n" +
+			"MIME-Version: 1.0\r\n" +
+			"Content-Type: text/plain; charset=UTF-8\r\n" +
+			"\r\n" +
+			params.Body + "\r\n"), nil
+	}
+
+	var body bytes.Buffer
+	writer := multipart.NewWriter(&body)
+
+	if err := writeMultipartPart(writer, "text/plain; charset=UTF-8", params.Body); err != nil {
+		return nil, fmt.Errorf("writing text email part: %w", err)
+	}
+	if err := writeMultipartPart(writer, "text/html; charset=UTF-8", params.HTMLBody); err != nil {
+		return nil, fmt.Errorf("writing html email part: %w", err)
+	}
+	if err := writer.Close(); err != nil {
+		return nil, fmt.Errorf("closing multipart email body: %w", err)
+	}
+
+	msg := []byte("To: " + params.Recipient + "\r\n" +
+		"Subject: " + params.Subject + "\r\n" +
+		"MIME-Version: 1.0\r\n" +
+		"Content-Type: multipart/alternative; boundary=" + writer.Boundary() + "\r\n" +
+		"\r\n" +
+		body.String())
+
+	return msg, nil
+}
+
+func writeMultipartPart(writer *multipart.Writer, contentType string, body string) error {
+	header := textproto.MIMEHeader{}
+	header.Set("Content-Type", contentType)
+
+	part, err := writer.CreatePart(header)
+	if err != nil {
+		return err
+	}
+	if _, err := part.Write([]byte(body)); err != nil {
+		return err
+	}
+	_, err = part.Write([]byte("\r\n"))
+	return err
 }

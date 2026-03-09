@@ -8,10 +8,24 @@ templ EmailLayout(subject string) {
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 			<title>{ subject }</title>
 		</head>
-		<body>
-			<div>
-				{ children... }
+		<body style="font-family: sans-serif; background-color: rgb(22, 25, 30); color: white;">
+			<div style="max-width: 600px; margin: 0 auto; background-color: rgb(26, 30, 36); padding: 14px 18px;">
+				<div>
+					{ children... }
+				</div>
 			</div>
 		</body>
 	</html>
+}
+
+templ preview() {
+	<div style="display:none !important; visibility:hidden; mso-hide:all; font-size:1px; color:#ffffff; line-height:1px; max-height:0px; max-width:0px; opacity:0; overflow:hidden;">
+		{ children... }
+	</div>
+}
+
+templ link(href string) {
+	<a href={ href } style="color: white;">
+		{ children... }
+	</a>
 }

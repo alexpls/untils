@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"github.com/alexpls/untils/internal/models"
+	"github.com/alexpls/untils/internal/notifications"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -46,6 +48,32 @@ func TestListGet(t *testing.T) {
 		assert.Equal(t, http.StatusOK, res.StatusCode)
 		assert.Contains(t, string(page), deps.fixtures.Monitor.Subject.String)
 	})
+}
+
+func TestSendDevNotification(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	deps := setupTestDeps(ctx, t)
+	tx := deps.service.db.(pgx.Tx) //nolint:forcetypeassert
+	result := createMonitorResultFixture(t, ctx, tx, deps.fixtures.Monitor.ID, "Notification result")
+
+	sender := &notificationSenderCapture{}
+	deps.service.notificationSender = sender
+
+	req := httptest.NewRequest("POST", fmt.Sprintf("/app/dev/monitors/%d/results/%d/send_notification", deps.fixtures.Monitor.ID, result.ID), nil)
+	res := getHandlerForRequest(func(w http.ResponseWriter, r *http.Request) {
+		r.SetPathValue("monitor_id", fmt.Sprint(deps.fixtures.Monitor.ID))
+		r.SetPathValue("result_id", fmt.Sprint(result.ID))
+		deps.handlers.SendDevNotification(w, r, deps.fixtures.User)
+	}, req)
+
+	require.Equal(t, http.StatusOK, res.StatusCode)
+	require.Len(t, sender.calls, 1)
+	assert.Equal(t, deps.fixtures.User.ID, sender.calls[0].UserID)
+	assert.Equal(t, []models.Notifier{models.NotifierEmail}, sender.calls[0].NotificationChannels)
+	assert.Equal(t, deps.fixtures.Monitor.ID, sender.calls[0].Message.Monitor.ID)
+	assert.Equal(t, result.ID, sender.calls[0].Message.New.ID)
 }
 
 func TestViewMonitorActivityPagination(t *testing.T) {
@@ -202,4 +230,13 @@ func getHandlerForRequest(handler func(http.ResponseWriter, *http.Request), req 
 
 	res := w.Result()
 	return res
+}
+
+type notificationSenderCapture struct {
+	calls []notifications.SendParams
+}
+
+func (s *notificationSenderCapture) Send(ctx context.Context, params notifications.SendParams) error {
+	s.calls = append(s.calls, params)
+	return nil
 }

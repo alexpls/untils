@@ -30,7 +30,15 @@ templ NotificationPreviewPage(data NotificationPreviewPageData) {
 					<iframe class="h-160 w-full rounded border-0 bg-white" src={ data.EmailPreviewURL } title={ data.Rendered.Email.Subject }></iframe>
 				</div>
 				<div class="rounded border border-base-content/10 bg-base-100 p-4">
-					<a class="btn btn-sm" href={ data.EmailPreviewURL } target="_blank" rel="noreferrer noopener">Open preview</a>
+					<div class="flex gap-2">
+						<a class="btn btn-sm" href={ data.EmailPreviewURL } target="_blank" rel="noreferrer noopener">Open preview</a>
+						<button
+							class="btn btn-sm"
+							data-on:click={ fmt.Sprintf("@post('/app/dev/monitors/%d/results/%d/send_notification')", data.Monitor.ID, data.Result.ID) }
+						>
+							Send notification
+						</button>
+					</div>
 				</div>
 				<div class="rounded border border-base-content/10 bg-base-100 p-4">
 					<div class="mb-3 text-sm text-muted">Text version</div>

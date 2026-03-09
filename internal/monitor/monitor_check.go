@@ -309,24 +309,18 @@ func (s *Service) PerformMonitorCheckWithPreviousResults(
 	}
 
 	if result.DifferentToPrevious {
-		lastResult := "(none)"
+		lastResult := emptyNotificationResult()
 		if priorState.previousVisible != nil {
-			lastResult, err = renderNotificationHeadline(&priorState.previousVisible.MonitorResult, user.Timezone)
-			if err != nil {
-				return fmt.Errorf("rendering previous headline: %w", err)
-			}
+			lastResult = priorState.previousVisible.MonitorResult
 		}
 
 		for _, params := range createMonitorResultParams {
-			newResult, err := renderNotificationHeadline(&models.MonitorResult{
+			newResult := models.MonitorResult{
 				Headline: params.Headline,
 				Subtitle: params.Subtitle,
 				Data:     params.Data,
-			}, user.Timezone)
-			if err != nil {
-				return err
 			}
-			createdNotificationMessages = append(createdNotificationMessages, newResultNotificationMessage(monitor.Subject.String, newResult, lastResult))
+			createdNotificationMessages = append(createdNotificationMessages, newResultNotificationMessage(*monitor, newResult, lastResult))
 		}
 
 		for _, message := range createdNotificationMessages {
