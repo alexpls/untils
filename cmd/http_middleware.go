@@ -21,11 +21,11 @@ func (a *app) requireAuth(next HandlerFuncWithUser) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		sess := session.FromRequest(r)
 
-		// If demo mode is set, get user ID 1 and allow the request
-		if reqcontext.DemoFromContext(r.Context()) {
-			user, err := a.auth.GetUser(r.Context(), 1)
+		// If demo mode is set and a demo user is configured, allow the request.
+		if reqcontext.DemoFromContext(r.Context()) && a.config.demoUserID > 0 {
+			user, err := a.auth.GetUser(r.Context(), a.config.demoUserID)
 			if a.internalServerError(err, w) {
-				a.logger.ErrorContext(r.Context(), "failed to get demo user", "user_id", 1)
+				a.logger.ErrorContext(r.Context(), "failed to get demo user", "user_id", a.config.demoUserID)
 				return
 			}
 			next(w, r, user)

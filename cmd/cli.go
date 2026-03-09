@@ -65,6 +65,7 @@ func globalFlags(c *config, f *flag.FlagSet) {
 
 	f.StringVar(&c.env, "env", "prod", "environment (dev, prod)")
 	f.StringVar(&c.dbUrl, "db", "", "postgresql connection url")
+	f.Int64Var(&c.demoUserID, "demo-user-id", 0, "user id used for demo-mode requests")
 	f.StringVar(&c.xAIKey, "xai-key", "", "x.ai API key")
 	f.StringVar(&c.openAIKey, "openai-key", "", "OpenAI API key")
 	f.StringVar(&c.braveKey, "brave-key", "", "Brave search API key")

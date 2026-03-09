@@ -4,6 +4,7 @@ type config struct {
 	buildVersion string
 	env          string
 	dbUrl        string
+	demoUserID   int64
 	xAIKey       string
 	openAIKey    string
 	braveKey     string

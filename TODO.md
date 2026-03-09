@@ -6,7 +6,6 @@
 - [ ] Add test coverage for important components that are not yet tested
 - [ ] Self hosting special single user mode that doesn't show the usual home page
 - [ ] License
-- [ ] Make the demo user configurable
 - [ ] Remove my personal email from seeds
 - [ ] Documentation: self hosting guide & Readme
 
@@ -50,6 +49,7 @@
 
 ## Done
 
+- [x] Make the demo user configurable
 - [x] Results pagination
 - [x] Feature: Result corrections
   - [x] Feature: hide results that were bad, and feed them back to LLM
