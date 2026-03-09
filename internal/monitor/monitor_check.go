@@ -11,7 +11,7 @@ import (
 	"github.com/alexpls/untils/internal/errortypes"
 	"github.com/alexpls/untils/internal/llm"
 	"github.com/alexpls/untils/internal/models"
-	"github.com/alexpls/untils/internal/monitorfieldrenderers"
+	"github.com/alexpls/untils/internal/notifications"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/riverqueue/river"
@@ -243,24 +243,15 @@ func (s *Service) PerformMonitorCheckWithPreviousResults(
 	if schemaToPersist.Zero() {
 		schemaToPersist = result.Schema
 	}
-	renderer := monitorfieldrenderers.TextRenderer{}
-	renderCtx := models.MonitorFieldsRenderContext{Timezone: user.Timezone}
-
 	createMonitorResultParams := make([]*models.CreateMonitorResultParams, 0, len(result.Updates))
-	createdResultHeadlines := make([]string, 0, len(result.Updates))
+	createdNotificationMessages := make([]notifications.MonitorNewResult, 0, len(result.Updates))
 	for _, update := range result.Updates {
-		headline, err := update.RenderHeadline(renderer, renderCtx)
-		if err != nil {
-			return fmt.Errorf("rendering headline: %w", err)
-		}
-
 		params := MonitorUpdateToCreateMonitorResultParams(
 			check.MonitorID,
 			update,
 			&result.Citations,
 		)
 		createMonitorResultParams = append(createMonitorResultParams, params)
-		createdResultHeadlines = append(createdResultHeadlines, headline)
 	}
 
 	err = db.WithTx(s.db, ctx, func(tx pgx.Tx) error {
@@ -320,17 +311,28 @@ func (s *Service) PerformMonitorCheckWithPreviousResults(
 	if result.DifferentToPrevious {
 		lastResult := "(none)"
 		if priorState.previousVisible != nil {
-			lastResult, err = priorState.previousVisible.MonitorResult.RenderHeadline(renderer, renderCtx)
+			lastResult, err = renderNotificationHeadline(&priorState.previousVisible.MonitorResult, user.Timezone)
 			if err != nil {
 				return fmt.Errorf("rendering previous headline: %w", err)
 			}
 		}
 
-		for _, newResult := range createdResultHeadlines {
+		for _, params := range createMonitorResultParams {
+			newResult, err := renderNotificationHeadline(&models.MonitorResult{
+				Headline: params.Headline,
+				Subtitle: params.Subtitle,
+				Data:     params.Data,
+			}, user.Timezone)
+			if err != nil {
+				return err
+			}
+			createdNotificationMessages = append(createdNotificationMessages, newResultNotificationMessage(monitor.Subject.String, newResult, lastResult))
+		}
+
+		for _, message := range createdNotificationMessages {
 			if err = s.SendNotifications(ctx, SendNotificationsParams{
-				Monitor:   monitor,
-				NewResult: newResult,
-				OldResult: lastResult,
+				Monitor: monitor,
+				Message: message,
 			}); err != nil {
 				return err
 			}

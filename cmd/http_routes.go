@@ -43,7 +43,6 @@ func (a *app) routes() http.Handler {
 	mux.HandleFunc("GET /app/monitors/{monitor_id}/results/{result_id}/correction", a.requireAuth(a.monitorHandlers.ViewResultCorrectionModal))
 	mux.HandleFunc("POST /app/monitors/{monitor_id}/results/{result_id}/correction", a.requireAuth(a.monitorHandlers.UpdateResultCorrection))
 	mux.HandleFunc("POST /app/monitors/{monitor_id}/results/{result_id}/hide", a.requireAuth(a.monitorHandlers.HideResult))
-
 	// checks
 	mux.HandleFunc("GET /app/checks", a.requireAuth(a.monitorHandlers.ListChecks))
 	mux.HandleFunc("GET /app/checks/{check_id}", a.requireAuth(a.monitorHandlers.ViewCheck))
@@ -63,9 +62,14 @@ func (a *app) routes() http.Handler {
 	mux.Handle("GET /app/favicon", a.requireAuth2(faviconproxy.Handler(a.logger.With("source", "faviconproxy"))))
 
 	// dev
-	mux.Handle("GET /app/dev/palette", a.requireAuth(a.devHandlers.ViewPalette))
-	mux.Handle("GET /app/dev/palette/monitor_draft", a.requireAuth(a.devHandlers.ViewMonitorDraftPalette))
-	mux.Handle("GET /app/dev/palette/flash", a.requireAuth(a.devHandlers.ViewFlashPalette))
+	mux.Handle("GET /app/dev/palette", a.requireDev(a.requireAuth(a.devHandlers.ViewPalette)))
+	mux.Handle("GET /app/dev/palette/monitor_draft", a.requireDev(a.requireAuth(a.devHandlers.ViewMonitorDraftPalette)))
+	mux.Handle("GET /app/dev/palette/flash", a.requireDev(a.requireAuth(a.devHandlers.ViewFlashPalette)))
+	mux.Handle("GET /app/dev/emails", a.requireDev(a.requireAuth(a.devHandlers.ListEmailPreviews)))
+	mux.Handle("GET /app/dev/emails/{template_key}", a.requireDev(a.requireAuth(a.devHandlers.ViewEmailPreview)))
+	mux.Handle("GET /app/dev/emails/{template_key}/html", a.requireDev(a.requireAuth(a.devHandlers.ViewEmailPreviewHTML)))
+	mux.HandleFunc("GET /app/dev/preview_notification", a.requireDev(a.requireAuth(a.monitorHandlers.ViewNotificationPreview)))
+	mux.HandleFunc("GET /app/dev/preview_notification/email", a.requireDev(a.requireAuth(a.monitorHandlers.ViewNotificationPreviewEmailHTML)))
 
 	// middleware
 	csrf := http.NewCrossOriginProtection()

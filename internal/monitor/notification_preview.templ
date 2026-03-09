@@ -1,0 +1,51 @@
+package monitor
+
+import "fmt"
+
+templ NotificationPreviewPage(data NotificationPreviewPageData) {
+	@MonitorSidebarLayout(data.Monitor, MonitorPageTypeActivity) {
+		<div class="space-y-4 p-4">
+			<div role="tablist" class="tabs tabs-box bg-base-100">
+				<a
+					role="tab"
+					class={ "tab", templ.KV("tab-active", data.ActiveTab == NotificationPreviewTabEmail) }
+					href={ fmt.Sprintf("/app/dev/preview_notification?monitor_id=%d&result_id=%d&tab=email", data.Monitor.ID, data.Result.ID) }
+				>
+					Email
+				</a>
+				<a
+					role="tab"
+					class={ "tab", templ.KV("tab-active", data.ActiveTab == NotificationPreviewTabPushover) }
+					href={ fmt.Sprintf("/app/dev/preview_notification?monitor_id=%d&result_id=%d&tab=pushover", data.Monitor.ID, data.Result.ID) }
+				>
+					Pushover
+				</a>
+			</div>
+			if data.ActiveTab == NotificationPreviewTabEmail {
+				<div class="rounded border border-base-content/10 bg-base-100 p-4">
+					<div class="mb-3 text-sm text-muted">Subject</div>
+					<div class="text-lg font-semibold">{ data.Rendered.Email.Subject }</div>
+				</div>
+				<div class="rounded border border-base-content/10 bg-base-100 p-2">
+					<iframe class="h-160 w-full rounded border-0 bg-white" src={ data.EmailPreviewURL } title={ data.Rendered.Email.Subject }></iframe>
+				</div>
+				<div class="rounded border border-base-content/10 bg-base-100 p-4">
+					<a class="btn btn-sm" href={ data.EmailPreviewURL } target="_blank" rel="noreferrer noopener">Open preview</a>
+				</div>
+				<div class="rounded border border-base-content/10 bg-base-100 p-4">
+					<div class="mb-3 text-sm text-muted">Text version</div>
+					<pre class="whitespace-pre-wrap wrap-break-word text-sm">{ data.Rendered.Email.TextBody }</pre>
+				</div>
+			} else {
+				<div class="rounded border border-base-content/10 bg-base-100 p-4">
+					<div class="mb-3 text-sm text-muted">Pushover title</div>
+					<div class="text-lg font-semibold">{ data.Rendered.Pushover.Title }</div>
+				</div>
+				<div class="rounded border border-base-content/10 bg-base-100 p-4">
+					<div class="mb-3 text-sm text-muted">Pushover message</div>
+					<pre class="whitespace-pre-wrap wrap-break-word text-sm">{ data.Rendered.Pushover.Message }</pre>
+				</div>
+			}
+		</div>
+	}
+}

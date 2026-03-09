@@ -215,6 +215,15 @@ templ monitorResultTimelineItemWithLatestCheck(result models.MonitorResult, allo
 					</span>
 				</a>
 			</div>
+			if components.IsDev(ctx) {
+				<a
+					class="link link-hover flex items-center justify-center py-1.5"
+					href={ fmt.Sprintf("/app/dev/preview_notification?monitor_id=%d&result_id=%d", result.MonitorID, result.ID) }
+				>
+					@icons.Info(iconParams)
+					Dev: Preview notification
+					</a>
+				}
 			if allowCorrection {
 				<button
 					class="link link-hover flex items-center justify-center py-1.5"

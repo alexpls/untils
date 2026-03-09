@@ -59,8 +59,8 @@ func (s *Service) DeleteMonitorNotifier(ctx context.Context, mon *models.Monitor
 }
 
 type SendNotificationsParams struct {
-	Monitor              *models.Monitor
-	NewResult, OldResult string
+	Monitor *models.Monitor
+	Message notifications.MonitorNewResult
 }
 
 func (s *Service) SendNotifications(ctx context.Context, params SendNotificationsParams) error {
@@ -82,11 +82,7 @@ func (s *Service) SendNotifications(ctx context.Context, params SendNotification
 	if err := s.notificationSender.Send(ctx, notifications.SendParams{
 		UserID:               params.Monitor.UserID,
 		NotificationChannels: notificationChannels,
-		Message: notifications.MonitorNewResult{
-			Subject: params.Monitor.Subject.String,
-			New:     params.NewResult,
-			Old:     params.OldResult,
-		},
+		Message:              params.Message,
 	}); err != nil {
 		return fmt.Errorf("sending notifications: %w", err)
 	}

@@ -12,12 +12,6 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-type MonitorNewResult struct {
-	Subject string
-	New     string
-	Old     string
-}
-
 type SendParams struct {
 	UserID               int64
 	NotificationChannels []models.Notifier
@@ -78,17 +72,24 @@ func (s *Service) Send(ctx context.Context, params SendParams) error {
 }
 
 func (s *Service) sendEmail(ctx context.Context, user *models.User, params SendParams) error {
+	rendered, err := RenderMonitorNewResultEmail(ctx, params.Message)
+	if err != nil {
+		return fmt.Errorf("rendering email notification: %w", err)
+	}
+
 	return s.email.Send(ctx, &email.SendParams{
 		Recipient: user.Email,
-		Subject:   fmt.Sprintf("Monitor changed: %s", params.Message.Subject),
-		Body:      fmt.Sprintf("New: %s\n\nOld: %s", params.Message.New, params.Message.Old),
+		Subject:   rendered.Subject,
+		Body:      rendered.TextBody,
 	})
 }
 
 func (s *Service) sendPushoverNotification(ctx context.Context, params SendParams) error {
+	rendered := RenderMonitorNewResultPushover(params.Message)
+
 	return s.pushover.Send(ctx, pushover.SendParams{
 		UserID:  params.UserID,
-		Title:   fmt.Sprintf("Monitor changed: %s", params.Message.Subject),
-		Message: fmt.Sprintf("New: %s\n\nOld: %s", params.Message.New, params.Message.Old),
+		Title:   rendered.Title,
+		Message: rendered.Message,
 	})
 }

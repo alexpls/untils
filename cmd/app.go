@@ -188,7 +188,7 @@ func createApp(c *config) (*app, context.Context, context.CancelFunc, func()) {
 
 	a.settingsHandlers = settings.NewHandlers(a.queries, a.db, a.pushoverStore, a.pushoverClient, a.sessionManager, a.auth, a.logger.With("source", "settings.handlers"))
 
-	a.devHandlers = dev.NewHandlers(a.logger.With("source", "dev.handlers"))
+	a.devHandlers = dev.NewHandlers(a.logger.With("source", "dev.handlers"), notifications.NewEmailTemplateStore())
 
 	river.AddWorker(workers, monitor.NewCheckWorker(a.monitor, a.logger.With("source", "monitor.check_worker")))
 	river.AddWorker(workers, monitor.NewValidateMonitorWorker(a.monitor, a.logger.With("source", "monitor.validate_monitor_worker")))

@@ -63,6 +63,17 @@ func (a *app) requireAuth2(next http.Handler) http.HandlerFunc {
 	})
 }
 
+func (a *app) requireDev(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if reqcontext.EnvFromContext(r.Context()) != "dev" {
+			http.NotFound(w, r)
+			return
+		}
+
+		next(w, r)
+	}
+}
+
 func (a *app) setRequestID(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if _, ok := reqcontext.RequestIDFromContext(r.Context()); ok {

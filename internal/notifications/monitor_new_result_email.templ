@@ -1,0 +1,20 @@
+package notifications
+
+type MonitorNewResultEmailData struct {
+	Subject string
+	New     string
+	Old     string
+}
+
+templ MonitorNewResultEmail(data MonitorNewResultEmailData) {
+	@EmailLayout(data.Subject) {
+		<div>
+			<div>New</div>
+			<div>{ data.New }</div>
+		</div>
+		<div>
+			<div>Old</div>
+			<div>{ data.Old }</div>
+		</div>
+	}
+}
