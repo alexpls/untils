@@ -64,6 +64,11 @@ func globalFlags(c *config, f *flag.FlagSet) {
 	c.buildVersion = buildVersion()
 
 	f.StringVar(&c.env, "env", "prod", "environment (dev, prod)")
+	f.Func("app-mode", "application mode (selfhosted, hosted)", func(value string) error {
+		c.appMode = appMode(value)
+		return nil
+	})
+	c.appMode = appModeSelfHosted
 	f.StringVar(&c.dbUrl, "db", "", "postgresql connection url")
 	f.Int64Var(&c.demoUserID, "demo-user-id", 0, "user id used for demo-mode requests")
 	f.StringVar(&c.xAIKey, "xai-key", "", "x.ai API key")
@@ -83,6 +88,9 @@ func serveFlags(c *serveConfig, f *flag.FlagSet) {
 func validateGlobalConfig(c *config) {
 	if c.env != "prod" && c.env != "dev" {
 		panic("env must be either prod or dev")
+	}
+	if c.appMode != appModeSelfHosted && c.appMode != appModeHosted {
+		panic("app-mode must be either selfhosted or hosted")
 	}
 }
 

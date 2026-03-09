@@ -6,6 +6,8 @@ set -eu
 go build -o ./tmp/serve ./cmd
 
 exec ./tmp/serve serve \
+  -app-mode "hosted" \
+  -demo-user-id 1 \
   -port "$APP_PORT" \
   -env "$ENV" \
   -db "$PG_URL" \

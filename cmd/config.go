@@ -1,8 +1,16 @@
 package main
 
+type appMode string
+
+const (
+	appModeSelfHosted appMode = "selfhosted"
+	appModeHosted     appMode = "hosted"
+)
+
 type config struct {
 	buildVersion string
 	env          string
+	appMode      appMode
 	dbUrl        string
 	demoUserID   int64
 	xAIKey       string
@@ -19,4 +27,8 @@ type config struct {
 
 type serveConfig struct {
 	port int
+}
+
+func (c *config) servesPublicPages() bool {
+	return c.appMode == appModeHosted
 }

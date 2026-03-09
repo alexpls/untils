@@ -13,9 +13,7 @@ func (a *app) routes() http.Handler {
 	// assets
 	mux.Handle("/assets/", public.Handler())
 
-	// public pages
-	mux.HandleFunc("GET /{$}", a.pagesHandlers.Home)
-	mux.HandleFunc("POST /subscribe", a.pagesHandlers.SubscribeEmail)
+	a.registerPublicRoutes(mux)
 
 	// auth pages
 	mux.HandleFunc("GET /sign_in", a.authHandlers.ViewSignIn)
@@ -78,4 +76,16 @@ func (a *app) routes() http.Handler {
 		a.setTimezoneContext, sess.Handler,
 		a.setFlashContext, a.setUserContext, a.logRequests,
 	)
+}
+
+func (a *app) registerPublicRoutes(mux *http.ServeMux) {
+	if a.config.servesPublicPages() {
+		mux.HandleFunc("GET /{$}", a.pagesHandlers.Home)
+		mux.HandleFunc("POST /subscribe", a.pagesHandlers.SubscribeEmail)
+		return
+	}
+
+	mux.HandleFunc("GET /{$}", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/app", http.StatusSeeOther)
+	})
 }
