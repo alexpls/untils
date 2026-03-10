@@ -1,22 +1,21 @@
 package notifications
 
 import (
+	"fmt"
 	"github.com/alexpls/untils/internal/models"
 	"github.com/alexpls/untils/internal/monitorfieldrenderers"
 )
 
-templ MonitorNewResultEmail(data MonitorNewResult) {
-	@EmailLayout(data.Monitor.Subject.String) {
-		{{
-			newHeadline, newSubtitle, newURLFields := monitorResultParams(data.New)
-			oldHeadline, oldSubtitle, oldURLFields := monitorResultParams(data.Old)
-		}}
-		@preview() {
-			Now: { newHeadline } - { newSubtitle }. Was: { oldHeadline } - { oldSubtitle }.
-		}
+templ MonitorNewResultEmail(data MonitorNewResultEmailData) {
+	{{
+		newHeadline, newSubtitle, newURLFields := monitorResultParams(data.Message.New)
+		oldHeadline, oldSubtitle, oldURLFields := monitorResultParams(data.Message.Old)
+		previewText := fmt.Sprintf("Now: %s - %s. Was: %s - %s.", newHeadline, newSubtitle, oldHeadline, oldSubtitle)
+	}}
+	@EmailLayout(data.Message.Monitor.Subject.String, previewText, data.HomeURL, data.LogoURL) {
 		<div style="margin-bottom: 20px;">
 			<h2 style="color: rgb(145, 156, 169); font-size: 12px; font-weight: 600; padding: 0; margin: 0; padding-bottom: 4px;">MONITOR - NEW RESULT</h2>
-			<h1 style="margin:0; padding:0; font-size: 24px;">{ data.Monitor.Subject.String }</h1>
+			<h1 style="margin:0; padding:0; font-size: 24px;">{ data.Message.Monitor.Subject.String }</h1>
 		</div>
 		<div style="margin-bottom: 18px;">
 			<h2 style="color: rgb(145, 156, 169); font-size: 12px; font-weight: 600; padding: 0; margin: 0; padding-bottom: 6px;">LATEST RESULT</h2>
@@ -34,7 +33,7 @@ templ MonitorNewResultEmail(data MonitorNewResult) {
 		</div>
 		<div style="font-size: 14px; border-top: 1px solid rgb(145, 156, 169); padding-top: 8px;">
 			<strong>Wrong result?</strong>&nbsp;
-			@link(monitorResultPagePath(data.New)) {
+			@link(data.MonitorURL) {
 				Correct or hide it
 			}
 			.

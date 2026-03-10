@@ -12,7 +12,9 @@ import (
 func TestRenderMonitorNewResult(t *testing.T) {
 	t.Parallel()
 
-	rendered, err := RenderMonitorNewResult(context.Background(), MonitorNewResult{
+	renderConfig := RenderConfig{BaseURL: "https://untils.example.com"}
+
+	rendered, err := RenderMonitorNewResult(context.Background(), renderConfig, MonitorNewResult{
 		Monitor: models.Monitor{Subject: pgtype.Text{String: "Example monitor", Valid: true}},
 		New: models.MonitorResult{
 			MonitorID: 42,
@@ -66,14 +68,17 @@ func TestRenderMonitorNewResult(t *testing.T) {
 	require.Contains(t, rendered.Email.HTMLBody, "Old subtitle")
 	require.Contains(t, rendered.Email.HTMLBody, "https://example.com/new")
 	require.Contains(t, rendered.Email.HTMLBody, "https://example.com/old")
+	require.Contains(t, rendered.Email.HTMLBody, "https://untils.example.com/")
+	require.Contains(t, rendered.Email.HTMLBody, "https://untils.example.com/assets/images/logo")
+	require.Contains(t, rendered.Email.HTMLBody, "alt=\"untils\"")
 	require.Contains(t, rendered.Email.HTMLBody, "Correct or hide it")
-	require.Contains(t, rendered.Email.HTMLBody, "/app/monitors/42")
+	require.Contains(t, rendered.Email.HTMLBody, "https://untils.example.com/app/monitors/42")
 }
 
 func TestEmailTemplateStore(t *testing.T) {
 	t.Parallel()
 
-	store := NewEmailTemplateStore()
+	store := NewEmailTemplateStore(RenderConfig{BaseURL: "https://untils.example.com"})
 
 	templates := store.Templates()
 	require.Len(t, templates, 1)

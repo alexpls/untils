@@ -3,9 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
+	"net/url"
 	"os"
 	"runtime/debug"
 	"slices"
+	"strings"
 
 	"github.com/alexpls/untils/internal/must"
 )
@@ -39,6 +41,10 @@ func parseServe() (*config, *serveConfig) {
 
 	_ = f.Parse(os.Args[2:])
 
+	if gc.baseURL == "" {
+		gc.baseURL = fmt.Sprintf("http://localhost:%d", sc.port)
+	}
+
 	validateGlobalConfig(&gc)
 	validateServeConfig(&sc)
 
@@ -55,6 +61,10 @@ func parseSeed() *config {
 
 	_ = f.Parse(os.Args[2:])
 
+	if gc.baseURL == "" {
+		gc.baseURL = "http://localhost:4200"
+	}
+
 	validateGlobalConfig(&gc)
 
 	return &gc
@@ -69,6 +79,7 @@ func globalFlags(c *config, f *flag.FlagSet) {
 		return nil
 	})
 	c.appMode = appModeSelfHosted
+	f.StringVar(&c.baseURL, "base-url", "", "public application base url")
 	f.StringVar(&c.dbUrl, "db", "", "postgresql connection url")
 	f.Int64Var(&c.demoUserID, "demo-user-id", 0, "user id used for demo-mode requests")
 	f.StringVar(&c.xAIKey, "xai-key", "", "x.ai API key")
@@ -92,6 +103,11 @@ func validateGlobalConfig(c *config) {
 	if c.appMode != appModeSelfHosted && c.appMode != appModeHosted {
 		panic("app-mode must be either selfhosted or hosted")
 	}
+	baseURL, err := normalizeBaseURL(c.baseURL)
+	if err != nil {
+		panic(err.Error())
+	}
+	c.baseURL = baseURL
 }
 
 func validateServeConfig(c *serveConfig) {
@@ -138,4 +154,28 @@ func buildVersion() string {
 	}
 
 	return revision
+}
+
+func normalizeBaseURL(value string) (string, error) {
+	if value == "" {
+		return "", fmt.Errorf("base-url is required")
+	}
+
+	parsed, err := url.Parse(value)
+	if err != nil {
+		return "", fmt.Errorf("invalid base-url: %w", err)
+	}
+	if parsed.Scheme != "http" && parsed.Scheme != "https" {
+		return "", fmt.Errorf("base-url must use http or https")
+	}
+	if parsed.Host == "" {
+		return "", fmt.Errorf("base-url must include a host")
+	}
+	if parsed.RawQuery != "" || parsed.Fragment != "" {
+		return "", fmt.Errorf("base-url must not include query params or fragments")
+	}
+
+	parsed.Path = strings.TrimSuffix(parsed.Path, "/")
+
+	return parsed.String(), nil
 }

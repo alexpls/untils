@@ -33,7 +33,9 @@ func setupTestDeps(ctx context.Context, t *testing.T) testDeps {
 	queries := models.New()
 	fixtures := testfixtures.New(ctx, t, db, queries)
 
-	service := NewService(db, queries, &llm, river, logger, validator, &notificationSender)
+	service := NewService(db, queries, &llm, river, logger, validator, &notificationSender, notifications.RenderConfig{
+		BaseURL: "https://untils.example.com",
+	})
 	handlers := NewHandlers(service, &dbEvents, logger)
 
 	return testDeps{

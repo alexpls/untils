@@ -4,16 +4,33 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/alexpls/untils/internal/models"
 	"github.com/alexpls/untils/internal/monitorfieldrenderers"
+	"github.com/alexpls/untils/public"
 	"github.com/jackc/pgx/v5/pgtype"
 )
+
+type RenderConfig struct {
+	BaseURL string
+}
+
+func (c RenderConfig) url(path string) string {
+	return c.BaseURL + "/" + strings.TrimPrefix(path, "/")
+}
 
 type MonitorNewResult struct {
 	Monitor models.Monitor
 	New     models.MonitorResult
 	Old     models.MonitorResult
+}
+
+type MonitorNewResultEmailData struct {
+	Message    MonitorNewResult
+	HomeURL    string
+	LogoURL    string
+	MonitorURL string
 }
 
 type RenderedEmail struct {
@@ -45,7 +62,7 @@ type EmailTemplateStore struct {
 	templates []EmailTemplateDefinition
 }
 
-func NewEmailTemplateStore() *EmailTemplateStore {
+func NewEmailTemplateStore(config RenderConfig) *EmailTemplateStore {
 	templates := []EmailTemplateDefinition{
 		{
 			Key:  "new_result",
@@ -55,7 +72,9 @@ func NewEmailTemplateStore() *EmailTemplateStore {
 				New:     models.MonitorResult{Headline: "Kubernetes v1.35 release notes published"},
 				Old:     models.MonitorResult{Headline: "Kubernetes v1.34 release notes published"},
 			},
-			Render: RenderMonitorNewResultEmail,
+			Render: func(ctx context.Context, data MonitorNewResult) (RenderedEmail, error) {
+				return RenderMonitorNewResultEmail(ctx, config, data)
+			},
 		},
 	}
 
@@ -77,8 +96,8 @@ func (s *EmailTemplateStore) Template(key string) (EmailTemplateDefinition, bool
 	return EmailTemplateDefinition{}, false
 }
 
-func RenderMonitorNewResult(ctx context.Context, msg MonitorNewResult) (RenderedNotification, error) {
-	emailRender, err := RenderMonitorNewResultEmail(ctx, msg)
+func RenderMonitorNewResult(ctx context.Context, config RenderConfig, msg MonitorNewResult) (RenderedNotification, error) {
+	emailRender, err := RenderMonitorNewResultEmail(ctx, config, msg)
 	if err != nil {
 		return RenderedNotification{}, err
 	}
@@ -94,7 +113,7 @@ func RenderMonitorNewResult(ctx context.Context, msg MonitorNewResult) (Rendered
 	}, nil
 }
 
-func RenderMonitorNewResultEmail(ctx context.Context, data MonitorNewResult) (RenderedEmail, error) {
+func RenderMonitorNewResultEmail(ctx context.Context, config RenderConfig, data MonitorNewResult) (RenderedEmail, error) {
 	subject := fmt.Sprintf("New result: %s", data.Monitor.Subject.String)
 	newHeadline, err := renderMonitorNewResultHeadline(data.New)
 	if err != nil {
@@ -107,7 +126,13 @@ func RenderMonitorNewResultEmail(ctx context.Context, data MonitorNewResult) (Re
 	textBody := fmt.Sprintf("New: %s\n\nOld: %s", newHeadline, oldHeadline)
 
 	var htmlBody bytes.Buffer
-	if err := MonitorNewResultEmail(data).Render(ctx, &htmlBody); err != nil {
+	viewData := MonitorNewResultEmailData{
+		Message:    data,
+		HomeURL:    config.url("/"),
+		LogoURL:    config.url(public.AssetURL("images/logo.png")),
+		MonitorURL: monitorResultURL(config, data.New),
+	}
+	if err := MonitorNewResultEmail(viewData).Render(ctx, &htmlBody); err != nil {
 		return RenderedEmail{}, fmt.Errorf("rendering html email: %w", err)
 	}
 
@@ -150,6 +175,6 @@ func monitorResultURLFields(result models.MonitorResult) []models.MonitorUpdateF
 	return urlFields
 }
 
-func monitorResultPagePath(result models.MonitorResult) string {
-	return fmt.Sprintf("/app/monitors/%d", result.MonitorID)
+func monitorResultURL(config RenderConfig, result models.MonitorResult) string {
+	return config.url(fmt.Sprintf("/app/monitors/%d", result.MonitorID))
 }

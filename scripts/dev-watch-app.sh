@@ -7,6 +7,7 @@ go build -o ./tmp/serve ./cmd
 
 exec ./tmp/serve serve \
   -app-mode "hosted" \
+  -base-url "http://untils.localhost:$APP_PORT" \
   -demo-user-id 1 \
   -port "$APP_PORT" \
   -env "$ENV" \

@@ -24,6 +24,7 @@ type Service struct {
 	river              *river.Client[pgx.Tx]
 	logger             *slog.Logger
 	notificationSender notifications.Sender
+	notificationRender notifications.RenderConfig
 	validate           *validator.Validate
 }
 
@@ -34,6 +35,7 @@ func NewService(db db.DB,
 	logger *slog.Logger,
 	validate *validator.Validate,
 	notificationSender notifications.Sender,
+	notificationRender notifications.RenderConfig,
 ) *Service {
 	return &Service{
 		db:                 db,
@@ -43,5 +45,6 @@ func NewService(db db.DB,
 		logger:             logger,
 		validate:           validate,
 		notificationSender: notificationSender,
+		notificationRender: notificationRender,
 	}
 }

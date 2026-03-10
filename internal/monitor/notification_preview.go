@@ -116,7 +116,7 @@ func (h *Handlers) renderNotificationPreview(r *http.Request, user *models.User,
 	if err != nil {
 		return notifications.RenderedNotification{}, err
 	}
-	return notifications.RenderMonitorNewResult(r.Context(), message)
+	return notifications.RenderMonitorNewResult(r.Context(), h.service.notificationRender, message)
 }
 
 func notificationPreviewTabFromRequest(r *http.Request) NotificationPreviewTab {

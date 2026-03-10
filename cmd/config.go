@@ -11,6 +11,7 @@ type config struct {
 	buildVersion string
 	env          string
 	appMode      appMode
+	baseURL      string
 	dbUrl        string
 	demoUserID   int64
 	xAIKey       string

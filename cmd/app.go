@@ -172,9 +172,13 @@ func createApp(c *config) (*app, context.Context, context.CancelFunc, func()) {
 		Port:     c.smtp.port,
 	})
 
-	a.notificationService = notifications.NewService(a.logger.With("source", "notifications.service"), a.pushoverClient, a.emailService, a.db, *a.queries)
+	notificationRenderConfig := notifications.RenderConfig{
+		BaseURL: c.baseURL,
+	}
 
-	a.monitor = monitor.NewService(a.db, a.queries, a.llm, a.river, a.logger.With("source", "monitor"), a.validate, a.notificationService)
+	a.notificationService = notifications.NewService(a.logger.With("source", "notifications.service"), notificationRenderConfig, a.pushoverClient, a.emailService, a.db, *a.queries)
+
+	a.monitor = monitor.NewService(a.db, a.queries, a.llm, a.river, a.logger.With("source", "monitor"), a.validate, a.notificationService, notificationRenderConfig)
 	a.monitorEvents = monitor.NewDBEventHandler()
 	a.dbListener.Handle("monitor_events", a.monitorEvents)
 
@@ -188,7 +192,7 @@ func createApp(c *config) (*app, context.Context, context.CancelFunc, func()) {
 
 	a.settingsHandlers = settings.NewHandlers(a.queries, a.db, a.pushoverStore, a.pushoverClient, a.sessionManager, a.auth, a.logger.With("source", "settings.handlers"))
 
-	a.devHandlers = dev.NewHandlers(a.logger.With("source", "dev.handlers"), notifications.NewEmailTemplateStore())
+	a.devHandlers = dev.NewHandlers(a.logger.With("source", "dev.handlers"), notifications.NewEmailTemplateStore(notificationRenderConfig))
 
 	river.AddWorker(workers, monitor.NewCheckWorker(a.monitor, a.logger.With("source", "monitor.check_worker")))
 	river.AddWorker(workers, monitor.NewValidateMonitorWorker(a.monitor, a.logger.With("source", "monitor.validate_monitor_worker")))

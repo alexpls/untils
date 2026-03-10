@@ -1,6 +1,6 @@
 package notifications
 
-templ EmailLayout(subject string) {
+templ EmailLayout(subject string, previewText string, homeURL string, logoURL string) {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
@@ -8,19 +8,36 @@ templ EmailLayout(subject string) {
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 			<title>{ subject }</title>
 		</head>
-		<body style="font-family: sans-serif; background-color: rgb(22, 25, 30); color: white;">
-			<div style="max-width: 600px; margin: 0 auto; background-color: rgb(26, 30, 36); padding: 14px 18px;">
-				<div>
+		<div style="font-family: sans-serif; background-color: rgb(22, 25, 30); color: white;">
+			if previewText != "" {
+				@preview(previewText)
+			}
+			<body style="max-width: 600px; margin: 0 auto; background-color: rgb(26, 30, 36); padding: 14px 18px;">
+				<div style="padding: 12px 18px;">
+					<a href={ homeURL } style="color: white; text-decoration: none; margin:0; padding: 0;">
+						<table role="presentation" border="0" cellpadding="0" cellspacing="0">
+							<tr>
+								<td style="vertical-align: middle; padding-right: 10px;">
+									<img src={ logoURL } alt="untils" width="24" height="24" style="display:block; width:24px; height:24px; border:0;"/>
+								</td>
+								<td style="vertical-align: middle; font-size: 14px; font-weight: 600; line-height: 1;">
+									untils
+								</td>
+							</tr>
+						</table>
+					</a>
+				</div>
+				<div style="padding: 12px 18px; padding-top: 6px;">
 					{ children... }
 				</div>
-			</div>
-		</body>
+			</body>
+		</div>
 	</html>
 }
 
-templ preview() {
+templ preview(text string) {
 	<div style="display:none !important; visibility:hidden; mso-hide:all; font-size:1px; color:#ffffff; line-height:1px; max-height:0px; max-width:0px; opacity:0; overflow:hidden;">
-		{ children... }
+		{ text }
 	</div>
 }
 
