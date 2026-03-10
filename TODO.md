@@ -5,8 +5,8 @@
 - [ ] Make sure errors are handled in the LLM path consistently
 - [ ] Add test coverage for important components that are not yet tested
 - [ ] Remove my personal email from seeds
-- [ ] Prettier and more informative notifications
 - [ ] Documentation: self hosting guide & Readme
+- [ ] Fix: Handle browser timeouts and lifecycle properly
 
 ### Monitor results
 
@@ -48,6 +48,7 @@
 
 ## Done
 
+- [x] Prettier and more informative notifications
 - [x] License
 - [x] Self hosting special single user mode that doesn't show the usual home page
 - [x] Make the demo user configurable
