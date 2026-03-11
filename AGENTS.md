@@ -59,3 +59,7 @@ For non-default workspaces, use `mise run dev:info` and open the printed localho
 - Prefer impersonal, non-agentive phrasing for user-facing text.
 - Avoid first-person references like "we", "our", or "us".
 - Use direct product behavior language, for example: "notifications will be sent when it changes."
+
+## Writing code
+
+- Fail fast if something is not in an expected state. e.g. if an expected app config value is missing, just panic.

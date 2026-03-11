@@ -90,6 +90,7 @@ func globalFlags(c *config, f *flag.FlagSet) {
 	f.StringVar(&c.smtp.password, "smtp-password", "", "smtp password")
 	f.StringVar(&c.smtp.host, "smtp-host", "127.0.0.1", "smtp host")
 	f.IntVar(&c.smtp.port, "smtp-port", 1025, "smtp port")
+	f.StringVar(&c.smtp.from, "smtp-from", "notifications@untils.com", "smtp from email address")
 }
 
 func serveFlags(c *serveConfig, f *flag.FlagSet) {
@@ -102,6 +103,9 @@ func validateGlobalConfig(c *config) {
 	}
 	if c.appMode != appModeSelfHosted && c.appMode != appModeHosted {
 		panic("app-mode must be either selfhosted or hosted")
+	}
+	if c.smtp.from == "" {
+		panic("smtp-from is required")
 	}
 	baseURL, err := normalizeBaseURL(c.baseURL)
 	if err != nil {

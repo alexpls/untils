@@ -23,6 +23,7 @@ type config struct {
 		password string
 		host     string
 		port     int
+		from     string
 	}
 }
 

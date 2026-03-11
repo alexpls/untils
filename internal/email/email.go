@@ -5,8 +5,9 @@ import (
 	"context"
 	"fmt"
 	"mime/multipart"
-	"net/textproto"
+	"net/mail"
 	"net/smtp"
+	"net/textproto"
 )
 
 type SMTPConfig struct {
@@ -14,6 +15,7 @@ type SMTPConfig struct {
 	Password string
 	Host     string
 	Port     int
+	From     string
 }
 
 type MailSender interface {
@@ -37,6 +39,10 @@ func NewService(config SMTPConfig) *Service {
 }
 
 func NewServiceWithSender(config SMTPConfig, sender MailSender) *Service {
+	if config.From == "" {
+		panic("smtp from address is required")
+	}
+
 	auth := smtp.PlainAuth("",
 		config.Username,
 		config.Password,
@@ -57,7 +63,7 @@ type SendParams struct {
 }
 
 func (s *Service) Send(ctx context.Context, params *SendParams) error {
-	msg, err := buildMessage(params)
+	msg, err := buildMessage(s.config.From, params)
 	if err != nil {
 		return err
 	}
@@ -70,7 +76,7 @@ func (s *Service) Send(ctx context.Context, params *SendParams) error {
 	if err := s.sender.SendMail(
 		fmt.Sprintf("%s:%d", s.config.Host, s.config.Port),
 		auth,
-		"notifications@untils.com",
+		s.config.From,
 		[]string{params.Recipient},
 		msg,
 	); err != nil {
@@ -79,9 +85,12 @@ func (s *Service) Send(ctx context.Context, params *SendParams) error {
 	return nil
 }
 
-func buildMessage(params *SendParams) ([]byte, error) {
+func buildMessage(from string, params *SendParams) ([]byte, error) {
+	fromHeader := (&mail.Address{Name: "untils", Address: from}).String()
+
 	if params.HTMLBody == "" {
-		return []byte("To: " + params.Recipient + "\r\n" +
+		return []byte("From: " + fromHeader + "\r\n" +
+			"To: " + params.Recipient + "\r\n" +
 			"Subject: " + params.Subject + "\r\n" +
 			"MIME-Version: 1.0\r\n" +
 			"Content-Type: text/plain; charset=UTF-8\r\n" +
@@ -102,7 +111,8 @@ func buildMessage(params *SendParams) ([]byte, error) {
 		return nil, fmt.Errorf("closing multipart email body: %w", err)
 	}
 
-	msg := []byte("To: " + params.Recipient + "\r\n" +
+	msg := []byte("From: " + fromHeader + "\r\n" +
+		"To: " + params.Recipient + "\r\n" +
 		"Subject: " + params.Subject + "\r\n" +
 		"MIME-Version: 1.0\r\n" +
 		"Content-Type: multipart/alternative; boundary=" + writer.Boundary() + "\r\n" +

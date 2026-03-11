@@ -41,6 +41,7 @@ func TestSend(t *testing.T) {
 			Port:     587,
 			Username: "user@example.com",
 			Password: "secret",
+			From:     "alerts@example.com",
 		}, mock)
 
 		err := s.Send(context.Background(), &SendParams{
@@ -53,8 +54,9 @@ func TestSend(t *testing.T) {
 		require.Len(t, mock.calls, 1)
 		call := mock.calls[0]
 		require.Equal(t, "smtp.example.com:587", call.addr)
-		require.Equal(t, "notifications@untils.com", call.from)
+		require.Equal(t, "alerts@example.com", call.from)
 		require.Equal(t, []string{"alexpls@fastmail.com"}, call.to)
+		require.Contains(t, string(call.msg), "From: \"untils\" <alerts@example.com>")
 		require.Contains(t, string(call.msg), "Subject: A humble test")
 		require.Contains(t, string(call.msg), "Content-Type: text/plain; charset=UTF-8")
 		require.Contains(t, string(call.msg), "it works?")
@@ -65,6 +67,7 @@ func TestSend(t *testing.T) {
 		s := NewServiceWithSender(SMTPConfig{
 			Host: "smtp.example.com",
 			Port: 587,
+			From: "notifications@untils.com",
 		}, mock)
 
 		err := s.Send(context.Background(), &SendParams{
@@ -78,6 +81,7 @@ func TestSend(t *testing.T) {
 		require.Len(t, mock.calls, 1)
 
 		msg := string(mock.calls[0].msg)
+		require.Contains(t, msg, "From: \"untils\" <notifications@untils.com>")
 		require.Contains(t, msg, "Subject: Multipart test")
 		require.Contains(t, msg, "MIME-Version: 1.0")
 		require.Contains(t, msg, "Content-Type: multipart/alternative; boundary=")
@@ -92,6 +96,7 @@ func TestSend(t *testing.T) {
 		s := NewServiceWithSender(SMTPConfig{
 			Host: "127.0.0.1",
 			Port: 1025,
+			From: "notifications@untils.com",
 		}, mock)
 
 		err := s.Send(context.Background(), &SendParams{
@@ -109,6 +114,7 @@ func TestSend(t *testing.T) {
 		s := NewServiceWithSender(SMTPConfig{
 			Host: "localhost",
 			Port: 1025,
+			From: "notifications@untils.com",
 		}, mock)
 
 		err := s.Send(context.Background(), &SendParams{
@@ -120,5 +126,15 @@ func TestSend(t *testing.T) {
 		require.NoError(t, err)
 		require.Len(t, mock.calls, 1)
 		require.Nil(t, mock.calls[0].a)
+		require.Equal(t, "notifications@untils.com", mock.calls[0].from)
+	})
+
+	t.Run("panics when from address is missing", func(t *testing.T) {
+		require.PanicsWithValue(t, "smtp from address is required", func() {
+			NewServiceWithSender(SMTPConfig{
+				Host: "localhost",
+				Port: 1025,
+			}, &mockMailSender{})
+		})
 	})
 }

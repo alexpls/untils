@@ -170,6 +170,7 @@ func createApp(c *config) (*app, context.Context, context.CancelFunc, func()) {
 		Password: c.smtp.password,
 		Host:     c.smtp.host,
 		Port:     c.smtp.port,
+		From:     c.smtp.from,
 	})
 
 	notificationRenderConfig := notifications.RenderConfig{
