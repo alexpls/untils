@@ -115,6 +115,15 @@ func globalProperties(c *config) []configProperty {
 			},
 			appModeSelfHosted.String(), appModeHosted.String(),
 		),
+		boolProperty(
+			"migrate",
+			"run pending database migrations during startup",
+			"migrate",
+			"MIGRATE",
+			"false",
+			func(value bool) { c.migrate = value },
+			nil,
+		),
 		stringProperty(
 			"base url",
 			"public application base url",
@@ -337,6 +346,25 @@ func int64Property(name string, description string, flagName string, envVar stri
 			parsed, err := strconv.ParseInt(value, 10, 64)
 			if err != nil {
 				return fmt.Errorf("must be a 64-bit integer: %w", err)
+			}
+			assign(parsed)
+			return nil
+		},
+		validate: validate,
+	}
+}
+
+func boolProperty(name string, description string, flagName string, envVar string, defaultValue string, assign func(bool), validate func() error) configProperty {
+	return configProperty{
+		name:         name,
+		description:  description,
+		flagName:     flagName,
+		envVar:       envVar,
+		defaultValue: stringPtr(defaultValue),
+		apply: func(value string) error {
+			parsed, err := strconv.ParseBool(value)
+			if err != nil {
+				return fmt.Errorf("must be a boolean: %w", err)
 			}
 			assign(parsed)
 			return nil

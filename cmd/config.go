@@ -13,6 +13,7 @@ type config struct {
 	buildVersion string
 	env          constants.Env
 	appMode      constants.Mode
+	migrate      bool
 	baseURL      string
 	dbUrl        string
 	demoUserID   int64

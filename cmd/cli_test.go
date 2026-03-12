@@ -80,6 +80,7 @@ func TestParseServeArgsLoadsFromEnv(t *testing.T) {
 			"SMTP_HOST":    "mail.local",
 			"SMTP_PORT":    "2025",
 			"APP_MODE":     appModeHosted.String(),
+			"MIGRATE":      "true",
 			"BRAVE_KEY":    "brave",
 			"OPENAI_KEY":   "openai",
 			"PUSHOVER_KEY": "pushover",
@@ -97,6 +98,9 @@ func TestParseServeArgsLoadsFromEnv(t *testing.T) {
 	}
 	if globalCfg.appMode != appModeHosted {
 		t.Fatalf("got appMode %q, want %q", globalCfg.appMode, appModeHosted)
+	}
+	if !globalCfg.migrate {
+		t.Fatalf("expected migrate to be true")
 	}
 	if globalCfg.smtp.host != "mail.local" {
 		t.Fatalf("got smtp host %q", globalCfg.smtp.host)
@@ -119,12 +123,14 @@ func TestParseServeArgsFlagsOverrideEnv(t *testing.T) {
 			"-port=4201",
 			"-base-url=http://flag.example/",
 			"-env=prod",
+			"-migrate=false",
 			"-smtp-from=flags@example.com",
 		},
 		envMap(map[string]string{
 			"APP_PORT":  "3322",
 			"BASE_URL":  "http://env.example:3322/",
 			"ENV":       appEnvDev.String(),
+			"MIGRATE":   "true",
 			"SMTP_FROM": "env@example.com",
 		}),
 	)
@@ -137,6 +143,9 @@ func TestParseServeArgsFlagsOverrideEnv(t *testing.T) {
 	}
 	if globalCfg.env != appEnvProd {
 		t.Fatalf("got env %q, want %q", globalCfg.env, appEnvProd)
+	}
+	if globalCfg.migrate {
+		t.Fatalf("expected migrate to be false")
 	}
 	if globalCfg.smtp.from != "flags@example.com" {
 		t.Fatalf("got smtp from %q, want %q", globalCfg.smtp.from, "flags@example.com")
@@ -155,5 +164,39 @@ func TestParseMigrateArgsLoadsFromEnv(t *testing.T) {
 
 	if cfg.dbUrl != "postgresql://postgres:postgres@db:5432/untils" {
 		t.Fatalf("got dbUrl %q", cfg.dbUrl)
+	}
+}
+
+func TestMigrationDriverURL(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		input string
+		want  string
+	}{
+		{
+			input: "postgresql://postgres:postgres@db:5432/untils?sslmode=disable",
+			want:  "pgx5://postgres:postgres@db:5432/untils?sslmode=disable",
+		},
+		{
+			input: "postgres://postgres:postgres@db:5432/untils",
+			want:  "pgx5://postgres:postgres@db:5432/untils",
+		},
+		{
+			input: "pgx5://postgres:postgres@db:5432/untils",
+			want:  "pgx5://postgres:postgres@db:5432/untils",
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.input, func(t *testing.T) {
+			t.Parallel()
+
+			got := migrationDriverURL(tt.input)
+			if got != tt.want {
+				t.Fatalf("got %q, want %q", got, tt.want)
+			}
+		})
 	}
 }

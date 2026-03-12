@@ -112,6 +112,10 @@ func createApp(c *config) (*app, context.Context, context.CancelFunc, func()) {
 
 	a.logger = slog.New(slogHandler).With("source", "server")
 
+	if c.migrate {
+		must.NoErr(runMigrations(a.logger.With("source", "db.migrate"), c.dbUrl))
+	}
+
 	pool, dbCloser := db.Connect(c.dbUrl, a.logger.With("source", "db"))
 	a.db = pool
 

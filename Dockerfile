@@ -23,5 +23,4 @@ RUN go build -o /bin/server ./cmd
 # server
 FROM scratch
 COPY --from=go /bin/server /bin/server
-CMD ["/bin/server"]
-
+CMD ["/bin/server", "serve"]

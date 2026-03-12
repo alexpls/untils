@@ -3,19 +3,18 @@ set -eu
 
 . ./scripts/workspace-env.sh
 
+ENV="${ENV:-dev}"
+APP_MODE="${APP_MODE:-hosted}"
+BASE_URL="${BASE_URL:-http://untils.localhost:$APP_PORT}"
+DEMO_USER_ID="${DEMO_USER_ID:-1}"
+SMTP_FROM="${SMTP_FROM:-notifications@untils.com}"
+
+export ENV
+export APP_MODE
+export BASE_URL
+export DEMO_USER_ID
+export SMTP_FROM
+
 go build -o ./tmp/serve ./cmd
 
-exec ./tmp/serve serve \
-  -app-mode "hosted" \
-  -base-url "http://untils.localhost:$APP_PORT" \
-  -demo-user-id 1 \
-  -port "$APP_PORT" \
-  -env "$ENV" \
-  -db "$PG_URL" \
-  -smtp-host "$SMTP_HOST" \
-  -smtp-port "$SMTP_PORT" \
-  -smtp-from "${SMTP_FROM:-notifications@untils.com}" \
-  -xai-key "$XAI_KEY" \
-  -openai-key "$OPENAI_KEY" \
-  -pushover-key "$PUSHOVER_KEY" \
-  -brave-key "$BRAVE_KEY"
+exec ./tmp/serve serve
