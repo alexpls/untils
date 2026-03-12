@@ -4,6 +4,7 @@ import (
 	"context"
 	"log/slog"
 
+	"github.com/alexpls/untils/internal/browser"
 	"github.com/alexpls/untils/internal/db"
 	"github.com/alexpls/untils/internal/logging"
 	"github.com/alexpls/untils/internal/models"
@@ -19,6 +20,7 @@ type Service struct {
 	queries     *models.Queries
 	logger      *slog.Logger
 	webSearcher search.WebSearcher
+	newBrowserCtx func(ctx context.Context) (browser.BrowserCtx, context.CancelFunc)
 }
 
 func NewService(
@@ -27,6 +29,7 @@ func NewService(
 	queries *models.Queries,
 	logger *slog.Logger,
 	webSearcher search.WebSearcher,
+	newBrowserCtx func(ctx context.Context) (browser.BrowserCtx, context.CancelFunc),
 ) *Service {
 	return &Service{
 		provider:    provider,
@@ -34,6 +37,7 @@ func NewService(
 		queries:     queries,
 		logger:      logger,
 		webSearcher: webSearcher,
+		newBrowserCtx: newBrowserCtx,
 	}
 }
 

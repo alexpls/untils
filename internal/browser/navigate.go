@@ -48,11 +48,24 @@ type BrowserCtx struct {
 	logger *slog.Logger
 }
 
-func NewBrowser(parentCtx context.Context, logger *slog.Logger) (BrowserCtx, context.CancelFunc) {
+type BrowserConfig struct {
+	ChromeDevToolsURL string
+}
+
+func NewBrowser(parentCtx context.Context, config BrowserConfig, logger *slog.Logger) (BrowserCtx, context.CancelFunc) {
 	// TODO: Make sure browser is configured with timeout
 
-	ctx, cancel := chromedp.NewContext(parentCtx)
-	return BrowserCtx{Context: ctx, logger: logger}, cancel
+	if config.ChromeDevToolsURL == "" {
+		ctx, cancel := chromedp.NewContext(parentCtx)
+		return BrowserCtx{Context: ctx, logger: logger}, cancel
+	} else {
+		allocCtx, allocCancel := chromedp.NewRemoteAllocator(parentCtx, config.ChromeDevToolsURL)
+		ctx, cancel := chromedp.NewContext(allocCtx)
+		return BrowserCtx{Context: ctx, logger: logger}, func() {
+			cancel()
+			allocCancel()
+		}
+	}
 }
 
 func (ctx *BrowserCtx) Click(idStr string) (*Page, error) {

@@ -5,6 +5,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/alexpls/untils/internal/browser"
 	"github.com/alexpls/untils/internal/models"
 	"github.com/alexpls/untils/internal/search"
 	"github.com/alexpls/untils/internal/testhelper"
@@ -36,7 +37,16 @@ func newTestDeps(t *testing.T) *testDeps {
 
 	ws := search.NewBraveClient(os.Getenv("BRAVE_KEY"), tl)
 
-	svc := NewService(NewOpenAIProvider(&oai), tx, queries, tl, ws)
+	svc := NewService(
+		NewOpenAIProvider(&oai),
+		tx,
+		queries,
+		tl,
+		ws,
+		func(ctx context.Context) (browser.BrowserCtx, context.CancelFunc) {
+			return browser.NewBrowser(ctx, browser.BrowserConfig{}, tl)
+		},
+	)
 
 	return &testDeps{
 		service:  svc,

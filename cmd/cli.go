@@ -91,6 +91,7 @@ func globalFlags(c *config, f *flag.FlagSet) {
 	f.StringVar(&c.smtp.host, "smtp-host", "127.0.0.1", "smtp host")
 	f.IntVar(&c.smtp.port, "smtp-port", 1025, "smtp port")
 	f.StringVar(&c.smtp.from, "smtp-from", "notifications@untils.com", "smtp from email address")
+	f.StringVar(&c.chrome.devToolsURL, "chrome-devtools-url", "", "chrome devtools url")
 }
 
 func serveFlags(c *serveConfig, f *flag.FlagSet) {
@@ -112,6 +113,13 @@ func validateGlobalConfig(c *config) {
 		panic(err.Error())
 	}
 	c.baseURL = baseURL
+
+	if c.chrome.devToolsURL != "" {
+		_, err := url.Parse(c.chrome.devToolsURL)
+		if err != nil {
+			panic("chrome-devtools-url invalid: " + err.Error())
+		}
+	}
 }
 
 func validateServeConfig(c *serveConfig) {

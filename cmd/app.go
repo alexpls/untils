@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/alexpls/untils/internal/auth"
+	"github.com/alexpls/untils/internal/browser"
 	"github.com/alexpls/untils/internal/dashboard"
 	"github.com/alexpls/untils/internal/db"
 	"github.com/alexpls/untils/internal/dev"
@@ -156,7 +157,21 @@ func createApp(c *config) (*app, context.Context, context.CancelFunc, func()) {
 		option.WithAPIKey(c.xAIKey),
 	)
 	llmProvider := llm.NewOpenAIProvider(&llmClient)
-	a.llm = llm.NewService(llmProvider, a.db, a.queries, a.logger.With("source", "llm"), a.webSearcher)
+	llmLogger :=a.logger.With("source", "llm")
+
+
+	a.llm = llm.NewService(
+		llmProvider,
+		a.db,
+		a.queries,
+		llmLogger,
+		a.webSearcher,
+		func(ctx context.Context) (browser.BrowserCtx, context.CancelFunc) {
+			return browser.NewBrowser(ctx, browser.BrowserConfig{
+				ChromeDevToolsURL: a.config.chrome.devToolsURL,
+			}, llmLogger)
+		},
+	)
 
 	a.auth = auth.NewAuth(a.logger.With("source", "auth"), a.db, a.queries, a.validate)
 

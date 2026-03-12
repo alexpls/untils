@@ -18,6 +18,9 @@ type config struct {
 	openAIKey    string
 	braveKey     string
 	pushoverKey  string
+	chrome struct {
+		devToolsURL string
+	}
 	smtp         struct {
 		username string
 		password string

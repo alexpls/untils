@@ -1,0 +1,21 @@
+name: untils-selfhosted
+
+services:
+  server:
+    image: untils:latest
+    env_file:
+      - .env.selfhosted
+
+  db:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - ${DB_DATA_LOCATION}:/var/lib/postgresql/data
+
+  browser:
+    image: chromedp/headless-shell:latest
+    shm_size: 2G
+

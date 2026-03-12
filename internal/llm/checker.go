@@ -192,7 +192,7 @@ func (c *checker) executeToolCall(ctx context.Context, call ToolCall) (string, e
 		Browser: func() *browser.BrowserCtx {
 			if c.browserCtx == nil {
 				browserInitStart := time.Now()
-				bctx, bcancel := browser.NewBrowser(ctx, c.service.logger)
+				bctx, bcancel := c.service.newBrowserCtx(ctx)
 				c.browserCtx, c.browserCancel = &bctx, bcancel
 				c.service.logger.DebugContext(ctx, "browser context initialized", "duration", time.Since(browserInitStart))
 			}
