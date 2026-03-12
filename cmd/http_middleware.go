@@ -65,7 +65,7 @@ func (a *app) requireAuth2(next http.Handler) http.HandlerFunc {
 
 func (a *app) requireDev(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if reqcontext.EnvFromContext(r.Context()) != "dev" {
+		if reqcontext.EnvFromContext(r.Context()) != appEnvDev {
 			http.NotFound(w, r)
 			return
 		}

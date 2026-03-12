@@ -76,7 +76,7 @@ func createApp(c *config) (*app, context.Context, context.CancelFunc, func()) {
 	a.validate = validator.New(validator.WithRequiredStructEnabled())
 
 	// Set dev mode for public assets
-	if c.env == "dev" {
+	if c.env == appEnvDev {
 		public.SetDevMode()
 	}
 
@@ -84,7 +84,7 @@ func createApp(c *config) (*app, context.Context, context.CancelFunc, func()) {
 	var slogRiverHandler slog.Handler
 
 	switch c.env {
-	case "dev":
+	case appEnvDev:
 		slogHandler = logging.ContextHandler{
 			Handler: tint.NewHandler(os.Stdout, &tint.Options{
 				Level:      slog.LevelDebug,
@@ -157,8 +157,7 @@ func createApp(c *config) (*app, context.Context, context.CancelFunc, func()) {
 		option.WithAPIKey(c.xAIKey),
 	)
 	llmProvider := llm.NewOpenAIProvider(&llmClient)
-	llmLogger :=a.logger.With("source", "llm")
-
+	llmLogger := a.logger.With("source", "llm")
 
 	a.llm = llm.NewService(
 		llmProvider,

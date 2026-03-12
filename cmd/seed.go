@@ -9,7 +9,7 @@ import (
 )
 
 func (a *app) seed() {
-	must.True(a.config.env == "dev")
+	must.True(a.config.env == appEnvDev)
 
 	ctx := context.Background()
 

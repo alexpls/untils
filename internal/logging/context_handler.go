@@ -13,7 +13,7 @@ type ContextHandler struct {
 
 func (h ContextHandler) Handle(ctx context.Context, r slog.Record) error {
 	r.AddAttrs(slog.String("build_version", reqcontext.BuildVersionFromContext(ctx)))
-	r.AddAttrs(slog.String("env", reqcontext.EnvFromContext(ctx)))
+	r.AddAttrs(slog.String("env", reqcontext.EnvFromContext(ctx).String()))
 
 	if reqID, ok := reqcontext.RequestIDFromContext(ctx); ok {
 		r.AddAttrs(slog.String("request_id", reqID))

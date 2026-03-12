@@ -3,6 +3,7 @@ package reqcontext
 import (
 	"context"
 
+	"github.com/alexpls/untils/internal/constants"
 	"github.com/alexpls/untils/internal/models"
 )
 
@@ -55,12 +56,12 @@ func TimezoneFromContext(ctx context.Context) (string, bool) {
 	return tz, ok
 }
 
-func ContextWithEnv(ctx context.Context, env string) context.Context {
+func ContextWithEnv(ctx context.Context, env constants.Env) context.Context {
 	return context.WithValue(ctx, envKey, env)
 }
 
-func EnvFromContext(ctx context.Context) string {
-	env, _ := ctx.Value(envKey).(string)
+func EnvFromContext(ctx context.Context) constants.Env {
+	env, _ := ctx.Value(envKey).(constants.Env)
 	return env
 }
 

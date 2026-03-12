@@ -3,19 +3,38 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
 	"net/url"
 	"os"
 	"runtime/debug"
 	"slices"
+	"strconv"
 	"strings"
 
+	"github.com/alexpls/untils/internal/constants"
 	"github.com/alexpls/untils/internal/must"
 )
 
 var validSubcommands = []string{"serve", "seed", "migrate"}
 
+type envLookup func(string) (string, bool)
+
+type configProperty struct {
+	name         string
+	description  string
+	flagName     string
+	envVar       string
+	defaultValue *string
+	apply        func(string) error
+	validate     func() error
+}
+
 func subcommand() string {
-	if len(os.Args) < 2 || !slices.Contains(validSubcommands, os.Args[1]) {
+	return subcommandFromArgs(os.Args)
+}
+
+func subcommandFromArgs(args []string) string {
+	if len(args) < 2 || !slices.Contains(validSubcommands, args[1]) {
 		var allowedStr string
 		for i, a := range validSubcommands {
 			allowedStr += "'" + a + "'"
@@ -25,21 +44,20 @@ func subcommand() string {
 		}
 		panic(fmt.Sprintf("unknown subcommand. specify %s.", allowedStr))
 	}
-	return os.Args[1]
+	return args[1]
 }
 
 func parseServe() (*config, *serveConfig) {
-	must.True(os.Args[1] == "serve")
+	return parseServeArgs(os.Args, os.LookupEnv)
+}
 
-	f := flag.NewFlagSet("serve", flag.ExitOnError)
+func parseServeArgs(args []string, lookupEnv envLookup) (*config, *serveConfig) {
+	must.True(args[1] == "serve")
 
-	gc := config{}
-	globalFlags(&gc, f)
-
+	gc := config{buildVersion: buildVersion()}
 	sc := serveConfig{}
-	serveFlags(&sc, f)
 
-	_ = f.Parse(os.Args[2:])
+	loadConfigProperties("serve", args[2:], lookupEnv, append(globalProperties(&gc), serveProperties(&sc)...))
 
 	if gc.baseURL == "" {
 		gc.baseURL = fmt.Sprintf("http://localhost:%d", sc.port)
@@ -52,14 +70,15 @@ func parseServe() (*config, *serveConfig) {
 }
 
 func parseSeed() *config {
-	must.True(os.Args[1] == "seed")
+	return parseSeedArgs(os.Args, os.LookupEnv)
+}
 
-	f := flag.NewFlagSet("seed", flag.ExitOnError)
+func parseSeedArgs(args []string, lookupEnv envLookup) *config {
+	must.True(args[1] == "seed")
 
-	gc := config{}
-	globalFlags(&gc, f)
+	gc := config{buildVersion: buildVersion()}
 
-	_ = f.Parse(os.Args[2:])
+	loadConfigProperties("seed", args[2:], lookupEnv, globalProperties(&gc))
 
 	if gc.baseURL == "" {
 		gc.baseURL = "http://localhost:4200"
@@ -70,55 +89,361 @@ func parseSeed() *config {
 	return &gc
 }
 
-func globalFlags(c *config, f *flag.FlagSet) {
-	c.buildVersion = buildVersion()
-
-	f.StringVar(&c.env, "env", "prod", "environment (dev, prod)")
-	f.Func("app-mode", "application mode (selfhosted, hosted)", func(value string) error {
-		c.appMode = appMode(value)
-		return nil
-	})
-	c.appMode = appModeSelfHosted
-	f.StringVar(&c.baseURL, "base-url", "", "public application base url")
-	f.StringVar(&c.dbUrl, "db", "", "postgresql connection url")
-	f.Int64Var(&c.demoUserID, "demo-user-id", 0, "user id used for demo-mode requests")
-	f.StringVar(&c.xAIKey, "xai-key", "", "x.ai API key")
-	f.StringVar(&c.openAIKey, "openai-key", "", "OpenAI API key")
-	f.StringVar(&c.braveKey, "brave-key", "", "Brave search API key")
-	f.StringVar(&c.pushoverKey, "pushover-key", "", "Pushover API key")
-	f.StringVar(&c.smtp.username, "smtp-username", "", "smtp username")
-	f.StringVar(&c.smtp.password, "smtp-password", "", "smtp password")
-	f.StringVar(&c.smtp.host, "smtp-host", "127.0.0.1", "smtp host")
-	f.IntVar(&c.smtp.port, "smtp-port", 1025, "smtp port")
-	f.StringVar(&c.smtp.from, "smtp-from", "notifications@untils.com", "smtp from email address")
-	f.StringVar(&c.chrome.devToolsURL, "chrome-devtools-url", "", "chrome devtools url")
+func globalProperties(c *config) []configProperty {
+	return []configProperty{
+		enumProperty(
+			"env",
+			"environment",
+			"env",
+			"ENV",
+			appEnvProd.String(),
+			func(value string) error {
+				c.env = constants.Env(value)
+				return nil
+			},
+			appEnvDev.String(), appEnvProd.String(),
+		),
+		enumProperty(
+			"app mode",
+			"application mode",
+			"app-mode",
+			"APP_MODE",
+			appModeSelfHosted.String(),
+			func(value string) error {
+				c.appMode = constants.Mode(value)
+				return nil
+			},
+			appModeSelfHosted.String(), appModeHosted.String(),
+		),
+		stringProperty(
+			"base url",
+			"public application base url",
+			"base-url",
+			"BASE_URL",
+			"",
+			func(value string) { c.baseURL = value },
+			func() error {
+				if c.baseURL == "" {
+					return nil
+				}
+				normalized, err := normalizeBaseURL(c.baseURL)
+				if err != nil {
+					return err
+				}
+				c.baseURL = normalized
+				return nil
+			},
+		),
+		stringProperty(
+			"database url",
+			"postgresql connection url",
+			"db",
+			"PG_URL",
+			"",
+			func(value string) { c.dbUrl = value },
+			nil,
+		),
+		int64Property(
+			"demo user id",
+			"user id used for demo-mode requests",
+			"demo-user-id",
+			"DEMO_USER_ID",
+			"0",
+			func(value int64) { c.demoUserID = value },
+			nil,
+		),
+		stringProperty(
+			"x.ai api key",
+			"x.ai API key",
+			"xai-key",
+			"XAI_KEY",
+			"",
+			func(value string) { c.xAIKey = value },
+			nil,
+		),
+		stringProperty(
+			"openai api key",
+			"OpenAI API key",
+			"openai-key",
+			"OPENAI_KEY",
+			"",
+			func(value string) { c.openAIKey = value },
+			nil,
+		),
+		stringProperty(
+			"brave api key",
+			"Brave search API key",
+			"brave-key",
+			"BRAVE_KEY",
+			"",
+			func(value string) { c.braveKey = value },
+			nil,
+		),
+		stringProperty(
+			"pushover api key",
+			"Pushover API key",
+			"pushover-key",
+			"PUSHOVER_KEY",
+			"",
+			func(value string) { c.pushoverKey = value },
+			nil,
+		),
+		stringProperty(
+			"smtp username",
+			"smtp username",
+			"smtp-username",
+			"SMTP_USERNAME",
+			"",
+			func(value string) { c.smtp.username = value },
+			nil,
+		),
+		stringProperty(
+			"smtp password",
+			"smtp password",
+			"smtp-password",
+			"SMTP_PASSWORD",
+			"",
+			func(value string) { c.smtp.password = value },
+			nil,
+		),
+		stringProperty(
+			"smtp host",
+			"smtp host",
+			"smtp-host",
+			"SMTP_HOST",
+			"127.0.0.1",
+			func(value string) { c.smtp.host = value },
+			nil,
+		),
+		intProperty(
+			"smtp port",
+			"smtp port",
+			"smtp-port",
+			"SMTP_PORT",
+			"1025",
+			func(value int) { c.smtp.port = value },
+			nil,
+		),
+		stringProperty(
+			"smtp from",
+			"smtp from email address",
+			"smtp-from",
+			"SMTP_FROM",
+			"notifications@untils.com",
+			func(value string) { c.smtp.from = value },
+			func() error {
+				if c.smtp.from == "" {
+					return fmt.Errorf("smtp-from is required")
+				}
+				return nil
+			},
+		),
+		stringProperty(
+			"chrome devtools url",
+			"chrome devtools url",
+			"chrome-devtools-url",
+			"CHROME_DEVTOOLS_URL",
+			"",
+			func(value string) { c.chrome.devToolsURL = value },
+			func() error {
+				if c.chrome.devToolsURL == "" {
+					return nil
+				}
+				_, err := url.Parse(c.chrome.devToolsURL)
+				if err != nil {
+					return fmt.Errorf("chrome-devtools-url invalid: %w", err)
+				}
+				return nil
+			},
+		),
+	}
 }
 
-func serveFlags(c *serveConfig, f *flag.FlagSet) {
-	f.IntVar(&c.port, "port", 4200, "http server port")
+func serveProperties(c *serveConfig) []configProperty {
+	return []configProperty{
+		intProperty(
+			"app port",
+			"http server port",
+			"port",
+			"APP_PORT",
+			"4200",
+			func(value int) { c.port = value },
+			nil,
+		),
+	}
+}
+
+func migrateProperties(c *migrateConfig) []configProperty {
+	return []configProperty{
+		stringProperty(
+			"database url",
+			"postgresql connection url",
+			"db",
+			"PG_URL",
+			"",
+			func(value string) { c.dbUrl = value },
+			func() error {
+				if c.dbUrl == "" {
+					return fmt.Errorf("db url is required")
+				}
+				return nil
+			},
+		),
+	}
+}
+
+func stringProperty(name string, description string, flagName string, envVar string, defaultValue string, assign func(string), validate func() error) configProperty {
+	return configProperty{
+		name:         name,
+		description:  description,
+		flagName:     flagName,
+		envVar:       envVar,
+		defaultValue: stringPtr(defaultValue),
+		apply: func(value string) error {
+			assign(value)
+			return nil
+		},
+		validate: validate,
+	}
+}
+
+func intProperty(name string, description string, flagName string, envVar string, defaultValue string, assign func(int), validate func() error) configProperty {
+	return configProperty{
+		name:         name,
+		description:  description,
+		flagName:     flagName,
+		envVar:       envVar,
+		defaultValue: stringPtr(defaultValue),
+		apply: func(value string) error {
+			parsed, err := strconv.Atoi(value)
+			if err != nil {
+				return fmt.Errorf("must be an integer: %w", err)
+			}
+			assign(parsed)
+			return nil
+		},
+		validate: validate,
+	}
+}
+
+func int64Property(name string, description string, flagName string, envVar string, defaultValue string, assign func(int64), validate func() error) configProperty {
+	return configProperty{
+		name:         name,
+		description:  description,
+		flagName:     flagName,
+		envVar:       envVar,
+		defaultValue: stringPtr(defaultValue),
+		apply: func(value string) error {
+			parsed, err := strconv.ParseInt(value, 10, 64)
+			if err != nil {
+				return fmt.Errorf("must be a 64-bit integer: %w", err)
+			}
+			assign(parsed)
+			return nil
+		},
+		validate: validate,
+	}
+}
+
+func enumProperty(name string, description string, flagName string, envVar string, defaultValue string, assign func(string) error, allowed ...string) configProperty {
+	return configProperty{
+		name:         name,
+		description:  description,
+		flagName:     flagName,
+		envVar:       envVar,
+		defaultValue: stringPtr(defaultValue),
+		apply: func(value string) error {
+			if !slices.Contains(allowed, value) {
+				return fmt.Errorf("must be one of %s", strings.Join(allowed, ", "))
+			}
+			return assign(value)
+		},
+	}
+}
+
+func stringPtr(value string) *string {
+	return &value
+}
+
+func loadConfigProperties(name string, args []string, lookupEnv envLookup, properties []configProperty) {
+	for _, property := range properties {
+		if property.defaultValue == nil {
+			continue
+		}
+		must.NoErr(property.apply(*property.defaultValue))
+	}
+
+	flagSet := flag.NewFlagSet(name, flag.ContinueOnError)
+	flagSet.SetOutput(io.Discard)
+
+	providedFlags := map[string]bool{}
+	for _, property := range properties {
+		if property.flagName == "" {
+			continue
+		}
+
+		property := property
+		flagSet.Func(property.flagName, propertyUsage(property), func(value string) error {
+			providedFlags[property.flagName] = true
+			if err := property.apply(value); err != nil {
+				return fmt.Errorf("%s: %w", property.flagName, err)
+			}
+			return nil
+		})
+	}
+
+	if err := flagSet.Parse(args); err != nil {
+		panic(err.Error())
+	}
+
+	for _, property := range properties {
+		if property.envVar == "" {
+			continue
+		}
+		if property.flagName != "" && providedFlags[property.flagName] {
+			continue
+		}
+
+		value, ok := lookupEnv(property.envVar)
+		if !ok {
+			continue
+		}
+
+		if err := property.apply(value); err != nil {
+			panic(fmt.Sprintf("%s: %v", property.envVar, err))
+		}
+	}
+
+	for _, property := range properties {
+		if property.validate == nil {
+			continue
+		}
+		if err := property.validate(); err != nil {
+			panic(err.Error())
+		}
+	}
+}
+
+func propertyUsage(property configProperty) string {
+	parts := []string{property.description}
+	if property.envVar != "" {
+		parts = append(parts, "env: "+property.envVar)
+	}
+	if property.defaultValue != nil && *property.defaultValue != "" {
+		parts = append(parts, "default: "+*property.defaultValue)
+	}
+	return strings.Join(parts, "; ")
 }
 
 func validateGlobalConfig(c *config) {
-	if c.env != "prod" && c.env != "dev" {
+	if c.env != appEnvProd && c.env != appEnvDev {
 		panic("env must be either prod or dev")
 	}
 	if c.appMode != appModeSelfHosted && c.appMode != appModeHosted {
 		panic("app-mode must be either selfhosted or hosted")
 	}
-	if c.smtp.from == "" {
-		panic("smtp-from is required")
-	}
-	baseURL, err := normalizeBaseURL(c.baseURL)
-	if err != nil {
-		panic(err.Error())
-	}
-	c.baseURL = baseURL
-
-	if c.chrome.devToolsURL != "" {
-		_, err := url.Parse(c.chrome.devToolsURL)
-		if err != nil {
-			panic("chrome-devtools-url invalid: " + err.Error())
-		}
+	if c.baseURL == "" {
+		panic("base-url is required")
 	}
 }
 
@@ -131,18 +456,14 @@ type migrateConfig struct {
 }
 
 func parseMigrate() *migrateConfig {
-	must.True(os.Args[1] == "migrate")
+	return parseMigrateArgs(os.Args, os.LookupEnv)
+}
 
-	f := flag.NewFlagSet("migrate", flag.ExitOnError)
+func parseMigrateArgs(args []string, lookupEnv envLookup) *migrateConfig {
+	must.True(args[1] == "migrate")
 
 	mc := migrateConfig{}
-	f.StringVar(&mc.dbUrl, "db", "", "postgresql connection url")
-
-	_ = f.Parse(os.Args[2:])
-
-	if mc.dbUrl == "" {
-		panic("db url is required")
-	}
+	loadConfigProperties("migrate", args[2:], lookupEnv, migrateProperties(&mc))
 
 	return &mc
 }

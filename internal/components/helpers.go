@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/alexpls/untils/internal/constants"
 	"github.com/alexpls/untils/internal/datefmt"
 	"github.com/alexpls/untils/internal/models"
 	"github.com/alexpls/untils/internal/reqcontext"
@@ -74,7 +75,7 @@ func ValidationError(data validation.HasValidationErrors, field string) string {
 
 func IsDev(ctx context.Context) bool {
 	env := reqcontext.EnvFromContext(ctx)
-	return env == "dev"
+	return env == constants.EnvDev
 }
 
 func IsDemo(ctx context.Context) bool {

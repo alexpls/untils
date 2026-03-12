@@ -1,16 +1,18 @@
 package main
 
-type appMode string
+import "github.com/alexpls/untils/internal/constants"
 
 const (
-	appModeSelfHosted appMode = "selfhosted"
-	appModeHosted     appMode = "hosted"
+	appEnvDev         = constants.EnvDev
+	appEnvProd        = constants.EnvProd
+	appModeSelfHosted = constants.ModeSelfHosted
+	appModeHosted     = constants.ModeHosted
 )
 
 type config struct {
 	buildVersion string
-	env          string
-	appMode      appMode
+	env          constants.Env
+	appMode      constants.Mode
 	baseURL      string
 	dbUrl        string
 	demoUserID   int64
@@ -18,10 +20,10 @@ type config struct {
 	openAIKey    string
 	braveKey     string
 	pushoverKey  string
-	chrome struct {
+	chrome       struct {
 		devToolsURL string
 	}
-	smtp         struct {
+	smtp struct {
 		username string
 		password string
 		host     string
