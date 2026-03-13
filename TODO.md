@@ -7,6 +7,7 @@
 - [ ] Remove my personal email from seeds
 - [ ] Documentation: self hosting guide & Readme
 - [ ] Fix: Handle browser timeouts and lifecycle properly
+- [ ] Fix: Pushover token config, SMTP config. If not set for selfhost, don't show on UI.
 
 ### Monitor results
 
