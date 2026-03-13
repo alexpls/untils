@@ -1,9 +1,7 @@
 package main
 
 import (
-	"flag"
 	"fmt"
-	"io"
 	"net/url"
 	"os"
 	"runtime/debug"
@@ -20,11 +18,8 @@ var validSubcommands = []string{"serve", "seed", "migrate"}
 type envLookup func(string) (string, bool)
 
 type configProperty struct {
-	name         string
-	description  string
-	flagName     string
 	envVar       string
-	defaultValue *string
+	defaultValue string
 	apply        func(string) error
 	validate     func() error
 }
@@ -35,14 +30,7 @@ func subcommand() string {
 
 func subcommandFromArgs(args []string) string {
 	if len(args) < 2 || !slices.Contains(validSubcommands, args[1]) {
-		var allowedStr string
-		for i, a := range validSubcommands {
-			allowedStr += "'" + a + "'"
-			if i < len(validSubcommands)-1 {
-				allowedStr += " or "
-			}
-		}
-		panic(fmt.Sprintf("unknown subcommand. specify %s.", allowedStr))
+		panic("unknown subcommand. specify serve, command, or migrate.")
 	}
 	return args[1]
 }
@@ -53,11 +41,12 @@ func parseServe() (*config, *serveConfig) {
 
 func parseServeArgs(args []string, lookupEnv envLookup) (*config, *serveConfig) {
 	must.True(args[1] == "serve")
+	requireNoArgs("serve", args[2:])
 
 	gc := config{buildVersion: buildVersion()}
 	sc := serveConfig{}
 
-	loadConfigProperties("serve", args[2:], lookupEnv, append(globalProperties(&gc), serveProperties(&sc)...))
+	loadConfigProperties(lookupEnv, append(globalProperties(&gc), serveProperties(&sc)...))
 
 	if gc.baseURL == "" {
 		gc.baseURL = fmt.Sprintf("http://localhost:%d", sc.port)
@@ -75,10 +64,11 @@ func parseSeed() *config {
 
 func parseSeedArgs(args []string, lookupEnv envLookup) *config {
 	must.True(args[1] == "seed")
+	requireNoArgs("seed", args[2:])
 
 	gc := config{buildVersion: buildVersion()}
 
-	loadConfigProperties("seed", args[2:], lookupEnv, globalProperties(&gc))
+	loadConfigProperties(lookupEnv, globalProperties(&gc))
 
 	if gc.baseURL == "" {
 		gc.baseURL = "http://localhost:4200"
@@ -92,9 +82,6 @@ func parseSeedArgs(args []string, lookupEnv envLookup) *config {
 func globalProperties(c *config) []configProperty {
 	return []configProperty{
 		enumProperty(
-			"env",
-			"environment",
-			"env",
 			"ENV",
 			appEnvProd.String(),
 			func(value string) error {
@@ -104,9 +91,6 @@ func globalProperties(c *config) []configProperty {
 			appEnvDev.String(), appEnvProd.String(),
 		),
 		enumProperty(
-			"app mode",
-			"application mode",
-			"app-mode",
 			"APP_MODE",
 			appModeSelfHosted.String(),
 			func(value string) error {
@@ -116,18 +100,12 @@ func globalProperties(c *config) []configProperty {
 			appModeSelfHosted.String(), appModeHosted.String(),
 		),
 		boolProperty(
-			"migrate",
-			"run pending database migrations during startup",
-			"migrate",
 			"MIGRATE",
 			"false",
 			func(value bool) { c.migrate = value },
 			nil,
 		),
 		stringProperty(
-			"base url",
-			"public application base url",
-			"base-url",
 			"BASE_URL",
 			"",
 			func(value string) { c.baseURL = value },
@@ -144,108 +122,72 @@ func globalProperties(c *config) []configProperty {
 			},
 		),
 		stringProperty(
-			"database url",
-			"postgresql connection url",
-			"db",
 			"PG_URL",
 			"",
 			func(value string) { c.dbUrl = value },
 			nil,
 		),
 		stringProperty(
-			"admin email",
-			"bootstrap email for the first selfhosted user",
-			"admin-email",
 			"ADMIN_EMAIL",
 			"",
 			func(value string) { c.adminEmail = value },
 			nil,
 		),
 		int64Property(
-			"demo user id",
-			"user id used for demo-mode requests",
-			"demo-user-id",
 			"DEMO_USER_ID",
 			"0",
 			func(value int64) { c.demoUserID = value },
 			nil,
 		),
 		stringProperty(
-			"x.ai api key",
-			"x.ai API key",
-			"xai-key",
 			"XAI_KEY",
 			"",
 			func(value string) { c.xAIKey = value },
 			nil,
 		),
 		stringProperty(
-			"openai api key",
-			"OpenAI API key",
-			"openai-key",
 			"OPENAI_KEY",
 			"",
 			func(value string) { c.openAIKey = value },
 			nil,
 		),
 		stringProperty(
-			"brave api key",
-			"Brave search API key",
-			"brave-key",
 			"BRAVE_KEY",
 			"",
 			func(value string) { c.braveKey = value },
 			nil,
 		),
 		stringProperty(
-			"pushover api key",
-			"Pushover API key",
-			"pushover-key",
 			"PUSHOVER_KEY",
 			"",
 			func(value string) { c.pushoverKey = value },
 			nil,
 		),
 		stringProperty(
-			"smtp username",
-			"smtp username",
-			"smtp-username",
 			"SMTP_USERNAME",
 			"",
 			func(value string) { c.smtp.username = value },
 			nil,
 		),
 		stringProperty(
-			"smtp password",
-			"smtp password",
-			"smtp-password",
 			"SMTP_PASSWORD",
 			"",
 			func(value string) { c.smtp.password = value },
 			nil,
 		),
 		stringProperty(
-			"smtp host",
-			"smtp host",
-			"smtp-host",
 			"SMTP_HOST",
 			"127.0.0.1",
 			func(value string) { c.smtp.host = value },
 			nil,
 		),
 		intProperty(
-			"smtp port",
-			"smtp port",
-			"smtp-port",
 			"SMTP_PORT",
 			"1025",
 			func(value int) { c.smtp.port = value },
 			nil,
 		),
 		stringProperty(
-			"smtp from",
-			"smtp from email address",
-			"smtp-from",
 			"SMTP_FROM",
 			"notifications@untils.com",
 			func(value string) { c.smtp.from = value },
@@ -257,9 +199,6 @@ func globalProperties(c *config) []configProperty {
 			},
 		),
 		stringProperty(
-			"chrome devtools url",
-			"chrome devtools url",
-			"chrome-devtools-url",
 			"CHROME_DEVTOOLS_URL",
 			"",
 			func(value string) { c.chrome.devToolsURL = value },
@@ -280,9 +219,6 @@ func globalProperties(c *config) []configProperty {
 func serveProperties(c *serveConfig) []configProperty {
 	return []configProperty{
 		intProperty(
-			"app port",
-			"http server port",
-			"port",
 			"APP_PORT",
 			"4200",
 			func(value int) { c.port = value },
@@ -294,9 +230,6 @@ func serveProperties(c *serveConfig) []configProperty {
 func migrateProperties(c *migrateConfig) []configProperty {
 	return []configProperty{
 		stringProperty(
-			"database url",
-			"postgresql connection url",
-			"db",
 			"PG_URL",
 			"",
 			func(value string) { c.dbUrl = value },
@@ -310,13 +243,10 @@ func migrateProperties(c *migrateConfig) []configProperty {
 	}
 }
 
-func stringProperty(name string, description string, flagName string, envVar string, defaultValue string, assign func(string), validate func() error) configProperty {
+func stringProperty(envVar string, defaultValue string, assign func(string), validate func() error) configProperty {
 	return configProperty{
-		name:         name,
-		description:  description,
-		flagName:     flagName,
 		envVar:       envVar,
-		defaultValue: stringPtr(defaultValue),
+		defaultValue: defaultValue,
 		apply: func(value string) error {
 			assign(value)
 			return nil
@@ -325,13 +255,10 @@ func stringProperty(name string, description string, flagName string, envVar str
 	}
 }
 
-func intProperty(name string, description string, flagName string, envVar string, defaultValue string, assign func(int), validate func() error) configProperty {
+func intProperty(envVar string, defaultValue string, assign func(int), validate func() error) configProperty {
 	return configProperty{
-		name:         name,
-		description:  description,
-		flagName:     flagName,
 		envVar:       envVar,
-		defaultValue: stringPtr(defaultValue),
+		defaultValue: defaultValue,
 		apply: func(value string) error {
 			parsed, err := strconv.Atoi(value)
 			if err != nil {
@@ -344,13 +271,10 @@ func intProperty(name string, description string, flagName string, envVar string
 	}
 }
 
-func int64Property(name string, description string, flagName string, envVar string, defaultValue string, assign func(int64), validate func() error) configProperty {
+func int64Property(envVar string, defaultValue string, assign func(int64), validate func() error) configProperty {
 	return configProperty{
-		name:         name,
-		description:  description,
-		flagName:     flagName,
 		envVar:       envVar,
-		defaultValue: stringPtr(defaultValue),
+		defaultValue: defaultValue,
 		apply: func(value string) error {
 			parsed, err := strconv.ParseInt(value, 10, 64)
 			if err != nil {
@@ -363,13 +287,10 @@ func int64Property(name string, description string, flagName string, envVar stri
 	}
 }
 
-func boolProperty(name string, description string, flagName string, envVar string, defaultValue string, assign func(bool), validate func() error) configProperty {
+func boolProperty(envVar string, defaultValue string, assign func(bool), validate func() error) configProperty {
 	return configProperty{
-		name:         name,
-		description:  description,
-		flagName:     flagName,
 		envVar:       envVar,
-		defaultValue: stringPtr(defaultValue),
+		defaultValue: defaultValue,
 		apply: func(value string) error {
 			parsed, err := strconv.ParseBool(value)
 			if err != nil {
@@ -382,13 +303,10 @@ func boolProperty(name string, description string, flagName string, envVar strin
 	}
 }
 
-func enumProperty(name string, description string, flagName string, envVar string, defaultValue string, assign func(string) error, allowed ...string) configProperty {
+func enumProperty(envVar string, defaultValue string, assign func(string) error, allowed ...string) configProperty {
 	return configProperty{
-		name:         name,
-		description:  description,
-		flagName:     flagName,
 		envVar:       envVar,
-		defaultValue: stringPtr(defaultValue),
+		defaultValue: defaultValue,
 		apply: func(value string) error {
 			if !slices.Contains(allowed, value) {
 				return fmt.Errorf("must be one of %s", strings.Join(allowed, ", "))
@@ -398,49 +316,15 @@ func enumProperty(name string, description string, flagName string, envVar strin
 	}
 }
 
-func stringPtr(value string) *string {
-	return &value
-}
-
-func loadConfigProperties(name string, args []string, lookupEnv envLookup, properties []configProperty) {
+func loadConfigProperties(lookupEnv envLookup, properties []configProperty) {
 	for _, property := range properties {
-		if property.defaultValue == nil {
-			continue
-		}
-		must.NoErr(property.apply(*property.defaultValue))
-	}
-
-	flagSet := flag.NewFlagSet(name, flag.ContinueOnError)
-	flagSet.SetOutput(io.Discard)
-
-	providedFlags := map[string]bool{}
-	for _, property := range properties {
-		if property.flagName == "" {
-			continue
-		}
-
-		property := property
-		flagSet.Func(property.flagName, propertyUsage(property), func(value string) error {
-			providedFlags[property.flagName] = true
-			if err := property.apply(value); err != nil {
-				return fmt.Errorf("%s: %w", property.flagName, err)
-			}
-			return nil
-		})
-	}
-
-	if err := flagSet.Parse(args); err != nil {
-		panic(err.Error())
+		must.NoErr(property.apply(property.defaultValue))
 	}
 
 	for _, property := range properties {
 		if property.envVar == "" {
 			continue
 		}
-		if property.flagName != "" && providedFlags[property.flagName] {
-			continue
-		}
-
 		value, ok := lookupEnv(property.envVar)
 		if !ok {
 			continue
@@ -459,17 +343,6 @@ func loadConfigProperties(name string, args []string, lookupEnv envLookup, prope
 			panic(err.Error())
 		}
 	}
-}
-
-func propertyUsage(property configProperty) string {
-	parts := []string{property.description}
-	if property.envVar != "" {
-		parts = append(parts, "env: "+property.envVar)
-	}
-	if property.defaultValue != nil && *property.defaultValue != "" {
-		parts = append(parts, "default: "+*property.defaultValue)
-	}
-	return strings.Join(parts, "; ")
 }
 
 func validateGlobalConfig(c *config) {
@@ -498,9 +371,10 @@ func parseMigrate() *migrateConfig {
 
 func parseMigrateArgs(args []string, lookupEnv envLookup) *migrateConfig {
 	must.True(args[1] == "migrate")
+	requireNoArgs("migrate", args[2:])
 
 	mc := migrateConfig{}
-	loadConfigProperties("migrate", args[2:], lookupEnv, migrateProperties(&mc))
+	loadConfigProperties(lookupEnv, migrateProperties(&mc))
 
 	return &mc
 }
@@ -524,6 +398,14 @@ func buildVersion() string {
 	}
 
 	return revision
+}
+
+func requireNoArgs(command string, args []string) {
+	if len(args) == 0 {
+		return
+	}
+
+	panic(fmt.Sprintf("%s does not accept CLI flags or args; use environment variables instead", command))
 }
 
 func normalizeBaseURL(value string) (string, error) {

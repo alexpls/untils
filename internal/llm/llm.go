@@ -15,11 +15,11 @@ var modelNonReasoning = "grok-4-1-fast-non-reasoning"
 var modelReasoning = "grok-4-1-fast-reasoning"
 
 type Service struct {
-	provider    Provider
-	db          db.DB
-	queries     *models.Queries
-	logger      *slog.Logger
-	webSearcher search.WebSearcher
+	provider      Provider
+	db            db.DB
+	queries       *models.Queries
+	logger        *slog.Logger
+	webSearcher   search.WebSearcher
 	newBrowserCtx func(ctx context.Context) (browser.BrowserCtx, context.CancelFunc)
 }
 
@@ -32,11 +32,11 @@ func NewService(
 	newBrowserCtx func(ctx context.Context) (browser.BrowserCtx, context.CancelFunc),
 ) *Service {
 	return &Service{
-		provider:    provider,
-		db:          db,
-		queries:     queries,
-		logger:      logger,
-		webSearcher: webSearcher,
+		provider:      provider,
+		db:            db,
+		queries:       queries,
+		logger:        logger,
+		webSearcher:   webSearcher,
 		newBrowserCtx: newBrowserCtx,
 	}
 }

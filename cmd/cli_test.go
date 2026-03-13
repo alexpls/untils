@@ -117,47 +117,16 @@ func TestParseServeArgsLoadsFromEnv(t *testing.T) {
 	}
 }
 
-func TestParseServeArgsFlagsOverrideEnv(t *testing.T) {
+func TestParseServeArgsRejectsCLIArgs(t *testing.T) {
 	t.Parallel()
 
-	globalCfg, serveCfg := parseServeArgs(
-		[]string{
-			"untils",
-			"serve",
-			"-port=4201",
-			"-base-url=http://flag.example/",
-			"-env=prod",
-			"-migrate=false",
-			"-smtp-from=flags@example.com",
-		},
-		envMap(map[string]string{
-			"APP_PORT":    "3322",
-			"BASE_URL":    "http://env.example:3322/",
-			"ENV":         appEnvDev.String(),
-			"MIGRATE":     "true",
-			"ADMIN_EMAIL": "env-admin@example.com",
-			"SMTP_FROM":   "env@example.com",
-		}),
-	)
+	defer func() {
+		if r := recover(); r != "serve does not accept CLI flags or args; use environment variables instead" {
+			t.Fatalf("got panic %v", r)
+		}
+	}()
 
-	if serveCfg.port != 4201 {
-		t.Fatalf("got port %d, want %d", serveCfg.port, 4201)
-	}
-	if globalCfg.baseURL != "http://flag.example" {
-		t.Fatalf("got baseURL %q, want %q", globalCfg.baseURL, "http://flag.example")
-	}
-	if globalCfg.env != appEnvProd {
-		t.Fatalf("got env %q, want %q", globalCfg.env, appEnvProd)
-	}
-	if globalCfg.migrate {
-		t.Fatalf("expected migrate to be false")
-	}
-	if globalCfg.adminEmail != "env-admin@example.com" {
-		t.Fatalf("got adminEmail %q, want %q", globalCfg.adminEmail, "env-admin@example.com")
-	}
-	if globalCfg.smtp.from != "flags@example.com" {
-		t.Fatalf("got smtp from %q, want %q", globalCfg.smtp.from, "flags@example.com")
-	}
+	parseServeArgs([]string{"untils", "serve", "-port=4201"}, envMap(nil))
 }
 
 func TestParseMigrateArgsLoadsFromEnv(t *testing.T) {

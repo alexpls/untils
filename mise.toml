@@ -116,7 +116,7 @@ psql "${PG_TEST_URL%/untils_test}" -c "drop database untils_test;" || true
 [tasks."db:seed"]
 run = '''
 . ./scripts/workspace-env.sh
-go run ./cmd seed -env dev -db "$PG_URL"
+ENV=dev go run ./cmd seed
 '''
 
 [tasks."db:migrate:create"]

@@ -14,7 +14,7 @@ import (
 
 func TestNavigateMySite(t *testing.T) {
 	tl := testhelper.TestLogger(t)
-	b, closeB := browser.NewBrowser(t.Context(), tl)
+	b, closeB := browser.NewBrowser(t.Context(), browser.BrowserConfig{}, tl)
 	defer closeB()
 
 	page, err := b.Navigate("https://alexplescan.com")
@@ -36,7 +36,7 @@ func TestNavigateMySite(t *testing.T) {
 
 func TestNavigateSiteWithNoFavicon(t *testing.T) {
 	tl := testhelper.TestLogger(t)
-	b, closeB := browser.NewBrowser(t.Context(), tl)
+	b, closeB := browser.NewBrowser(t.Context(), browser.BrowserConfig{}, tl)
 	defer closeB()
 
 	page, err := b.Navigate("https://example.org")
