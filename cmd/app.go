@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 	"os"
 	"time"
@@ -177,6 +178,7 @@ func createApp(c *config) (*app, context.Context, context.CancelFunc, func()) {
 	)
 
 	a.auth = auth.NewAuth(a.logger.With("source", "auth"), a.db, a.queries, a.validate)
+	must.NoErr(a.bootstrapInitialSelfHostedAdmin(ctx, a.db))
 
 	a.sessionManager = session.NewManager(a.db, a.queries, a.logger.With("source", "session"))
 
@@ -245,4 +247,30 @@ func createApp(c *config) (*app, context.Context, context.CancelFunc, func()) {
 	}
 
 	return a, ctx, cancelFn, closer
+}
+
+func (a *app) bootstrapInitialSelfHostedAdmin(ctx context.Context, db models.DBTX) error {
+	if a.config.appMode != appModeSelfHosted {
+		return nil
+	}
+	if a.config.adminEmail == "" {
+		return nil
+	}
+
+	userCount, err := a.queries.CountUsers(ctx, db)
+	if err != nil {
+		return fmt.Errorf("counting users: %w", err)
+	}
+	if userCount != 0 {
+		return nil
+	}
+
+	user, err := a.auth.CreateUser(ctx, a.config.adminEmail, "abc123", "UTC")
+	if err != nil {
+		return fmt.Errorf("creating initial selfhosted admin user: %w", err)
+	}
+
+	a.logger.InfoContext(ctx, "bootstrapped initial selfhosted admin user", "user_id", user.ID, "email", user.Email)
+
+	return nil
 }

@@ -10,6 +10,17 @@ import (
 	"time"
 )
 
+const countUsers = `-- name: CountUsers :one
+select count(*)::bigint from users
+`
+
+func (q *Queries) CountUsers(ctx context.Context, db DBTX) (int64, error) {
+	row := db.QueryRow(ctx, countUsers)
+	var column_1 int64
+	err := row.Scan(&column_1)
+	return column_1, err
+}
+
 const createUser = `-- name: CreateUser :one
 insert into users (email, password_hash, timezone, created_at, updated_at)
 values ($1, $2, $3, $4, $5)

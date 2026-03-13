@@ -76,6 +76,7 @@ func TestParseServeArgsLoadsFromEnv(t *testing.T) {
 			"APP_PORT":     "3322",
 			"BASE_URL":     "http://localhost:3322/",
 			"PG_URL":       "postgresql://postgres:postgres@db:5432/untils",
+			"ADMIN_EMAIL":  "admin@example.com",
 			"SMTP_FROM":    "notifications@untils.local",
 			"SMTP_HOST":    "mail.local",
 			"SMTP_PORT":    "2025",
@@ -95,6 +96,9 @@ func TestParseServeArgsLoadsFromEnv(t *testing.T) {
 	}
 	if globalCfg.dbUrl != "postgresql://postgres:postgres@db:5432/untils" {
 		t.Fatalf("got dbUrl %q", globalCfg.dbUrl)
+	}
+	if globalCfg.adminEmail != "admin@example.com" {
+		t.Fatalf("got adminEmail %q, want %q", globalCfg.adminEmail, "admin@example.com")
 	}
 	if globalCfg.appMode != appModeHosted {
 		t.Fatalf("got appMode %q, want %q", globalCfg.appMode, appModeHosted)
@@ -127,11 +131,12 @@ func TestParseServeArgsFlagsOverrideEnv(t *testing.T) {
 			"-smtp-from=flags@example.com",
 		},
 		envMap(map[string]string{
-			"APP_PORT":  "3322",
-			"BASE_URL":  "http://env.example:3322/",
-			"ENV":       appEnvDev.String(),
-			"MIGRATE":   "true",
-			"SMTP_FROM": "env@example.com",
+			"APP_PORT":    "3322",
+			"BASE_URL":    "http://env.example:3322/",
+			"ENV":         appEnvDev.String(),
+			"MIGRATE":     "true",
+			"ADMIN_EMAIL": "env-admin@example.com",
+			"SMTP_FROM":   "env@example.com",
 		}),
 	)
 
@@ -146,6 +151,9 @@ func TestParseServeArgsFlagsOverrideEnv(t *testing.T) {
 	}
 	if globalCfg.migrate {
 		t.Fatalf("expected migrate to be false")
+	}
+	if globalCfg.adminEmail != "env-admin@example.com" {
+		t.Fatalf("got adminEmail %q, want %q", globalCfg.adminEmail, "env-admin@example.com")
 	}
 	if globalCfg.smtp.from != "flags@example.com" {
 		t.Fatalf("got smtp from %q, want %q", globalCfg.smtp.from, "flags@example.com")

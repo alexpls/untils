@@ -152,6 +152,15 @@ func globalProperties(c *config) []configProperty {
 			func(value string) { c.dbUrl = value },
 			nil,
 		),
+		stringProperty(
+			"admin email",
+			"bootstrap email for the first selfhosted user",
+			"admin-email",
+			"ADMIN_EMAIL",
+			"",
+			func(value string) { c.adminEmail = value },
+			nil,
+		),
 		int64Property(
 			"demo user id",
 			"user id used for demo-mode requests",

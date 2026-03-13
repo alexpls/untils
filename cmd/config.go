@@ -16,6 +16,7 @@ type config struct {
 	migrate      bool
 	baseURL      string
 	dbUrl        string
+	adminEmail   string
 	demoUserID   int64
 	xAIKey       string
 	openAIKey    string

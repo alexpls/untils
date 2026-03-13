@@ -3,7 +3,8 @@ FROM oven/bun:latest AS bun
 WORKDIR /app
 COPY package.json bun.lock .
 RUN bun install
-RUN mkdir public
+COPY . .
+RUN rm -rf public/js/* public/css/*
 COPY assets/css ./assets/css
 RUN bun run build-css
 COPY assets/js ./assets/js

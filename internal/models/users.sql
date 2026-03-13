@@ -9,6 +9,9 @@ select * from users where email = @email limit 1;
 -- name: GetUser :one
 select * from users where id = @id limit 1;
 
+-- name: CountUsers :one
+select count(*)::bigint from users;
+
 -- name: UserIntegrations :many
 select
     'pushover'::notifier as name,
