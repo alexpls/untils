@@ -13,6 +13,7 @@ RUN bun run build-js
 # build go
 FROM golang:1.26-alpine AS go
 WORKDIR /app
+RUN apk add --no-cache ca-certificates
 COPY go.mod go.sum ./
 RUN go mod download
 RUN go install github.com/a-h/templ/cmd/templ@latest
@@ -24,4 +25,5 @@ RUN go build -o /bin/server ./cmd
 # server
 FROM scratch
 COPY --from=go /bin/server /bin/server
+COPY --from=go /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 CMD ["/bin/server", "serve"]
