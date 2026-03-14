@@ -129,6 +129,24 @@ func TestParseServeArgsRejectsCLIArgs(t *testing.T) {
 	parseServeArgs([]string{"untils", "serve", "-port=4201"}, envMap(nil))
 }
 
+func TestParseServeArgsRequiresAdminEmailInSelfHostedMode(t *testing.T) {
+	t.Parallel()
+
+	defer func() {
+		if r := recover(); r != "admin-email is required in selfhosted mode" {
+			t.Fatalf("got panic %v", r)
+		}
+	}()
+
+	parseServeArgs(
+		[]string{"untils", "serve"},
+		envMap(map[string]string{
+			"BASE_URL":  "http://localhost:3322",
+			"SMTP_FROM": "notifications@untils.local",
+		}),
+	)
+}
+
 func TestParseMigrateArgsLoadsFromEnv(t *testing.T) {
 	t.Parallel()
 

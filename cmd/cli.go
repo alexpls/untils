@@ -53,6 +53,7 @@ func parseServeArgs(args []string, lookupEnv envLookup) (*config, *serveConfig) 
 	}
 
 	validateGlobalConfig(&gc)
+	validateServeGlobalConfig(&gc)
 	validateServeConfig(&sc)
 
 	return &gc, &sc
@@ -101,7 +102,7 @@ func globalProperties(c *config) []configProperty {
 		),
 		boolProperty(
 			"MIGRATE",
-			"false",
+			"true",
 			func(value bool) { c.migrate = value },
 			nil,
 		),
@@ -354,6 +355,12 @@ func validateGlobalConfig(c *config) {
 	}
 	if c.baseURL == "" {
 		panic("base-url is required")
+	}
+}
+
+func validateServeGlobalConfig(c *config) {
+	if c.appMode == appModeSelfHosted && c.adminEmail == "" {
+		panic("admin-email is required in selfhosted mode")
 	}
 }
 

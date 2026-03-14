@@ -56,6 +56,7 @@ For non-default workspaces, use `mise run dev:info` and open the printed localho
 
 ## Writing UI copy
 
+- untils is always spelt "untils" in lowercase.
 - Prefer impersonal, non-agentive phrasing for user-facing text.
 - Avoid first-person references like "we", "our", or "us".
 - Use direct product behavior language, for example: "notifications will be sent when it changes."

@@ -2,11 +2,13 @@ name: untils-selfhosted
 
 services:
   server:
-    image: untils:latest
+    image: ghcr.io/alexpls/untils:latest
     ports:
       - "3322:3322"
     env_file:
       - .env.selfhosted
+    environment:
+      PG_URL: postgresql://${DB_USERNAME}:${DB_PASSWORD}@db:5432/${DB_NAME}
     depends_on:
       db:
         condition: service_healthy
@@ -14,9 +16,9 @@ services:
   db:
     image: postgres:18
     environment:
-      POSTGRES_USER: ${DB_USERNAME:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
-      POSTGRES_DB: ${DB_NAME:-untils}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     volumes:
       - ${DB_DATA_LOCATION:-./tmp/selfhosted_pgdata}:/var/lib/postgresql/data
     healthcheck:
@@ -28,4 +30,3 @@ services:
   browser:
     image: chromedp/headless-shell:latest
     shm_size: 2G
-
