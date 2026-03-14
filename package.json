@@ -11,5 +11,8 @@
     "watch-css": "bunx @tailwindcss/cli -i ./assets/css/index.css -o ./public/css/output.css --watch",
     "build-js": "bun build assets/js/index.js --minify --format=esm --outfile=public/js/app.js",
     "watch-js": "bun build assets/js/index.js --watch --format=esm --outfile=public/js/app.js"
+  },
+  "devDependencies": {
+    "@tailwindcss/typography": "^0.5.19"
   }
 }

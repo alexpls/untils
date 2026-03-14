@@ -25,13 +25,19 @@ templ Layout(title string) {
 
 templ Page(title string) {
 	@Layout(title) {
-		<header class="grid grid-cols-3 p-4">
-			<div class="text-start"></div>
-			<div class="text-center flex items-center justify-center gap-x-2">
-				<img src={ AssetURL("images/logo.png") } height="24px" width="24px" alt="Untils logo"/>
-				<a href="/" class="font-stretch-expanded mb-0.5">untils</a>
+		<header class="grid grid-cols-2 md:grid-cols-3 p-4">
+			<div class="hidden md:block text-start text-sm">
+			</div>
+			<div class="md:text-center flex items-center md:justify-center gap-x-3">
+				<a href="/" class="font-stretch-expanded mb-0.5 flex items-center gap-x-2">
+					<img src={ AssetURL("images/logo.png") } height="24px" width="24px" alt="Untils logo"/>
+					<span>untils</span>
+				</a>
+
+				<a href="/docs" class="pl-3 text-sm md:hidden border-l border-base-content/10">Docs</a>
 			</div>
 			<div class="text-end text-sm">
+				<a href="/docs" class="hidden md:inline mr-2 pr-3 border-r border-base-content/10">Docs</a>
 				if IsSignedIn(ctx) {
 					<a href="/app" class="link link-hover mr-2">Go to app</a>
 					<a href="/sign_out" class="link link-hover">Sign out</a>

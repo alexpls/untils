@@ -145,20 +145,20 @@ func Page(title string) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<header class=\"grid grid-cols-3 p-4\"><div class=\"text-start\"></div><div class=\"text-center flex items-center justify-center gap-x-2\"><img src=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<header class=\"grid grid-cols-2 md:grid-cols-3 p-4\"><div class=\"hidden md:block text-start text-sm\"></div><div class=\"md:text-center flex items-center md:justify-center gap-x-3\"><a href=\"/\" class=\"font-stretch-expanded mb-0.5 flex items-center gap-x-2\"><img src=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var8 string
 			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(AssetURL("images/logo.png"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/layout.templ`, Line: 31, Col: 42}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/layout.templ`, Line: 33, Col: 43}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" height=\"24px\" width=\"24px\" alt=\"Untils logo\"> <a href=\"/\" class=\"font-stretch-expanded mb-0.5\">untils</a></div><div class=\"text-end text-sm\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" height=\"24px\" width=\"24px\" alt=\"Untils logo\"> <span>untils</span></a> <a href=\"/docs\" class=\"pl-3 text-sm md:hidden border-l border-base-content/10\">Docs</a></div><div class=\"text-end text-sm\"><a href=\"/docs\" class=\"hidden md:inline mr-2 pr-3 border-r border-base-content/10\">Docs</a> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

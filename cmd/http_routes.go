@@ -85,6 +85,9 @@ func (a *app) routes() http.Handler {
 
 func (a *app) registerPublicRoutes(mux *http.ServeMux) {
 	if a.config.servesPublicPages() {
+		mux.HandleFunc("GET /docs", a.pagesHandlers.DocsHome)
+		mux.HandleFunc("GET /docs/{$}", a.pagesHandlers.DocsHome)
+		mux.HandleFunc("GET /docs/{doc_path...}", a.pagesHandlers.DocsPage)
 		mux.HandleFunc("GET /{$}", a.pagesHandlers.Home)
 		mux.HandleFunc("POST /subscribe", a.pagesHandlers.SubscribeEmail)
 		return

@@ -6,7 +6,7 @@ bun = "latest"
 env_file = '.env.dev'
 
 [tasks."build:x86"]
-depends = ["lint", "test:*"]
+depends = ["docs:generate", "lint", "test:*"]
 run = "GOOS=linux GOARCH=amd64 go build -o untils_linux_amd64 ./cmd"
 
 [tasks."format:go"]
@@ -19,7 +19,11 @@ run = "bun run format"
 depends = "format:*"
 
 [tasks.lint]
+depends = ["docs:generate"]
 run = "golangci-lint run"
+
+[tasks."docs:generate"]
+run = "go run ./cmd/docsgen"
 
 [tasks."testsetup:db"]
 run = '''
@@ -33,11 +37,11 @@ psql "${PG_TEST_URL}" --echo-errors --quiet -c "insert into river_migration (lin
 
 [tasks."test:unit"]
 env.TEMPL_DEV_MODE=false
-depends = ["testsetup:*"]
+depends = ["docs:generate", "testsetup:*"]
 run = 'go test ./...'
 
 [tasks."test:integration"]
-depends = ["testsetup:*"]
+depends = ["docs:generate", "testsetup:*"]
 run = 'go test -tags=integration ./...'
 
 [tasks."dev:deps"]

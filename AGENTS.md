@@ -19,6 +19,7 @@ Frontend:
 - Tailwind 4 CSS
 - Daisy UI
 - Datastar (ref: https://data-star.dev/reference/attributes)
+- Bun for bundling and package management
 
 ## Dev tasks
 

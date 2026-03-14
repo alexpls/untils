@@ -4,7 +4,9 @@ import (
 	"log/slog"
 	"net/http"
 	"net/mail"
+	"strings"
 
+	"github.com/alexpls/untils/internal/docs"
 	"github.com/alexpls/untils/internal/db"
 	"github.com/alexpls/untils/internal/models"
 	"github.com/starfederation/datastar-go/datastar"
@@ -30,6 +32,29 @@ func NewHandlers(queries *models.Queries, db db.DB, logger *slog.Logger) *Handle
 func (h *Handlers) Home(w http.ResponseWriter, r *http.Request) {
 	if err := HomePage().Render(r.Context(), w); err != nil {
 		h.logger.ErrorContext(r.Context(), "error rendering home page", "error", err)
+	}
+}
+
+// DocsHome handles GET /docs
+func (h *Handlers) DocsHome(w http.ResponseWriter, r *http.Request) {
+	http.Redirect(w, r, docs.CurrentSite().IndexPath, http.StatusFound)
+}
+
+// DocsPage handles GET /docs/{doc_path...}
+func (h *Handlers) DocsPage(w http.ResponseWriter, r *http.Request) {
+	docPath := docs.NormalizePath(strings.TrimPrefix(r.URL.Path, "/"))
+	page, ok := docs.CurrentSite().Page(docPath)
+	if !ok {
+		http.NotFound(w, r)
+		return
+	}
+
+	h.renderDocsPage(w, r, page)
+}
+
+func (h *Handlers) renderDocsPage(w http.ResponseWriter, r *http.Request, page docs.Page) {
+	if err := docs.PageView(page, docs.CurrentSite().NavSections).Render(r.Context(), w); err != nil {
+		h.logger.ErrorContext(r.Context(), "error rendering docs page", "error", err, "path", page.Path)
 	}
 }
 

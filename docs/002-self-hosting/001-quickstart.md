@@ -1,4 +1,10 @@
-# Self-hosting quickstart
+---
+title: Self-hosting quickstart
+sidebar_title: Quickstart
+url: /self-hosting/quickstart
+section: Self hosting
+description: A guide to running untils on your own hardware. Some knowledge of Linux server admin and Docker is required.
+---
 
 Self-hosting untils lets you run the full application stack on your own hardware.
 Some knowledge of Linux server admin and Docker is required.
@@ -59,7 +65,7 @@ http://localhost:3322/app
 
 Sign in with:
 
-- email: the `ADMIN_EMAIL` value
-- password: `abc123`
+- Email: the `ADMIN_EMAIL` value
+- Password: `abc123`
 
 If this is the first boot, **change that password immediately**.
