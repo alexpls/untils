@@ -13,8 +13,8 @@ import (
 )
 
 type llmWorkflowBuilder interface {
-	NewTriageWorkflow() *llm.TriageWorkflow
-	NewCheckWorkflow() *llm.CheckWorkflow
+	NewTriageWorkflow() llm.TriageWorkflowRunner
+	NewCheckWorkflow() llm.CheckWorkflowRunner
 }
 
 type Service struct {

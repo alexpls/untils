@@ -10,7 +10,7 @@ type TriageWorkflow struct {
 	service *Service
 }
 
-func (s *Service) NewTriageWorkflow() *TriageWorkflow {
+func (s *Service) NewTriageWorkflow() TriageWorkflowRunner {
 	return &TriageWorkflow{service: s}
 }
 

@@ -11,6 +11,14 @@ import (
 	"github.com/alexpls/untils/internal/search"
 )
 
+type TriageWorkflowRunner interface {
+	Run(context.Context, *CheckParams) (*TriagerResponse, error)
+}
+
+type CheckWorkflowRunner interface {
+	Run(context.Context, *CheckParams) (*models.CheckResultWithSchema, error)
+}
+
 var modelNonReasoning = "grok-4-1-fast-non-reasoning"
 var modelReasoning = "grok-4-1-fast-reasoning"
 

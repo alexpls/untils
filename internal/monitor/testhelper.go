@@ -49,11 +49,11 @@ type llmWorkflowsStub struct{}
 
 var _ llmWorkflowBuilder = &llmWorkflowsStub{}
 
-func (s *llmWorkflowsStub) NewCheckWorkflow() *llm.CheckWorkflow {
+func (s *llmWorkflowsStub) NewCheckWorkflow() llm.CheckWorkflowRunner {
 	return &llm.CheckWorkflow{}
 }
 
-func (s *llmWorkflowsStub) NewTriageWorkflow() *llm.TriageWorkflow {
+func (s *llmWorkflowsStub) NewTriageWorkflow() llm.TriageWorkflowRunner {
 	return &llm.TriageWorkflow{}
 }
 

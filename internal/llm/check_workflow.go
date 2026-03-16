@@ -11,7 +11,7 @@ type CheckWorkflow struct {
 	service *Service
 }
 
-func (s *Service) NewCheckWorkflow() *CheckWorkflow {
+func (s *Service) NewCheckWorkflow() CheckWorkflowRunner {
 	return &CheckWorkflow{service: s}
 }
 

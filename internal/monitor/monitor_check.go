@@ -316,9 +316,10 @@ func (s *Service) PerformMonitorCheckWithPreviousResults(
 
 		for _, params := range createMonitorResultParams {
 			newResult := models.MonitorResult{
-				Headline: params.Headline,
-				Subtitle: params.Subtitle,
-				Data:     params.Data,
+				MonitorID: params.MonitorID,
+				Headline:  params.Headline,
+				Subtitle:  params.Subtitle,
+				Data:      params.Data,
 			}
 			createdNotificationMessages = append(createdNotificationMessages, newResultNotificationMessage(*monitor, newResult, lastResult))
 		}
