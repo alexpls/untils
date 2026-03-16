@@ -348,19 +348,19 @@ func loadConfigProperties(lookupEnv envLookup, properties []configProperty) {
 
 func validateGlobalConfig(c *config) {
 	if c.env != appEnvProd && c.env != appEnvDev {
-		panic("env must be either prod or dev")
+		panic("ENV must be either prod or dev")
 	}
 	if c.appMode != appModeSelfHosted && c.appMode != appModeHosted {
-		panic("app-mode must be either selfhosted or hosted")
+		panic("APP_MODE must be either selfhosted or hosted")
 	}
 	if c.baseURL == "" {
-		panic("base-url is required")
+		panic("BASE_URL is required")
 	}
 }
 
 func validateServeGlobalConfig(c *config) {
 	if c.appMode == appModeSelfHosted && c.adminEmail == "" {
-		panic("admin-email is required in selfhosted mode")
+		panic("ADMIN_EMAIL is required in selfhosted mode")
 	}
 }
 
