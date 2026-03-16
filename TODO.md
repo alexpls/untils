@@ -23,7 +23,7 @@
 - [ ] Feedback: it's not obvious at all that there are multiple ways to receive notifications.
 - [ ] Improvement: make it clearer what the purpose of the preview is. I've had feedback that it's confusing that it's showing something that's already happened, which isn't something that the user wants to be notified about _now_.
 
-## Monitor checks
+### Monitor checks
 
 - [ ] Improvement: identify ourselves as untils. Respect robots.txt files
 
@@ -46,6 +46,7 @@
   - [ ] Refactor: "llm_conversations" should probably be renamed to "monitor_events", especially if it's gonna hold more than llm responses in it.
 - [ ] Fix: "check now" when clicked should put the check in some kinda "queued" state, so the user has immediate feedback that their action had an effect, even if a worker may not pick it up for a while.
 - [ ] Improvement: Refusal/check failures should be more obvious. At the moment say if a site returns a net::ERR_HTTP_RESPONSE_CODE_FAILURE the result will be 'no results found' when it should instead be an error
+- [ ] Refactor: figure out codegen pattern better. Currently codegen gets checked in, but then is rebuilt in GHA anyway. This this through and decide what makes most sense.
 
 ## Done
 
