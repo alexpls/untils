@@ -4,6 +4,7 @@ sidebar_title: Quickstart
 url: /self-hosting/quickstart
 section: Self hosting
 description: A guide to running untils on your own hardware. Some knowledge of Linux server admin and Docker is required.
+last_updated: 17 March 2026
 ---
 
 Self-hosting untils lets you run the full application stack on your own hardware.

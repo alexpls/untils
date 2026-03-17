@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"slices"
 	"strings"
+	"time"
 
 	"github.com/alecthomas/chroma/v2"
 	"github.com/alecthomas/chroma/v2/formatters/html"
@@ -31,6 +32,7 @@ type frontmatter struct {
 	URL          string `yaml:"url"`
 	Section      string `yaml:"section"`
 	Description  string `yaml:"description"`
+	LastUpdated  string `yaml:"last_updated"`
 }
 
 var codeBlockPattern = regexp.MustCompile(`(?s)<pre><code(?: class="language-([^"]+)")?>(.*?)</code></pre>`)
@@ -160,10 +162,6 @@ func parseDocFile(path string, renderer goldmark.Markdown) (docs.Page, error) {
 	if err != nil {
 		return docs.Page{}, err
 	}
-	info, err := os.Stat(path)
-	if err != nil {
-		return docs.Page{}, err
-	}
 	fm, body, err := splitFrontmatter(string(content))
 	if err != nil {
 		return docs.Page{}, fmt.Errorf("%s: %w", path, err)
@@ -177,6 +175,14 @@ func parseDocFile(path string, renderer goldmark.Markdown) (docs.Page, error) {
 	}
 	if fm.URL == "" {
 		return docs.Page{}, fmt.Errorf("%s: missing url frontmatter", path)
+	}
+	if fm.LastUpdated == "" {
+		return docs.Page{}, fmt.Errorf("%s: missing last_updated frontmatter", path)
+	}
+
+	lastUpdated, err := time.Parse("2 January 2006", fm.LastUpdated)
+	if err != nil {
+		return docs.Page{}, fmt.Errorf("%s: invalid last_updated frontmatter: %w", path, err)
 	}
 
 	body = strings.TrimSpace(strings.ReplaceAll(body, "\r\n", "\n"))
@@ -201,7 +207,7 @@ func parseDocFile(path string, renderer goldmark.Markdown) (docs.Page, error) {
 		Description:  fm.Description,
 		Section:      fm.Section,
 		Path:         normalizeRoutePath(fm.URL),
-		LastUpdated:  info.ModTime().Format("2 January 2006"),
+		LastUpdated:  lastUpdated.Format("2 January 2006"),
 		ContentHTML:  contentHTML,
 		Headings:     extractH2Headings(source, doc),
 	}, nil
