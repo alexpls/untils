@@ -71,6 +71,18 @@ func TestPerformMonitorCheckSendsNotification(t *testing.T) {
 	require.Equal(t, "Example release", sender.calls[0].Message.New.Data.Fields.GetValue("Title"))
 }
 
+func TestCreateMonitorNotifierRejectsUnavailableNotifier(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	deps := setupTestDeps(ctx, t)
+	deps.service.capabilities.EmailEnabled = false
+
+	_, err := deps.service.CreateMonitorNotifier(ctx, deps.fixtures.Monitor, models.NotifierEmail)
+	require.ErrorIs(t, err, ErrNotifierNotConfigured)
+	require.EqualError(t, err, "notifier is not configured for this installation")
+}
+
 type stubLLMWorkflows struct {
 	checkResult *models.CheckResultWithSchema
 	triage      *llm.TriagerResponse

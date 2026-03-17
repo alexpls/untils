@@ -147,7 +147,43 @@ func TestParseServeArgsRequiresAdminEmailInSelfHostedMode(t *testing.T) {
 	parseServeArgs(
 		[]string{"untils", "serve"},
 		envMap(map[string]string{
+			"BASE_URL": "http://localhost:3322",
+		}),
+	)
+}
+
+func TestParseServeArgsAllowsMissingNotifierConfigInSelfHostedMode(t *testing.T) {
+	t.Parallel()
+
+	globalCfg, _ := parseServeArgs(
+		[]string{"untils", "serve"},
+		envMap(map[string]string{
+			"APP_MODE":    appModeSelfHosted.String(),
+			"BASE_URL":    "http://localhost:3322",
+			"ADMIN_EMAIL": "admin@example.com",
+		}),
+	)
+
+	assert.False(t, globalCfg.emailSendConfigured())
+	assert.False(t, globalCfg.pushoverConfigured())
+}
+
+func TestParseServeArgsRequiresNotifierConfigInHostedMode(t *testing.T) {
+	t.Parallel()
+
+	defer func() {
+		if r := recover(); r != "PUSHOVER_KEY is required in hosted mode" {
+			t.Fatalf("got panic %v", r)
+		}
+	}()
+
+	parseServeArgs(
+		[]string{"untils", "serve"},
+		envMap(map[string]string{
+			"APP_MODE":  appModeHosted.String(),
 			"BASE_URL":  "http://localhost:3322",
+			"SMTP_HOST": "mail.local",
+			"SMTP_PORT": "2025",
 			"SMTP_FROM": "notifications@untils.local",
 		}),
 	)

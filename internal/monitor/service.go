@@ -23,6 +23,7 @@ type Service struct {
 	llm                llmWorkflowBuilder
 	river              *river.Client[pgx.Tx]
 	logger             *slog.Logger
+	capabilities       notifications.Capabilities
 	notificationSender notifications.Sender
 	notificationRender notifications.RenderConfig
 	validate           *validator.Validate
@@ -34,6 +35,7 @@ func NewService(db db.DB,
 	river *river.Client[pgx.Tx],
 	logger *slog.Logger,
 	validate *validator.Validate,
+	capabilities notifications.Capabilities,
 	notificationSender notifications.Sender,
 	notificationRender notifications.RenderConfig,
 ) *Service {
@@ -44,6 +46,7 @@ func NewService(db db.DB,
 		river:              river,
 		logger:             logger,
 		validate:           validate,
+		capabilities:       capabilities,
 		notificationSender: notificationSender,
 		notificationRender: notificationRender,
 	}

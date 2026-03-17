@@ -49,3 +49,11 @@ func (c *config) servesPublicPages() bool {
 func (c *config) usesXAI() bool {
 	return strings.HasPrefix(c.openAIModel, "grok")
 }
+
+func (c *config) pushoverConfigured() bool {
+	return c.pushoverKey != ""
+}
+
+func (c *config) emailSendConfigured() bool {
+	return c.smtp.host != "" && c.smtp.port != 0 && c.smtp.from != ""
+}

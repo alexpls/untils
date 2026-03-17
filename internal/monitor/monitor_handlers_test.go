@@ -218,6 +218,23 @@ func TestViewMonitorChecksPagination(t *testing.T) {
 	})
 }
 
+func TestViewMonitorNotificationsHidesDisabledIntegrations(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	deps := setupTestDeps(ctx, t)
+	deps.service.capabilities.EmailEnabled = false
+
+	res := getHandlerForRequest(func(w http.ResponseWriter, r *http.Request) {
+		r.SetPathValue("monitor_id", fmt.Sprint(deps.fixtures.Monitor.ID))
+		deps.handlers.ViewMonitorNotifications(w, r, deps.fixtures.User)
+	}, httptest.NewRequest("GET", fmt.Sprintf("/app/monitors/%d/notifications", deps.fixtures.Monitor.ID), nil))
+	page, _ := io.ReadAll(res.Body)
+
+	require.Equal(t, http.StatusOK, res.StatusCode)
+	assert.NotContains(t, string(page), "Notify by <strong>Email</strong>")
+}
+
 func getHandler(handler func(http.ResponseWriter, *http.Request, *models.User), user *models.User) *http.Response {
 	return getHandlerForRequest(func(w http.ResponseWriter, r *http.Request) {
 		handler(w, r, user)

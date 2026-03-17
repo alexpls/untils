@@ -13,6 +13,7 @@ import (
 	"github.com/alexpls/untils/internal/db"
 	"github.com/alexpls/untils/internal/errortypes"
 	"github.com/alexpls/untils/internal/models"
+	"github.com/alexpls/untils/internal/notifications"
 	"github.com/alexpls/untils/internal/pushover"
 	"github.com/alexpls/untils/internal/session"
 	"github.com/alexpls/untils/internal/validation"
@@ -27,6 +28,7 @@ type AuthService interface {
 
 // Handlers contains HTTP handlers for settings routes
 type Handlers struct {
+	capabilities   notifications.Capabilities
 	queries        *models.Queries
 	db             db.DB
 	pushoverStore  *pushover.Store
@@ -36,10 +38,29 @@ type Handlers struct {
 	logger         *slog.Logger
 }
 
+type SettingsIntegrationViewData struct {
+	Integration *models.UserIntegrationsRow
+	// Whether the integration type is available. In self hosted mode
+	// this depends on the config of the application.
+	Enabled     bool
+}
+
+func toSettingsIntegrations(integrations []*models.UserIntegrationsRow, capabilities notifications.Capabilities) []*SettingsIntegrationViewData {
+	items := make([]*SettingsIntegrationViewData, 0, len(integrations))
+	for _, integration := range integrations {
+		items = append(items, &SettingsIntegrationViewData{
+			Integration: integration,
+			Enabled:     capabilities.Enabled(integration.Name),
+		})
+	}
+	return items
+}
+
 // NewHandlers creates a new Handlers instance
 func NewHandlers(
 	queries *models.Queries,
 	db db.DB,
+	capabilities notifications.Capabilities,
 	pushoverStore *pushover.Store,
 	pushoverClient *pushover.Client,
 	sessionManager *session.Manager,
@@ -47,6 +68,7 @@ func NewHandlers(
 	logger *slog.Logger,
 ) *Handlers {
 	return &Handlers{
+		capabilities:   capabilities,
 		queries:        queries,
 		db:             db,
 		pushoverStore:  pushoverStore,
@@ -66,7 +88,7 @@ func (h *Handlers) ViewSettings(w http.ResponseWriter, r *http.Request, user *mo
 		return
 	}
 	if err := Settings(&SettingsViewModel{
-		ConfiguredIntegrations: integrations,
+		Integrations: toSettingsIntegrations(integrations, h.capabilities),
 	}).Render(r.Context(), w); err != nil {
 		h.logger.ErrorContext(r.Context(), "error rendering settings component", "error", err)
 	}
@@ -143,6 +165,15 @@ func (h *Handlers) UpdatePassword(w http.ResponseWriter, r *http.Request, user *
 
 // ViewPushoverSettings handles GET /app/settings/pushover
 func (h *Handlers) ViewPushoverSettings(w http.ResponseWriter, r *http.Request, user *models.User) {
+	if !h.capabilities.PushoverEnabled {
+		if err := PushoverSettings(&PushoverSettingsViewModel{
+			Enabled: false,
+		}).Render(r.Context(), w); err != nil {
+			h.logger.ErrorContext(r.Context(), "error rendering pushover settings component", "error", err)
+		}
+		return
+	}
+
 	tok, err := h.pushoverStore.GetToken(r.Context(), user.ID)
 	if err != nil {
 		if !errors.Is(err, &errortypes.ErrNoPushoverUserToken{}) {
@@ -153,7 +184,8 @@ func (h *Handlers) ViewPushoverSettings(w http.ResponseWriter, r *http.Request, 
 	}
 
 	data := PushoverSettingsViewModel{
-		Token: nil,
+		Enabled: true,
+		Token:   nil,
 		Values: pushover.CreateOrUpdateTokenParams{
 			Token: "",
 		},
@@ -171,6 +203,11 @@ func (h *Handlers) ViewPushoverSettings(w http.ResponseWriter, r *http.Request, 
 
 // UpdatePushoverSettings handles POST /app/settings/pushover
 func (h *Handlers) UpdatePushoverSettings(w http.ResponseWriter, r *http.Request, user *models.User) {
+	if !h.capabilities.PushoverEnabled {
+		http.Error(w, "pushover is not configured", http.StatusBadRequest)
+		return
+	}
+
 	if err := r.ParseForm(); err != nil {
 		h.logger.ErrorContext(r.Context(), "failed to parse form", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
@@ -190,6 +227,7 @@ func (h *Handlers) UpdatePushoverSettings(w http.ResponseWriter, r *http.Request
 				Message: fmt.Sprintf("Failed to validate with Pushover: %s", strings.Join(validationErr.Reasons, ", ")),
 			}
 			if err := PushoverSettings(&PushoverSettingsViewModel{
+				Enabled:          true,
 				Values:           params,
 				ValidationErrors: validation.ValidationErrors{mapped},
 			}).Render(r.Context(), w); err != nil {
@@ -204,6 +242,7 @@ func (h *Handlers) UpdatePushoverSettings(w http.ResponseWriter, r *http.Request
 		if validationErrs := validation.MapValidationErrors(err); validationErrs != nil {
 			h.logger.WarnContext(r.Context(), "failed validation when creating pushover token", "validation_errors", validationErrs)
 			if err := PushoverSettings(&PushoverSettingsViewModel{
+				Enabled:          true,
 				Values:           params,
 				ValidationErrors: validationErrs,
 			}).Render(r.Context(), w); err != nil {
@@ -221,6 +260,11 @@ func (h *Handlers) UpdatePushoverSettings(w http.ResponseWriter, r *http.Request
 
 // DeletePushoverSettings handles DELETE /app/settings/pushover
 func (h *Handlers) DeletePushoverSettings(w http.ResponseWriter, r *http.Request, user *models.User) {
+	if !h.capabilities.PushoverEnabled {
+		http.Error(w, "pushover is not configured", http.StatusBadRequest)
+		return
+	}
+
 	sse := datastar.NewSSE(w, r)
 
 	err := h.pushoverStore.DeleteToken(r.Context(), user.ID)
@@ -238,7 +282,8 @@ func (h *Handlers) DeletePushoverSettings(w http.ResponseWriter, r *http.Request
 // ViewEmailSettings handles GET /app/settings/email
 func (h *Handlers) ViewEmailSettings(w http.ResponseWriter, r *http.Request, user *models.User) {
 	if err := EmailSettings(&EmailSettingsViewModel{
-		Email: user.Email,
+		Enabled: h.capabilities.EmailEnabled,
+		Email:   user.Email,
 	}).Render(r.Context(), w); err != nil {
 		h.logger.ErrorContext(r.Context(), "error rendering email settings component", "error", err)
 	}

@@ -401,6 +401,10 @@ func (h *Handlers) UpdateMonitorNotifier(w http.ResponseWriter, r *http.Request,
 	notifierType := r.PathValue("type")
 
 	if _, err := h.service.CreateMonitorNotifier(r.Context(), mon, models.Notifier(notifierType)); err != nil {
+		if errors.Is(err, ErrNotifierNotConfigured) {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
 		h.logger.ErrorContext(r.Context(), "error creating notifier", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
@@ -707,7 +711,7 @@ func (h *Handlers) monitorNotifierViewData(ctx context.Context, mon *models.Moni
 	}
 
 	for _, integration := range integrations {
-		if !integration.Configured {
+		if !integration.Configured || !h.service.capabilities.Enabled(integration.Name) {
 			continue
 		}
 

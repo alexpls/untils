@@ -6,7 +6,6 @@
 - [ ] Add test coverage for important components that are not yet tested
 - [ ] Remove my personal email from seeds
 - [ ] Fix: Handle browser timeouts and lifecycle properly
-- [ ] Fix: Pushover token config, SMTP config. If not set for selfhost, don't show on UI.
 
 ### Monitor results
 
@@ -49,6 +48,7 @@
 
 ## Done
 
+- [x] Fix: Pushover token config, SMTP config. If not set for selfhost, don't show on UI.
 - [x] Feature: Allow switching API providers between x.ai and OpenAI on startup
 - [x] Documentation: self hosting guide & Readme
 - [x] Prettier and more informative notifications

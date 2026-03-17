@@ -26,12 +26,16 @@ func (s *Service) CreateMonitorNotifier(ctx context.Context, mon *models.Monitor
 }
 
 func (s *Service) createMonitorNotifierTx(ctx context.Context, tx pgx.Tx, mon *models.Monitor, notifierType models.Notifier) (*models.MonitorNotifier, error) {
+	if !s.capabilities.Enabled(notifierType) {
+		return nil, fmt.Errorf("%w for this installation", ErrNotifierNotConfigured)
+	}
+
 	switch notifierType {
 	case models.NotifierPushover:
 		_, err := s.queries.GetPushoverUserToken(ctx, tx, mon.UserID)
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
-				return nil, ErrNotifierNotConfigured
+				return nil, fmt.Errorf("%w for this account", ErrNotifierNotConfigured)
 			}
 			return nil, fmt.Errorf("checking pushover token: %w", err)
 		}
@@ -97,7 +101,7 @@ func (s *Service) enableAllNotifiers(ctx context.Context, tx pgx.Tx, mon *models
 	}
 
 	for _, integration := range integrations {
-		if !integration.Configured {
+		if !integration.Configured || !s.capabilities.Enabled(integration.Name) {
 			continue
 		}
 

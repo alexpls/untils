@@ -38,11 +38,17 @@ psql "${PG_TEST_URL}" --echo-errors --quiet -c "insert into river_migration (lin
 [tasks."test:unit"]
 env.TEMPL_DEV_MODE=false
 depends = ["docs:generate", "testsetup:*"]
-run = 'go test ./...'
+run = '''
+. ./scripts/workspace-env.sh
+go test ./...
+'''
 
 [tasks."test:integration"]
 depends = ["docs:generate", "testsetup:*"]
-run = 'go test -tags=integration ./...'
+run = '''
+. ./scripts/workspace-env.sh
+go test -tags=integration ./...
+'''
 
 [tasks."dev:deps"]
 run = '''

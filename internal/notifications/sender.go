@@ -25,16 +25,18 @@ type Sender interface {
 type Service struct {
 	logger       *slog.Logger
 	renderConfig RenderConfig
+	capabilities Capabilities
 	pushover     *pushover.Client
 	email        *email.Service
 	db           db.DB
 	queries      models.Queries
 }
 
-func NewService(logger *slog.Logger, renderConfig RenderConfig, pushover *pushover.Client, email *email.Service, db db.DB, queries models.Queries) *Service {
+func NewService(logger *slog.Logger, renderConfig RenderConfig, capabilities Capabilities, pushover *pushover.Client, email *email.Service, db db.DB, queries models.Queries) *Service {
 	return &Service{
 		logger:       logger,
 		renderConfig: renderConfig,
+		capabilities: capabilities,
 		pushover:     pushover,
 		email:        email,
 		db:           db,
@@ -74,6 +76,10 @@ func (s *Service) Send(ctx context.Context, params SendParams) error {
 }
 
 func (s *Service) sendEmail(ctx context.Context, user *models.User, params SendParams) error {
+	if !s.capabilities.EmailEnabled || s.email == nil {
+		return nil
+	}
+
 	rendered, err := RenderMonitorNewResultEmail(ctx, s.renderConfig, params.Message)
 	if err != nil {
 		return fmt.Errorf("rendering email notification: %w", err)
@@ -88,6 +94,10 @@ func (s *Service) sendEmail(ctx context.Context, user *models.User, params SendP
 }
 
 func (s *Service) sendPushoverNotification(ctx context.Context, params SendParams) error {
+	if !s.capabilities.PushoverEnabled || s.pushover == nil {
+		return nil
+	}
+
 	rendered, err := RenderMonitorNewResultPushover(params.Message)
 	if err != nil {
 		return fmt.Errorf("rendering pushover notification: %w", err)

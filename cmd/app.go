@@ -186,24 +186,32 @@ func createApp(c *config) (*app, context.Context, context.CancelFunc, func()) {
 
 	a.sessionManager = session.NewManager(a.db, a.queries, a.logger.With("source", "session"))
 
+	notificationCapabilities := notifications.Capabilities{
+		EmailEnabled:    c.emailSendConfigured(),
+		PushoverEnabled: c.pushoverConfigured(),
+	}
 	a.pushoverStore = pushover.NewStore(a.db, a.queries, a.validate)
-	a.pushoverClient = pushover.NewPushoverClient(c.pushoverKey, a.logger.With("source", "pushover"), a.pushoverStore)
+	if notificationCapabilities.PushoverEnabled {
+		a.pushoverClient = pushover.NewPushoverClient(c.pushoverKey, a.logger.With("source", "pushover"), a.pushoverStore)
+	}
 
-	a.emailService = email.NewService(email.SMTPConfig{
-		Username: c.smtp.username,
-		Password: c.smtp.password,
-		Host:     c.smtp.host,
-		Port:     c.smtp.port,
-		From:     c.smtp.from,
-	})
+	if notificationCapabilities.EmailEnabled {
+		a.emailService = email.NewService(email.SMTPConfig{
+			Username: c.smtp.username,
+			Password: c.smtp.password,
+			Host:     c.smtp.host,
+			Port:     c.smtp.port,
+			From:     c.smtp.from,
+		})
+	}
 
 	notificationRenderConfig := notifications.RenderConfig{
 		BaseURL: c.baseURL,
 	}
 
-	a.notificationService = notifications.NewService(a.logger.With("source", "notifications.service"), notificationRenderConfig, a.pushoverClient, a.emailService, a.db, *a.queries)
+	a.notificationService = notifications.NewService(a.logger.With("source", "notifications.service"), notificationRenderConfig, notificationCapabilities, a.pushoverClient, a.emailService, a.db, *a.queries)
 
-	a.monitor = monitor.NewService(a.db, a.queries, a.llm, a.river, a.logger.With("source", "monitor"), a.validate, a.notificationService, notificationRenderConfig)
+	a.monitor = monitor.NewService(a.db, a.queries, a.llm, a.river, a.logger.With("source", "monitor"), a.validate, notificationCapabilities, a.notificationService, notificationRenderConfig)
 	a.monitorEvents = monitor.NewDBEventHandler()
 	a.dbListener.Handle("monitor_events", a.monitorEvents)
 
@@ -215,7 +223,7 @@ func createApp(c *config) (*app, context.Context, context.CancelFunc, func()) {
 
 	a.authHandlers = auth.NewHandlers(a.auth, a.sessionManager, a.logger.With("source", "auth.handlers"))
 
-	a.settingsHandlers = settings.NewHandlers(a.queries, a.db, a.pushoverStore, a.pushoverClient, a.sessionManager, a.auth, a.logger.With("source", "settings.handlers"))
+	a.settingsHandlers = settings.NewHandlers(a.queries, a.db, notificationCapabilities, a.pushoverStore, a.pushoverClient, a.sessionManager, a.auth, a.logger.With("source", "settings.handlers"))
 
 	a.devHandlers = dev.NewHandlers(a.logger.With("source", "dev.handlers"), notifications.NewEmailTemplateStore(notificationRenderConfig))
 

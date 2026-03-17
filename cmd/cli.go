@@ -178,26 +178,21 @@ func globalProperties(c *config) []configProperty {
 		),
 		stringProperty(
 			"SMTP_HOST",
-			"127.0.0.1",
+			"",
 			func(value string) { c.smtp.host = value },
 			nil,
 		),
 		intProperty(
 			"SMTP_PORT",
-			"1025",
+			"0",
 			func(value int) { c.smtp.port = value },
 			nil,
 		),
 		stringProperty(
 			"SMTP_FROM",
-			"notifications@untils.com",
+			"",
 			func(value string) { c.smtp.from = value },
-			func() error {
-				if c.smtp.from == "" {
-					return fmt.Errorf("smtp-from is required")
-				}
-				return nil
-			},
+			nil,
 		),
 		stringProperty(
 			"CHROME_DEVTOOLS_URL",
@@ -361,6 +356,13 @@ func validateGlobalConfig(c *config) {
 func validateServeGlobalConfig(c *config) {
 	if c.appMode == appModeSelfHosted && c.adminEmail == "" {
 		panic("ADMIN_EMAIL is required in selfhosted mode")
+	}
+
+	if c.appMode == appModeHosted && !c.pushoverConfigured() {
+		panic("PUSHOVER_KEY is required in hosted mode")
+	}
+	if c.appMode == appModeHosted && !c.emailSendConfigured() {
+		panic("SMTP_HOST, SMTP_PORT, and SMTP_FROM are required in hosted mode")
 	}
 }
 
