@@ -28,8 +28,8 @@
 
 ### AI SDKs
 
-- [ ] Feature: Allow switching API providers between x.ai and OpenAI on startup
 - [ ] Improvement: 25% of the produced binary is OpenAI's bloated SDK. I only use one endpoint, could move away from the SDK and call it directly with HTTP?
+- [ ] Improvement: add pricing for gpt models too 
 
 ### Misc
 
@@ -49,6 +49,7 @@
 
 ## Done
 
+- [x] Feature: Allow switching API providers between x.ai and OpenAI on startup
 - [x] Documentation: self hosting guide & Readme
 - [x] Prettier and more informative notifications
 - [x] License

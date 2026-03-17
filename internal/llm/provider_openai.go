@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/openai/openai-go/v3"
 	"github.com/openai/openai-go/v3/responses"
@@ -100,6 +101,9 @@ func (p *openAIProvider) CalculateCostUSD(model string, usage TokenUsage) (float
 			cost += float64(toolUsage.XSearchCalls) / 1_000 * per1KXSearchCalls
 		}
 	default:
+		if strings.HasPrefix(model, "gpt-") {
+			return 0.0, nil
+		}
 		return 0.0, fmt.Errorf("unsupported model: %s", model)
 	}
 

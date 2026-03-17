@@ -24,7 +24,7 @@ and I'll let you know when it arrives.
 ### External APIs
 
 - Brave Search API ([quickstart](https://api-dashboard.search.brave.com/documentation/quickstart))
-- LLM provider ([OpenAI](https://developers.openai.com/api/docs/quickstart/) or [x.ai](https://docs.x.ai/developers/quickstart) API keys)
+- LLM provider ([OpenAI](https://developers.openai.com/api/docs/quickstart/) or [x.ai](https://docs.x.ai/developers/quickstart) API key)
 - (optional) Pushover app key for delivering push notifications ([quickstart](https://pushover.net/api))
 - (optional) SMTP server for delivering emails
 

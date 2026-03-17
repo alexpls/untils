@@ -19,11 +19,9 @@ type CheckWorkflowRunner interface {
 	Run(context.Context, *CheckParams) (*models.CheckResultWithSchema, error)
 }
 
-var modelNonReasoning = "grok-4-1-fast-non-reasoning"
-var modelReasoning = "grok-4-1-fast-reasoning"
-
 type Service struct {
 	provider      Provider
+	model         string
 	db            db.DB
 	queries       *models.Queries
 	logger        *slog.Logger
@@ -33,6 +31,7 @@ type Service struct {
 
 func NewService(
 	provider Provider,
+	model string,
 	db db.DB,
 	queries *models.Queries,
 	logger *slog.Logger,
@@ -41,6 +40,7 @@ func NewService(
 ) *Service {
 	return &Service{
 		provider:      provider,
+		model:         model,
 		db:            db,
 		queries:       queries,
 		logger:        logger,

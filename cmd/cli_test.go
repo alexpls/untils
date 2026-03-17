@@ -1,6 +1,10 @@
 package main
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 func envMap(values map[string]string) envLookup {
 	return func(key string) (string, bool) {
@@ -72,19 +76,19 @@ func TestParseServeArgsLoadsFromEnv(t *testing.T) {
 	globalCfg, serveCfg := parseServeArgs(
 		[]string{"untils", "serve"},
 		envMap(map[string]string{
-			"ENV":          appEnvDev.String(),
-			"APP_PORT":     "3322",
-			"BASE_URL":     "http://localhost:3322/",
-			"PG_URL":       "postgresql://postgres:postgres@db:5432/untils",
-			"ADMIN_EMAIL":  "admin@example.com",
-			"SMTP_FROM":    "notifications@untils.local",
-			"SMTP_HOST":    "mail.local",
-			"SMTP_PORT":    "2025",
-			"APP_MODE":     appModeHosted.String(),
-			"MIGRATE":      "true",
-			"BRAVE_KEY":    "brave",
-			"OPENAI_KEY":   "openai",
-			"PUSHOVER_KEY": "pushover",
+			"ENV":            appEnvDev.String(),
+			"APP_PORT":       "3322",
+			"BASE_URL":       "http://localhost:3322/",
+			"PG_URL":         "postgresql://postgres:postgres@db:5432/untils",
+			"ADMIN_EMAIL":    "admin@example.com",
+			"SMTP_FROM":      "notifications@untils.local",
+			"SMTP_HOST":      "mail.local",
+			"SMTP_PORT":      "2025",
+			"APP_MODE":       appModeHosted.String(),
+			"MIGRATE":        "true",
+			"BRAVE_KEY":      "brave",
+			"OPENAI_API_KEY": "openai",
+			"PUSHOVER_KEY":   "pushover",
 		}),
 	)
 
@@ -115,6 +119,8 @@ func TestParseServeArgsLoadsFromEnv(t *testing.T) {
 	if serveCfg.port != 3322 {
 		t.Fatalf("got port %d, want %d", serveCfg.port, 3322)
 	}
+	assert.Equal(t, "openai", globalCfg.openAIAPIKey)
+	assert.Equal(t, "gpt-5.4", globalCfg.openAIModel)
 }
 
 func TestParseServeArgsRejectsCLIArgs(t *testing.T) {
@@ -133,7 +139,7 @@ func TestParseServeArgsRequiresAdminEmailInSelfHostedMode(t *testing.T) {
 	t.Parallel()
 
 	defer func() {
-		if r := recover(); r != "admin-email is required in selfhosted mode" {
+		if r := recover(); r != "ADMIN_EMAIL is required in selfhosted mode" {
 			t.Fatalf("got panic %v", r)
 		}
 	}()

@@ -42,7 +42,7 @@ func (p *Triager) Run(ctx context.Context) (*TriagerResponse, error) {
 	}
 
 	res, err := runAgent[TriagerResponse](ctx, p.service, agentRunOptions[TriagerResponse]{
-		model:          modelNonReasoning,
+		model:          p.service.model,
 		responseName:   "TriagerResponse",
 		responseSchema: jsonSchema(TriagerResponse{}),
 		maxTurns:       3,

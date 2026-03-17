@@ -31,7 +31,7 @@ func newTestDeps(t *testing.T) *testDeps {
 	fixtures := testfixtures.New(ctx, t, tx, queries)
 
 	oai := openai.NewClient(
-		option.WithAPIKey(os.Getenv("XAI_KEY")),
+		option.WithAPIKey(os.Getenv("OPENAI_API_KEY")),
 		option.WithBaseURL("https://api.x.ai/v1"),
 	)
 
@@ -39,6 +39,7 @@ func newTestDeps(t *testing.T) *testDeps {
 
 	svc := NewService(
 		NewOpenAIProvider(&oai),
+		"grok-4-1-fast-reasoning",
 		tx,
 		queries,
 		tl,

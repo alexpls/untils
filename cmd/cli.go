@@ -141,15 +141,15 @@ func globalProperties(c *config) []configProperty {
 			nil,
 		),
 		stringProperty(
-			"XAI_KEY",
+			"OPENAI_API_KEY",
 			"",
-			func(value string) { c.xAIKey = value },
+			func(value string) { c.openAIAPIKey = value },
 			nil,
 		),
 		stringProperty(
-			"OPENAI_KEY",
-			"",
-			func(value string) { c.openAIKey = value },
+			"OPENAI_MODEL",
+			"gpt-5.4",
+			func(value string) { c.openAIModel = value },
 			nil,
 		),
 		stringProperty(

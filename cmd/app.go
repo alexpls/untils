@@ -157,15 +157,19 @@ func createApp(c *config) (*app, context.Context, context.CancelFunc, func()) {
 
 	a.webSearcher = search.NewBraveClient(c.braveKey, a.logger.With("source", "search.brave"))
 
-	llmClient := openai.NewClient(
-		option.WithBaseURL("https://api.x.ai/v1"),
-		option.WithAPIKey(c.xAIKey),
-	)
+	clientOptions := []option.RequestOption{
+		option.WithAPIKey(c.openAIAPIKey),
+	}
+	if c.usesXAI() {
+		clientOptions = append(clientOptions, option.WithBaseURL("https://api.x.ai/v1"))
+	}
+	llmClient := openai.NewClient(clientOptions...)
 	llmProvider := llm.NewOpenAIProvider(&llmClient)
 	llmLogger := a.logger.With("source", "llm")
 
 	a.llm = llm.NewService(
 		llmProvider,
+		c.openAIModel,
 		a.db,
 		a.queries,
 		llmLogger,

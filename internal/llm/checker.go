@@ -76,7 +76,7 @@ func (c *checker) perform(ctx context.Context, params *CheckParams) (*models.Che
 	}
 
 	return runAgent(ctx, c.service, agentRunOptions[models.CheckResultWithSchema]{
-		model:             modelReasoning,
+		model:             c.service.model,
 		responseName:      "CheckResult",
 		responseSchema:    responseSchema,
 		tools:             toProviderTools(llmtools.Registry.Definitions()),
