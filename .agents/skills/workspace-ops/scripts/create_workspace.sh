@@ -40,6 +40,9 @@ echo "creating workspace '${workspace_name}' at ${destination_path}"
 
 cd "${destination_path}"
 
+echo "generating workspace .env.dev"
+"${repo_root}/scripts/generate-env-dev.sh" "${workspace_name}" "${repo_root}/.env.dev" ".env.dev"
+
 echo "installing workspace dependencies"
 bun install
 mise trust
@@ -53,12 +56,12 @@ bun run build-js
 
 echo "waiting for postgres to accept connections"
 for _ in $(seq 1 60); do
-	if zsh -lc '. ./scripts/workspace-env.sh; psql "${PG_URL%/untils_dev}" -Atc "select 1"' >/dev/null 2>&1; then
+	if mise x -- psql "${PG_URL%/untils_dev}" -Atc "select 1" >/dev/null 2>&1; then
 		break
 	fi
 	sleep 1
 done
-if ! zsh -lc '. ./scripts/workspace-env.sh; psql "${PG_URL%/untils_dev}" -Atc "select 1"' >/dev/null 2>&1; then
+if ! mise x -- psql "${PG_URL%/untils_dev}" -Atc "select 1" >/dev/null 2>&1; then
 	echo "postgres did not become ready in time" >&2
 	exit 1
 fi
@@ -67,7 +70,7 @@ echo "initializing databases"
 mise run db:reset
 
 echo "verifying readiness"
-zsh -lc '. ./scripts/workspace-env.sh; psql "$PG_URL" -Atc "select email from users;"'
+mise x -- psql "$PG_URL" -Atc "select email from users;"
 mise run test:unit
 mise run dev:info
 

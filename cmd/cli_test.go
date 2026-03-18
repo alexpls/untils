@@ -189,6 +189,43 @@ func TestParseServeArgsRequiresNotifierConfigInHostedMode(t *testing.T) {
 	)
 }
 
+func TestParseServeArgsAllowsMissingSMTPHostInHostedMode(t *testing.T) {
+	t.Parallel()
+
+	globalCfg, _ := parseServeArgs(
+		[]string{"untils", "serve"},
+		envMap(map[string]string{
+			"APP_MODE":     appModeHosted.String(),
+			"BASE_URL":     "http://localhost:3322",
+			"PUSHOVER_KEY": "pushover",
+			"SMTP_PORT":    "2025",
+			"SMTP_FROM":    "notifications@untils.local",
+		}),
+	)
+
+	assert.False(t, globalCfg.emailSendConfigured())
+}
+
+func TestParseServeArgsRequiresCompleteSMTPConfigWhenSMTPHostIsSetInHostedMode(t *testing.T) {
+	t.Parallel()
+
+	defer func() {
+		if r := recover(); r != "SMTP_HOST, SMTP_PORT, and SMTP_FROM are required in hosted mode" {
+			t.Fatalf("got panic %v", r)
+		}
+	}()
+
+	parseServeArgs(
+		[]string{"untils", "serve"},
+		envMap(map[string]string{
+			"APP_MODE":     appModeHosted.String(),
+			"BASE_URL":     "http://localhost:3322",
+			"PUSHOVER_KEY": "pushover",
+			"SMTP_HOST":    "mail.local",
+		}),
+	)
+}
+
 func TestParseMigrateArgsLoadsFromEnv(t *testing.T) {
 	t.Parallel()
 

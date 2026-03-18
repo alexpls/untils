@@ -1,8 +1,6 @@
 #!/bin/bash
 set -euo pipefail
 
-. ./scripts/workspace-env.sh
-
 # Backport staging database to local development environment
 #
 # Prerequisites:

@@ -1,9 +1,8 @@
 #!/usr/bin/env sh
 set -eu
 
-. ./scripts/workspace-env.sh
-
 ENV="${ENV:-dev}"
+APP_PORT="${APP_PORT:-4200}"
 APP_MODE="${APP_MODE:-hosted}"
 BASE_URL="${BASE_URL:-http://untils.localhost:$APP_PORT}"
 DEMO_USER_ID="${DEMO_USER_ID:-1}"

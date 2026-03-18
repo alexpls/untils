@@ -30,7 +30,8 @@ things related to code generation, db migrations, testing, linting, etc.
 
 - When working from a newly created `jj workspace`, run `bun install` in that workspace directory before running dev tasks.
 - This ensures JS/CSS tooling dependencies are available for that workspace if they have not already been installed there.
-- Workspace runtime settings are derived from the active workspace name via `./scripts/workspace-env.sh`.
+- Workspace runtime settings come from `.env.dev`. New workspaces generate a workspace-specific `.env.dev` with overridden ports, compose name, and database URLs.
+- If an existing checkout still has an older `.env.dev`, run `mise run dev:env:sync` once to add the generated workspace block for the current workspace.
 - Use `mise run dev:info` to print the current workspace's app/db/compose settings.
 - Use `mise run dev:up` and `mise run dev:down` to start/stop the workspace's docker services.
 - A dedicated skill exists at `.agents/skills/workspace-ops/SKILL.md` for workspace setup and teardown operations.
@@ -52,8 +53,8 @@ as this file could be very big.
 When the development server is running, Templ files will be generated when modified.
 
 For the default workspace, you may use the Chrome MCP server to access
-http://untils.localhost:7331/app and log in by clicking the dev mode button.
-For non-default workspaces, use `mise run dev:info` and open the printed localhost app URL.
+the templ proxy URL printed by `mise run dev:info` and log in by clicking the dev mode button.
+For non-default workspaces, use `mise run dev:info` and open the printed templ URL.
 
 ## Writing UI copy
 

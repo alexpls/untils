@@ -361,7 +361,7 @@ func validateServeGlobalConfig(c *config) {
 	if c.appMode == appModeHosted && !c.pushoverConfigured() {
 		panic("PUSHOVER_KEY is required in hosted mode")
 	}
-	if c.appMode == appModeHosted && !c.emailSendConfigured() {
+	if c.appMode == appModeHosted && c.smtp.host != "" && !c.emailSendConfigured() {
 		panic("SMTP_HOST, SMTP_PORT, and SMTP_FROM are required in hosted mode")
 	}
 }

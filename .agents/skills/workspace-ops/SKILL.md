@@ -21,6 +21,7 @@ Use the deterministic bootstrap script from repo root:
 What it does:
 
 - Creates the workspace via `jj workspace add`.
+- Generates `.env.dev` in the new workspace by copying the current workspace's `.env.dev` and replacing workspace-specific ports, compose name, and database URLs.
 - Runs `bun install` and `mise trust` in the new workspace.
 - Starts workspace-scoped services via `mise run dev:up`.
 - Initializes databases with `mise run db:reset`.
@@ -53,7 +54,7 @@ Rules:
 
 ## Expected result
 
-- Workspace has isolated docker project/ports based on workspace name.
+- Workspace has isolated docker project/ports in its generated `.env.dev`.
 - `untils_dev` and `untils_test` are ready.
 - Seed user can sign in:
   - email: `alexpls@fastmail.com`

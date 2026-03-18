@@ -27,7 +27,6 @@ run = "go run ./cmd/docsgen"
 
 [tasks."testsetup:db"]
 run = '''
-. ./scripts/workspace-env.sh
 psql "${PG_TEST_URL%/untils_test}" --echo-errors --quiet -c '\timing off' -c "drop database if exists untils_test with (force);"
 psql "${PG_TEST_URL%/untils_test}" --echo-errors --quiet -c '\timing off' -c "create database untils_test;"
 psql "${PG_TEST_URL}" --echo-errors --quiet -c '\timing off' -f ./internal/models/schema.sql
@@ -39,16 +38,17 @@ psql "${PG_TEST_URL}" --echo-errors --quiet -c "insert into river_migration (lin
 env.TEMPL_DEV_MODE=false
 depends = ["docs:generate", "testsetup:*"]
 run = '''
-. ./scripts/workspace-env.sh
 go test ./...
 '''
 
 [tasks."test:integration"]
 depends = ["docs:generate", "testsetup:*"]
 run = '''
-. ./scripts/workspace-env.sh
 go test -tags=integration ./...
 '''
+
+[tasks."dev:env:sync"]
+run = "./scripts/generate-env-dev.sh"
 
 [tasks."dev:deps"]
 run = '''
@@ -62,8 +62,8 @@ curl -sSfL https://golangci-lint.run/install.sh | sh -s -- -b $(go env GOPATH)/b
 
 [tasks."dev:watch:app"]
 run = '''
-. ./scripts/workspace-env.sh
 templ generate --watch --proxy="http://localhost:${APP_PORT}" --open-browser=false \
+    --proxyport="${TEMPL_PROXY_PORT}" \
     --ignore-pattern='.*_templ\\.go$' \
     --cmd './scripts/dev-watch-app.sh'
 '''
@@ -76,10 +76,10 @@ run = "bun run watch-js"
 
 [tasks."dev:info"]
 run = '''
-. ./scripts/workspace-env.sh
 printf "workspace: %s\n" "${WORKSPACE_NAME}"
 printf "compose project: %s\n" "${COMPOSE_PROJECT_NAME}"
 printf "app url: http://localhost:%s/app\n" "${APP_PORT}"
+printf "templ url: http://localhost:%s/app\n" "${TEMPL_PROXY_PORT}"
 printf "db url: %s\n" "${PG_URL}"
 printf "mailpit ui: http://localhost:%s\n" "${MAILPIT_PORT}"
 printf "river ui: http://localhost:%s\n" "${RIVERUI_PORT}"
@@ -87,13 +87,11 @@ printf "river ui: http://localhost:%s\n" "${RIVERUI_PORT}"
 
 [tasks."dev:up"]
 run = '''
-. ./scripts/workspace-env.sh
 docker compose up -d
 '''
 
 [tasks."dev:down"]
 run = '''
-. ./scripts/workspace-env.sh
 docker compose down
 '''
 
@@ -111,21 +109,18 @@ run = [
 
 [tasks."db:create"]
 run = '''
-. ./scripts/workspace-env.sh
 psql "${PG_URL%/untils_dev}" -c "create database untils_dev;" || true
 psql "${PG_TEST_URL%/untils_test}" -c "create database untils_test;" || true
 '''
 
 [tasks."db:drop"]
 run = '''
-. ./scripts/workspace-env.sh
 psql "${PG_URL%/untils_dev}" -c "drop database untils_dev;" || true
 psql "${PG_TEST_URL%/untils_test}" -c "drop database untils_test;" || true
 '''
 
 [tasks."db:seed"]
 run = '''
-. ./scripts/workspace-env.sh
 ENV=dev go run ./cmd seed
 '''
 
@@ -140,7 +135,6 @@ migrate create -ext sql -dir internal/db/migrations "${usage_name?}"
 [tasks."db:migrate:up"]
 depends_post = ["db:dump_schema"]
 run = '''
-. ./scripts/workspace-env.sh
 migrate -database ${PG_URL/postgresql/pgx5} -path internal/db/migrations up
 migrate -database ${PG_TEST_URL/postgresql/pgx5} -path internal/db/migrations up
 river migrate-up --database-url "${PG_URL}"
@@ -150,14 +144,12 @@ river migrate-up --database-url "${PG_TEST_URL}"
 [tasks."db:migrate:down"]
 depends_post = ["db:dump_schema"]
 run = '''
-. ./scripts/workspace-env.sh
 migrate -database ${PG_URL/postgresql/pgx5} -path internal/db/migrations down 1
 migrate -database ${PG_TEST_URL/postgresql/pgx5} -path internal/db/migrations down 1
 '''
 
 [tasks."db:dump_schema"]
 run = '''
-. ./scripts/workspace-env.sh
 # stripping restrict tags because sqlc balks when processing them. remove once: https://github.com/sqlc-dev/sqlc/issues/4065 is fixed
 pg_dump "$PG_URL" --schema-only --no-owner --no-privileges --restrict-key stable \
     | sed '/^\\restrict /d;/^\\unrestrict /d' \
