@@ -2,6 +2,7 @@
   "name": "untils",
   "private": "true",
   "dependencies": {
+    "@oddbird/css-anchor-positioning": "^0.9.0",
     "daisyui": "^5.5.19",
     "tailwindcss": "^4.2.1"
   },

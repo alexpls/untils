@@ -36,7 +36,6 @@
 - [ ] Improvement: Better use of go context. Should pass it all the way down and rely less on closer functions during app startup/shutdown
 - [ ] Refactor: Forms should have some helpers extracted
 - [ ] Improvement: Pushover form should show a spinner while we're validating the token
-- [ ] Fix: Need an anchored positioning tooltip polyfill for Firefox
 - [ ] Improvement: should be able to checkpoint progress in conversation with LLM and resume it on server restart
 - [ ] Refactor: make new tool creation less of a trek through various parts of the codebase. So concretely speaking, try to move as much as possible into the llm/tools package definitions.
 - [ ] Fix: should be able to visit check pages for incomplete checks - but right now that errors
@@ -48,6 +47,7 @@
 
 ## Done
 
+- [x] Fix: Need an anchored positioning tooltip polyfill for Firefox
 - [x] Fix: Pushover token config, SMTP config. If not set for selfhost, don't show on UI.
 - [x] Feature: Allow switching API providers between x.ai and OpenAI on startup
 - [x] Documentation: self hosting guide & Readme

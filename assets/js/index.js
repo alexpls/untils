@@ -1,6 +1,12 @@
 import "./vendor/datastar.js"
 import "./schedule.js"
 
+if (!("anchorName" in document.documentElement.style)) {
+  import("@oddbird/css-anchor-positioning").catch((error) => {
+    console.error("error loading anchor positioning polyfill", error)
+  })
+}
+
 function timezoneName(tz) {
   const formatter = new Intl.DateTimeFormat(undefined, {
     timeZone: tz,
