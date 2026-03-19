@@ -18,7 +18,7 @@ and I'll let you know when it arrives.
 ## Prerequisites
 
 ### System
- 
+
 - Docker with `docker compose`
 - Enough RAM to comfortably run Google Chrome headless
 

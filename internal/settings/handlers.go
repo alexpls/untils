@@ -42,7 +42,7 @@ type SettingsIntegrationViewData struct {
 	Integration *models.UserIntegrationsRow
 	// Whether the integration type is available. In self hosted mode
 	// this depends on the config of the application.
-	Enabled     bool
+	Enabled bool
 }
 
 func toSettingsIntegrations(integrations []*models.UserIntegrationsRow, capabilities notifications.Capabilities) []*SettingsIntegrationViewData {

@@ -28,7 +28,7 @@
 ### AI SDKs
 
 - [ ] Improvement: 25% of the produced binary is OpenAI's bloated SDK. I only use one endpoint, could move away from the SDK and call it directly with HTTP?
-- [ ] Improvement: add pricing for gpt models too 
+- [ ] Improvement: add pricing for gpt models too
 
 ### Misc
 

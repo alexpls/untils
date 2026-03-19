@@ -12,7 +12,7 @@ Use this workflow to validate migration changes against staging-like data.
 1. Ensure migration SQL changes are in place before validation.
 2. Run `./scripts/backport-staging-db.sh` to refresh `untils_dev` from staging.
 3. Check starting version:
-   ` /bin/zsh -lc "migrate -database ${PG_URL/postgresql/pgx5} -path internal/db/migrations version" `
+   `/bin/zsh -lc "migrate -database ${PG_URL/postgresql/pgx5} -path internal/db/migrations version"`
 4. Run migrations:
    `mise run db:migrate:up`
 5. Check ending version with the same `migrate ... version` command.

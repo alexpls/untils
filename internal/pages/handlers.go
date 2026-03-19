@@ -6,8 +6,8 @@ import (
 	"net/mail"
 	"strings"
 
-	"github.com/alexpls/untils/internal/docs"
 	"github.com/alexpls/untils/internal/db"
+	"github.com/alexpls/untils/internal/docs"
 	"github.com/alexpls/untils/internal/models"
 	"github.com/starfederation/datastar-go/datastar"
 )
