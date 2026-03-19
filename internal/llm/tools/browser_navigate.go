@@ -26,7 +26,10 @@ var browserNavigateTool = tool[models.BrowserNavigateParams]{
 		}
 
 		getBrowserStart := time.Now()
-		b := tc.Browser()
+		b, err := tc.Browser()
+		if err != nil {
+			return "", err
+		}
 		tc.Logger.DebugContext(tc.Ctx, "browser_navigate got browser context", "duration", time.Since(getBrowserStart))
 
 		navigateStart := time.Now()

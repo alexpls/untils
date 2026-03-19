@@ -23,7 +23,7 @@ type Definition struct {
 type Context struct {
 	Ctx             context.Context
 	Logger          *slog.Logger
-	Browser         func() *browser.BrowserCtx
+	Browser         func() (*browser.BrowserSession, error)
 	Search          func(params *search.SearchParams) (*search.SearchResponse, error)
 	ReadInstruction func(name string) (string, error)
 	AddSiteVisited  func(url string)

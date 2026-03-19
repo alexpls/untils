@@ -5,7 +5,6 @@
 - [ ] Make sure errors are handled in the LLM path consistently
 - [ ] Add test coverage for important components that are not yet tested
 - [ ] Remove my personal email from seeds
-- [ ] Fix: Handle browser timeouts and lifecycle properly
 
 ### Monitor results
 
@@ -47,6 +46,7 @@
 
 ## Done
 
+- [x] Fix: Handle browser timeouts and lifecycle properly
 - [x] Fix: Need an anchored positioning tooltip polyfill for Firefox
 - [x] Fix: Pushover token config, SMTP config. If not set for selfhost, don't show on UI.
 - [x] Feature: Allow switching API providers between x.ai and OpenAI on startup

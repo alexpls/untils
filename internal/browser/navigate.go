@@ -36,41 +36,14 @@ func (p Page) String() string {
 }
 
 type NavigateResult struct {
-	BrowserCtx    context.Context
-	BrowserCancel context.CancelFunc
-	Page          *Page
+	BrowserSession context.Context
+	BrowserCancel  context.CancelFunc
+	Page           *Page
 }
 
-// BrowserCtx wraps a chromedp context
-type BrowserCtx struct {
-	context.Context
-	ID     string
-	logger *slog.Logger
-}
-
-type BrowserConfig struct {
-	ChromeDevToolsURL string
-}
-
-func NewBrowser(parentCtx context.Context, config BrowserConfig, logger *slog.Logger) (BrowserCtx, context.CancelFunc) {
-	// TODO: Make sure browser is configured with timeout
-
-	if config.ChromeDevToolsURL == "" {
-		ctx, cancel := chromedp.NewContext(parentCtx)
-		return BrowserCtx{Context: ctx, logger: logger}, cancel
-	} else {
-		allocCtx, allocCancel := chromedp.NewRemoteAllocator(parentCtx, config.ChromeDevToolsURL)
-		ctx, cancel := chromedp.NewContext(allocCtx)
-		return BrowserCtx{Context: ctx, logger: logger}, func() {
-			cancel()
-			allocCancel()
-		}
-	}
-}
-
-func (ctx *BrowserCtx) Click(idStr string) (*Page, error) {
+func (s *BrowserSession) Click(idStr string) (*Page, error) {
 	start := time.Now()
-	ctx.logger.DebugContext(ctx.Context, "clicking node", slog.String("id", idStr))
+	s.logger.DebugContext(s.Context, "clicking node", slog.String("id", idStr))
 
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
@@ -83,7 +56,7 @@ func (ctx *BrowserCtx) Click(idStr string) (*Page, error) {
 	// is more complex.
 	// Still, there must be an easier way?
 	clickActionStart := time.Now()
-	if err := chromedp.Run(ctx,
+	if err := chromedp.Run(s,
 		chromedp.ActionFunc(func(ctx context.Context) error {
 			remoteObj, err := dom.ResolveNode().WithBackendNodeID(backendNodeID).Do(ctx)
 			if err != nil {
@@ -99,26 +72,26 @@ func (ctx *BrowserCtx) Click(idStr string) (*Page, error) {
 	); err != nil {
 		return nil, fmt.Errorf("clicking node: %w", err)
 	}
-	ctx.logger.DebugContext(ctx.Context, "click action and network idle completed", "duration", time.Since(clickActionStart))
+	s.logger.DebugContext(s.Context, "click action and network idle completed", "duration", time.Since(clickActionStart))
 
 	pageResultStart := time.Now()
-	page, err := pageResult(ctx)
+	page, err := pageResult(s)
 	if err != nil {
 		return nil, err
 	}
-	ctx.logger.DebugContext(ctx.Context, "page result extracted after click", "duration", time.Since(pageResultStart))
+	s.logger.DebugContext(s.Context, "page result extracted after click", "duration", time.Since(pageResultStart))
 
-	ctx.logger.DebugContext(ctx.Context, "clicked node", slog.String("id", idStr), slog.String("new_url", page.URL), "total_duration", time.Since(start))
+	s.logger.DebugContext(s.Context, "clicked node", slog.String("id", idStr), slog.String("new_url", page.URL), "total_duration", time.Since(start))
 
 	return page, nil
 }
 
-func (ctx *BrowserCtx) Navigate(path string) (*Page, error) {
+func (s *BrowserSession) Navigate(path string) (*Page, error) {
 	start := time.Now()
-	ctx.logger.DebugContext(ctx.Context, "navigating to page", slog.String("url", path))
+	s.logger.DebugContext(s.Context, "navigating to page", slog.String("url", path))
 
 	navigateStart := time.Now()
-	if err := chromedp.Run(ctx,
+	if err := chromedp.Run(s,
 		accessibility.Enable(),
 		emulation.SetEmulatedMedia().WithMedia("print"),
 		chromedp.Navigate(path),
@@ -126,29 +99,29 @@ func (ctx *BrowserCtx) Navigate(path string) (*Page, error) {
 	); err != nil {
 		return nil, err
 	}
-	ctx.logger.DebugContext(ctx.Context, "navigation and network idle completed", "duration", time.Since(navigateStart))
+	s.logger.DebugContext(s.Context, "navigation and network idle completed", "duration", time.Since(navigateStart))
 
 	pageResultStart := time.Now()
-	page, err := pageResult(ctx)
+	page, err := pageResult(s)
 	if err != nil {
 		return nil, err
 	}
-	ctx.logger.DebugContext(ctx.Context, "page result extracted", "duration", time.Since(pageResultStart), "total_duration", time.Since(start))
+	s.logger.DebugContext(s.Context, "page result extracted", "duration", time.Since(pageResultStart), "total_duration", time.Since(start))
 
 	return page, nil
 }
 
-func pageResult(ctx *BrowserCtx) (*Page, error) {
+func pageResult(s *BrowserSession) (*Page, error) {
 	start := time.Now()
 	var urlStr string
 
 	locationStart := time.Now()
-	if err := chromedp.Run(ctx,
+	if err := chromedp.Run(s,
 		chromedp.Location(&urlStr),
 	); err != nil {
 		return nil, err
 	}
-	ctx.logger.DebugContext(ctx.Context, "got page location", "duration", time.Since(locationStart))
+	s.logger.DebugContext(s.Context, "got page location", "duration", time.Since(locationStart))
 
 	u, err := url.Parse(urlStr)
 	if err != nil {
@@ -160,7 +133,7 @@ func pageResult(ctx *BrowserCtx) (*Page, error) {
 	var f string
 
 	pageDataStart := time.Now()
-	if err := chromedp.Run(ctx,
+	if err := chromedp.Run(s,
 		tidyHTML(u),
 		chromedp.Title(&title),
 		favicon(&f),
@@ -168,13 +141,13 @@ func pageResult(ctx *BrowserCtx) (*Page, error) {
 	); err != nil {
 		return nil, err
 	}
-	ctx.logger.DebugContext(ctx.Context, "got page data (tidy, title, favicon, accessibility tree)", "duration", time.Since(pageDataStart))
+	s.logger.DebugContext(s.Context, "got page data (tidy, title, favicon, accessibility tree)", "duration", time.Since(pageDataStart))
 
 	treeStringStart := time.Now()
 	pageContents := tree.String()
-	ctx.logger.DebugContext(ctx.Context, "accessibility tree stringified", "duration", time.Since(treeStringStart), "content_length", len(pageContents))
+	s.logger.DebugContext(s.Context, "accessibility tree stringified", "duration", time.Since(treeStringStart), "content_length", len(pageContents))
 
-	ctx.logger.DebugContext(ctx.Context, "page result completed", "total_duration", time.Since(start))
+	s.logger.DebugContext(s.Context, "page result completed", "total_duration", time.Since(start))
 
 	return &Page{
 		URL:        urlStr,
@@ -185,16 +158,16 @@ func pageResult(ctx *BrowserCtx) (*Page, error) {
 }
 
 // CurrentPage returns the current page contents without navigating
-func (ctx *BrowserCtx) CurrentPage() (*Page, error) {
-	ctx.logger.DebugContext(ctx.Context, "getting current page")
+func (s *BrowserSession) CurrentPage() (*Page, error) {
+	s.logger.DebugContext(s.Context, "getting current page")
 	start := time.Now()
 
-	page, err := pageResult(ctx)
+	page, err := pageResult(s)
 	if err != nil {
 		return nil, err
 	}
 
-	ctx.logger.DebugContext(ctx.Context, "current page retrieved", "url", page.URL, "total_duration", time.Since(start))
+	s.logger.DebugContext(s.Context, "current page retrieved", "url", page.URL, "total_duration", time.Since(start))
 	return page, nil
 }
 
@@ -215,6 +188,11 @@ func waitForNetworkIdle(timeout time.Duration) chromedp.ActionFunc {
 		})
 
 		<-dctx.Done()
+
+		// whether we got 'networkIdle' or the context timed out, return
+		// nil either way, so the rest of the actions can continue with a
+		// hopefully interactable page.
+
 		return nil
 	}
 }

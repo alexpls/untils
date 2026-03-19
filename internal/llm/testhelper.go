@@ -36,6 +36,7 @@ func newTestDeps(t *testing.T) *testDeps {
 	)
 
 	ws := search.NewBraveClient(os.Getenv("BRAVE_KEY"), tl)
+	browserManager := browser.NewManager(1, browser.BrowserSessionConfig{}, tl)
 
 	svc := NewService(
 		NewOpenAIProvider(&oai),
@@ -44,8 +45,8 @@ func newTestDeps(t *testing.T) *testDeps {
 		queries,
 		tl,
 		ws,
-		func(ctx context.Context) (browser.BrowserCtx, context.CancelFunc) {
-			return browser.NewBrowser(ctx, browser.BrowserConfig{}, tl)
+		func(ctx context.Context) (browser.BrowserSession, context.CancelFunc, error) {
+			return browserManager.NewSession(ctx)
 		},
 	)
 

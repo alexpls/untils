@@ -116,11 +116,29 @@ func TestParseServeArgsLoadsFromEnv(t *testing.T) {
 	if globalCfg.smtp.port != 2025 {
 		t.Fatalf("got smtp port %d, want %d", globalCfg.smtp.port, 2025)
 	}
+	if globalCfg.chrome.maxConcurrentSessions != 5 {
+		t.Fatalf("got max concurrent browser sessions %d, want %d", globalCfg.chrome.maxConcurrentSessions, 5)
+	}
 	if serveCfg.port != 3322 {
 		t.Fatalf("got port %d, want %d", serveCfg.port, 3322)
 	}
 	assert.Equal(t, "openai", globalCfg.openAIAPIKey)
 	assert.Equal(t, "gpt-5.4", globalCfg.openAIModel)
+}
+
+func TestParseServeArgsLoadsBrowserMaxConcurrentSessionsFromEnv(t *testing.T) {
+	t.Parallel()
+
+	globalCfg, _ := parseServeArgs(
+		[]string{"untils", "serve"},
+		envMap(map[string]string{
+			"BASE_URL":                        "http://localhost:3322",
+			"ADMIN_EMAIL":                     "admin@example.com",
+			"BROWSER_MAX_CONCURRENT_SESSIONS": "7",
+		}),
+	)
+
+	assert.Equal(t, 7, globalCfg.chrome.maxConcurrentSessions)
 }
 
 func TestParseServeArgsRejectsCLIArgs(t *testing.T) {

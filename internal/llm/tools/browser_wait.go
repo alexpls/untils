@@ -26,9 +26,19 @@ var browserWaitTool = tool[browserWaitParams]{
 		tc.Logger.DebugContext(tc.Ctx, "browser_wait started")
 		start := time.Now()
 
-		time.Sleep(3 * time.Second)
+		timer := time.NewTimer(3 * time.Second)
+		defer timer.Stop()
 
-		b := tc.Browser()
+		select {
+		case <-tc.Ctx.Done():
+			return "", tc.Ctx.Err()
+		case <-timer.C:
+		}
+
+		b, err := tc.Browser()
+		if err != nil {
+			return "", err
+		}
 		page, err := b.CurrentPage()
 		if err != nil {
 			tc.Logger.ErrorContext(tc.Ctx, "error getting current page after wait", "error", err)

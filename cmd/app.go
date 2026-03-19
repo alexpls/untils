@@ -166,6 +166,9 @@ func createApp(c *config) (*app, context.Context, context.CancelFunc, func()) {
 	llmClient := openai.NewClient(clientOptions...)
 	llmProvider := llm.NewOpenAIProvider(&llmClient)
 	llmLogger := a.logger.With("source", "llm")
+	browserManager := browser.NewManager(c.chrome.maxConcurrentSessions, browser.BrowserSessionConfig{
+		ChromeDevToolsURL: a.config.chrome.devToolsURL,
+	}, llmLogger.With("component", "browser"))
 
 	a.llm = llm.NewService(
 		llmProvider,
@@ -174,10 +177,8 @@ func createApp(c *config) (*app, context.Context, context.CancelFunc, func()) {
 		a.queries,
 		llmLogger,
 		a.webSearcher,
-		func(ctx context.Context) (browser.BrowserCtx, context.CancelFunc) {
-			return browser.NewBrowser(ctx, browser.BrowserConfig{
-				ChromeDevToolsURL: a.config.chrome.devToolsURL,
-			}, llmLogger)
+		func(ctx context.Context) (browser.BrowserSession, context.CancelFunc, error) {
+			return browserManager.NewSession(ctx)
 		},
 	)
 

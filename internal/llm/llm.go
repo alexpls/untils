@@ -20,13 +20,13 @@ type CheckWorkflowRunner interface {
 }
 
 type Service struct {
-	provider      Provider
-	model         string
-	db            db.DB
-	queries       *models.Queries
-	logger        *slog.Logger
-	webSearcher   search.WebSearcher
-	newBrowserCtx func(ctx context.Context) (browser.BrowserCtx, context.CancelFunc)
+	provider          Provider
+	model             string
+	db                db.DB
+	queries           *models.Queries
+	logger            *slog.Logger
+	webSearcher       search.WebSearcher
+	newBrowserSession func(ctx context.Context) (browser.BrowserSession, context.CancelFunc, error)
 }
 
 func NewService(
@@ -36,16 +36,16 @@ func NewService(
 	queries *models.Queries,
 	logger *slog.Logger,
 	webSearcher search.WebSearcher,
-	newBrowserCtx func(ctx context.Context) (browser.BrowserCtx, context.CancelFunc),
+	newBrowserSession func(ctx context.Context) (browser.BrowserSession, context.CancelFunc, error),
 ) *Service {
 	return &Service{
-		provider:      provider,
-		model:         model,
-		db:            db,
-		queries:       queries,
-		logger:        logger,
-		webSearcher:   webSearcher,
-		newBrowserCtx: newBrowserCtx,
+		provider:          provider,
+		model:             model,
+		db:                db,
+		queries:           queries,
+		logger:            logger,
+		webSearcher:       webSearcher,
+		newBrowserSession: newBrowserSession,
 	}
 }
 

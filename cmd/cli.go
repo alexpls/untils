@@ -209,6 +209,17 @@ func globalProperties(c *config) []configProperty {
 				return nil
 			},
 		),
+		intProperty(
+			"BROWSER_MAX_CONCURRENT_SESSIONS",
+			"5",
+			func(value int) { c.chrome.maxConcurrentSessions = value },
+			func() error {
+				if c.chrome.maxConcurrentSessions <= 0 {
+					return fmt.Errorf("must be greater than zero")
+				}
+				return nil
+			},
+		),
 	}
 }
 

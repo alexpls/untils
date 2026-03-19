@@ -32,7 +32,10 @@ var browserClickTool = tool[browserClickParams]{
 		tc.Logger.DebugContext(tc.Ctx, "browser_click started", "node_id", p.NodeID)
 		start := time.Now()
 
-		b := tc.Browser()
+		b, err := tc.Browser()
+		if err != nil {
+			return "", err
+		}
 		clickStart := time.Now()
 		page, err := b.Click(p.NodeID)
 		tc.Logger.DebugContext(tc.Ctx, "browser_click click completed", "duration", time.Since(clickStart))

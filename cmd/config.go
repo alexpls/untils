@@ -27,7 +27,8 @@ type config struct {
 	braveKey     string
 	pushoverKey  string
 	chrome       struct {
-		devToolsURL string
+		devToolsURL           string
+		maxConcurrentSessions int
 	}
 	smtp struct {
 		username string

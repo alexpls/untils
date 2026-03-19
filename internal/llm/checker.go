@@ -15,11 +15,11 @@ import (
 )
 
 type checker struct {
-	service       *Service
-	conversation  *dbConversation
-	browserCtx    *browser.BrowserCtx
-	browserCancel context.CancelFunc
-	priorCalls    []llmtools.Call
+	service        *Service
+	conversation   *dbConversation
+	browserSession *browser.BrowserSession
+	browserCancel  context.CancelFunc
+	priorCalls     []llmtools.Call
 }
 
 func newChecker(service *Service) *checker {
@@ -189,14 +189,17 @@ func (c *checker) executeToolCall(ctx context.Context, call ToolCall) (string, e
 			return instructions.Registry.Body(name)
 		},
 		AddSiteVisited: llmEvent.addSiteVisited,
-		Browser: func() *browser.BrowserCtx {
-			if c.browserCtx == nil {
+		Browser: func() (*browser.BrowserSession, error) {
+			if c.browserSession == nil {
 				browserInitStart := time.Now()
-				bctx, bcancel := c.service.newBrowserCtx(ctx)
-				c.browserCtx, c.browserCancel = &bctx, bcancel
+				session, sessionCancel, err := c.service.newBrowserSession(ctx)
+				if err != nil {
+					return nil, err
+				}
+				c.browserSession, c.browserCancel = &session, sessionCancel
 				c.service.logger.DebugContext(ctx, "browser context initialized", "duration", time.Since(browserInitStart))
 			}
-			return c.browserCtx
+			return c.browserSession, nil
 		},
 	}
 
