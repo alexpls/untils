@@ -57,7 +57,7 @@ go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
 go install github.com/riverqueue/river/cmd/river@latest
 go install github.com/a-h/templ/cmd/templ@latest
 go install golang.org/x/tools/gopls@latest
-curl -sSfL https://golangci-lint.run/install.sh | sh -s -- -b $(go env GOPATH)/bin v2.10.1
+curl -sSfL https://golangci-lint.run/install.sh | sh -s -- -b $(go env GOPATH)/bin v2.11.3
 '''
 
 [tasks."dev:watch:app"]

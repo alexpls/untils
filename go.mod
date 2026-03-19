@@ -20,7 +20,7 @@ require (
 	github.com/riverqueue/river/rivertype v0.30.2
 	github.com/starfederation/datastar-go v1.1.0
 	github.com/stretchr/testify v1.11.1
-	github.com/yuin/goldmark v1.7.16
+	github.com/yuin/goldmark v1.7.17
 	golang.org/x/sync v0.19.0
 	gopkg.in/yaml.v3 v3.0.1
 )

@@ -4,7 +4,7 @@
   "dependencies": {
     "@oddbird/css-anchor-positioning": "^0.9.0",
     "daisyui": "^5.5.19",
-    "tailwindcss": "^4.2.1"
+    "tailwindcss": "^4.2.2"
   },
   "scripts": {
     "format": "bunx prettier . --write",
