@@ -57,6 +57,6 @@ Rules:
 - Workspace has isolated docker project/ports in its generated `.env.dev`.
 - `untils_dev` and `untils_test` are ready.
 - Seed user can sign in:
-  - email: `alexpls@fastmail.com`
+  - email: `alex@example.com`
   - password: `abc123`
 - Unit tests pass and the app can run independently of other workspaces.

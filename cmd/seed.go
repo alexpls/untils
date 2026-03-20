@@ -13,7 +13,7 @@ func (a *app) seed() {
 
 	ctx := context.Background()
 
-	_, err := a.auth.CreateUser(ctx, "alexpls@fastmail.com", "abc123", "Australia/Brisbane")
+	_, err := a.auth.CreateUser(ctx, "alex@example.com", "abc123", "Australia/Brisbane")
 	if err != nil {
 		if errors.Is(err, auth.ErrUserExists) {
 			return

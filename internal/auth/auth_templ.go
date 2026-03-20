@@ -109,7 +109,7 @@ func SignInPage(data SignInData) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\"> <input type=\"hidden\" name=\"email\" value=\"alexpls@fastmail.com\"> <input type=\"hidden\" name=\"password\" value=\"abc123\"> <button type=\"submit\" class=\"btn btn-warning\">Dev: Sign in as alexpls@fastmail.com</button></form></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\"> <input type=\"hidden\" name=\"email\" value=\"alex@example.com\"> <input type=\"hidden\" name=\"password\" value=\"abc123\"> <button type=\"submit\" class=\"btn btn-warning\">Dev: Sign in as alex@example.com</button></form></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

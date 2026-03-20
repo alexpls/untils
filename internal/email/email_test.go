@@ -45,7 +45,7 @@ func TestSend(t *testing.T) {
 		}, mock)
 
 		err := s.Send(context.Background(), &SendParams{
-			Recipient: "alexpls@fastmail.com",
+			Recipient: "alex@example.com",
 			Subject:   "A humble test",
 			Body:      "it works?",
 		})
@@ -55,7 +55,7 @@ func TestSend(t *testing.T) {
 		call := mock.calls[0]
 		require.Equal(t, "smtp.example.com:587", call.addr)
 		require.Equal(t, "alerts@example.com", call.from)
-		require.Equal(t, []string{"alexpls@fastmail.com"}, call.to)
+		require.Equal(t, []string{"alex@example.com"}, call.to)
 		require.Contains(t, string(call.msg), "From: \"untils\" <alerts@example.com>")
 		require.Contains(t, string(call.msg), "Subject: A humble test")
 		require.Contains(t, string(call.msg), "Content-Type: text/plain; charset=UTF-8")
@@ -71,7 +71,7 @@ func TestSend(t *testing.T) {
 		}, mock)
 
 		err := s.Send(context.Background(), &SendParams{
-			Recipient: "alexpls@fastmail.com",
+			Recipient: "alex@example.com",
 			Subject:   "Multipart test",
 			Body:      "plain text body",
 			HTMLBody:  "<p>html body</p>",
