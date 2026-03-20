@@ -2,9 +2,9 @@ name: ci
 
 on:
   push:
-    branches: [main, setupSelfhost]
+    branches: [master]
   pull_request:
-    branches: [main, setupSelfhost]
+    branches: [master]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
