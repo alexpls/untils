@@ -36,7 +36,7 @@ func Breadcrumbs(breadcrumbs []Breadcrumb) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"flex items-center pl-3 md:pl-1 overflow-x-auto scrollbar-gutter-stable\" data-effect=\"el.scrollTo({ left:9999 }) && el.blur()\"><a href=\"/app\" title=\"Untils\"><img src=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"flex items-center pl-3 md:pl-1 overflow-x-auto scrollbar-gutter-stable\" data-effect=\"el.scrollTo({ left:9999 }) && el.blur()\"><a href=\"/\" title=\"untils\"><img src=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -49,7 +49,7 @@ func Breadcrumbs(breadcrumbs []Breadcrumb) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" height=\"24px\" width=\"24px\" alt=\"Untils logo\"></a>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" height=\"24px\" width=\"24px\" alt=\"untils logo\"></a>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

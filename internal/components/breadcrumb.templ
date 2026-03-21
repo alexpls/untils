@@ -12,8 +12,8 @@ templ Breadcrumbs(breadcrumbs []Breadcrumb) {
 		class="flex items-center pl-3 md:pl-1 overflow-x-auto scrollbar-gutter-stable"
 		data-effect="el.scrollTo({ left:9999 }) && el.blur()"
 	>
-		<a href="/app" title="Untils">
-			<img src={ AssetURL("images/logo.png") } height="24px" width="24px" alt="Untils logo"/>
+		<a href="/" title="untils">
+			<img src={ AssetURL("images/logo.png") } height="24px" width="24px" alt="untils logo"/>
 		</a>
 		{{ lastIndex := len(breadcrumbs) - 1 }}
 		for index, b := range breadcrumbs {
