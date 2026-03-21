@@ -3,16 +3,16 @@ package docs
 
 func init() {
 	generatedSite = Site{
-		IndexPath: "/docs/introduction/getting-started",
+		IndexPath: "/docs/introduction/welcome",
 		PagesByPath: map[string]Page{
-			"/docs/introduction/getting-started": {
-				Title:        "Getting started",
-				SidebarTitle: "Getting started",
-				Description:  "A quick introduction to untils and the first steps for creating a monitor.",
+			"/docs/introduction/welcome": {
+				Title:        "Welcome",
+				SidebarTitle: "Welcome",
+				Description:  "untils monitors the things you care about on the internet, and notifies you when they change",
 				Section:      "Introduction",
-				Path:         "/docs/introduction/getting-started",
-				LastUpdated:  "16 March 2026",
-				ContentHTML:  "<p>TODO</p>\n",
+				Path:         "/docs/introduction/welcome",
+				LastUpdated:  "22 March 2026",
+				ContentHTML:  "<p><a href=\"https://untils.com\">untils</a> monitors the things you care about on the internet, and\nnotifies you when they change.</p>\n<p>It's still under active development. See the <a href=\"https://untils.com\">home page</a> for more\ninformation and subscribe to updates about its release.</p>\n",
 				Headings:     []PageHeading{},
 			},
 			"/docs/self-hosting/quickstart": {
@@ -34,7 +34,7 @@ func init() {
 		},
 		NavSections: []NavSection{
 			{Title: "Introduction", Pages: []NavPage{
-				{SidebarTitle: "Getting started", Path: "/docs/introduction/getting-started"},
+				{SidebarTitle: "Welcome", Path: "/docs/introduction/welcome"},
 			}},
 			{Title: "Self hosting", Pages: []NavPage{
 				{SidebarTitle: "Quickstart", Path: "/docs/self-hosting/quickstart"},

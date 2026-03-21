@@ -30,12 +30,12 @@ func TestCurrentSiteIndexPath(t *testing.T) {
 	t.Parallel()
 
 	site := CurrentSite()
-	require.Equal(t, "/docs/introduction/getting-started", site.IndexPath)
+	require.Equal(t, "/docs/introduction/welcome", site.IndexPath)
 
 	page, ok := site.Page(site.IndexPath)
 	require.True(t, ok, "CurrentSite().Page(%q) not found", site.IndexPath)
-	require.Equal(t, "/docs/introduction/getting-started", page.Path)
-	require.Equal(t, "Getting started", page.Title)
-	require.Equal(t, "Getting started", page.SidebarTitle)
+	require.Equal(t, "/docs/introduction/welcome", page.Path)
+	require.Equal(t, "Welcome", page.Title)
+	require.Equal(t, "Welcome", page.SidebarTitle)
 	require.NotEmpty(t, page.LastUpdated)
 }
