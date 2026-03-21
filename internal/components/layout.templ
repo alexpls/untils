@@ -1,5 +1,7 @@
 package components
 
+import "fmt"
+
 templ Layout(title string) {
 	<html>
 		<head>
@@ -19,6 +21,7 @@ templ Layout(title string) {
 		</head>
 		<body class="bg-base-300 min-h-screen flex flex-col">
 			{ children... }
+			@plausibleAnalytics()
 		</body>
 	</html>
 }
@@ -26,14 +29,12 @@ templ Layout(title string) {
 templ Page(title string) {
 	@Layout(title) {
 		<header class="grid grid-cols-2 md:grid-cols-3 p-4">
-			<div class="hidden md:block text-start text-sm">
-			</div>
+			<div class="hidden md:block text-start text-sm"></div>
 			<div class="md:text-center flex items-center md:justify-center gap-x-3">
 				<a href="/" class="font-stretch-expanded mb-0.5 flex items-center gap-x-2">
 					<img src={ AssetURL("images/logo.png") } height="24px" width="24px" alt="Untils logo"/>
 					<span>untils</span>
 				</a>
-
 				<a href="/docs" class="pl-3 text-sm md:hidden border-l border-base-content/10">Docs</a>
 			</div>
 			<div class="text-end text-sm">
@@ -49,5 +50,16 @@ templ Page(title string) {
 		<main>
 			{ children... }
 		</main>
+	}
+}
+
+templ plausibleAnalytics() {
+	if tag := PlausibleSnippetTag(ctx); tag != "" {
+		{{ src := fmt.Sprintf("https://plausible.io/js/%s.js", tag) }}
+		<script async src={ src }></script>
+		<script>
+			window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+			plausible.init()
+		</script>
 	}
 }

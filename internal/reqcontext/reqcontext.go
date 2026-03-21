@@ -17,6 +17,7 @@ const (
 	tzKey
 	envKey
 	demoKey
+	plausibleSnippetTagKey
 	flashAlertKey
 )
 
@@ -72,6 +73,15 @@ func ContextWithDemo(ctx context.Context) context.Context {
 func DemoFromContext(ctx context.Context) bool {
 	demo, _ := ctx.Value(demoKey).(bool)
 	return demo
+}
+
+func ContextWithPlausibleSnippetTag(ctx context.Context, plausibleSnippetTag string) context.Context {
+	return context.WithValue(ctx, plausibleSnippetTagKey, plausibleSnippetTag)
+}
+
+func PlausibleSnippetTagFromContext(ctx context.Context) string {
+	v, _ := ctx.Value(plausibleSnippetTagKey).(string)
+	return v
 }
 
 func ContextWithFlashAlert(ctx context.Context, message string) context.Context {

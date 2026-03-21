@@ -82,6 +82,10 @@ func IsDemo(ctx context.Context) bool {
 	return reqcontext.DemoFromContext(ctx)
 }
 
+func PlausibleSnippetTag(ctx context.Context) string {
+	return reqcontext.PlausibleSnippetTagFromContext(ctx)
+}
+
 func BuildVersion(ctx context.Context) string {
 	return reqcontext.BuildVersionFromContext(ctx)
 }

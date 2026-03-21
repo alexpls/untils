@@ -141,6 +141,12 @@ func globalProperties(c *config) []configProperty {
 			nil,
 		),
 		stringProperty(
+			"PLAUSIBLE_SNIPPET_TAG",
+			"",
+			func(value string) { c.plausibleSnippetTag = value },
+			nil,
+		),
+		stringProperty(
 			"OPENAI_API_KEY",
 			"",
 			func(value string) { c.openAIAPIKey = value },

@@ -117,6 +117,14 @@ func (a *app) setFlashContext(next http.Handler) http.Handler {
 	})
 }
 
+func (a *app) setContextFromAppConfig(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		c := a.config
+		r = r.WithContext(reqcontext.ContextWithPlausibleSnippetTag(r.Context(), c.plausibleSnippetTag))
+		next.ServeHTTP(w, r)
+	})
+}
+
 func (a *app) setTimezoneContext(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var tz string

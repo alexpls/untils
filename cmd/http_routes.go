@@ -79,7 +79,8 @@ func (a *app) routes() http.Handler {
 	return applyMiddleware(mux,
 		a.setRequestID, csrf.Handler,
 		a.setTimezoneContext, sess.Handler,
-		a.setFlashContext, a.setUserContext, a.logRequests,
+		a.setFlashContext, a.setContextFromAppConfig,
+		a.setUserContext, a.logRequests,
 	)
 }
 

@@ -21,12 +21,16 @@ type config struct {
 	baseURL      string
 	dbUrl        string
 	adminEmail   string
-	demoUserID   int64
-	openAIAPIKey string
-	openAIModel  string
-	braveKey     string
-	pushoverKey  string
-	chrome       struct {
+	// plausible analytics tag for page view tracking.
+	// set to zero value to disable tracking.
+	// e.g. pa-vckXXX
+	plausibleSnippetTag string
+	demoUserID          int64
+	openAIAPIKey        string
+	openAIModel         string
+	braveKey            string
+	pushoverKey         string
+	chrome              struct {
 		devToolsURL           string
 		maxConcurrentSessions int
 	}
