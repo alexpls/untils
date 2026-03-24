@@ -24,7 +24,7 @@ templ PageView(page Page, nav []NavSection) {
 								Table of contents
 							</div>
 							<div class="flex items-center gap-1">
-								<span data-text="$_docs_toc.open ? 'Collapse' : 'Expand'">Expand</span>
+								<span data-text="$_docs_toc.open ? 'Hide' : 'Show'">Show</span>
 								<span class="transition-transform duration-300 ease-in-out" data-class="{'rotate-180': $_docs_toc.open}">
 									@icons.ChevronDown(icons.IconParams{})
 								</span>
