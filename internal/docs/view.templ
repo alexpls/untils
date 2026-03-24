@@ -16,18 +16,20 @@ templ PageView(page Page, nav []NavSection) {
 								<ul class="menu w-full ml-0 pl-0">
 									for _, navPage := range section.Pages {
 										{{ activePage := page.Path == navPage.Path }}
-								<li class={
-									"border-l",
-									"pl-2",
-											templ.KV("border-base-content/10", !activePage),
-											templ.KV("text-muted", !activePage),
-									templ.KV("border-primary", activePage),
-									templ.KV("text-primary", activePage),
-								}>
-									<a href={ navPage.Path }>{ navPage.SidebarTitle }</a>
-								</li>
-							}
-						</ul>
+										<li
+											class={
+												"border-l",
+												"pl-2",
+												templ.KV("border-base-content/10", !activePage),
+												templ.KV("text-muted", !activePage),
+												templ.KV("border-primary", activePage),
+												templ.KV("text-primary", activePage),
+											}
+										>
+											<a href={ navPage.Path }>{ navPage.SidebarTitle }</a>
+										</li>
+									}
+								</ul>
 							</div>
 						}
 					</nav>
@@ -38,10 +40,12 @@ templ PageView(page Page, nav []NavSection) {
 						<h1 class="border-b border-base-content/10 pb-5 text-4xl font-semibold tracking-tight">{ page.Title }</h1>
 					</header>
 					<div class="flex gap-x-8 mt-8">
-						<article class={
-							"prose", "min-w-0", "grow-1",
-							"prose-hr:border-base-content/10",
-						}>
+						<article
+							class={
+								"prose", "min-w-0", "grow-1",
+								"prose-hr:border-base-content/10",
+							}
+						>
 							@templ.Raw(page.ContentHTML)
 						</article>
 						if len(page.Headings) > 0 {

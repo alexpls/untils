@@ -35,7 +35,7 @@ psql "${PG_TEST_URL}" --echo-errors --quiet -c "insert into river_migration (lin
 '''
 
 [tasks."test:unit"]
-env.TEMPL_DEV_MODE=false
+env.TEMPL_DEV_MODE = false
 depends = ["docs:generate", "testsetup:*"]
 run = '''
 go test ./...
@@ -100,11 +100,11 @@ run = { task = "dev:watch:*" }
 
 [tasks."db:reset"]
 run = [
-    { task = "db:drop" },
-    { task = "db:create" },
-    { task = "db:migrate:up" },
-    { task = "db:seed" },
-    { task = "sqlc:generate" },
+  { task = "db:drop" },
+  { task = "db:create" },
+  { task = "db:migrate:up" },
+  { task = "db:seed" },
+  { task = "sqlc:generate" },
 ]
 
 [tasks."db:create"]
