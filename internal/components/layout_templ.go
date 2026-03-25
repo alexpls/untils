@@ -164,7 +164,7 @@ func Page(title string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" height=\"24px\" width=\"24px\" alt=\"Untils logo\"> <span>untils</span></a> <a href=\"/docs\" class=\"pl-3 text-sm md:hidden border-l border-base-content/10\">Docs</a></div><div class=\"text-end text-sm\"><a href=\"/docs\" class=\"hidden md:inline mr-2 pr-3 border-r border-base-content/10\">Docs</a> ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" height=\"24px\" width=\"24px\" alt=\"Untils logo\"> <span>untils</span></a> <a href=\"/docs\" class=\"link-hover pl-3 text-sm md:hidden border-l border-base-content/10\">Docs</a></div><div class=\"text-end text-sm\"><a href=\"/docs\" class=\"link-hover hidden md:inline mr-2 pr-3 border-r border-base-content/10\">Docs</a> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -187,7 +187,7 @@ func Page(title string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</main><footer class=\"text-sm text-center text-muted pt-10 pb-8\">untils is <a href=\"https://github.com/alexpls/untils\" target=\"_blank\" class=\"link-hover\">open source</a> and built by <a href=\"https://alexplescan.com\" target=\"_blank\" class=\"link-hover\">Alex Plescan</a>.</footer>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</main><footer class=\"text-sm text-center text-muted pt-10 pb-8\">untils is <a href=\"https://github.com/alexpls/untils\" target=\"_blank\" class=\"link\">open source</a> and built by <a href=\"https://alexplescan.com\" target=\"_blank\" class=\"link\">Alex Plescan</a>.</footer>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

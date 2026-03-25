@@ -8,10 +8,11 @@ package pages
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "github.com/alexpls/untils/internal/components"
-
-import "fmt"
-import "github.com/alexpls/untils/internal/components/icons"
+import (
+	"github.com/alexpls/untils/internal/components"
+	"github.com/alexpls/untils/internal/components/icons"
+	"github.com/alexpls/untils/public"
+)
 
 func HomePage() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -46,7 +47,15 @@ func HomePage() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"max-w-[56ch] mx-auto text-lg bg-base-200 text-base-content/82 rounded-lg py-6 px-4\"><section><p class=\"mb-4\">Hey, I'm <a href=\"https://alexplescan.com\" target=\"_blank\" class=\"underline\">Alex</a> and I'm building untils because I'm tired of how I use the internet to answer questions like:</p><ul class=\"mb-4 list-disc list-inside\"><li>What's the latest album by Radiohead?</li><li>When's the next solar eclipse happening in Brisbane?</li><li>Is there a sale on the iPhone 17 in Australia?</li></ul><p class=\"mb-4\">When one of those things changes, I want to know. What I <em>don't</em> want is to have to remember to Google them each day, give my email up to back‑in‑stock sites, or set reminders to check in later.</p></section><section><p>Here's what untils looks like &mdash; this is actually a live peek at some of my monitors:</p><div class=\"my-8 border border-base-content/10 bg-base-300 rounded-lg shadow-xl -mx-2 lg:-mx-30 h-100 overflow-hidden\"><div class=\"flex items-center gap-3 px-4 py-2.5 bg-base-300 border-b border-base-content/10\"><div class=\"flex gap-1.5\"><div class=\"w-3 h-3 rounded-full bg-error/70\"></div><div class=\"w-3 h-3 rounded-full bg-warning/70\"></div><div class=\"w-3 h-3 rounded-full bg-success/70\"></div></div><div class=\"flex-1 flex items-center gap-2 bg-base-100 rounded-md px-3 py-1.5 text-sm text-base-content/50 pointer-events-none\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"bg-linear-to-b from-base-300 to-base-200 border-b border-base-content/10 px-4 sm:px-6 lg:px-10\"><div class=\"container mx-auto mb-12 max-w-5xl border-b-2 border-base-content/10 pt-12 pb-4 sm:mb-16 sm:pt-16 lg:mb-20 lg:pt-24\"><div class=\"mt-4 flex flex-col gap-6 sm:gap-8 md:flex-row md:items-end md:justify-between md:gap-x-16 lg:gap-x-40\"><div class=\"max-w-3xl text-3xl/10 font-bold tracking-tight sm:text-4xl/12\">AI monitoring of pages, products, and signals that should not be missed.</div><a href=\"#email-form\" class=\"btn btn-primary btn-outline w-full sm:w-auto md:shrink-0\" data-on:click__prevent=\"document.getElementById('email-form')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); setTimeout(() => document.getElementById('waitlist-email')?.focus(), window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 600)\"><span class=\"mr-1\">Join the waitlist</span>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = icons.ArrowRight(icons.IconParams{}).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</a></div></div><div class=\"container mx-auto\"><div class=\"h-80 overflow-hidden rounded-lg rounded-b-none border border-base-content/10 border-b-0 bg-base-300 shadow-2xl sm:h-96 lg:h-120\"><div class=\"flex items-center gap-3 px-4 py-2.5 bg-base-300 border-b border-base-content/10\"><div class=\"flex gap-1.5\"><div class=\"w-3 h-3 rounded-full bg-error/70\"></div><div class=\"w-3 h-3 rounded-full bg-warning/70\"></div><div class=\"w-3 h-3 rounded-full bg-success/70\"></div></div><div class=\"pointer-events-none flex flex-1 items-center gap-2 truncate rounded-md bg-base-100 px-3 py-1.5 text-xs text-base-content/50 sm:text-sm\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -54,15 +63,119 @@ func HomePage() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<span>untils.com/app/monitors</span></div></div><iframe class=\"w-full h-[calc(100%-52px)] bg-base-100\" src=\"/app/monitors?demo=true\"></iframe></div><p class=\"mb-6\">untils continuously searches the internet for the subjects I'm monitoring and sends me notifications when something changes. No more tabs, no more clutter, no more forgetting. Just relevant information as it happens.</p></section><section><h2 class=\"text-xl font-bold mb-4 text-base-content/90\">Is this just text matching change detection?</h2><p class=\"mb-6\">Not in the traditional sense, no. untils uses a real browser and an AI agent to scan the internet and determine answers without relying on crude text matching methods that can lead to incorrect results.</p><h2 class=\"text-xl font-bold mb-4 text-base-content/90\">Oh it uses AI, it must be expensive?</h2><p class=\"mb-6\">I'm trying to keep costs down as much as possible. That means being flexible on model choice, optimising token use, and doing some things in-house.</p><h2 class=\"text-xl font-bold mb-4 text-base-content/90\">Oh it uses AI, it must get false positives?</h2><p class=\"mb-6\">Yeah - it does. I'm trying to minimise them, however mistakes will happen. When one does, a correction can be added so the next check can adjust accordingly.</p></section><section><h2 class=\"text-xl font-bold mb-4\">What's the release plan?</h2><ol class=\"mb-4 list-decimal list-inside\"><li>Build a solid foundation for untils</li><li>Open source it for self hosting</li><li>Release a paid offering where I host untils for you</li></ol><p class=\"mb-8\"><strong>Interested?</strong> Enter your email and I'll let you know when 2 &amp; 3 happen, or email me at <a class=\"link\" href=\"mailto:alex@alexplescan.com\">alex@alexplescan.com</a>. I'd love to hear from you:</p><div class=\"mb-8\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<span class=\"truncate\">untils.com/app/monitors</span></div></div><iframe class=\"w-full h-[calc(100%-52px)] bg-base-100\" src=\"/app/monitors?demo=true\"></iframe></div></div></div><div class=\"mt-16 space-y-16 sm:mt-20 sm:space-y-20\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = emailForm().Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Var3 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+				templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+				templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+				if !templ_7745c5c3_IsBuffer {
+					defer func() {
+						templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+						if templ_7745c5c3_Err == nil {
+							templ_7745c5c3_Err = templ_7745c5c3_BufErr
+						}
+					}()
+				}
+				ctx = templ.InitializeContext(ctx)
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-10\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = featureCard(
+					"Describe what to watch in plain English",
+					"Forget complicated scraping setups with rules and selectors. Just specify the subject you want to monitor in plain language.",
+					"screenshot showing the subject: IGN's latest 9/10 game",
+					"images/untils_home_subject.png",
+				).Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = featureCard(
+					"See what changed over time",
+					"Each monitor has a timeline of results, so you can see previous answers, compare updates, and spot trends.",
+					"screenshot showing two recent monitor results",
+					"images/untils_home_timeline.png",
+				).Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = featureCard(
+					"Correct mistakes to improve future checks",
+					"If a result is not what you expected, corrections can be added to steer the AI towards a better check in the future.",
+					"screenshot showing a monitor correction",
+					"images/untils_home_correction.png",
+				).Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = featureCard(
+					"Choose how to get notified",
+					"When a new result is found, choose which channel to get notified via.",
+					"screenshot showing monitor notification settings",
+					"images/untils_home_notifications.png",
+				).Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				return nil
+			})
+			templ_7745c5c3_Err = homeSection().Render(templ.WithChildren(ctx, templ_7745c5c3_Var3), templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div></section><section><p class=\"mb-4\">Thanks for reading, and have a great day!</p><p>&mdash; Alex</p></section></div>")
+			templ_7745c5c3_Var4 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+				templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+				templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+				if !templ_7745c5c3_IsBuffer {
+					defer func() {
+						templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+						if templ_7745c5c3_Err == nil {
+							templ_7745c5c3_Err = templ_7745c5c3_BufErr
+						}
+					}()
+				}
+				ctx = templ.InitializeContext(ctx)
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div class=\"flex flex-col items-center rounded border border-base-content/10 bg-linear-to-b from-base-300 to-base-200 px-4 py-8 sm:px-6\"><h2 class=\"mb-1 text-center text-2xl font-bold sm:text-3xl\">Sign up to the waitlist</h2><p class=\"mb-8 text-center text-muted\">&hellip; and get an email when untils is ready to try.</p>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = emailFormInner("").Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<div class=\"my-6 w-full max-w-sm px-6\"><div class=\"relative flex items-center justify-center\"><div class=\"absolute inset-x-0 border-t border-base-content/15\"></div><div class=\"relative bg-base-200 px-3 text-sm text-base-content/60 uppercase\">or self-host</div></div></div><div class=\"w-full\"><div class=\"flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center sm:gap-x-4\"><a href=\"https://github.com/alexpls/untils\" target=\"_blank\" class=\"btn btn-soft btn-lg btn-outline w-full sm:w-auto\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = icons.Github(icons.IconParams{}).Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<span class=\"ml-1\">View on Github</span></a> <a href=\"/docs/self-hosting/quickstart\" class=\"btn btn-soft btn-outline btn-lg w-full sm:w-auto\"><span class=\"mr-1\">Read the self-hosting docs</span>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = icons.ArrowRight(icons.IconParams{}).Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</a></div></div></div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				return nil
+			})
+			templ_7745c5c3_Err = homeSection().Render(templ.WithChildren(ctx, templ_7745c5c3_Var4), templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -76,7 +189,7 @@ func HomePage() templ.Component {
 	})
 }
 
-func emailForm() templ.Component {
+func homeSection() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -92,12 +205,138 @@ func emailForm() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var3 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var3 == nil {
-			templ_7745c5c3_Var3 = templ.NopComponent
+		templ_7745c5c3_Var5 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var5 == nil {
+			templ_7745c5c3_Var5 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = emailFormInner("").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<section class=\"container mx-auto max-w-5xl space-y-20\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templ_7745c5c3_Var5.Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</section>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+func featureCard(title, body, alt, imagePath string) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var6 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var6 == nil {
+			templ_7745c5c3_Var6 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<div class=\"border-b border-base-content/10 bg-linear-to-b from-base-300 to-base-200 p-4 pb-0 md:rounded md:border md:border-base-content/10\"><h2 class=\"text-xl font-bold tracking-tight text-base-content sm:text-2xl\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var7 string
+		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(title)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/pages/home.templ`, Line: 111, Col: 84}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</h2><p class=\"mt-4 text-base leading-7 text-base-content/75\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var8 string
+		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(body)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/pages/home.templ`, Line: 112, Col: 65}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</p>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = featureCardImage(alt, imagePath).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+func featureCardImage(alt, imagePath string) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var9 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var9 == nil {
+			templ_7745c5c3_Var9 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<div class=\"overflow-hidden\"><div class=\"translate-y-3 overflow-hidden rounded border border-base-content/20 bg-base-100 shadow-lg sm:translate-y-4 sm:scale-90\"><img alt=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var10 string
+		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(alt)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/pages/home.templ`, Line: 120, Col: 17}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "\" src=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var11 string
+		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(public.AssetURL(imagePath))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/pages/home.templ`, Line: 120, Col: 52}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "\"></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -121,48 +360,35 @@ func emailFormInner(errorMessage string) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var4 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var4 == nil {
-			templ_7745c5c3_Var4 = templ.NopComponent
+		templ_7745c5c3_Var12 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var12 == nil {
+			templ_7745c5c3_Var12 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div id=\"email-form\" class=\"flex flex-col items-center\"><form class=\"flex justify-center\" data-on:submit=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var5 string
-		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("@post('/subscribe', {contentType: 'form'})"))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/pages/home.templ`, Line: 74, Col: 77}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" data-indicator:submitting><div class=\"join\"><div><input class=\"input input-lg join-item\" name=\"email\" type=\"email\" placeholder=\"Your email address...\" required data-attr:disabled=\"$submitting\"></div><button class=\"btn btn-lg btn-primary join-item\" data-attr:disabled=\"$submitting\"><span data-show=\"$submitting\" style=\"display: none\" class=\"loading loading-spinner loading-sm\"></span> Submit</button></div></form>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<div id=\"email-form\" class=\"flex w-full flex-col items-center\"><form class=\"flex w-full justify-center\" data-on:submit=\"@post('/subscribe', {contentType: 'form'})\" data-indicator:submitting><div class=\"join join-vertical w-full max-w-md sm:join-horizontal\"><input id=\"waitlist-email\" class=\"input input-lg join-item w-full sm:w-[300px]\" name=\"email\" type=\"email\" placeholder=\"Your email address...\" required data-attr:disabled=\"$submitting\"> <button class=\"btn btn-lg btn-primary join-item w-full sm:w-auto\" data-attr:disabled=\"$submitting\"><span data-show=\"$submitting\" style=\"display: none\" class=\"loading loading-spinner loading-sm\"></span> Submit</button></div></form>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if errorMessage != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<p class=\"text-error text-sm font-medium mt-3\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<p class=\"text-error text-sm font-medium mt-3\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var6 string
-			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(errorMessage)
+			var templ_7745c5c3_Var13 string
+			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(errorMessage)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/pages/home.templ`, Line: 98, Col: 64}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/pages/home.templ`, Line: 152, Col: 64}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</p>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "</p>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -186,12 +412,12 @@ func emailFormSuccess() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var7 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var7 == nil {
-			templ_7745c5c3_Var7 = templ.NopComponent
+		templ_7745c5c3_Var14 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var14 == nil {
+			templ_7745c5c3_Var14 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<div id=\"email-form\" class=\"text-center h-12 flex items-center justify-center\"><p class=\"text-success text-sm font-medium\">Thanks for subscribing! I'll be in touch.</p></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "<div id=\"email-form\" class=\"text-center h-12 flex items-center justify-center\"><p class=\"text-success text-sm font-medium\">Thanks for subscribing! I'll be in touch.</p></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
