@@ -141,7 +141,7 @@ func HomePage() templ.Component {
 					}()
 				}
 				ctx = templ.InitializeContext(ctx)
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div class=\"flex flex-col items-center rounded border border-base-content/10 bg-linear-to-b from-base-300 to-base-200 px-4 py-8 sm:px-6\"><h2 class=\"mb-1 text-center text-2xl font-bold sm:text-3xl\">Sign up to the waitlist</h2><p class=\"mb-8 text-center text-muted\">&hellip; and get an email when untils is ready to try.</p>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div class=\"flex flex-col items-center rounded border border-base-content/10 bg-linear-to-b from-base-300 to-base-200 px-4 py-8 sm:px-6\"><h2 class=\"mb-1 text-center text-2xl font-bold sm:text-3xl\">Sign up to the waitlist</h2><p class=\"mb-8 text-center text-muted\">and get an email when untils is ready to try</p>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -149,7 +149,7 @@ func HomePage() templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<div class=\"my-6 w-full max-w-sm px-6\"><div class=\"relative flex items-center justify-center\"><div class=\"absolute inset-x-0 border-t border-base-content/15\"></div><div class=\"relative bg-base-200 px-3 text-sm text-base-content/60 uppercase\">or self-host</div></div></div><div class=\"w-full\"><div class=\"flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center sm:gap-x-4\"><a href=\"https://github.com/alexpls/untils\" target=\"_blank\" class=\"btn btn-soft btn-lg btn-outline w-full sm:w-auto\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<div class=\"my-6 w-full max-w-sm px-6\"><div class=\"relative flex items-center justify-center\"><div class=\"absolute inset-x-0 border-t border-base-content/15\"></div><div class=\"relative bg-base-200 px-3 text-sm text-base-content/60 uppercase\">or self-host</div></div></div><div class=\"w-full\"><div class=\"flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center sm:gap-x-4\"><a href=\"https://github.com/alexpls/untils\" target=\"_blank\" class=\"btn btn-soft btn-lg w-full sm:w-auto\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -157,7 +157,7 @@ func HomePage() templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<span class=\"ml-1\">View on Github</span></a> <a href=\"/docs/self-hosting/quickstart\" class=\"btn btn-soft btn-outline btn-lg w-full sm:w-auto\"><span class=\"mr-1\">Read the self-hosting docs</span>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<span class=\"ml-1\">View on Github</span></a> <a href=\"/docs/self-hosting/quickstart\" class=\"btn btn-soft btn-lg w-full sm:w-auto\"><span class=\"mr-1\">Read the self-hosting docs</span>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -368,7 +368,7 @@ func emailFormInner(errorMessage string) templ.Component {
 			templ_7745c5c3_Var12 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<div id=\"email-form\" class=\"flex w-full flex-col items-center\"><form class=\"flex w-full justify-center\" data-on:submit=\"@post('/subscribe', {contentType: 'form'})\" data-indicator:submitting><div class=\"join join-vertical w-full max-w-md sm:join-horizontal\"><input id=\"waitlist-email\" class=\"input input-lg join-item w-full sm:w-[300px]\" name=\"email\" type=\"email\" placeholder=\"Your email address...\" required data-attr:disabled=\"$submitting\"> <button class=\"btn btn-lg btn-primary join-item w-full sm:w-auto\" data-attr:disabled=\"$submitting\"><span data-show=\"$submitting\" style=\"display: none\" class=\"loading loading-spinner loading-sm\"></span> Submit</button></div></form>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<div id=\"email-form\" class=\"flex w-full flex-col items-center\"><form class=\"flex w-full justify-center\" data-on:submit=\"@post('/subscribe', {contentType: 'form'})\" data-indicator:submitting><div class=\"join join-vertical w-full max-w-md sm:join-horizontal\"><input id=\"waitlist-email\" class=\"input input-lg join-item w-full sm:w-75\" name=\"email\" type=\"email\" placeholder=\"Your email address...\" required data-attr:disabled=\"$submitting\"> <button class=\"btn btn-lg btn-primary join-item w-full sm:w-auto\" data-attr:disabled=\"$submitting\"><span data-show=\"$submitting\" style=\"display: none\" class=\"loading loading-spinner loading-sm\"></span> Submit</button></div></form>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
