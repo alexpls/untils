@@ -15,7 +15,7 @@ func TestLayoutRendersPlausibleSnippet(t *testing.T) {
 		r, w := io.Pipe()
 
 		go func() {
-			_ = Layout("Test Title").Render(ctx, w)
+			_ = Layout("Test Title", "").Render(ctx, w)
 			_ = w.Close()
 		}()
 

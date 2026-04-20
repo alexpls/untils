@@ -121,6 +121,7 @@ func (a *app) setContextFromAppConfig(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		c := a.config
 		r = r.WithContext(reqcontext.ContextWithPlausibleSnippetTag(r.Context(), c.plausibleSnippetTag))
+		r = r.WithContext(reqcontext.ContextWithBaseURL(r.Context(), c.baseURL))
 		next.ServeHTTP(w, r)
 	})
 }

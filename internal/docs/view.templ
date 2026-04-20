@@ -4,7 +4,7 @@ import "github.com/alexpls/untils/internal/components"
 import "github.com/alexpls/untils/internal/components/icons"
 
 templ PageView(page Page, nav []NavSection) {
-	@components.Page(page.Title) {
+	@components.Page(page.Title, page.Description) {
 		<div class="container mx-auto bg-base-200 rounded-lg shadow-lg">
 			<div class="h-full grid grid-cols-12 gap-4">
 				<aside class="col-span-12 lg:col-span-3 p-4 border-b lg:border-b-0 lg:border-r border-base-content/10">

@@ -7,7 +7,10 @@ import (
 )
 
 templ HomePage() {
-	@components.Page("Home") {
+	@components.Page(
+		"Home",
+		"AI monitoring of pages, products, and signals that should not be missed",
+	) {
 		<div class="bg-linear-to-b from-base-300 to-base-200 border-b border-base-content/10 px-4 sm:px-6 lg:px-10">
 			<div class="container mx-auto mb-12 max-w-5xl border-b-2 border-base-content/10 pt-12 pb-4 sm:mb-16 sm:pt-16 lg:mb-20 lg:pt-24">
 				<div class="mt-4 flex flex-col gap-6 sm:gap-8 md:flex-row md:items-end md:justify-between md:gap-x-16 lg:gap-x-40">

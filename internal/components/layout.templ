@@ -2,21 +2,15 @@ package components
 
 import "fmt"
 
-templ Layout(title string) {
+templ Layout(title, description string) {
 	<html>
 		<head>
-			if title == "" {
-				<title>untils</title>
-			} else {
-				<title>{ title } | untils</title>
-			}
-			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			@metaTags(title, description)
 			<link
 				rel="stylesheet"
 				type="text/css"
 				href={ AssetURL("css/output.css") }
 			/>
-			<link rel="shortcut icon" href={ AssetURL("images/logo.png") }/>
 			<script type="module" src={ AssetURL("js/app.js") }></script>
 		</head>
 		<body class="bg-base-300 min-h-screen flex flex-col">
@@ -26,8 +20,8 @@ templ Layout(title string) {
 	</html>
 }
 
-templ Page(title string) {
-	@Layout(title) {
+templ Page(title, description string) {
+	@Layout(title, description) {
 		<header class="grid grid-cols-2 md:grid-cols-3 p-4">
 			<div class="hidden md:block text-start text-sm"></div>
 			<div class="md:text-center flex items-center md:justify-center gap-x-3">
@@ -55,6 +49,31 @@ templ Page(title string) {
 			and built by <a href="https://alexplescan.com" target="_blank" class="link">Alex Plescan</a>.
 		</footer>
 	}
+}
+
+templ metaTags(title, description string) {
+	{{
+		fullTitle := "untils"
+		if title != "" {
+			fullTitle = title + " | untils"
+		}
+	}}
+	{{ imageURL := AbsoluteURL(ctx, AssetURL("images/logo.png")) }}
+	<title>{ fullTitle }</title>
+	<meta name="description" content={ description }/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<meta property="og:title" content={ fullTitle }/>
+	<meta property="og:description" content={ description }/>
+	if imageURL != "" {
+		<meta property="og:image" content={ imageURL }/>
+	}
+	<meta name="twitter:card" content="summary_large_image"/>
+	<meta name="twitter:title" content={ fullTitle }/>
+	<meta name="twitter:description" content={ description }/>
+	if imageURL != "" {
+		<meta name="twitter:image" content={ imageURL }/>
+	}
+	<link rel="shortcut icon" href={ AssetURL("images/logo.png") }/>
 }
 
 templ plausibleAnalytics() {

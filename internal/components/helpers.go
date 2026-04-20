@@ -3,6 +3,7 @@ package components
 import (
 	"context"
 	"net/url"
+	"path"
 	"strings"
 	"time"
 
@@ -88,6 +89,26 @@ func PlausibleSnippetTag(ctx context.Context) string {
 
 func BuildVersion(ctx context.Context) string {
 	return reqcontext.BuildVersionFromContext(ctx)
+}
+
+func BaseURL(ctx context.Context) string {
+	return reqcontext.BaseURLFromContext(ctx)
+}
+
+func AbsoluteURL(ctx context.Context, urlPath string) string {
+	baseURL := BaseURL(ctx)
+	if baseURL == "" {
+		return ""
+	}
+
+	u, err := url.Parse(baseURL)
+	if err != nil {
+		panic(err)
+	}
+	u.Path = path.Join(u.Path, strings.TrimPrefix(urlPath, "/"))
+	u.RawQuery = ""
+	u.Fragment = ""
+	return u.String()
 }
 
 func FlashAlert(ctx context.Context) string {

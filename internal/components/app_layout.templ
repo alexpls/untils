@@ -3,7 +3,7 @@ package components
 import "github.com/alexpls/untils/internal/components/icons"
 
 templ AppLayout(title string, breadcrumbs []Breadcrumb) {
-	@Layout(title) {
+	@Layout(title, "") {
 		@TimezoneSync()
 		<header
 			class={ "sticky",  "top-0",  "z-0", templ.KV("pointer-events-none", IsDemo(ctx)) }

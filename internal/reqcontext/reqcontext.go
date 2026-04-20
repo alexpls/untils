@@ -19,6 +19,7 @@ const (
 	demoKey
 	plausibleSnippetTagKey
 	flashAlertKey
+	baseURLKey
 )
 
 func ContextWithBuildVersion(ctx context.Context, buildVersion string) context.Context {
@@ -91,4 +92,13 @@ func ContextWithFlashAlert(ctx context.Context, message string) context.Context 
 func FlashAlertFromContext(ctx context.Context) (string, bool) {
 	message, ok := ctx.Value(flashAlertKey).(string)
 	return message, ok
+}
+
+func ContextWithBaseURL(ctx context.Context, baseURL string) context.Context {
+	return context.WithValue(ctx, baseURLKey, baseURL)
+}
+
+func BaseURLFromContext(ctx context.Context) string {
+	baseURL, _ := ctx.Value(baseURLKey).(string)
+	return baseURL
 }

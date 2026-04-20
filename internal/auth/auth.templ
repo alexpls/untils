@@ -9,7 +9,7 @@ type SignInData struct {
 }
 
 templ SignInPage(data SignInData) {
-	@components.Page("Sign in") {
+	@components.Page("Sign in", "") {
 		<div class="mx-auto w-100 px-4">
 			if data.Failed {
 				<div class="alert alert-error mb-8">
