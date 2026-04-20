@@ -4,16 +4,18 @@ sidebar_title: Quickstart
 url: /self-hosting/quickstart
 section: Self hosting
 description: A guide to running untils on your own hardware. Some knowledge of Linux server admin and Docker is required.
-last_updated: 17 March 2026
+last_updated: 20 April 2026
 ---
 
 Self-hosting untils lets you run the full application stack on your own hardware.
-Some knowledge of Linux server admin and Docker is required.
+Some knowledge of server admin and Docker is expected.
+
+If you'd prefer to use a hosted version, sign up to the waitlist on the
+[home page](/) and get notified when it's ready.
 
 untils is still in development - rough edges and backwards-incompatible changes should be expected.
 
-If you'd prefer a hosted version, one's on its way! Join the waitlist at https://untils.com
-and I'll let you know when it arrives.
+Find untils on Github: [alexpls/untils](https://github.com/alexpls/untils).
 
 ## Prerequisites
 

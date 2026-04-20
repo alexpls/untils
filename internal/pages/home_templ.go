@@ -55,7 +55,7 @@ func HomePage() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</a></div></div><div class=\"container mx-auto\"><div class=\"h-80 overflow-hidden rounded-lg rounded-b-none border border-base-content/10 border-b-0 bg-base-300 shadow-2xl sm:h-96 lg:h-120\"><div class=\"flex items-center gap-3 px-4 py-2.5 bg-base-300 border-b border-base-content/10\"><div class=\"flex gap-1.5\"><div class=\"w-3 h-3 rounded-full bg-error/70\"></div><div class=\"w-3 h-3 rounded-full bg-warning/70\"></div><div class=\"w-3 h-3 rounded-full bg-success/70\"></div></div><div class=\"pointer-events-none flex flex-1 items-center gap-2 truncate rounded-md bg-base-100 px-3 py-1.5 text-xs text-base-content/50 sm:text-sm\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</a></div></div><div class=\"container mx-auto\"><div class=\"h-80 overflow-hidden rounded-lg rounded-b-none border border-base-content/10 border-b-0 bg-base-300 shadow-2xl sm:h-96 lg:h-100\"><div class=\"flex items-center gap-3 px-4 py-2.5 bg-base-300 border-b border-base-content/10\"><div class=\"flex gap-1.5\"><div class=\"w-3 h-3 rounded-full bg-error/70\"></div><div class=\"w-3 h-3 rounded-full bg-warning/70\"></div><div class=\"w-3 h-3 rounded-full bg-success/70\"></div></div><div class=\"pointer-events-none flex flex-1 items-center gap-2 truncate rounded-md bg-base-100 px-3 py-1.5 text-xs text-base-content/50 sm:text-sm\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -63,7 +63,7 @@ func HomePage() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<span class=\"truncate\">untils.com/app/monitors</span></div></div><iframe class=\"w-full h-[calc(100%-52px)] bg-base-100\" src=\"/app/monitors?demo=true\"></iframe></div></div></div><div class=\"mt-16 space-y-16 sm:mt-20 sm:space-y-20\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<span class=\"truncate\">untils.com/app/monitors</span></div></div><div class=\"relative h-[calc(100%-52px)]\"><iframe class=\"h-full w-full pointer-events-none bg-base-100\" src=\"/app/monitors?demo=true\"></iframe><div class=\"pointer-events-none absolute inset-x-0 bottom-4 flex justify-center px-4\"><div class=\"rounded-full border border-base-content/10 bg-black/50 px-4 py-2 shadow-lg backdrop-blur text-xs uppercase tracking-tight font-bold text-muted\">Preview &mdash; live data</div></div></div></div></div></div><div class=\"mt-16 sm:mt-20\"><div class=\"container mx-auto max-w-5xl\"><div class=\"border-b border-base-content/10 bg-linear-to-b from-base-300 to-base-200 p-4 md:rounded md:border\"><div class=\"flex flex-col gap-4 sm:gap-5 md:mx-auto md:w-fit md:grid md:grid-cols-[auto_minmax(32rem,auto)] md:items-center md:justify-center md:gap-8\"><h2 class=\"textcarousel-inline-lead text-base-content\">Monitor when a...</h2><text-carousel class=\"textcarousel textcarousel-inline\" aria-label=\"Examples of things to monitor\"><ul class=\"textcarousel-source\"><li>Topic is mentioned on a forum</li><li>Product drops below a target price</li><li>Band announces a new album release</li><li>Director releases a new movie trailer</li><li>Podcast publishes a new full episode</li><li>Sold out item is back in stock</li><li>Competitor announces a new launch</li><li>Software ships a new major version</li><li>Game launches with strong reviews</li></ul></text-carousel></div></div></div></div><div class=\"mt-16 space-y-16 sm:mt-20 sm:space-y-20\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -254,7 +254,7 @@ func featureCard(title, body, alt, imagePath string) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/pages/home.templ`, Line: 111, Col: 84}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/pages/home.templ`, Line: 140, Col: 84}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -267,7 +267,7 @@ func featureCard(title, body, alt, imagePath string) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(body)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/pages/home.templ`, Line: 112, Col: 65}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/pages/home.templ`, Line: 141, Col: 65}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -317,7 +317,7 @@ func featureCardImage(alt, imagePath string) templ.Component {
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(alt)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/pages/home.templ`, Line: 120, Col: 17}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/pages/home.templ`, Line: 149, Col: 17}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -330,7 +330,7 @@ func featureCardImage(alt, imagePath string) templ.Component {
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(public.AssetURL(imagePath))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/pages/home.templ`, Line: 120, Col: 52}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/pages/home.templ`, Line: 149, Col: 52}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -377,7 +377,7 @@ func emailFormInner(errorMessage string) templ.Component {
 			var templ_7745c5c3_Var13 string
 			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(errorMessage)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/pages/home.templ`, Line: 152, Col: 64}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/pages/home.templ`, Line: 181, Col: 64}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 			if templ_7745c5c3_Err != nil {

@@ -1,0 +1,115 @@
+text-carousel {
+  --textcarousel-step: clamp(1.65rem, 4vw, 2.5rem);
+  --textcarousel-height: calc(var(--textcarousel-step) * 5.2);
+  --textcarousel-item-left: 50%;
+  --textcarousel-item-max-width: min(92vw, 44rem);
+  --textcarousel-item-text-align: center;
+  --textcarousel-item-transform-origin: center center;
+  --textcarousel-item-x-offset: -50%;
+  display: block;
+  margin-inline: auto;
+  max-width: 56rem;
+  position: relative;
+}
+
+.textcarousel-inline {
+  margin-inline: 0;
+  max-width: none;
+  width: 100%;
+  min-width: min(32rem, 100%);
+}
+
+.textcarousel-inline-lead {
+  font-size: clamp(0.95rem, 1.4vw + 0.7rem, 1.5rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+}
+
+.textcarousel-source {
+  display: grid;
+  gap: 0.5rem;
+  justify-items: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.textcarousel-source li {
+  color: color-mix(in oklab, var(--color-base-content) 70%, var(--color-base-100));
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+text-carousel[data-enhanced="true"] .textcarousel-source {
+  display: none;
+}
+
+.textcarousel-viewport {
+  height: var(--textcarousel-height);
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 18%,
+    black 82%,
+    transparent 100%
+  );
+  overflow: hidden;
+  position: relative;
+}
+
+.textcarousel-track {
+  height: 100%;
+  position: relative;
+}
+
+.textcarousel-item {
+  color: color-mix(in oklab, var(--color-base-content) 85%, var(--color-base-100));
+  font-size: clamp(0.95rem, 1.4vw + 0.7rem, 1.5rem);
+  font-weight: 620;
+  left: var(--textcarousel-item-left);
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  max-width: var(--textcarousel-item-max-width);
+  opacity: var(--textcarousel-opacity, 0);
+  pointer-events: none;
+  position: absolute;
+  text-align: var(--textcarousel-item-text-align);
+  text-wrap: balance;
+  top: 50%;
+  transform: translate(var(--textcarousel-item-x-offset), calc(-50% + (var(--textcarousel-offset, 0) * var(--textcarousel-step))))
+    scale(var(--textcarousel-scale, 1));
+  transform-origin: var(--textcarousel-item-transform-origin);
+  filter: blur(var(--textcarousel-blur, 0));
+  white-space: nowrap;
+  will-change: transform, opacity, filter;
+}
+
+.textcarousel-item[data-active] {
+  color: var(--color-base-content);
+}
+
+.textcarousel-inline .textcarousel-source {
+  justify-items: start;
+}
+
+.textcarousel-inline .textcarousel-item {
+  --textcarousel-item-left: 0;
+  --textcarousel-item-max-width: 100%;
+  --textcarousel-item-text-align: left;
+  --textcarousel-item-transform-origin: left center;
+  --textcarousel-item-x-offset: 0;
+}
+
+@media (max-width: 640px) {
+  text-carousel {
+    --textcarousel-step: 1.8rem;
+    --textcarousel-height: calc(var(--textcarousel-step) * 5.1);
+    --textcarousel-item-max-width: 94vw;
+  }
+
+  .textcarousel-item {
+    font-size: clamp(0.85rem, 2.5vw + 0.35rem, 1.1rem);
+  }
+}

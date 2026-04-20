@@ -1,5 +1,6 @@
 import "./vendor/datastar.js"
 import "./schedule.js"
+import "./textcarousel.js"
 
 if (!("anchorName" in document.documentElement.style)) {
   import("@oddbird/css-anchor-positioning").catch((error) => {
