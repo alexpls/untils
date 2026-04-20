@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/alexpls/untils/internal/faviconproxy"
+	"github.com/alexpls/untils/internal/robotstxt"
 	"github.com/alexpls/untils/public"
 )
 
@@ -12,6 +13,8 @@ func (a *app) routes() http.Handler {
 
 	// assets
 	mux.Handle("/assets/", public.Handler())
+
+	mux.Handle("GET /robots.txt", robotstxt.Handler(a.config.servesPublicPages()))
 
 	a.registerPublicRoutes(mux)
 
