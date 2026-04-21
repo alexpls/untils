@@ -15,6 +15,7 @@ type NotificationPreviewTab string
 const (
 	NotificationPreviewTabEmail    NotificationPreviewTab = "email"
 	NotificationPreviewTabPushover NotificationPreviewTab = "pushover"
+	NotificationPreviewTabWebhook  NotificationPreviewTab = "webhook"
 )
 
 type NotificationPreviewPageData struct {
@@ -123,6 +124,8 @@ func notificationPreviewTabFromRequest(r *http.Request) NotificationPreviewTab {
 	switch NotificationPreviewTab(r.URL.Query().Get("tab")) {
 	case NotificationPreviewTabPushover:
 		return NotificationPreviewTabPushover
+	case NotificationPreviewTabWebhook:
+		return NotificationPreviewTabWebhook
 	default:
 		return NotificationPreviewTabEmail
 	}

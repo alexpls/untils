@@ -46,9 +46,14 @@ type RenderedPushover struct {
 	Message string
 }
 
+type RenderedWebhook struct {
+	Json []byte
+}
+
 type RenderedNotification struct {
 	Email    RenderedEmail
 	Pushover RenderedPushover
+	Webhook  RenderedWebhook
 }
 
 type EmailTemplateDefinition struct {
@@ -107,9 +112,15 @@ func RenderMonitorNewResult(ctx context.Context, config RenderConfig, msg Monito
 		return RenderedNotification{}, err
 	}
 
+	webhookRender, err := RenderMonitorNewResultWebhook(msg)
+	if err != nil {
+		return RenderedNotification{}, err
+	}
+
 	return RenderedNotification{
 		Email:    emailRender,
 		Pushover: pushoverRender,
+		Webhook:  webhookRender,
 	}, nil
 }
 

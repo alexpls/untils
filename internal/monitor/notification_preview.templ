@@ -1,6 +1,10 @@
 package monitor
 
-import "fmt"
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+)
 
 templ NotificationPreviewPage(data NotificationPreviewPageData) {
 	@MonitorSidebarLayout(data.Monitor, MonitorPageTypeActivity) {
@@ -20,40 +24,60 @@ templ NotificationPreviewPage(data NotificationPreviewPageData) {
 				>
 					Pushover
 				</a>
+				<a
+					role="tab"
+					class={ "tab", templ.KV("tab-active", data.ActiveTab == NotificationPreviewTabWebhook) }
+					href={ fmt.Sprintf("/app/dev/preview_notification?monitor_id=%d&result_id=%d&tab=webhook", data.Monitor.ID, data.Result.ID) }
+				>
+					Webhook
+				</a>
 			</div>
-			if data.ActiveTab == NotificationPreviewTabEmail {
-				<div class="rounded border border-base-content/10 bg-base-100 p-4">
-					<div class="mb-3 text-sm text-muted">Subject</div>
-					<div class="text-lg font-semibold">{ data.Rendered.Email.Subject }</div>
-				</div>
-				<div class="rounded border border-base-content/10 bg-base-100 p-2">
-					<iframe class="h-160 w-full rounded border-0 bg-white" src={ data.EmailPreviewURL } title={ data.Rendered.Email.Subject }></iframe>
-				</div>
-				<div class="rounded border border-base-content/10 bg-base-100 p-4">
-					<div class="flex gap-2">
-						<a class="btn btn-sm" href={ data.EmailPreviewURL } target="_blank" rel="noreferrer noopener">Open preview</a>
-						<button
-							class="btn btn-sm"
-							data-on:click={ fmt.Sprintf("@post('/app/dev/monitors/%d/results/%d/send_notification')", data.Monitor.ID, data.Result.ID) }
-						>
-							Send notification
-						</button>
+			switch data.ActiveTab {
+				case NotificationPreviewTabEmail:
+					<div class="rounded border border-base-content/10 bg-base-100 p-4">
+						<div class="mb-3 text-sm text-muted">Subject</div>
+						<div class="text-lg font-semibold">{ data.Rendered.Email.Subject }</div>
 					</div>
-				</div>
-				<div class="rounded border border-base-content/10 bg-base-100 p-4">
-					<div class="mb-3 text-sm text-muted">Text version</div>
-					<pre class="whitespace-pre-wrap wrap-break-word text-sm">{ data.Rendered.Email.TextBody }</pre>
-				</div>
-			} else {
-				<div class="rounded border border-base-content/10 bg-base-100 p-4">
-					<div class="mb-3 text-sm text-muted">Pushover title</div>
-					<div class="text-lg font-semibold">{ data.Rendered.Pushover.Title }</div>
-				</div>
-				<div class="rounded border border-base-content/10 bg-base-100 p-4">
-					<div class="mb-3 text-sm text-muted">Pushover message</div>
-					<pre class="whitespace-pre-wrap wrap-break-word text-sm">{ data.Rendered.Pushover.Message }</pre>
-				</div>
+					<div class="rounded border border-base-content/10 bg-base-100 p-2">
+						<iframe class="h-160 w-full rounded border-0 bg-white" src={ data.EmailPreviewURL } title={ data.Rendered.Email.Subject }></iframe>
+					</div>
+					<div class="rounded border border-base-content/10 bg-base-100 p-4">
+						<div class="flex gap-2">
+							<a class="btn btn-sm" href={ data.EmailPreviewURL } target="_blank" rel="noreferrer noopener">Open preview</a>
+							<button
+								class="btn btn-sm"
+								data-on:click={ fmt.Sprintf("@post('/app/dev/monitors/%d/results/%d/send_notification')", data.Monitor.ID, data.Result.ID) }
+							>
+								Send notification
+							</button>
+						</div>
+					</div>
+					<div class="rounded border border-base-content/10 bg-base-100 p-4">
+						<div class="mb-3 text-sm text-muted">Text version</div>
+						<pre class="whitespace-pre-wrap wrap-break-word text-sm">{ data.Rendered.Email.TextBody }</pre>
+					</div>
+				case NotificationPreviewTabPushover:
+					<div class="rounded border border-base-content/10 bg-base-100 p-4">
+						<div class="mb-3 text-sm text-muted">Pushover title</div>
+						<div class="text-lg font-semibold">{ data.Rendered.Pushover.Title }</div>
+					</div>
+					<div class="rounded border border-base-content/10 bg-base-100 p-4">
+						<div class="mb-3 text-sm text-muted">Pushover message</div>
+						<pre class="whitespace-pre-wrap wrap-break-word text-sm">{ data.Rendered.Pushover.Message }</pre>
+					</div>
+				case NotificationPreviewTabWebhook:
+					<div class="rounded border border-base-content/10 bg-base-100 p-4">
+						<pre class="text-xs">
+							{ formatJson(data.Rendered.Webhook.Json) }
+						</pre>
+					</div>
 			}
 		</div>
 	}
+}
+
+func formatJson(jsonStr []byte) string {
+	var pretty bytes.Buffer
+	json.Indent(&pretty, jsonStr, "", "  ")
+	return fmt.Sprintln(pretty.String())
 }
