@@ -36,6 +36,7 @@ func setupTestDeps(ctx context.Context, t *testing.T) testDeps {
 	service := NewService(db, queries, &llm, river, logger, validator, notifications.Capabilities{
 		EmailEnabled:    true,
 		PushoverEnabled: true,
+		WebhookEnabled:  true,
 	}, &notificationSender, notifications.RenderConfig{
 		BaseURL: "https://untils.example.com",
 	})

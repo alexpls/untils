@@ -1,10 +1,14 @@
 package main
 
-import "net/http"
+import (
+	"net/http"
+
+	"github.com/alexpls/untils/internal/errortypes"
+)
 
 func (a *app) internalServerError(err error, w http.ResponseWriter) bool {
 	if err != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		errortypes.InternalServerError(w)
 		return true
 	}
 	return false

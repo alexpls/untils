@@ -8,11 +8,11 @@ package settings
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
+import "fmt"
 import "github.com/alexpls/untils/internal/validation"
 import "github.com/alexpls/untils/internal/pushover"
 import "github.com/alexpls/untils/internal/models"
 import "github.com/alexpls/untils/internal/components"
-import "fmt"
 import "github.com/starfederation/datastar-go/datastar"
 
 type SettingsViewModel struct {
@@ -535,7 +535,7 @@ func settingsPanel(title string) templ.Component {
 			templ_7745c5c3_Var22 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "<div class=\"bg-base-100 border rounded border-base-content/10\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "<div class=\"bg-base-100 border rounded border-base-content/10 overflow-hidden\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

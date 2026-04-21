@@ -149,6 +149,7 @@ type Notifier string
 const (
 	NotifierEmail    Notifier = "email"
 	NotifierPushover Notifier = "pushover"
+	NotifierWebhook  Notifier = "webhook"
 )
 
 func (e *Notifier) Scan(src interface{}) error {
@@ -389,4 +390,11 @@ type User struct {
 	Timezone     string
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
+}
+
+type WebhookTarget struct {
+	ID        int64
+	UserID    int64
+	Url       pgtype.Text
+	CreatedAt time.Time
 }

@@ -17,12 +17,20 @@ select
     'pushover'::notifier as name,
     exists(
         select 1 from pushover_user_tokens
-        where user_id = @user_id
+        where pushover_user_tokens.user_id = @user_id
     ) as configured
 union
 select
     'email'::notifier as name,
-    true as configured;
+    true as configured
+union
+select
+    'webhook'::notifier as name,
+    exists(
+        select 1 from webhook_targets
+        where webhook_targets.user_id = @user_id
+    ) as configured
+;
 
 -- name: UpdateUserTimezone :one
 update users

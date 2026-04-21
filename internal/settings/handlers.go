@@ -17,6 +17,7 @@ import (
 	"github.com/alexpls/untils/internal/pushover"
 	"github.com/alexpls/untils/internal/session"
 	"github.com/alexpls/untils/internal/validation"
+	"github.com/alexpls/untils/internal/webhook"
 	"github.com/starfederation/datastar-go/datastar"
 )
 
@@ -33,6 +34,7 @@ type Handlers struct {
 	db             db.DB
 	pushoverStore  *pushover.Store
 	pushoverClient *pushover.Client
+	webhook        *webhook.Service
 	sessionManager *session.Manager
 	auth           AuthService
 	logger         *slog.Logger
@@ -65,6 +67,7 @@ func NewHandlers(
 	pushoverClient *pushover.Client,
 	sessionManager *session.Manager,
 	auth AuthService,
+	webhook *webhook.Service,
 	logger *slog.Logger,
 ) *Handlers {
 	return &Handlers{
@@ -75,8 +78,14 @@ func NewHandlers(
 		pushoverClient: pushoverClient,
 		sessionManager: sessionManager,
 		auth:           auth,
+		webhook:        webhook,
 		logger:         logger,
 	}
+}
+
+func (h *Handlers) internalServerError(w http.ResponseWriter, r *http.Request, msg string, err error) {
+	h.logger.ErrorContext(r.Context(), msg, "error", err)
+	errortypes.InternalServerError(w)
 }
 
 // ViewSettings handles GET /app/settings
@@ -152,11 +161,8 @@ func (h *Handlers) UpdatePassword(w http.ResponseWriter, r *http.Request, user *
 		return
 	}
 
-	sess := session.FromRequest(r)
-	sess.Data.SetFlash(session.FlashTypeAlert, "Password changed.")
-	if err := h.sessionManager.Save(r); err != nil {
-		h.logger.ErrorContext(r.Context(), "error saving session with password update flash", "error", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+	if err := h.sessionManager.SetFlash(r, session.FlashTypeAlert, "Password changed."); err != nil {
+		h.internalServerError(w, r, "error saving session with password update flash", err)
 		return
 	}
 

@@ -6,6 +6,8 @@ func (row *UserIntegrationsRow) DisplayName() string {
 		return "Email"
 	case NotifierPushover:
 		return "Pushover"
+	case NotifierWebhook:
+		return "Webhook"
 	default:
 		panic("unhandled name: " + row.Name)
 	}

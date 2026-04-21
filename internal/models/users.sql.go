@@ -148,12 +148,19 @@ select
     'pushover'::notifier as name,
     exists(
         select 1 from pushover_user_tokens
-        where user_id = $1
+        where pushover_user_tokens.user_id = $1
     ) as configured
 union
 select
     'email'::notifier as name,
     true as configured
+union
+select
+    'webhook'::notifier as name,
+    exists(
+        select 1 from webhook_targets
+        where webhook_targets.user_id = $1
+    ) as configured
 `
 
 type UserIntegrationsRow struct {

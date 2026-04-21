@@ -42,6 +42,7 @@
 - [ ] Fix: "check now" when clicked should put the check in some kinda "queued" state, so the user has immediate feedback that their action had an effect, even if a worker may not pick it up for a while.
 - [ ] Improvement: Refusal/check failures should be more obvious. At the moment say if a site returns a net::ERR_HTTP_RESPONSE_CODE_FAILURE the result will be 'no results found' when it should instead be an error
 - [ ] Refactor: figure out codegen pattern better. Currently codegen gets checked in, but then is rebuilt in GHA anyway. This this through and decide what makes most sense.
+- [ ] Improvement: rate limits on webhook tests
 
 ## Done
 

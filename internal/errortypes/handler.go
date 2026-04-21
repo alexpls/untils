@@ -5,6 +5,10 @@ import (
 	"net/http"
 )
 
+func InternalServerError(w http.ResponseWriter) {
+	http.Error(w, "Internal server error", http.StatusInternalServerError)
+}
+
 // HandleError responds with a nicely formatted error, if one is given.
 // Returns true if an error has been responded to, false otherwise.
 func HandleError(err error, w http.ResponseWriter) bool {
@@ -18,7 +22,7 @@ func HandleError(err error, w http.ResponseWriter) bool {
 		return true
 	}
 
-	http.Error(w, "Internal server error", http.StatusInternalServerError)
+	InternalServerError(w)
 
 	return true
 }

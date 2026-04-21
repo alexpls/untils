@@ -1,10 +1,10 @@
 package settings
 
+import "fmt"
 import "github.com/alexpls/untils/internal/validation"
 import "github.com/alexpls/untils/internal/pushover"
 import "github.com/alexpls/untils/internal/models"
 import "github.com/alexpls/untils/internal/components"
-import "fmt"
 import "github.com/starfederation/datastar-go/datastar"
 
 type SettingsViewModel struct {
@@ -73,7 +73,7 @@ templ Settings(data *SettingsViewModel) {
 
 type PushoverSettingsViewModel struct {
 	Enabled bool
-	Token *models.PushoverUserToken
+	Token   *models.PushoverUserToken
 
 	Values           pushover.CreateOrUpdateTokenParams
 	ValidationErrors validation.ValidationErrors
@@ -150,7 +150,7 @@ templ PushoverSettings(data *PushoverSettingsViewModel) {
 
 type EmailSettingsViewModel struct {
 	Enabled bool
-	Email string
+	Email   string
 }
 
 templ EmailSettings(data *EmailSettingsViewModel) {
@@ -168,18 +168,18 @@ templ EmailSettings(data *EmailSettingsViewModel) {
 							email address: <strong>{ data.Email }</strong>.
 						</span>
 					</div>
-					} else {
-						<div role="alert" class="alert alert-info">
-							<span>Email notifications are not configured.</span>
-						</div>
-					}
+				} else {
+					<div role="alert" class="alert alert-info">
+						<span>Email notifications are not configured.</span>
+					</div>
+				}
 			}
 		</div>
 	}
 }
 
 templ settingsPanel(title string) {
-	<div class="bg-base-100 border rounded border-base-content/10">
+	<div class="bg-base-100 border rounded border-base-content/10 overflow-hidden">
 		if title != "" {
 			<h2 class="text-xl font-semibold p-4 border-b border-base-content/10">{ title }</h2>
 		}

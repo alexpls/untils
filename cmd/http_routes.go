@@ -60,6 +60,10 @@ func (a *app) routes() http.Handler {
 	mux.HandleFunc("POST /app/settings/pushover", a.requireAuth(a.settingsHandlers.UpdatePushoverSettings))
 	mux.HandleFunc("DELETE /app/settings/pushover", a.requireAuth(a.settingsHandlers.DeletePushoverSettings))
 	mux.HandleFunc("GET /app/settings/email", a.requireAuth(a.settingsHandlers.ViewEmailSettings))
+	mux.HandleFunc("GET /app/settings/webhook", a.requireAuth(a.settingsHandlers.ViewWebhookSettings))
+	mux.HandleFunc("POST /app/settings/webhook", a.requireAuth(a.settingsHandlers.CreateWebhook))
+	mux.HandleFunc("POST /app/settings/webhook/{webhook_id}/test", a.requireAuth(a.settingsHandlers.TestWebhook))
+	mux.HandleFunc("DELETE /app/settings/webhook/{webhook_id}", a.requireAuth(a.settingsHandlers.DeleteWebhook))
 
 	// favicon
 	mux.Handle("GET /app/favicon", a.requireAuth2(faviconproxy.Handler(a.logger.With("source", "faviconproxy"))))

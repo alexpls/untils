@@ -90,6 +90,12 @@ func (sm *Manager) Save(r *http.Request) error {
 	return nil
 }
 
+func (sm *Manager) SetFlash(r *http.Request, kind Flash, message string) error {
+	sess := FromRequest(r)
+	sess.Data.SetFlash(kind, message)
+	return sm.Save(r)
+}
+
 func (sm *Manager) Destroy(r *http.Request, w http.ResponseWriter) error {
 	sess := FromRequest(r)
 	err := sm.store.destroy(r.Context(), sess.ID)

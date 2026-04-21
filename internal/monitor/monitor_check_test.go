@@ -71,6 +71,77 @@ func TestPerformMonitorCheckSendsNotification(t *testing.T) {
 	require.Equal(t, "Example release", sender.calls[0].Message.New.Data.Fields.GetValue("Title"))
 }
 
+func TestPerformMonitorCheckSendsWebhookNotificationToSender(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	deps := setupTestDeps(ctx, t)
+
+	_, err := deps.service.queries.UpdateMonitorStatus(ctx, deps.service.db, &models.UpdateMonitorStatusParams{
+		ID:     deps.fixtures.Monitor.ID,
+		UserID: deps.fixtures.User.ID,
+		Status: models.MonitorStatusActive,
+	})
+	require.NoError(t, err)
+
+	_, err = deps.service.queries.CreateMonitorNotifier(ctx, deps.service.db, &models.CreateMonitorNotifierParams{
+		MonitorID: deps.fixtures.Monitor.ID,
+		Type:      models.NotifierWebhook,
+	})
+	require.NoError(t, err)
+
+	sender := &notificationSenderCapture{}
+	deps.service.notificationSender = sender
+	deps.service.llm = &stubLLMWorkflows{
+		checkResult: &models.CheckResultWithSchema{
+			CheckResultBase: models.CheckResultBase{
+				Success:             true,
+				DifferentToPrevious: true,
+				Updates:             models.MonitorUpdateDataList{{Headline: "New webhook value"}},
+			},
+		},
+	}
+
+	err = deps.service.PerformMonitorCheck(ctx, deps.fixtures.User.ID, deps.fixtures.Check, false)
+	require.NoError(t, err)
+
+	require.Len(t, sender.calls, 1)
+	require.Equal(t, []models.Notifier{models.NotifierWebhook}, sender.calls[0].NotificationChannels)
+	require.NotZero(t, sender.calls[0].Message.New.ID)
+}
+
+func TestPerformMonitorCheckDoesNotSendWebhookNotificationWhenNotifierDisabled(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	deps := setupTestDeps(ctx, t)
+
+	_, err := deps.service.queries.UpdateMonitorStatus(ctx, deps.service.db, &models.UpdateMonitorStatusParams{
+		ID:     deps.fixtures.Monitor.ID,
+		UserID: deps.fixtures.User.ID,
+		Status: models.MonitorStatusActive,
+	})
+	require.NoError(t, err)
+
+	sender := &notificationSenderCapture{}
+	deps.service.notificationSender = sender
+	deps.service.llm = &stubLLMWorkflows{
+		checkResult: &models.CheckResultWithSchema{
+			CheckResultBase: models.CheckResultBase{
+				Success:             true,
+				DifferentToPrevious: true,
+				Updates:             models.MonitorUpdateDataList{{Headline: "New webhook value"}},
+			},
+		},
+	}
+
+	err = deps.service.PerformMonitorCheck(ctx, deps.fixtures.User.ID, deps.fixtures.Check, false)
+	require.NoError(t, err)
+
+	require.Len(t, sender.calls, 1)
+	require.Empty(t, sender.calls[0].NotificationChannels)
+}
+
 func TestCreateMonitorNotifierRejectsUnavailableNotifier(t *testing.T) {
 	t.Parallel()
 

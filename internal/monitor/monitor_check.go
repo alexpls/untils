@@ -244,6 +244,7 @@ func (s *Service) PerformMonitorCheckWithPreviousResults(
 		schemaToPersist = result.Schema
 	}
 	createMonitorResultParams := make([]*models.CreateMonitorResultParams, 0, len(result.Updates))
+	createdResults := make([]models.MonitorResult, 0, len(result.Updates))
 	createdNotificationMessages := make([]notifications.MonitorNewResult, 0, len(result.Updates))
 	for _, update := range result.Updates {
 		params := MonitorUpdateToCreateMonitorResultParams(
@@ -285,6 +286,7 @@ func (s *Service) PerformMonitorCheckWithPreviousResults(
 				if err != nil {
 					return fmt.Errorf("creating monitor result: %w", err)
 				}
+				createdResults = append(createdResults, *createdResult)
 
 				if err := s.queries.CreateMonitorResultCheck(ctx, tx, &models.CreateMonitorResultCheckParams{
 					MonitorResultID: createdResult.ID,
@@ -302,6 +304,17 @@ func (s *Service) PerformMonitorCheckWithPreviousResults(
 			}
 		}
 
+		if result.DifferentToPrevious {
+			lastResult := emptyNotificationResult()
+			if priorState.previousVisible != nil {
+				lastResult = priorState.previousVisible.MonitorResult
+			}
+
+			for _, createdResult := range createdResults {
+				createdNotificationMessages = append(createdNotificationMessages, newResultNotificationMessage(*monitor, createdResult, lastResult))
+			}
+		}
+
 		return nil
 	})
 	if err != nil {
@@ -309,21 +322,6 @@ func (s *Service) PerformMonitorCheckWithPreviousResults(
 	}
 
 	if result.DifferentToPrevious {
-		lastResult := emptyNotificationResult()
-		if priorState.previousVisible != nil {
-			lastResult = priorState.previousVisible.MonitorResult
-		}
-
-		for _, params := range createMonitorResultParams {
-			newResult := models.MonitorResult{
-				MonitorID: params.MonitorID,
-				Headline:  params.Headline,
-				Subtitle:  params.Subtitle,
-				Data:      params.Data,
-			}
-			createdNotificationMessages = append(createdNotificationMessages, newResultNotificationMessage(*monitor, newResult, lastResult))
-		}
-
 		for _, message := range createdNotificationMessages {
 			if err = s.SendNotifications(ctx, SendNotificationsParams{
 				Monitor: monitor,

@@ -88,7 +88,8 @@ CREATE TYPE public.monitor_status AS ENUM (
 
 CREATE TYPE public.notifier AS ENUM (
     'email',
-    'pushover'
+    'pushover',
+    'webhook'
 );
 
 
@@ -614,6 +615,37 @@ ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
 
 
 --
+-- Name: webhook_targets; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.webhook_targets (
+    id bigint NOT NULL,
+    user_id bigint NOT NULL,
+    url text,
+    created_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: webhook_targets_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.webhook_targets_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: webhook_targets_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.webhook_targets_id_seq OWNED BY public.webhook_targets.id;
+
+
+--
 -- Name: llm_conversations id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -667,6 +699,13 @@ ALTER TABLE ONLY public.river_job ALTER COLUMN id SET DEFAULT nextval('public.ri
 --
 
 ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
+
+
+--
+-- Name: webhook_targets id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.webhook_targets ALTER COLUMN id SET DEFAULT nextval('public.webhook_targets_id_seq'::regclass);
 
 
 --
@@ -835,6 +874,14 @@ ALTER TABLE ONLY public.users
 
 ALTER TABLE ONLY public.users
     ADD CONSTRAINT users_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: webhook_targets webhook_targets_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.webhook_targets
+    ADD CONSTRAINT webhook_targets_pkey PRIMARY KEY (id);
 
 
 --
@@ -1041,6 +1088,14 @@ ALTER TABLE ONLY public.pushover_user_tokens
 
 ALTER TABLE ONLY public.river_client_queue
     ADD CONSTRAINT river_client_queue_river_client_id_fkey FOREIGN KEY (river_client_id) REFERENCES public.river_client(id) ON DELETE CASCADE;
+
+
+--
+-- Name: webhook_targets webhook_targets_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.webhook_targets
+    ADD CONSTRAINT webhook_targets_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
 
 
 --

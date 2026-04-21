@@ -27,6 +27,7 @@ import (
 	"github.com/alexpls/untils/internal/session"
 	"github.com/alexpls/untils/internal/settings"
 	"github.com/alexpls/untils/internal/types"
+	"github.com/alexpls/untils/internal/webhook"
 	"github.com/alexpls/untils/public"
 	"github.com/go-playground/validator/v10"
 	"github.com/jackc/pgx/v5"
@@ -64,6 +65,7 @@ type app struct {
 	validate            *validator.Validate
 	webSearcher         search.WebSearcher
 	devHandlers         *dev.Handlers
+	webhook             *webhook.Service
 }
 
 func createApp(c *config) (*app, context.Context, context.CancelFunc, func()) {
@@ -190,6 +192,7 @@ func createApp(c *config) (*app, context.Context, context.CancelFunc, func()) {
 	notificationCapabilities := notifications.Capabilities{
 		EmailEnabled:    c.emailSendConfigured(),
 		PushoverEnabled: c.pushoverConfigured(),
+		WebhookEnabled:  true,
 	}
 	a.pushoverStore = pushover.NewStore(a.db, a.queries, a.validate)
 	if notificationCapabilities.PushoverEnabled {
@@ -210,7 +213,8 @@ func createApp(c *config) (*app, context.Context, context.CancelFunc, func()) {
 		BaseURL: c.baseURL,
 	}
 
-	a.notificationService = notifications.NewService(a.logger.With("source", "notifications.service"), notificationRenderConfig, notificationCapabilities, a.pushoverClient, a.emailService, a.db, *a.queries)
+	a.webhook = webhook.NewService(a.queries, a.db, a.validate)
+	a.notificationService = notifications.NewService(a.logger.With("source", "notifications.service"), notificationRenderConfig, notificationCapabilities, a.pushoverClient, a.emailService, a.river, a.db, *a.queries)
 
 	a.monitor = monitor.NewService(a.db, a.queries, a.llm, a.river, a.logger.With("source", "monitor"), a.validate, notificationCapabilities, a.notificationService, notificationRenderConfig)
 	a.monitorEvents = monitor.NewDBEventHandler()
@@ -224,12 +228,13 @@ func createApp(c *config) (*app, context.Context, context.CancelFunc, func()) {
 
 	a.authHandlers = auth.NewHandlers(a.auth, a.sessionManager, a.logger.With("source", "auth.handlers"))
 
-	a.settingsHandlers = settings.NewHandlers(a.queries, a.db, notificationCapabilities, a.pushoverStore, a.pushoverClient, a.sessionManager, a.auth, a.logger.With("source", "settings.handlers"))
+	a.settingsHandlers = settings.NewHandlers(a.queries, a.db, notificationCapabilities, a.pushoverStore, a.pushoverClient, a.sessionManager, a.auth, a.webhook, a.logger.With("source", "settings.handlers"))
 
 	a.devHandlers = dev.NewHandlers(a.logger.With("source", "dev.handlers"), notifications.NewEmailTemplateStore(notificationRenderConfig))
 
 	river.AddWorker(workers, monitor.NewCheckWorker(a.monitor, a.logger.With("source", "monitor.check_worker")))
 	river.AddWorker(workers, monitor.NewValidateMonitorWorker(a.monitor, a.logger.With("source", "monitor.validate_monitor_worker")))
+	river.AddWorker(workers, webhook.NewSendWorker(a.webhook, a.logger.With("source", "webhook.send_worker")))
 	river.AddWorker(workers, a.sessionManager.NewTrimWorker(a.logger.With("source", "session.trim_worker")))
 	must.NoErr(a.river.Start(ctx))
 

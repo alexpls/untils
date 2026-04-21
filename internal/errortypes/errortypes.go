@@ -178,3 +178,18 @@ func (e *ErrNoPushoverUserToken) Is(target error) bool {
 	_, ok := target.(*ErrNoPushoverUserToken)
 	return ok
 }
+
+// ErrWebhookRequest represents an error when the webhook request failed.
+type ErrWebhookRequest struct {
+	// Reason specifies why the request failed. It is user facing, so should be
+	// written as such.
+	Reason string
+}
+
+func (e *ErrWebhookRequest) Error() string {
+	if e.Reason != "" {
+		return "webhook request failed: " + e.Reason
+	} else {
+		return "webhook request failed"
+	}
+}
