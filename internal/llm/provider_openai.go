@@ -3,7 +3,9 @@ package llm
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/openai/openai-go/v3"
@@ -45,7 +47,11 @@ func (p *openAIProvider) Complete(ctx context.Context, req CompletionRequest) (*
 
 	resp, err := p.client.Responses.New(ctx, params)
 	if err != nil {
-		return nil, fmt.Errorf("fetching llm response: %w", err)
+		err = fmt.Errorf("fetching llm response: %w", err)
+		if openAIErrorIsNonRetryable(err) {
+			return nil, nonRetryableProviderErr(err)
+		}
+		return nil, err
 	}
 
 	toolCalls := make([]ToolCall, 0)
@@ -76,6 +82,33 @@ func (p *openAIProvider) Complete(ctx context.Context, req CompletionRequest) (*
 			ExtraFields:  extraFields,
 		},
 	}, nil
+}
+
+func openAIErrorIsNonRetryable(err error) bool {
+	var apiErr *openai.Error
+	if !errors.As(err, &apiErr) {
+		return false
+	}
+
+	switch apiErr.StatusCode {
+	case http.StatusBadRequest,
+		http.StatusUnauthorized,
+		http.StatusForbidden,
+		http.StatusNotFound:
+		return true
+	case http.StatusTooManyRequests:
+		return openAIErrorIsQuotaExhausted(apiErr)
+	default:
+		return false
+	}
+}
+
+func openAIErrorIsQuotaExhausted(err *openai.Error) bool {
+	message := strings.ToLower(err.Message + " " + err.RawJSON())
+	return strings.Contains(message, "used all available credits") ||
+		strings.Contains(message, "monthly spending limit") ||
+		strings.Contains(message, "purchase more credits") ||
+		strings.Contains(message, "insufficient_quota")
 }
 
 func (p *openAIProvider) CalculateCostUSD(model string, usage TokenUsage) (float64, error) {

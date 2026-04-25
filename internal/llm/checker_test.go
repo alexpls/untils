@@ -42,7 +42,10 @@ func TestCheckerEasySubjectWithoutSchema(t *testing.T) {
 
 	assert.Equal(t, "Fear Inoculum", update.Fields.GetValue("Title"))
 	assert.Equal(t, "2019-08-30", update.Fields.GetValue("Release date"))
-	assert.Equal(t, "https://en.wikipedia.org/wiki/Fear_Inoculum", update.Fields.GetValue("Link"))
+	assert.Contains(t, []string{
+		"https://en.wikipedia.org/wiki/Fear_Inoculum",
+		"https://en.wikipedia.org/wiki/Fear_Inoculum_(album)",
+	}, update.Fields.GetValue("Link"))
 }
 
 func TestCheckerEasySubjectWithSchema(t *testing.T) {
@@ -86,7 +89,10 @@ func TestCheckerEasySubjectWithSchema(t *testing.T) {
 
 	assert.Equal(t, "Fear Inoculum", update.Fields.GetValue("Album name"))
 	assert.Equal(t, "2019-08-30", update.Fields.GetValue("Release date"))
-	assert.Equal(t, "https://en.wikipedia.org/wiki/Fear_Inoculum", update.Fields.GetValue("Link"))
+	assert.Contains(t, []string{
+		"https://en.wikipedia.org/wiki/Fear_Inoculum",
+		"https://en.wikipedia.org/wiki/Fear_Inoculum_(album)",
+	}, update.Fields.GetValue("Link"))
 }
 
 func TestCheckerContextCancellation(t *testing.T) {

@@ -2,6 +2,9 @@ package testfixtures
 
 import (
 	"context"
+	"fmt"
+	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -16,6 +19,8 @@ type Fixtures struct {
 	Monitor *models.Monitor
 	Check   *models.MonitorCheck
 }
+
+var userEmailSeq atomic.Int64
 
 func New(ctx context.Context, t *testing.T, db db.DB, queries *models.Queries) Fixtures {
 	u := user(ctx, t, db, queries)
@@ -33,7 +38,7 @@ func user(ctx context.Context, t *testing.T, db db.DB, queries *models.Queries) 
 	t.Helper()
 
 	user, err := queries.CreateUser(ctx, db, &models.CreateUserParams{
-		Email:        "tester@example.com",
+		Email:        testEmail(t),
 		PasswordHash: "supersecret",
 		Timezone:     "UTC",
 		CreatedAt:    time.Now(),
@@ -42,6 +47,13 @@ func user(ctx context.Context, t *testing.T, db db.DB, queries *models.Queries) 
 	require.NoError(t, err)
 
 	return user
+}
+
+func testEmail(t *testing.T) string {
+	t.Helper()
+
+	name := strings.NewReplacer("/", "-", " ", "-", "_", "-").Replace(strings.ToLower(t.Name()))
+	return fmt.Sprintf("tester+%s-%d@example.com", name, userEmailSeq.Add(1))
 }
 
 func monitor(ctx context.Context, t *testing.T, db db.DB, queries *models.Queries, userID int64) *models.Monitor {

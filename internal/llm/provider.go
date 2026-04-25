@@ -3,6 +3,7 @@ package llm
 import (
 	"context"
 	"encoding/json"
+	"errors"
 )
 
 type MessageRole string
@@ -63,4 +64,25 @@ type CompletionResponse struct {
 type Provider interface {
 	Complete(ctx context.Context, req CompletionRequest) (*CompletionResponse, error)
 	CalculateCostUSD(model string, usage TokenUsage) (float64, error)
+}
+
+type nonRetryableProviderError struct {
+	err error
+}
+
+func (e *nonRetryableProviderError) Error() string {
+	return e.err.Error()
+}
+
+func (e *nonRetryableProviderError) Unwrap() error {
+	return e.err
+}
+
+func nonRetryableProviderErr(err error) error {
+	return &nonRetryableProviderError{err: err}
+}
+
+func isNonRetryableProviderErr(err error) bool {
+	var target *nonRetryableProviderError
+	return errors.As(err, &target)
 }

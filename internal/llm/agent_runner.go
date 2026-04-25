@@ -62,7 +62,7 @@ func runAgent[T any](ctx context.Context, service *Service, opts agentRunOptions
 		if err != nil {
 			lastErr = err
 			service.logger.ErrorContext(ctx, "error getting response", "turn", turn, "duration", llmDuration, "error", err)
-			if turn >= opts.maxTurns {
+			if isNonRetryableProviderErr(err) || turn >= opts.maxTurns {
 				return nil, err
 			}
 			select {
