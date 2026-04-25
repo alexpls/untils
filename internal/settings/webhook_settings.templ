@@ -60,6 +60,13 @@ templ WebhookSettings(data *WebhookSettingsViewModel) {
 						</tr>
 					</thead>
 					<tbody>
+						if len(data.Targets) == 0 {
+							<tr>
+								<td colspan="2" class="text-muted text-center py-8">
+									No webhooks to show.
+								</td>
+							</tr>
+						}
 						for _, target := range data.Targets {
 							<tr>
 								<td>
