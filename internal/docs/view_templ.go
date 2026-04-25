@@ -168,6 +168,7 @@ func PageView(page Page, nav []NavSection) templ.Component {
 			}
 			var templ_7745c5c3_Var10 = []any{"prose", "min-w-0", "grow-1",
 				"prose-hr:border-base-content/10",
+				"prose-pre:text-sm", "prose-pre:leading-5",
 				"prose-img:rounded", "prose-img:border", "prose-img:border-base-content/10",
 			}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var10...)
@@ -212,7 +213,7 @@ func PageView(page Page, nav []NavSection) templ.Component {
 					var templ_7745c5c3_Var12 templ.SafeURL
 					templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinURLErrs("#" + heading.ID)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/docs/view.templ`, Line: 92, Col: 87}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/docs/view.templ`, Line: 93, Col: 87}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 					if templ_7745c5c3_Err != nil {
@@ -225,7 +226,7 @@ func PageView(page Page, nav []NavSection) templ.Component {
 					var templ_7745c5c3_Var13 string
 					templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(heading.Title)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/docs/view.templ`, Line: 92, Col: 105}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/docs/view.templ`, Line: 93, Col: 105}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 					if templ_7745c5c3_Err != nil {

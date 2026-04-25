@@ -35,6 +35,11 @@ templ WebhookSettings(data *WebhookSettingsViewModel) {
 	}) {
 		@components.HeaderCentered("Configure webhooks")
 		<div class="max-w-160 mx-auto p-4 space-y-4">
+			<p class="text-sm text-muted">
+				Send monitor updates to an HTTP endpoint.
+				<a href="/docs/notifications/webhooks" class="link">The webhook docs</a>
+				contain more details.
+			</p>
 			@settingsPanel("Add a webhook") {
 				<form class="form p-4" method="POST" action="/app/settings/webhook">
 					<label class="floating-label">

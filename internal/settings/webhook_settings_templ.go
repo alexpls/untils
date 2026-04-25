@@ -73,7 +73,7 @@ func WebhookSettings(data *WebhookSettingsViewModel) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, " <div class=\"max-w-160 mx-auto p-4 space-y-4\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, " <div class=\"max-w-160 mx-auto p-4 space-y-4\"><p class=\"text-sm text-muted\">Send monitor updates to an HTTP endpoint. <a href=\"/docs/notifications/webhooks\" class=\"link\">The webhook docs</a> contain more details.</p>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -101,7 +101,7 @@ func WebhookSettings(data *WebhookSettingsViewModel) templ.Component {
 					var templ_7745c5c3_Var4 string
 					templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(err)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/settings/webhook_settings.templ`, Line: 45, Col: 52}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/settings/webhook_settings.templ`, Line: 50, Col: 52}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 					if templ_7745c5c3_Err != nil {
@@ -156,7 +156,7 @@ func WebhookSettings(data *WebhookSettingsViewModel) templ.Component {
 					var templ_7745c5c3_Var6 string
 					templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(target.Url.String)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/settings/webhook_settings.templ`, Line: 74, Col: 29}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/settings/webhook_settings.templ`, Line: 79, Col: 29}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 					if templ_7745c5c3_Err != nil {
@@ -169,7 +169,7 @@ func WebhookSettings(data *WebhookSettingsViewModel) templ.Component {
 					var templ_7745c5c3_Var7 string
 					templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(datastar.PostSSE("/app/settings/webhook/%d/test", target.ID))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/settings/webhook_settings.templ`, Line: 79, Col: 87}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/settings/webhook_settings.templ`, Line: 84, Col: 87}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 					if templ_7745c5c3_Err != nil {
@@ -182,7 +182,7 @@ func WebhookSettings(data *WebhookSettingsViewModel) templ.Component {
 					var templ_7745c5c3_Var8 string
 					templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(datastar.DeleteSSE("/app/settings/webhook/%d", target.ID))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/settings/webhook_settings.templ`, Line: 83, Col: 84}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/settings/webhook_settings.templ`, Line: 88, Col: 84}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 					if templ_7745c5c3_Err != nil {
@@ -195,7 +195,7 @@ func WebhookSettings(data *WebhookSettingsViewModel) templ.Component {
 					var templ_7745c5c3_Var9 string
 					templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(components.FormatDateTime(ctx, target.CreatedAt))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/settings/webhook_settings.templ`, Line: 88, Col: 59}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/settings/webhook_settings.templ`, Line: 93, Col: 59}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 					if templ_7745c5c3_Err != nil {
@@ -257,7 +257,7 @@ func WebhookSettings(data *WebhookSettingsViewModel) templ.Component {
 								var templ_7745c5c3_Var12 string
 								templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(data.TestData.Error)
 								if templ_7745c5c3_Err != nil {
-									return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/settings/webhook_settings.templ`, Line: 109, Col: 59}
+									return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/settings/webhook_settings.templ`, Line: 114, Col: 59}
 								}
 								_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 								if templ_7745c5c3_Err != nil {
@@ -276,7 +276,7 @@ func WebhookSettings(data *WebhookSettingsViewModel) templ.Component {
 								var templ_7745c5c3_Var13 string
 								templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(data.TestData.Response.StatusCode)
 								if templ_7745c5c3_Err != nil {
-									return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/settings/webhook_settings.templ`, Line: 114, Col: 79}
+									return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/settings/webhook_settings.templ`, Line: 119, Col: 79}
 								}
 								_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 								if templ_7745c5c3_Err != nil {
@@ -295,7 +295,7 @@ func WebhookSettings(data *WebhookSettingsViewModel) templ.Component {
 								var templ_7745c5c3_Var14 string
 								templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(data.TestData.Response.Latency.Milliseconds())
 								if templ_7745c5c3_Err != nil {
-									return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/settings/webhook_settings.templ`, Line: 119, Col: 87}
+									return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/settings/webhook_settings.templ`, Line: 124, Col: 87}
 								}
 								_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 								if templ_7745c5c3_Err != nil {
