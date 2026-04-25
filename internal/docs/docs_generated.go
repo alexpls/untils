@@ -11,9 +11,38 @@ func init() {
 				Description:  "untils monitors the things you care about on the internet and notifies you when they change",
 				Section:      "Introduction",
 				Path:         "/docs/introduction/welcome",
-				LastUpdated:  "20 April 2026",
-				ContentHTML:  "<p><a href=\"https://untils.com\">untils</a> monitors the things you care about on the internet and\nnotifies you when they change.</p>\n<p>It's still under active development. See the <a href=\"https://untils.com\">home page</a> for more\ninformation and join the waitlist for updates about its release.</p>\n",
+				LastUpdated:  "25 April 2026",
+				ContentHTML:  "<h2 id=\"about-untils\">About untils</h2>\n<p><a href=\"https://untils.com\">untils</a> monitors the things you care about on the internet and\nnotifies you when they change.</p>\n<p>It's still under active development. See the <a href=\"https://untils.com\">home page</a> for more\ninformation and join the waitlist for updates about its release.</p>\n<p>If you want earlier access, you can self-host untils. Start by reading\n<a href=\"/docs/self-hosting/quickstart\">the docs</a> and visiting the project\n<a href=\"https://github.com/alexpls/untils\">on Github</a>.</p>\n<h2 id=\"screenshots\">Screenshots</h2>\n<figure>\n  <img src=\"/assets/images/untils_monitor_list.jpg\" alt=\"List of monitors in untils\" />\n  <figcaption>Monitors list showing the configured checks and their latest state.</figcaption>\n</figure>\n<figure>\n  <img src=\"/assets/images/untils_monitor_create.jpg\" alt=\"Create monitor form in untils\" />\n  <figcaption>Monitor creation form for setting up a new change notification.</figcaption>\n</figure>\n<figure>\n  <img src=\"/assets/images/untils_monitor_view.jpg\" alt=\"Monitor detail page in untils\" />\n  <figcaption>Monitor detail page showing the latest results.</figcaption>\n</figure>",
+				Headings: []PageHeading{
+					{Title: "About untils", ID: "about-untils"},
+					{Title: "Screenshots", ID: "screenshots"},
+				},
+			},
+			"/docs/introduction/support": {
+				Title:        "Support",
+				SidebarTitle: "Support",
+				Description:  "How to get help with untils",
+				Section:      "Introduction",
+				Path:         "/docs/introduction/support",
+				LastUpdated:  "25 April 2026",
+				ContentHTML:  "<p>I'd love your feedback on untils. Get in touch by:</p>\n<ul>\n<li>Emailing me: <a href=\"mailto:alex@alexplescan.com\">alex@alexplescan.com</a></li>\n<li>Collaborating on Github issues: <a href=\"https://github.com/alexpls/untils/issues\">https://github.com/alexpls/untils/issues</a></li>\n</ul>\n",
 				Headings:     []PageHeading{},
+			},
+			"/docs/introduction/privacy": {
+				Title:        "Privacy",
+				SidebarTitle: "Privacy",
+				Description:  "Information about untils' privacy and service providers",
+				Section:      "Introduction",
+				Path:         "/docs/introduction/privacy",
+				LastUpdated:  "25 April 2026",
+				ContentHTML:  "<h2 id=\"tldr\">tl;dr</h2>\n<p>untils stores the minimum amount of data required to provide the service, and only\nshares it with third parties when necessary to provide hosting, email delivery, and\nanonymous analytics.</p>\n<p>You can review all the data untils stores by checking its\n<a href=\"https://github.com/alexpls/untils\">source code</a>.</p>\n<h2 id=\"data-stored-on-untils-systems\">Data stored on untils' systems</h2>\n<p>To facilitate login, your email address is stored. Your password is hashed and is\nnot stored in plain text. The date and time of your most recent login is also stored.</p>\n<p>To provide monitoring and notification functionality, untils stores the monitors,\nURLs, configuration, notification preferences, and related history needed to detect\nchanges and send notifications.</p>\n<h2 id=\"service-providers\">Service providers</h2>\n<p><a href=\"https://www.hetzner.com/\">Hetzner</a> provides web hosting services for untils. The\ndata stored above resides on Hetzner servers in the EU.</p>\n<p><a href=\"https://aws.amazon.com/\">Amazon Web Services</a> is used to send emails from untils.\nEmail addresses and the contents of emails sent by untils are processed by AWS for\nemail delivery.</p>\n<p>Anonymous analytics for visits to untils.com are captured with\n<a href=\"https://plausible.io\">Plausible Analytics</a>. IP addresses are not stored by\nPlausible, and browser &quot;Do Not Track&quot; settings are respected. For more information,\nsee <a href=\"https://plausible.io/data-policy\">Plausible's data policy</a>.</p>\n<p>No other third party data processors are used.</p>\n<h2 id=\"cookies\">Cookies</h2>\n<p>Only essential cookies are used, such as a session identifier to keep you logged in\nto untils. These cookies may be deleted at any time using browser settings. Deleting\nthem will log you out of untils.</p>\n<h2 id=\"deletion\">Deletion</h2>\n<p>To request account deletion and removal of associated data, send a request to\n<a href=\"mailto:alex@alexplescan.com\">alex@alexplescan.com</a>.</p>\n",
+				Headings: []PageHeading{
+					{Title: "tl;dr", ID: "tldr"},
+					{Title: "Data stored on untils' systems", ID: "data-stored-on-untils-systems"},
+					{Title: "Service providers", ID: "service-providers"},
+					{Title: "Cookies", ID: "cookies"},
+					{Title: "Deletion", ID: "deletion"},
+				},
 			},
 			"/docs/self-hosting/quickstart": {
 				Title:        "Self-hosting quickstart",
@@ -35,6 +64,8 @@ func init() {
 		NavSections: []NavSection{
 			{Title: "Introduction", Pages: []NavPage{
 				{SidebarTitle: "Welcome", Path: "/docs/introduction/welcome"},
+				{SidebarTitle: "Support", Path: "/docs/introduction/support"},
+				{SidebarTitle: "Privacy", Path: "/docs/introduction/privacy"},
 			}},
 			{Title: "Self hosting", Pages: []NavPage{
 				{SidebarTitle: "Quickstart", Path: "/docs/self-hosting/quickstart"},
