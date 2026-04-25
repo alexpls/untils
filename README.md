@@ -28,14 +28,9 @@ doc is a good place to learn more.
 
 ## Stack
 
-- Go HTTP server
-- PostgreSQL
-- [sqlc](https://sqlc.dev/) query generation
-- [River](https://riverqueue.com/) background jobs
-- [templ](https://templ.guide/) templates
-- Tailwind CSS 4 and DaisyUI
-- Datastar
-- Bun for frontend tooling/bundling
+Backend: [Go](https://go.dev/), [PostgreSQL](https://www.postgresql.org/), [sqlc](https://sqlc.dev/), [River](https://riverqueue.com/)
+
+Frontend: [templ](https://templ.guide/), [Tailwind CSS 4](https://tailwindcss.com/), [DaisyUI](https://daisyui.com/), [Datastar](https://data-star.dev/).
 
 ## Development setup
 
