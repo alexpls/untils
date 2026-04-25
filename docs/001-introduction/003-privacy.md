@@ -10,8 +10,8 @@ last_updated: 25 April 2026
 ## tl;dr
 
 untils stores the minimum amount of data required to provide the service, and only
-shares it with third parties when necessary to provide hosting, email delivery, and
-anonymous analytics.
+shares it with third parties when necessary to provide hosting, email delivery,
+anonymous analytics, search, and AI-powered processing.
 
 You can review all the data untils stores by checking its
 [source code](https://github.com/alexpls/untils).
@@ -29,6 +29,12 @@ changes and send notifications.
 
 [Hetzner](https://www.hetzner.com/) provides web hosting services for untils. The
 data stored above resides on Hetzner servers in the EU.
+
+[xAI](https://x.ai/) is used as the LLM provider for untils' agents.
+Monitor content and configuration are processed by xAI, as well as results.
+
+[Brave Search](https://search.brave.com/) is used to retrieve search results for
+monitors.
 
 [Amazon Web Services](https://aws.amazon.com/) is used to send emails from untils.
 Email addresses and the contents of emails sent by untils are processed by AWS for
