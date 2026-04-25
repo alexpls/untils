@@ -172,6 +172,31 @@ func (h *Handlers) ViewMonitorSettings(w http.ResponseWriter, r *http.Request, u
 	}
 }
 
+// CreateFakeMonitorResult handles POST /app/dev/monitors/{id}/fake_result
+func (h *Handlers) CreateFakeMonitorResult(w http.ResponseWriter, r *http.Request, user *models.User) {
+	mon := h.monitorFromPath(w, r, user)
+	if mon == nil {
+		return
+	}
+
+	result, err := h.service.CreateFakeMonitorResultAndNotify(r.Context(), mon)
+	if err != nil {
+		if errors.Is(err, ErrFakeMonitorResultRequiresActiveMonitor) {
+			http.Error(w, err.Error(), http.StatusConflict)
+			return
+		}
+
+		h.logger.ErrorContext(r.Context(), "error creating fake monitor result", "monitor_id", mon.ID, "error", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	sse := datastar.NewSSE(w, r)
+	if err := sse.Redirect(fmt.Sprintf("/app/monitors/%d?fake_result_id=%d", mon.ID, result.ID)); err != nil {
+		h.logger.ErrorContext(sse.Context(), "error redirecting after creating fake monitor result", "monitor_id", mon.ID, "result_id", result.ID, "error", err)
+	}
+}
+
 // NewMonitor handles GET /app/monitors/new
 func (h *Handlers) NewMonitor(w http.ResponseWriter, r *http.Request, user *models.User) {
 	if err := MonitorNewPage(MonitorNewData{}).Render(r.Context(), w); err != nil {

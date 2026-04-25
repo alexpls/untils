@@ -78,6 +78,7 @@ func (a *app) routes() http.Handler {
 	mux.HandleFunc("GET /app/dev/preview_notification", a.requireDev(a.requireAuth(a.monitorHandlers.ViewNotificationPreview)))
 	mux.HandleFunc("GET /app/dev/preview_notification/email", a.requireDev(a.requireAuth(a.monitorHandlers.ViewNotificationPreviewEmailHTML)))
 	mux.HandleFunc("POST /app/dev/monitors/{monitor_id}/results/{result_id}/send_notification", a.requireDev(a.requireAuth(a.monitorHandlers.SendDevNotification)))
+	mux.HandleFunc("POST /app/dev/monitors/{monitor_id}/fake_result", a.requireDev(a.requireAuth(a.monitorHandlers.CreateFakeMonitorResult)))
 
 	// middleware
 	csrf := http.NewCrossOriginProtection()

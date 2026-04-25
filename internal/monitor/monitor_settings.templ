@@ -1,6 +1,7 @@
 package monitor
 
 import (
+	"github.com/alexpls/untils/internal/components"
 	"github.com/alexpls/untils/internal/models"
 	"github.com/starfederation/datastar-go/datastar"
 )
@@ -19,6 +20,22 @@ templ MonitorSettingsView(data MonitorSettingsViewData) {
 	<div id="monitor-settings-view" class="lg:p-4">
 		<div class="p-4 border border-base-content/10 rounded bg-base-100 space-y-4">
 			<h3 class="font-semibold">Monitor Settings</h3>
+			if components.IsDev(ctx) {
+				<div class="rounded border border-info/30 bg-info/10 p-4 space-y-2">
+					<h4 class="font-semibold">Dev tools</h4>
+					<p class="text-sm text-muted">Create a fake result and send configured notifications for this monitor.</p>
+					<button
+						data-on:click={ datastar.PostSSE("/app/dev/monitors/%d/fake_result", data.Monitor.ID) }
+						class="btn btn-sm btn-info"
+						disabled?={ data.Monitor.Status != models.MonitorStatusActive }
+					>
+						Create fake result
+					</button>
+					if data.Monitor.Status != models.MonitorStatusActive {
+						<p class="text-xs text-muted">Fake result notifications require an active monitor.</p>
+					}
+				</div>
+			}
 			<div class="space-y-2">
 				if data.Monitor.Status == models.MonitorStatusActive {
 					<button
