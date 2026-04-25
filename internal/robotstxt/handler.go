@@ -17,6 +17,6 @@ func Handler(servesPublicPages bool) http.Handler {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Add("content-type", "text/plain")
-		w.Write([]byte(robots))
+		_, _ = w.Write([]byte(robots))
 	})
 }

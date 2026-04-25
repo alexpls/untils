@@ -59,7 +59,9 @@ func (h *httpClient) Request(ctx context.Context, url string, body io.Reader) (H
 		return respData, err
 	}
 
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	respData.StatusCode = resp.StatusCode
 
