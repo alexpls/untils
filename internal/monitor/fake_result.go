@@ -21,7 +21,7 @@ func (s *Service) CreateFakeMonitorResultAndNotify(ctx context.Context, mon *mod
 
 	type fakeResultData struct {
 		result  *models.MonitorResult
-		message notifications.MonitorNewResult
+		message notifications.MonitorNewResults
 	}
 
 	created, err := db.WithTxV(s.db, ctx, func(tx pgx.Tx) (*fakeResultData, error) {
@@ -74,7 +74,7 @@ func (s *Service) CreateFakeMonitorResultAndNotify(ctx context.Context, mon *mod
 
 		return &fakeResultData{
 			result:  result,
-			message: newResultNotificationMessage(*mon, *result, oldResult),
+			message: newResultsNotificationMessage(*mon, []models.MonitorResult{*result}, oldResult),
 		}, nil
 	})
 	if err != nil {

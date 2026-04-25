@@ -116,12 +116,21 @@ func (s *Service) SendMonitorNewResult(ctx context.Context, args SendArgs) (Http
 		return HttpResponse{}, fmt.Errorf("getting monitor: %w", err)
 	}
 
-	newResult, err := s.queries.GetMonitorResult(ctx, s.db, &models.GetMonitorResultParams{
-		MonitorID: args.MonitorID,
-		ResultID:  args.NewResultID,
-	})
-	if err != nil {
-		return HttpResponse{}, fmt.Errorf("getting new result: %w", err)
+	newResultIDs := args.normalizedNewResultIDs()
+	if len(newResultIDs) == 0 {
+		return HttpResponse{}, fmt.Errorf("webhook send requires at least one new result id")
+	}
+
+	newResults := make([]models.MonitorResult, len(newResultIDs))
+	for i, resultID := range newResultIDs {
+		newResult, err := s.queries.GetMonitorResult(ctx, s.db, &models.GetMonitorResultParams{
+			MonitorID: args.MonitorID,
+			ResultID:  resultID,
+		})
+		if err != nil {
+			return HttpResponse{}, fmt.Errorf("getting new result: %w", err)
+		}
+		newResults[i] = *newResult
 	}
 
 	oldResult := models.MonitorResult{Headline: "(none)"}
@@ -136,7 +145,7 @@ func (s *Service) SendMonitorNewResult(ctx context.Context, args SendArgs) (Http
 		oldResult = *oldResultPtr
 	}
 
-	jsonStr, err := MarshalMessageMonitorNewResult(*monitor, *newResult, oldResult)
+	jsonStr, err := MarshalMessageMonitorNewResults(*monitor, newResults, oldResult)
 	if err != nil {
 		return HttpResponse{}, fmt.Errorf("marshaling json: %w", err)
 	}

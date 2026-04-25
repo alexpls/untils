@@ -26,6 +26,24 @@ type MonitorNewResult struct {
 	Old     models.MonitorResult
 }
 
+type MonitorNewResults struct {
+	Monitor    models.Monitor
+	NewResults []models.MonitorResult
+	OldResult  models.MonitorResult
+}
+
+func (m MonitorNewResults) singleMessages() []MonitorNewResult {
+	messages := make([]MonitorNewResult, len(m.NewResults))
+	for i, result := range m.NewResults {
+		messages[i] = MonitorNewResult{
+			Monitor: m.Monitor,
+			New:     result,
+			Old:     m.OldResult,
+		}
+	}
+	return messages
+}
+
 type MonitorNewResultEmailData struct {
 	Message    MonitorNewResult
 	HomeURL    string
@@ -102,17 +120,30 @@ func (s *EmailTemplateStore) Template(key string) (EmailTemplateDefinition, bool
 }
 
 func RenderMonitorNewResult(ctx context.Context, config RenderConfig, msg MonitorNewResult) (RenderedNotification, error) {
-	emailRender, err := RenderMonitorNewResultEmail(ctx, config, msg)
+	return RenderMonitorNewResults(ctx, config, MonitorNewResults{
+		Monitor:    msg.Monitor,
+		NewResults: []models.MonitorResult{msg.New},
+		OldResult:  msg.Old,
+	})
+}
+
+func RenderMonitorNewResults(ctx context.Context, config RenderConfig, msg MonitorNewResults) (RenderedNotification, error) {
+	if len(msg.NewResults) == 0 {
+		panic("notification message must contain at least one new result")
+	}
+
+	firstMessage := msg.singleMessages()[0]
+	emailRender, err := RenderMonitorNewResultEmail(ctx, config, firstMessage)
 	if err != nil {
 		return RenderedNotification{}, err
 	}
 
-	pushoverRender, err := RenderMonitorNewResultPushover(msg)
+	pushoverRender, err := RenderMonitorNewResultPushover(firstMessage)
 	if err != nil {
 		return RenderedNotification{}, err
 	}
 
-	webhookRender, err := RenderMonitorNewResultWebhook(msg)
+	webhookRender, err := RenderMonitorNewResultsWebhook(msg)
 	if err != nil {
 		return RenderedNotification{}, err
 	}

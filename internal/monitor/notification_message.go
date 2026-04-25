@@ -8,11 +8,11 @@ import (
 	"github.com/alexpls/untils/internal/notifications"
 )
 
-func newResultNotificationMessage(monitor models.Monitor, newValue, oldValue models.MonitorResult) notifications.MonitorNewResult {
-	return notifications.MonitorNewResult{
-		Monitor: monitor,
-		New:     newValue,
-		Old:     oldValue,
+func newResultsNotificationMessage(monitor models.Monitor, newValues []models.MonitorResult, oldValue models.MonitorResult) notifications.MonitorNewResults {
+	return notifications.MonitorNewResults{
+		Monitor:    monitor,
+		NewResults: newValues,
+		OldResult:  oldValue,
 	}
 }
 

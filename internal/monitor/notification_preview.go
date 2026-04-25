@@ -117,7 +117,7 @@ func (h *Handlers) renderNotificationPreview(r *http.Request, user *models.User,
 	if err != nil {
 		return notifications.RenderedNotification{}, err
 	}
-	return notifications.RenderMonitorNewResult(r.Context(), h.service.notificationRender, message)
+	return notifications.RenderMonitorNewResults(r.Context(), h.service.notificationRender, message)
 }
 
 func notificationPreviewTabFromRequest(r *http.Request) NotificationPreviewTab {
@@ -131,12 +131,12 @@ func notificationPreviewTabFromRequest(r *http.Request) NotificationPreviewTab {
 	}
 }
 
-func (h *Handlers) monitorNewResultNotification(r *http.Request, user *models.User, mon models.Monitor, result models.MonitorResult) (notifications.MonitorNewResult, error) {
+func (h *Handlers) monitorNewResultNotification(r *http.Request, user *models.User, mon models.Monitor, result models.MonitorResult) (notifications.MonitorNewResults, error) {
 	oldValue, err := h.service.previousVisibleNotificationResult(r.Context(), mon.ID, result.ID)
 	if err != nil {
-		return notifications.MonitorNewResult{}, err
+		return notifications.MonitorNewResults{}, err
 	}
-	return newResultNotificationMessage(mon, result, oldValue), nil
+	return newResultsNotificationMessage(mon, []models.MonitorResult{result}, oldValue), nil
 }
 
 func (h *Handlers) monitorFromPreviewQuery(w http.ResponseWriter, r *http.Request, user *models.User) *models.Monitor {

@@ -73,7 +73,7 @@ func TestSendDevNotification(t *testing.T) {
 	assert.Equal(t, deps.fixtures.User.ID, sender.calls[0].UserID)
 	assert.Equal(t, []models.Notifier{models.NotifierEmail}, sender.calls[0].NotificationChannels)
 	assert.Equal(t, deps.fixtures.Monitor.ID, sender.calls[0].Message.Monitor.ID)
-	assert.Equal(t, result.ID, sender.calls[0].Message.New.ID)
+	assert.Equal(t, result.ID, sender.calls[0].Message.NewResults[0].ID)
 }
 
 func TestViewMonitorActivityPagination(t *testing.T) {

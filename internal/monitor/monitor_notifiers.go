@@ -64,10 +64,14 @@ func (s *Service) DeleteMonitorNotifier(ctx context.Context, mon *models.Monitor
 
 type SendNotificationsParams struct {
 	Monitor *models.Monitor
-	Message notifications.MonitorNewResult
+	Message notifications.MonitorNewResults
 }
 
 func (s *Service) SendNotifications(ctx context.Context, params SendNotificationsParams) error {
+	if len(params.Message.NewResults) == 0 {
+		panic("notification message must contain at least one new result")
+	}
+
 	if params.Monitor.Status != models.MonitorStatusActive {
 		s.logger.WarnContext(ctx, "skipping notifications for inactive monitor", "monitor_id", params.Monitor.ID)
 		return nil

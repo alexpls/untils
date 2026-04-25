@@ -11,7 +11,6 @@ import (
 	"github.com/alexpls/untils/internal/errortypes"
 	"github.com/alexpls/untils/internal/llm"
 	"github.com/alexpls/untils/internal/models"
-	"github.com/alexpls/untils/internal/notifications"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/riverqueue/river"
@@ -245,7 +244,6 @@ func (s *Service) PerformMonitorCheckWithPreviousResults(
 	}
 	createMonitorResultParams := make([]*models.CreateMonitorResultParams, 0, len(result.Updates))
 	createdResults := make([]models.MonitorResult, 0, len(result.Updates))
-	createdNotificationMessages := make([]notifications.MonitorNewResult, 0, len(result.Updates))
 	for _, update := range result.Updates {
 		params := MonitorUpdateToCreateMonitorResultParams(
 			check.MonitorID,
@@ -304,31 +302,23 @@ func (s *Service) PerformMonitorCheckWithPreviousResults(
 			}
 		}
 
-		if result.DifferentToPrevious {
-			lastResult := emptyNotificationResult()
-			if priorState.previousVisible != nil {
-				lastResult = priorState.previousVisible.MonitorResult
-			}
-
-			for _, createdResult := range createdResults {
-				createdNotificationMessages = append(createdNotificationMessages, newResultNotificationMessage(*monitor, createdResult, lastResult))
-			}
-		}
-
 		return nil
 	})
 	if err != nil {
 		return err
 	}
 
-	if result.DifferentToPrevious {
-		for _, message := range createdNotificationMessages {
-			if err = s.SendNotifications(ctx, SendNotificationsParams{
-				Monitor: monitor,
-				Message: message,
-			}); err != nil {
-				return err
-			}
+	if result.DifferentToPrevious && len(createdResults) > 0 {
+		lastResult := emptyNotificationResult()
+		if priorState.previousVisible != nil {
+			lastResult = priorState.previousVisible.MonitorResult
+		}
+
+		if err = s.SendNotifications(ctx, SendNotificationsParams{
+			Monitor: monitor,
+			Message: newResultsNotificationMessage(*monitor, createdResults, lastResult),
+		}); err != nil {
+			return err
 		}
 	}
 

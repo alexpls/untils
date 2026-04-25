@@ -20,7 +20,7 @@ func TestParseDocFileExtractsH2Headings(t *testing.T) {
 		goldmark.WithRendererOptions(mdhtml.WithUnsafe()),
 	)
 
-	page, err := parseDocFile("../../docs/002-self-hosting/001-quickstart.md", renderer)
+	page, err := parseDocFile("../../docs/003-self-hosting/001-quickstart.md", renderer)
 	if err != nil {
 		t.Fatalf("parseDocFile() error = %v", err)
 	}

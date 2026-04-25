@@ -67,8 +67,8 @@ func TestPerformMonitorCheckSendsNotification(t *testing.T) {
 	require.Len(t, sender.calls, 1)
 	require.Equal(t, []models.Notifier{models.NotifierEmail}, sender.calls[0].NotificationChannels)
 	require.Equal(t, deps.fixtures.Monitor.ID, sender.calls[0].Message.Monitor.ID)
-	require.Equal(t, deps.fixtures.Monitor.ID, sender.calls[0].Message.New.MonitorID)
-	require.Equal(t, "Example release", sender.calls[0].Message.New.Data.Fields.GetValue("Title"))
+	require.Equal(t, deps.fixtures.Monitor.ID, sender.calls[0].Message.NewResults[0].MonitorID)
+	require.Equal(t, "Example release", sender.calls[0].Message.NewResults[0].Data.Fields.GetValue("Title"))
 }
 
 func TestPerformMonitorCheckSendsWebhookNotificationToSender(t *testing.T) {
@@ -107,7 +107,53 @@ func TestPerformMonitorCheckSendsWebhookNotificationToSender(t *testing.T) {
 
 	require.Len(t, sender.calls, 1)
 	require.Equal(t, []models.Notifier{models.NotifierWebhook}, sender.calls[0].NotificationChannels)
-	require.NotZero(t, sender.calls[0].Message.New.ID)
+	require.NotZero(t, sender.calls[0].Message.NewResults[0].ID)
+}
+
+func TestPerformMonitorCheckSendsOneNotificationForMultipleResults(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	deps := setupTestDeps(ctx, t)
+
+	_, err := deps.service.queries.UpdateMonitorStatus(ctx, deps.service.db, &models.UpdateMonitorStatusParams{
+		ID:     deps.fixtures.Monitor.ID,
+		UserID: deps.fixtures.User.ID,
+		Status: models.MonitorStatusActive,
+	})
+	require.NoError(t, err)
+
+	_, err = deps.service.queries.CreateMonitorNotifier(ctx, deps.service.db, &models.CreateMonitorNotifierParams{
+		MonitorID: deps.fixtures.Monitor.ID,
+		Type:      models.NotifierWebhook,
+	})
+	require.NoError(t, err)
+
+	sender := &notificationSenderCapture{}
+	deps.service.notificationSender = sender
+	deps.service.llm = &stubLLMWorkflows{
+		checkResult: &models.CheckResultWithSchema{
+			CheckResultBase: models.CheckResultBase{
+				Success:             true,
+				DifferentToPrevious: true,
+				Updates: models.MonitorUpdateDataList{
+					{Headline: "First webhook value"},
+					{Headline: "Second webhook value"},
+				},
+			},
+		},
+	}
+
+	err = deps.service.PerformMonitorCheck(ctx, deps.fixtures.User.ID, deps.fixtures.Check, false)
+	require.NoError(t, err)
+
+	require.Len(t, sender.calls, 1)
+	require.Equal(t, []models.Notifier{models.NotifierWebhook}, sender.calls[0].NotificationChannels)
+	require.Len(t, sender.calls[0].Message.NewResults, 2)
+	require.NotZero(t, sender.calls[0].Message.NewResults[0].ID)
+	require.NotZero(t, sender.calls[0].Message.NewResults[1].ID)
+	require.Equal(t, "First webhook value", sender.calls[0].Message.NewResults[0].Headline)
+	require.Equal(t, "Second webhook value", sender.calls[0].Message.NewResults[1].Headline)
 }
 
 func TestPerformMonitorCheckDoesNotSendWebhookNotificationWhenNotifierDisabled(t *testing.T) {

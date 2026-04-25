@@ -38,7 +38,7 @@ func TestCreateFakeMonitorResultAndNotify(t *testing.T) {
 
 	require.Len(t, sender.calls, 1)
 	require.Equal(t, []models.Notifier{models.NotifierWebhook}, sender.calls[0].NotificationChannels)
-	require.Equal(t, result.ID, sender.calls[0].Message.New.ID)
+	require.Equal(t, result.ID, sender.calls[0].Message.NewResults[0].ID)
 }
 
 func TestCreateFakeMonitorResultAndNotifyRequiresActiveMonitor(t *testing.T) {

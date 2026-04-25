@@ -9,26 +9,29 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestNewMessageMonitorNewResult(t *testing.T) {
+func TestNewMessageMonitorNewResults(t *testing.T) {
 	t.Parallel()
 
-	payload, err := MarshalMessageMonitorNewResult(
+	payload, err := MarshalMessageMonitorNewResults(
 		models.Monitor{ID: 42, Subject: pgtype.Text{String: "Example monitor", Valid: true}},
-		models.MonitorResult{
-			ID:        101,
-			MonitorID: 42,
-			Headline:  "{{Title}}",
-			Subtitle:  "Released at {{Link}}",
-			Data: models.MonitorUpdateData{Fields: models.MonitorUpdateFields{
-				{
-					MonitorSchemaField: models.MonitorSchemaField{Type: models.MonitorSchemaFieldTypeText, Name: "Title"},
-					Value:              "New value",
-				},
-				{
-					MonitorSchemaField: models.MonitorSchemaField{Type: models.MonitorSchemaFieldTypeURL, Name: "Link"},
-					Value:              "https://example.com/new",
-				},
-			}},
+		[]models.MonitorResult{
+			{
+				ID:        101,
+				MonitorID: 42,
+				Headline:  "{{Title}}",
+				Subtitle:  "Released at {{Link}}",
+				Data: models.MonitorUpdateData{Fields: models.MonitorUpdateFields{
+					{
+						MonitorSchemaField: models.MonitorSchemaField{Type: models.MonitorSchemaFieldTypeText, Name: "Title"},
+						Value:              "New value",
+					},
+					{
+						MonitorSchemaField: models.MonitorSchemaField{Type: models.MonitorSchemaFieldTypeURL, Name: "Link"},
+						Value:              "https://example.com/new",
+					},
+				}},
+			},
+			{ID: 102, MonitorID: 42, Headline: "Another value"},
 		},
 		models.MonitorResult{ID: 100, MonitorID: 42, Headline: "Old value"},
 	)
@@ -39,10 +42,13 @@ func TestNewMessageMonitorNewResult(t *testing.T) {
 	require.Equal(t, "webhook_message", got["type"])
 
 	message := got["message"].(map[string]any)
-	require.Equal(t, "new_result", message["type"])
+	require.Equal(t, "new_results", message["type"])
 	require.Equal(t, "Example monitor", message["monitor"].(map[string]any)["subject"])
-	require.Equal(t, float64(101), message["new_result"].(map[string]any)["id"])
-	require.Equal(t, "New value", message["new_result"].(map[string]any)["headline"])
-	require.Equal(t, "Released at https://example.com/new", message["new_result"].(map[string]any)["subtitle"])
+	newResults := message["new_results"].([]any)
+	require.Len(t, newResults, 2)
+	require.Equal(t, float64(101), newResults[0].(map[string]any)["id"])
+	require.Equal(t, "New value", newResults[0].(map[string]any)["headline"])
+	require.Equal(t, "Released at https://example.com/new", newResults[0].(map[string]any)["subtitle"])
+	require.Equal(t, float64(102), newResults[1].(map[string]any)["id"])
 	require.Equal(t, float64(100), message["old_result"].(map[string]any)["id"])
 }

@@ -4,8 +4,8 @@ import (
 	"github.com/alexpls/untils/internal/webhook"
 )
 
-func RenderMonitorNewResultWebhook(msg MonitorNewResult) (RenderedWebhook, error) {
-	jsonStr, err := webhook.MarshalMessageMonitorNewResult(msg.Monitor, msg.New, msg.Old)
+func RenderMonitorNewResultsWebhook(msg MonitorNewResults) (RenderedWebhook, error) {
+	jsonStr, err := webhook.MarshalMessageMonitorNewResults(msg.Monitor, msg.NewResults, msg.OldResult)
 	if err != nil {
 		return RenderedWebhook{}, err
 	}

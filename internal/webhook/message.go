@@ -9,8 +9,8 @@ import (
 
 const (
 	MessageType          = "webhook_message"
-	MessageTestType      = "test"
-	MessageNewResultType = "new_result"
+	MessageTestType       = "test"
+	MessageNewResultsType = "new_results"
 )
 
 type MessageTest struct {
@@ -53,36 +53,41 @@ type MonitorMessage struct {
 	Subject string `json:"subject"`
 }
 
-type MonitorNewResultMessage struct {
-	Type      string         `json:"type"`
-	Monitor   MonitorMessage `json:"monitor"`
-	NewResult ResultMessage  `json:"new_result"`
-	OldResult ResultMessage  `json:"old_result"`
+type MonitorNewResultsMessage struct {
+	Type       string          `json:"type"`
+	Monitor    MonitorMessage  `json:"monitor"`
+	NewResults []ResultMessage `json:"new_results"`
+	OldResult  ResultMessage   `json:"old_result"`
 }
 
-type MessageMonitorNewResult struct {
-	Type    string                  `json:"type"`
-	Message MonitorNewResultMessage `json:"message"`
+type MessageMonitorNewResults struct {
+	Type    string                   `json:"type"`
+	Message MonitorNewResultsMessage `json:"message"`
 }
 
-func NewMessageMonitorNewResult(monitor models.Monitor, newResult, oldResult models.MonitorResult) MessageMonitorNewResult {
-	return MessageMonitorNewResult{
+func NewMessageMonitorNewResults(monitor models.Monitor, newResults []models.MonitorResult, oldResult models.MonitorResult) MessageMonitorNewResults {
+	resultMessages := make([]ResultMessage, len(newResults))
+	for i, result := range newResults {
+		resultMessages[i] = buildResultMessage(result)
+	}
+
+	return MessageMonitorNewResults{
 		Type: MessageType,
-		Message: MonitorNewResultMessage{
-			Type: MessageNewResultType,
+		Message: MonitorNewResultsMessage{
+			Type: MessageNewResultsType,
 			Monitor: MonitorMessage{
 				Type:    "monitor",
 				ID:      monitor.ID,
 				Subject: monitor.Subject.String,
 			},
-			NewResult: buildResultMessage(newResult),
-			OldResult: buildResultMessage(oldResult),
+			NewResults: resultMessages,
+			OldResult:  buildResultMessage(oldResult),
 		},
 	}
 }
 
-func MarshalMessageMonitorNewResult(monitor models.Monitor, newResult, oldResult models.MonitorResult) ([]byte, error) {
-	return json.Marshal(NewMessageMonitorNewResult(monitor, newResult, oldResult))
+func MarshalMessageMonitorNewResults(monitor models.Monitor, newResults []models.MonitorResult, oldResult models.MonitorResult) ([]byte, error) {
+	return json.Marshal(NewMessageMonitorNewResults(monitor, newResults, oldResult))
 }
 
 func buildResultMessage(result models.MonitorResult) ResultMessage {

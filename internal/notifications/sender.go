@@ -18,7 +18,7 @@ import (
 type SendParams struct {
 	UserID               int64
 	NotificationChannels []models.Notifier
-	Message              MonitorNewResult
+	Message              MonitorNewResults
 }
 
 type Sender interface {
@@ -52,6 +52,10 @@ func NewService(logger *slog.Logger, renderConfig RenderConfig, capabilities Cap
 var _ Sender = &Service{}
 
 func (s *Service) Send(ctx context.Context, params SendParams) error {
+	if len(params.Message.NewResults) == 0 {
+		panic("notification message must contain at least one new result")
+	}
+
 	g, ctx := errgroup.WithContext(ctx)
 
 	for _, channel := range params.NotificationChannels {
@@ -89,17 +93,23 @@ func (s *Service) sendEmail(ctx context.Context, user *models.User, params SendP
 		return nil
 	}
 
-	rendered, err := RenderMonitorNewResultEmail(ctx, s.renderConfig, params.Message)
-	if err != nil {
-		return fmt.Errorf("rendering email notification: %w", err)
+	for _, message := range params.Message.singleMessages() {
+		rendered, err := RenderMonitorNewResultEmail(ctx, s.renderConfig, message)
+		if err != nil {
+			return fmt.Errorf("rendering email notification: %w", err)
+		}
+
+		if err := s.email.Send(ctx, &email.SendParams{
+			Recipient: user.Email,
+			Subject:   rendered.Subject,
+			Body:      rendered.TextBody,
+			HTMLBody:  rendered.HTMLBody,
+		}); err != nil {
+			return err
+		}
 	}
 
-	return s.email.Send(ctx, &email.SendParams{
-		Recipient: user.Email,
-		Subject:   rendered.Subject,
-		Body:      rendered.TextBody,
-		HTMLBody:  rendered.HTMLBody,
-	})
+	return nil
 }
 
 func (s *Service) sendWebhookNotifications(ctx context.Context, params SendParams) error {
@@ -112,13 +122,18 @@ func (s *Service) sendWebhookNotifications(ctx context.Context, params SendParam
 		return fmt.Errorf("listing webhook targets: %w", err)
 	}
 
+	newResultIDs := make([]int64, len(params.Message.NewResults))
+	for i, result := range params.Message.NewResults {
+		newResultIDs[i] = result.ID
+	}
+
 	for _, target := range targets {
 		_, err := s.river.Insert(ctx, webhook.SendArgs{
 			UserID:          params.UserID,
 			WebhookTargetID: target.ID,
 			MonitorID:       params.Message.Monitor.ID,
-			NewResultID:     params.Message.New.ID,
-			OldResultID:     params.Message.Old.ID,
+			NewResultIDs:    newResultIDs,
+			OldResultID:     params.Message.OldResult.ID,
 		}, nil)
 		if err != nil {
 			return fmt.Errorf("inserting webhook send job: %w", err)
@@ -133,14 +148,20 @@ func (s *Service) sendPushoverNotification(ctx context.Context, params SendParam
 		return nil
 	}
 
-	rendered, err := RenderMonitorNewResultPushover(params.Message)
-	if err != nil {
-		return fmt.Errorf("rendering pushover notification: %w", err)
+	for _, message := range params.Message.singleMessages() {
+		rendered, err := RenderMonitorNewResultPushover(message)
+		if err != nil {
+			return fmt.Errorf("rendering pushover notification: %w", err)
+		}
+
+		if err := s.pushover.Send(ctx, pushover.SendParams{
+			UserID:  params.UserID,
+			Title:   rendered.Title,
+			Message: rendered.Message,
+		}); err != nil {
+			return err
+		}
 	}
 
-	return s.pushover.Send(ctx, pushover.SendParams{
-		UserID:  params.UserID,
-		Title:   rendered.Title,
-		Message: rendered.Message,
-	})
+	return nil
 }
