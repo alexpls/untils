@@ -3,7 +3,7 @@ package components
 import "fmt"
 
 templ Layout(title, description string) {
-	<html>
+	<html data-theme="dark">
 		<head>
 			@metaTags(title, description)
 			<link
@@ -62,6 +62,7 @@ templ metaTags(title, description string) {
 	<title>{ fullTitle }</title>
 	<meta name="description" content={ description }/>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<meta name="color-scheme" content="dark"/>
 	<meta property="og:title" content={ fullTitle }/>
 	<meta property="og:description" content={ description }/>
 	if imageURL != "" {
