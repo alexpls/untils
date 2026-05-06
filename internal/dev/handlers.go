@@ -35,6 +35,13 @@ func (h *Handlers) ViewMonitorDraftPalette(w http.ResponseWriter, r *http.Reques
 	}
 }
 
+func (h *Handlers) ViewMonitorListCardPalette(w http.ResponseWriter, r *http.Request, _ *models.User) {
+	component := MonitorListCardPalettePage()
+	if err := component.Render(r.Context(), w); err != nil {
+		h.logger.Error("error rendering monitor list card palette", "error", err)
+	}
+}
+
 func (h *Handlers) ViewFlashPalette(w http.ResponseWriter, r *http.Request, _ *models.User) {
 	ctx := reqcontext.ContextWithFlashAlert(r.Context(), "Password changed")
 	component := FlashPalettePage()

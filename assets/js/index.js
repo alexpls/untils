@@ -22,6 +22,7 @@ function timezoneName(tz) {
 }
 window.timezoneName = timezoneName
 
+// Keep this in sync with internal/components/helpers.go TimeAgoTextAt.
 function timeAgo(isoTimestamp) {
   const date = new Date(isoTimestamp)
   const now = new Date()

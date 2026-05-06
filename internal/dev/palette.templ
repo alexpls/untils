@@ -22,6 +22,9 @@ templ PalettePage() {
 			@example("Monitor draft") {
 				<a class="btn" href="/app/dev/palette/monitor_draft">Open monitor draft palette</a>
 			}
+			@example("Monitor list card") {
+				<a class="btn" href="/app/dev/palette/monitor_list_card">Open monitor list card palette</a>
+			}
 			@example("Flash alert") {
 				<a class="btn" href="/app/dev/palette/flash">Open flash palette</a>
 			}
@@ -59,6 +62,33 @@ templ FlashPalettePage() {
 		@components.HeaderCentered("Flash")
 		<div class="p-4">
 			<p class="text-sm text-muted">This page injects a flash alert into request context on every load.</p>
+		</div>
+	}
+}
+
+templ MonitorListCardPalettePage() {
+	@components.AppLayout("Palette: Monitor list card", []components.Breadcrumb{
+		components.Breadcrumb{
+			Title: "Dev",
+			Href:  "#noop",
+		},
+		components.Breadcrumb{
+			Title: "Palette",
+			Href:  "/app/dev/palette",
+		},
+		components.Breadcrumb{
+			Title: "Monitor list card",
+			Href:  "/app/dev/palette/monitor_list_card",
+		},
+	}) {
+		<div class="p-4">
+			<div class="grid gap-4 lg:grid-cols-2">
+				for _, fixture := range fixtureMonitorListCardData() {
+					@example(fixture.Title) {
+						@monitor.MonitorListCard(fixture.Monitor)
+					}
+				}
+			</div>
 		</div>
 	}
 }

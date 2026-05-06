@@ -2,6 +2,7 @@ package components
 
 import (
 	"context"
+	"fmt"
 	"net/url"
 	"path"
 	"strings"
@@ -55,6 +56,49 @@ func FormatDate(ctx context.Context, t time.Time) string {
 func FormatTime(ctx context.Context, t time.Time) string {
 	localTime := t.In(userLocation(ctx))
 	return localTime.Format("3:04:05 PM")
+}
+
+func TimeAgoText(t time.Time) string {
+	return TimeAgoTextAt(time.Now(), t)
+}
+
+func TimeAgoTextAt(now, t time.Time) string {
+	diff := now.Sub(t)
+	isFuture := diff < 0
+	if isFuture {
+		diff = -diff
+	}
+
+	seconds := int64(diff / time.Second)
+	intervals := []struct {
+		label   string
+		seconds int64
+	}{
+		{"year", 31536000},
+		{"month", 2592000},
+		{"week", 604800},
+		{"day", 86400},
+		{"hour", 3600},
+		{"minute", 60},
+		{"second", 1},
+	}
+
+	// Keep this in sync with assets/js/index.js timeAgo.
+	for _, interval := range intervals {
+		count := (seconds + interval.seconds/2) / interval.seconds
+		if count >= 1 {
+			label := interval.label
+			if count != 1 {
+				label += "s"
+			}
+			if isFuture {
+				return fmt.Sprintf("in %d %s", count, label)
+			}
+			return fmt.Sprintf("%d %s ago", count, label)
+		}
+	}
+
+	return "just now"
 }
 
 func userLocation(ctx context.Context) *time.Location {

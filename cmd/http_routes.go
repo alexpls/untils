@@ -71,6 +71,7 @@ func (a *app) routes() http.Handler {
 	// dev
 	mux.Handle("GET /app/dev/palette", a.requireDev(a.requireAuth(a.devHandlers.ViewPalette)))
 	mux.Handle("GET /app/dev/palette/monitor_draft", a.requireDev(a.requireAuth(a.devHandlers.ViewMonitorDraftPalette)))
+	mux.Handle("GET /app/dev/palette/monitor_list_card", a.requireDev(a.requireAuth(a.devHandlers.ViewMonitorListCardPalette)))
 	mux.Handle("GET /app/dev/palette/flash", a.requireDev(a.requireAuth(a.devHandlers.ViewFlashPalette)))
 	mux.Handle("GET /app/dev/emails", a.requireDev(a.requireAuth(a.devHandlers.ListEmailPreviews)))
 	mux.Handle("GET /app/dev/emails/{template_key}", a.requireDev(a.requireAuth(a.devHandlers.ViewEmailPreview)))

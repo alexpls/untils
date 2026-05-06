@@ -66,3 +66,4 @@ For non-default workspaces, use `mise run dev:info` and open the printed templ U
 ## Writing code
 
 - Fail fast if something is not in an expected state. e.g. if an expected app config value is missing, just panic.
+- Don't manually regenerate templ files if `ps aux | grep 'templ generate'` is already running.
