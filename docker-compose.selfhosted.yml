@@ -20,7 +20,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
     volumes:
-      - ${DB_DATA_LOCATION:-./tmp/selfhosted_pgdata}:/var/lib/postgresql/data
+      - ${DB_DATA_LOCATION:-./tmp/selfhosted_pgdata}:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", 'pg_isready -U "$${POSTGRES_USER}" -d postgres']
       interval: 3s

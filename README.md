@@ -70,7 +70,7 @@ ADMIN_EMAIL=alex@example.com
 # Optional for real monitor checks. Blank values are enough to start the app,
 # but checks that call these providers will fail until real keys are configured.
 OPENAI_API_KEY=
-OPENAI_MODEL=grok-4-1-fast-reasoning
+OPENAI_MODEL=gpt-5.4
 BRAVE_KEY=
 
 SMTP_HOST=127.0.0.1

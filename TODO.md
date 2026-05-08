@@ -28,6 +28,10 @@
 - [ ] Improvement: 25% of the produced binary is OpenAI's bloated SDK. I only use one endpoint, could move away from the SDK and call it directly with HTTP?
 - [ ] Improvement: add pricing for gpt models too
 
+### Self-hosting
+
+- [ ] Improvement: add arm64 arch variants of docker images pushed
+
 ### Misc
 
 - [ ] Feature: User signup

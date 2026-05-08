@@ -21,6 +21,7 @@ Find untils on Github: [alexpls/untils](https://github.com/alexpls/untils).
 
 ### System
 
+- x86
 - Docker with `docker compose`
 - Enough RAM to comfortably run Google Chrome headless
 
@@ -38,8 +39,8 @@ Create a working directory, then download the self-hosting files from GitHub:
 ```sh
 mkdir untils-selfhost
 cd untils-selfhost
-curl -O https://raw.githubusercontent.com/alexpls/untils/main/docker-compose.selfhosted.yml
-curl -o .env.selfhosted https://raw.githubusercontent.com/alexpls/untils/main/.env.selfhosted.example
+curl -O https://raw.githubusercontent.com/alexpls/untils/master/docker-compose.selfhosted.yml
+curl -o .env.selfhosted https://raw.githubusercontent.com/alexpls/untils/master/.env.selfhosted.example
 ```
 
 ## 2. Edit `.env.selfhosted`
@@ -53,7 +54,7 @@ Set the values for your deployment. The example file includes comments for each 
 ## 3. Start the stack
 
 ```sh
-docker compose -f docker-compose.selfhosted.yml up -d
+docker compose --env-file .env.selfhosted -f docker-compose.selfhosted.yml up -d
 ```
 
 This starts the app, PostgreSQL, and the bundled browser service used for checks.
@@ -69,6 +70,4 @@ http://localhost:3322/app
 Sign in with:
 
 - Email: the `ADMIN_EMAIL` value
-- Password: `abc123`
-
-If this is the first boot, **change that password immediately**.
+- Password: `abc123` (change that password immediately!)

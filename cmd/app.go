@@ -187,7 +187,7 @@ func createApp(c *config) (*app, context.Context, context.CancelFunc, func()) {
 	a.auth = auth.NewAuth(a.logger.With("source", "auth"), a.db, a.queries, a.validate)
 	must.NoErr(a.bootstrapInitialSelfHostedAdmin(ctx, a.db))
 
-	a.sessionManager = session.NewManager(a.db, a.queries, a.logger.With("source", "session"))
+	a.sessionManager = session.NewManager(a.db, a.queries, c.secureCookies, a.logger.With("source", "session"))
 
 	notificationCapabilities := notifications.Capabilities{
 		EmailEnabled:    c.emailSendConfigured(),

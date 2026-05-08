@@ -14,13 +14,14 @@ const (
 )
 
 type config struct {
-	buildVersion string
-	env          constants.Env
-	appMode      constants.Mode
-	migrate      bool
-	baseURL      string
-	dbUrl        string
-	adminEmail   string
+	buildVersion  string
+	env           constants.Env
+	appMode       constants.Mode
+	migrate       bool
+	secureCookies bool
+	baseURL       string
+	dbUrl         string
+	adminEmail    string
 	// plausible analytics tag for page view tracking.
 	// set to zero value to disable tracking.
 	// e.g. pa-vckXXX

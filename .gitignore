@@ -1,8 +1,9 @@
-public/css/output.css
-public/js/*
-node_modules
 .DS_Store
 .env.*
+!.env.selfhosted.example
+/tmp/
 /untils_linux_amd64
 dev.log
-/tmp/
+node_modules
+public/css/output.css
+public/js/*

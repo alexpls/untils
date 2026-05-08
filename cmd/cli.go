@@ -106,6 +106,12 @@ func globalProperties(c *config) []configProperty {
 			func(value bool) { c.migrate = value },
 			nil,
 		),
+		boolProperty(
+			"SECURE_COOKIES",
+			"true",
+			func(value bool) { c.secureCookies = value },
+			nil,
+		),
 		stringProperty(
 			"BASE_URL",
 			"",

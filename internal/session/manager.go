@@ -21,17 +21,19 @@ const (
 const cookieName = "sid"
 
 type Manager struct {
-	store  *store
-	logger *slog.Logger
+	store         *store
+	secureCookies bool
+	logger        *slog.Logger
 }
 
-func NewManager(db db.DB, queries *models.Queries, logger *slog.Logger) *Manager {
+func NewManager(db db.DB, queries *models.Queries, secureCookies bool, logger *slog.Logger) *Manager {
 	return &Manager{
 		store: &store{
 			db:      db,
 			queries: queries,
 		},
-		logger: logger,
+		secureCookies: secureCookies,
+		logger:        logger,
 	}
 }
 
@@ -67,7 +69,7 @@ func (sm *Manager) New(r *http.Request, w http.ResponseWriter) *Session {
 		Name:     cookieName,
 		Value:    sess.ID,
 		MaxAge:   sessionExpirySecs,
-		Secure:   true,
+		Secure:   sm.secureCookies,
 		HttpOnly: true,
 		SameSite: http.SameSiteStrictMode,
 	}

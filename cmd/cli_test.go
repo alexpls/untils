@@ -86,6 +86,7 @@ func TestParseServeArgsLoadsFromEnv(t *testing.T) {
 			"SMTP_PORT":      "2025",
 			"APP_MODE":       appModeHosted.String(),
 			"MIGRATE":        "true",
+			"SECURE_COOKIES": "false",
 			"BRAVE_KEY":      "brave",
 			"OPENAI_API_KEY": "openai",
 			"PUSHOVER_KEY":   "pushover",
@@ -109,6 +110,9 @@ func TestParseServeArgsLoadsFromEnv(t *testing.T) {
 	}
 	if !globalCfg.migrate {
 		t.Fatalf("expected migrate to be true")
+	}
+	if globalCfg.secureCookies {
+		t.Fatalf("expected secureCookies to be false")
 	}
 	if globalCfg.smtp.host != "mail.local" {
 		t.Fatalf("got smtp host %q", globalCfg.smtp.host)
