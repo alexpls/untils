@@ -18,7 +18,7 @@ Still under active development. See the [home page](https://untils.com)
 for more information and join the waitlist for updates about its release.
 
 If you want earlier access, you can self-host untils. But you're reading
-this README so you probably already know that :)
+this README so you probably already figured that out :)
 The [self-hosting quickstart](https://untils.com/docs/self-hosting/quickstart)
 doc is a good place to learn more.
 
@@ -81,19 +81,6 @@ EOF
 mise run dev:env:sync
 ```
 
-git worktrees / jj workspaces are supported out of the box, so multiple instances
-of the application can be developed at the same time.
-
-`dev:env:sync` adds workspace-specific ports and database URLs to `.env.dev`. The default workspace uses:
-
-- app: `http://localhost:4200/app`
-- templ proxy: `http://localhost:7331/app`
-- database: `postgresql://root:root@localhost:54324/untils_dev`
-- Mailpit: `http://localhost:8025`
-- River UI: `http://localhost:7332`
-
-Run `mise run dev:info` at any time to print the current workspace settings.
-
 ### 3. Start services and prepare the database
 
 ```sh
@@ -101,14 +88,7 @@ mise run dev:up
 mise run db:reset
 ```
 
-This starts PostgreSQL, Mailpit, and River UI, then creates, migrates, seeds, and regenerates sqlc output for the development and test databases.
-
-The seed user is:
-
-- email: `alex@example.com`
-- password: `abc123`
-
-In `ENV=dev`, the sign-in page also shows a development sign-in button.
+This starts the supporting services from the Docker Compose file, and initialises the database to a clean slate.
 
 ### 4. Run the development server
 
@@ -118,26 +98,14 @@ mise run dev
 
 This runs the templ/app watcher plus CSS and JS watchers. Open the templ proxy URL from `mise run dev:info` for hot reload.
 
-Development logs are written to [`dev.log`](dev.log) when the watcher is running.
+The default seed user to log in with is:
 
-## Common tasks
+- email: `alex@example.com`
+- password: `abc123`
 
-List all tasks:
+### Tips
 
-```sh
-mise tasks
-```
-
-Frequently used tasks:
-
-```sh
-mise run dev              # run app, css, and js watchers
-mise run dev:up           # start docker services
-mise run format           # auto-format files
-mise run lint             # lint
-mise run test:unit        # run unit tests
-mise run test:integration # run integration tests (require API keys)
-```
+- List `mise tasks` to get an idea of other dev tasks that can be performed
 
 ## License
 
