@@ -22,16 +22,16 @@ If you want earlier access, you can self-host untils. Start by reading
 ## Screenshots
 
 <figure>
-  <img src="/assets/images/untils_monitor_list.jpg" alt="List of monitors in untils" />
+  <img src="/assets/images/screenshots/full/untils_monitor_list.jpg" alt="List of monitors in untils" />
   <figcaption>Monitors list showing the configured checks and their latest state.</figcaption>
 </figure>
 
 <figure>
-  <img src="/assets/images/untils_monitor_create.jpg" alt="Create monitor form in untils" />
+  <img src="/assets/images/screenshots/full/untils_monitor_create.jpg" alt="Create monitor form in untils" />
   <figcaption>Monitor creation form for setting up a new change notification.</figcaption>
 </figure>
 
 <figure>
-  <img src="/assets/images/untils_monitor_view.jpg" alt="Monitor detail page in untils" />
+  <img src="/assets/images/screenshots/full/untils_monitor_view.jpg" alt="Monitor detail page in untils" />
   <figcaption>Monitor detail page showing the latest results.</figcaption>
 </figure>

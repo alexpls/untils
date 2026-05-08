@@ -87,7 +87,7 @@ func HomePage() templ.Component {
 					"Describe what to watch in plain English",
 					"Forget complicated scraping setups with rules and selectors. Just specify the subject you want to monitor in plain language.",
 					"screenshot showing the subject: IGN's latest 9/10 game",
-					"images/untils_home_subject.png",
+					"images/screenshots/highlights/untils_home_subject.png",
 				).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -96,7 +96,7 @@ func HomePage() templ.Component {
 					"See what changed over time",
 					"Each monitor has a timeline of results, so you can see previous answers, compare updates, and spot trends.",
 					"screenshot showing two recent monitor results",
-					"images/untils_home_timeline.png",
+					"images/screenshots/highlights/untils_home_timeline.png",
 				).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -105,7 +105,7 @@ func HomePage() templ.Component {
 					"Correct mistakes to improve future checks",
 					"If a result is not what you expected, corrections can be added to steer the AI towards a better check in the future.",
 					"screenshot showing a monitor correction",
-					"images/untils_home_correction.png",
+					"images/screenshots/highlights/untils_home_correction.png",
 				).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -114,7 +114,7 @@ func HomePage() templ.Component {
 					"Choose how to get notified",
 					"When a new result is found, choose which channel to get notified via.",
 					"screenshot showing monitor notification settings",
-					"images/untils_home_notifications.png",
+					"images/screenshots/highlights/untils_home_notifications.png",
 				).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err

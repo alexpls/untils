@@ -22,7 +22,7 @@ this README so you probably already know that :)
 The [self-hosting quickstart](https://untils.com/docs/self-hosting/quickstart)
 doc is a good place to learn more.
 
-![List of monitors in untils](public/images/untils_monitor_list.jpg)
+![List of monitors in untils](public/images/screenshots/full/untils_monitor_list.jpg)
 
 ---
 
@@ -142,4 +142,3 @@ mise run test:integration # run integration tests (require API keys)
 ## License
 
 See [`LICENSE.md`](LICENSE.md).
-
