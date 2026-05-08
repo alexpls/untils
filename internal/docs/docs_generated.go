@@ -6,7 +6,7 @@ func init() {
 		IndexPath: "/docs/introduction/welcome",
 		PagesByPath: map[string]Page{
 			"/docs/introduction/welcome": {
-				Title:        "Welcome",
+				Title:        "Welcome!!!",
 				SidebarTitle: "Welcome",
 				Description:  "untils monitors the things you care about on the internet and notifies you when they change",
 				Section:      "Introduction",

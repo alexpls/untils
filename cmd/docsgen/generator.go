@@ -45,7 +45,7 @@ func WriteGeneratedFile(repoRoot string) error {
 		return err
 	}
 
-	docsDir := filepath.Join(root, "docs")
+	docsDir := filepath.Join(root, "docs", "public")
 	outputPath := filepath.Join(root, "internal", "docs", "docs_generated.go")
 
 	files := make([]string, 0)
