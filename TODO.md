@@ -4,6 +4,7 @@
 
 - [ ] Make sure errors are handled in the LLM path consistently
 - [ ] Add test coverage for important components that are not yet tested
+- [ ] Home page app mobile preview should look better. The monitor is cut off currently.
 
 ### Monitor results
 
