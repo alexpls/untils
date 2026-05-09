@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/url"
 	"os"
-	"runtime/debug"
 	"slices"
 	"strconv"
 	"strings"
@@ -409,27 +408,6 @@ func parseMigrateArgs(args []string, lookupEnv envLookup) *migrateConfig {
 	loadConfigProperties(lookupEnv, migrateProperties(&mc))
 
 	return &mc
-}
-
-func buildVersion() string {
-	var revision string
-	buildInfo, ok := debug.ReadBuildInfo()
-	if !ok {
-		return "unknown"
-	}
-
-	for _, setting := range buildInfo.Settings {
-		if setting.Key == "vcs.revision" {
-			revision = setting.Value[0:7]
-			break
-		}
-	}
-
-	if revision == "" {
-		return "unknown"
-	}
-
-	return revision
 }
 
 func requireNoArgs(command string, args []string) {

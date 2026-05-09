@@ -14,13 +14,14 @@ RUN bun run build-js
 FROM golang:1.26-alpine AS go
 WORKDIR /app
 RUN apk add --no-cache ca-certificates
+ARG BUILD_REVISION
 COPY go.mod go.sum ./
 RUN go mod download
 RUN go install github.com/a-h/templ/cmd/templ@latest
 COPY . .
 COPY --from=bun /app/public ./public
 RUN templ generate
-RUN go build -o /bin/server ./cmd
+RUN go build -ldflags="-X main.buildRevision=${BUILD_REVISION}" -o /bin/server ./cmd
 
 # server
 FROM scratch
