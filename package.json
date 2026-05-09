@@ -4,12 +4,12 @@
   "dependencies": {
     "@oddbird/css-anchor-positioning": "^0.9.0",
     "daisyui": "^5.5.19",
-    "tailwindcss": "^4.2.2"
+    "tailwindcss": "^4.3.0"
   },
   "scripts": {
     "format": "bunx prettier . --write",
     "build-css": "bunx @tailwindcss/cli -i ./assets/css/index.css -o ./public/css/output.css",
-    "watch-css": "bunx @tailwindcss/cli -i ./assets/css/index.css -o ./public/css/output.css --watch",
+    "watch-css": "bunx @tailwindcss/cli -i ./assets/css/index.css -o ./public/css/output.css --watch=always",
     "build-js": "bun build assets/js/index.js --minify --format=esm --outfile=public/js/app.js",
     "watch-js": "bun build assets/js/index.js --watch --format=esm --outfile=public/js/app.js"
   },
