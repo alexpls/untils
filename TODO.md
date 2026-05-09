@@ -35,7 +35,6 @@
 
 ### Misc
 
-- [ ] Improvement: Monitor list: prettier empty state
 - [ ] Feature: User signup
 - [ ] Improvement: Better use of go context. Should pass it all the way down and rely less on closer functions during app startup/shutdown
 - [ ] Refactor: Forms should have some helpers extracted
@@ -52,6 +51,7 @@
 
 ## Done
 
+- [x] Improvement: Monitor list: prettier empty state
 - [x] Remove my personal email from seeds
 - [x] Fix: Handle browser timeouts and lifecycle properly
 - [x] Fix: Need an anchored positioning tooltip polyfill for Firefox

@@ -33,7 +33,7 @@ func TestListGet(t *testing.T) {
 		page, _ := io.ReadAll(res.Body)
 
 		assert.Equal(t, http.StatusOK, res.StatusCode)
-		assert.Contains(t, string(page), "No monitors to show")
+		assert.Contains(t, string(page), "Create your first monitor")
 	})
 
 	t.Run("with monitors", func(t *testing.T) {

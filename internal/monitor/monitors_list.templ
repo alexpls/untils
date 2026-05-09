@@ -47,10 +47,27 @@ templ MonitorsList(data MonitorsListData) {
 				"?"+data.Pagination.NextPageParams().Encode()+demoParam(ctx),
 			)
 		} else {
-			<div class="p-4">
-				No monitors to show.
-			</div>
+			@MonitorsListEmptyState()
 		}
+	</div>
+}
+
+templ MonitorsListEmptyState() {
+	<div class="mx-auto max-w-130 p-4 space-y-4 md:mt-10">
+		<div class="space-y-4">
+			<div class="inline-block p-4 rounded-lg bg-base-100 text-muted">
+				@icons.Binoculars(icons.IconParams{Size: 20})
+			</div>
+			<div class="space-y-1">
+				<h2 class="text-xl font-semibold">Create your first monitor</h2>
+				<p>
+					Monitors watch things and send notifications when they change.
+				</p>
+			</div>
+			<div>
+				<a class="btn btn-primary" href="/app/monitors/new">Create a monitor</a>
+			</div>
+		</div>
 	</div>
 }
 
