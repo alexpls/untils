@@ -17,20 +17,15 @@ Webhook targets are configured from **Settings → Webhooks**. Add the HTTPS or 
 URL that should receive notifications, then use **Test** to send a test message.
 
 When a monitor has webhook notifications enabled and new results are detected,
-untils queues one delivery job for each configured webhook target. Each delivery
-is sent as an HTTP `POST` request with this header:
-
-```txt
-Content-Type: application/json
-```
+untils sends a webhook for each configured webhook target. Each delivery
+is sent as an HTTP `POST` request containing a JSON body.
 
 A delivery is treated as successful when the endpoint returns any HTTP status code
 below `400`. Status codes `400` and above are treated as failures. Failed delivery
 jobs are retried automatically, up to 10 attempts.
 
-Webhook requests have a 15 second HTTP timeout and a 20 second delivery job
-timeout. The receiving endpoint should respond quickly and do any slower work in
-its own background job.
+Webhook requests have a 15 second HTTP timeout. The receiving endpoint should respond
+quickly so as to stay within the timeout.
 
 ## Test messages
 
@@ -68,33 +63,33 @@ Monitor change notifications use this top-level shape:
 
 ### Fields
 
-| Field | Type | Description |
-| --- | --- | --- |
-| `type` | string | Always `webhook_message` for webhook payloads. |
-| `message.type` | string | The message kind. Monitor change notifications use `new_results`. |
-| `message.monitor.type` | string | Always `monitor`. |
-| `message.monitor.id` | number | The untils monitor ID. |
-| `message.monitor.subject` | string | The monitor subject shown in untils. |
-| `message.new_results` | array | One or more newly detected results. |
-| `message.old_result` | object | The previous visible result for comparison. If there was no previous result, the headline is `(none)`. |
+| Field                     | Type   | Description                                                                                            |
+| ------------------------- | ------ | ------------------------------------------------------------------------------------------------------ |
+| `type`                    | string | Always `webhook_message` for webhook payloads.                                                         |
+| `message.type`            | string | The message kind. Monitor change notifications use `new_results`.                                      |
+| `message.monitor.type`    | string | Always `monitor`.                                                                                      |
+| `message.monitor.id`      | number | The untils monitor ID.                                                                                 |
+| `message.monitor.subject` | string | The monitor subject shown in untils.                                                                   |
+| `message.new_results`     | array  | One or more newly detected results.                                                                    |
+| `message.old_result`      | object | The previous visible result for comparison. If there was no previous result, the headline is `(none)`. |
 
 Each result in `new_results` and `old_result` uses this shape:
 
-| Field | Type | Description |
-| --- | --- | --- |
-| `type` | string | Always `result`. |
-| `id` | number | The untils result ID. |
-| `headline` | string | The rendered result headline. |
-| `subtitle` | string | The rendered result subtitle. |
-| `fields` | array | The extracted fields for the result. |
+| Field      | Type   | Description                          |
+| ---------- | ------ | ------------------------------------ |
+| `type`     | string | Always `result`.                     |
+| `id`       | number | The untils result ID.                |
+| `headline` | string | The rendered result headline.        |
+| `subtitle` | string | The rendered result subtitle.        |
+| `fields`   | array  | The extracted fields for the result. |
 
 Each item in `fields` uses this shape:
 
-| Field | Type | Description |
-| --- | --- | --- |
-| `type` | string | Always `result_field`. |
-| `name` | string | The field name configured for the monitor. |
-| `value` | string | The extracted value as text. |
+| Field   | Type   | Description                                |
+| ------- | ------ | ------------------------------------------ |
+| `type`  | string | Always `result_field`.                     |
+| `name`  | string | The field name configured for the monitor. |
+| `value` | string | The extracted value as text.               |
 
 ## Example monitor change message
 
