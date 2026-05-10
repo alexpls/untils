@@ -26,6 +26,9 @@ Frontend:
 Run `mise tasks` to view the standard development tasks that you can run. These include
 things related to code generation, db migrations, testing, linting, etc.
 
+Tests need their database reset before each run. The mise tasks do this automatically. If
+you need to do it manually, use `mise run testsetup:db`.
+
 ## jj workspaces
 
 - When working from a newly created `jj workspace`, run `bun install` in that workspace directory before running dev tasks.
