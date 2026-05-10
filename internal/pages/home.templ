@@ -32,8 +32,8 @@ templ HomePage() {
 				<div
 					class="overflow-hidden rounded-lg rounded-b-none border border-base-content/10 border-b-0 bg-base-300 shadow-2xl min-h-100"
 					data-signals:_home_preview.height="'400px'"
-					data-init="$_home_preview.height = Math.max(400, window.innerHeight - el.getBoundingClientRect().top) + 'px'"
-					data-on:resize__window__debounce.50ms="if (window.scrollY === 0) $_home_preview.height = Math.max(400, window.innerHeight - el.getBoundingClientRect().top) + 'px'"
+					data-init="$_home_preview.height = Math.max(400, window.innerHeight - (el.getBoundingClientRect().top + window.scrollY)) + 'px'"
+					data-on:resize__window__debounce.50ms="if (window.scrollY === 0) $_home_preview.height = Math.max(400, window.innerHeight - (el.getBoundingClientRect().top + window.scrollY)) + 'px'"
 					data-style:height="$_home_preview.height"
 				>
 					<div class="flex items-center gap-3 px-4 py-2.5 bg-base-300 border-b border-base-content/10">
