@@ -55,7 +55,7 @@ func HomePage() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</a></div></div><div class=\"container mx-auto\"><div class=\"h-80 overflow-hidden rounded-lg rounded-b-none border border-base-content/10 border-b-0 bg-base-300 shadow-2xl sm:h-96 lg:h-100\"><div class=\"flex items-center gap-3 px-4 py-2.5 bg-base-300 border-b border-base-content/10\"><div class=\"flex gap-1.5\"><div class=\"w-3 h-3 rounded-full bg-error/70\"></div><div class=\"w-3 h-3 rounded-full bg-warning/70\"></div><div class=\"w-3 h-3 rounded-full bg-success/70\"></div></div><div class=\"pointer-events-none flex flex-1 items-center gap-2 truncate rounded-md bg-base-100 px-3 py-1.5 text-xs text-base-content/50 sm:text-sm\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</a></div></div><div class=\"container mx-auto\"><div class=\"overflow-hidden rounded-lg rounded-b-none border border-base-content/10 border-b-0 bg-base-300 shadow-2xl min-h-100\" data-signals:_home_preview.height=\"'400px'\" data-init=\"$_home_preview.height = Math.max(400, window.innerHeight - el.getBoundingClientRect().top) + 'px'\" data-on:resize__window__debounce.50ms=\"if (window.scrollY === 0) $_home_preview.height = Math.max(400, window.innerHeight - el.getBoundingClientRect().top) + 'px'\" data-style:height=\"$_home_preview.height\"><div class=\"flex items-center gap-3 px-4 py-2.5 bg-base-300 border-b border-base-content/10\"><div class=\"flex gap-1.5\"><div class=\"w-3 h-3 rounded-full bg-error/70\"></div><div class=\"w-3 h-3 rounded-full bg-warning/70\"></div><div class=\"w-3 h-3 rounded-full bg-success/70\"></div></div><div class=\"pointer-events-none flex flex-1 items-center gap-2 truncate rounded-md bg-base-100 px-3 py-1.5 text-xs text-base-content/50 sm:text-sm\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -257,7 +257,7 @@ func featureCard(title, body, alt, imagePath string) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/pages/home.templ`, Line: 143, Col: 84}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/pages/home.templ`, Line: 149, Col: 84}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -270,7 +270,7 @@ func featureCard(title, body, alt, imagePath string) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(body)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/pages/home.templ`, Line: 144, Col: 65}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/pages/home.templ`, Line: 150, Col: 65}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -320,7 +320,7 @@ func featureCardImage(alt, imagePath string) templ.Component {
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(alt)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/pages/home.templ`, Line: 152, Col: 17}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/pages/home.templ`, Line: 158, Col: 17}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -333,7 +333,7 @@ func featureCardImage(alt, imagePath string) templ.Component {
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(public.AssetURL(imagePath))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/pages/home.templ`, Line: 152, Col: 52}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/pages/home.templ`, Line: 158, Col: 52}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -380,7 +380,7 @@ func emailFormInner(errorMessage string) templ.Component {
 			var templ_7745c5c3_Var13 string
 			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(errorMessage)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/pages/home.templ`, Line: 184, Col: 64}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/pages/home.templ`, Line: 190, Col: 64}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 			if templ_7745c5c3_Err != nil {
