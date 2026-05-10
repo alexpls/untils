@@ -20,9 +20,9 @@ var (
 )
 
 func pgURL() string {
-	pgURL := os.Getenv("PG_TEST_URL")
+	pgURL := os.Getenv("PG_URL")
 	if pgURL == "" {
-		panic("PG_TEST_URL environment variable is not set")
+		panic("PG_URL environment variable is not set")
 	}
 	return pgURL
 }

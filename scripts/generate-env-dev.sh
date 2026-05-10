@@ -7,6 +7,7 @@ generated_end="# --- end workspace overrides ---"
 workspace_name="${1:-}"
 source_env_file="${2:-.env.dev}"
 dest_env_file="${3:-$source_env_file}"
+test_env_file="${TEST_ENV_FILE:-.env.test}"
 
 if [ -z "${workspace_name}" ]; then
 	if command -v jj >/dev/null 2>&1; then
@@ -66,7 +67,7 @@ while IFS= read -r line || [ -n "${line}" ]; do
 		continue
 	fi
 	case "${line}" in
-		WORKSPACE_NAME=*|WORKSPACE_SLUG=*|APP_PORT=*|DB_PORT=*|SMTP_PORT=*|MAILPIT_PORT=*|RIVERUI_PORT=*|TEMPL_PROXY_PORT=*|COMPOSE_PROJECT_NAME=*|PG_URL=*|PG_TEST_URL=*)
+		WORKSPACE_NAME=*|WORKSPACE_SLUG=*|APP_PORT=*|DB_PORT=*|SMTP_PORT=*|MAILPIT_PORT=*|RIVERUI_PORT=*|TEMPL_PROXY_PORT=*|COMPOSE_PROJECT_NAME=*|PG_URL=*)
 			continue
 			;;
 	esac
@@ -89,8 +90,13 @@ RIVERUI_PORT=${riverui_port}
 TEMPL_PROXY_PORT=${templ_proxy_port}
 COMPOSE_PROJECT_NAME=untils_${workspace_slug}
 PG_URL=postgresql://root:root@localhost:${db_port}/untils_dev
-PG_TEST_URL=postgresql://root:root@localhost:${db_port}/untils_test
 ${generated_end}
 EOF
 
 mv "${tmp_file}" "${dest_env_file}"
+
+cat > "${test_env_file}" <<EOF
+${generated_start}
+PG_URL=postgresql://root:root@localhost:${db_port}/untils_test
+${generated_end}
+EOF

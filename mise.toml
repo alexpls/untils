@@ -2,8 +2,8 @@
 go = "1.26.0"
 bun = "latest"
 
-[settings]
-env_file = '.env.dev'
+[env]
+_.file = ".env.dev"
 
 [tasks."build:x86"]
 depends = ["docs:generate", "lint", "test:*"]
@@ -26,26 +26,25 @@ run = "golangci-lint run"
 run = "go run ./cmd/docsgen"
 
 [tasks."testsetup:db"]
+env = { _.file = ".env.test" }
 run = '''
-psql "${PG_TEST_URL%/untils_test}" --echo-errors --quiet -c '\timing off' -c "drop database if exists untils_test with (force);"
-psql "${PG_TEST_URL%/untils_test}" --echo-errors --quiet -c '\timing off' -c "create database untils_test;"
-psql "${PG_TEST_URL}" --echo-errors --quiet -c '\timing off' -f ./internal/models/schema.sql
-# Mark River migrations as applied since they're in schema.sql - TODO there must be a better way?
-psql "${PG_TEST_URL}" --echo-errors --quiet -c "insert into river_migration (line, version, created_at) values ('main', 1, now()), ('main', 2, now()), ('main', 3, now()), ('main', 4, now()), ('main', 5, now()), ('main', 6, now()) on conflict do nothing;"
+db_name="${PG_URL##*/}"
+db_base_url="${PG_URL%/${db_name}}"
+
+psql "${db_base_url}" --echo-errors --quiet -c "drop database if exists ${db_name} with (force);"
+psql "${db_base_url}" --echo-errors --quiet -c "create database ${db_name};"
+psql "${PG_URL}" --echo-errors --quiet -f ./internal/models/schema.sql
 '''
 
 [tasks."test:unit"]
-env.TEMPL_DEV_MODE = false
+env = { _.file = ".env.test", TEMPL_DEV_MODE = "false" }
 depends = ["docs:generate", "testsetup:*"]
-run = '''
-go test ./...
-'''
+run = "go test ./..."
 
 [tasks."test:integration"]
+env = { _.file = ".env.test" }
 depends = ["docs:generate", "testsetup:*"]
-run = '''
-go test -tags=integration ./...
-'''
+run = "go test -tags=integration ./..."
 
 [tasks."dev:env:sync"]
 run = "./scripts/generate-env-dev.sh"
@@ -96,7 +95,7 @@ docker compose down
 '''
 
 [tasks.dev]
-run = { task = "dev:watch:*" }
+depends = ["dev:watch:app", "dev:watch:css", "dev:watch:js"]
 
 [tasks."db:reset"]
 run = [
@@ -109,20 +108,18 @@ run = [
 
 [tasks."db:create"]
 run = '''
-psql "${PG_URL%/untils_dev}" -c "create database untils_dev;" || true
-psql "${PG_TEST_URL%/untils_test}" -c "create database untils_test;" || true
+db_name="${PG_URL##*/}"
+psql "${PG_URL%/${db_name}}" -c "create database ${db_name};" || true
 '''
 
 [tasks."db:drop"]
 run = '''
-psql "${PG_URL%/untils_dev}" -c "drop database untils_dev;" || true
-psql "${PG_TEST_URL%/untils_test}" -c "drop database untils_test;" || true
+db_name="${PG_URL##*/}"
+psql "${PG_URL%/${db_name}}" -c "drop database ${db_name};" || true
 '''
 
 [tasks."db:seed"]
-run = '''
-ENV=dev go run ./cmd seed
-'''
+run = 'go run ./cmd seed'
 
 [tasks."db:migrate:create"]
 usage = '''
@@ -135,17 +132,16 @@ migrate create -ext sql -dir internal/db/migrations "${usage_name?}"
 [tasks."db:migrate:up"]
 depends_post = ["db:dump_schema"]
 run = '''
-migrate -database ${PG_URL/postgresql/pgx5} -path internal/db/migrations up
-migrate -database ${PG_TEST_URL/postgresql/pgx5} -path internal/db/migrations up
+pgx_url="$(printf '%s\n' "$PG_URL" | sed -e 's,^postgresql:,pgx5:,' -e 's,^postgres:,pgx5:,')"
+migrate -database "$pgx_url" -path internal/db/migrations up
 river migrate-up --database-url "${PG_URL}"
-river migrate-up --database-url "${PG_TEST_URL}"
 '''
 
 [tasks."db:migrate:down"]
 depends_post = ["db:dump_schema"]
 run = '''
-migrate -database ${PG_URL/postgresql/pgx5} -path internal/db/migrations down 1
-migrate -database ${PG_TEST_URL/postgresql/pgx5} -path internal/db/migrations down 1
+pgx_url="$(printf '%s\n' "$PG_URL" | sed -e 's,^postgresql:,pgx5:,' -e 's,^postgres:,pgx5:,')"
+migrate -database "$pgx_url" -path internal/db/migrations down 1
 '''
 
 [tasks."db:dump_schema"]

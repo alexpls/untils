@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  PG_TEST_URL: postgres://postgres:postgres@localhost:5432/untils_test
+  PG_URL: postgres://postgres:postgres@localhost:5432/untils_test
 
 jobs:
   lint:

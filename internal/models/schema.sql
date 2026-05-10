@@ -941,6 +941,13 @@ CREATE INDEX idx_sessions_expires_at ON public.sessions USING btree (expires_at)
 
 
 --
+-- Name: idx_webhook_targets_user_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_webhook_targets_user_id ON public.webhook_targets USING btree (user_id);
+
+
+--
 -- Name: river_job_args_index; Type: INDEX; Schema: public; Owner: -
 --
 
