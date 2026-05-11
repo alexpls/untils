@@ -17,7 +17,7 @@ RUN apk add --no-cache ca-certificates
 ARG BUILD_REVISION
 COPY go.mod go.sum ./
 RUN go mod download
-RUN go install github.com/a-h/templ/cmd/templ@latest
+RUN go install github.com/a-h/templ/cmd/templ@v0.3.1020
 COPY . .
 COPY --from=bun /app/public ./public
 RUN templ generate

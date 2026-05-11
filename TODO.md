@@ -34,6 +34,7 @@
 
 ### Misc
 
+- [ ] Refactor: go tools are a mess. e.g. templ is defined in dockerfile, and mise. Should we be using tool directives in go.mod for stable pinned versions instead?
 - [ ] Feature: User signup
 - [ ] Improvement: Better use of go context. Should pass it all the way down and rely less on closer functions during app startup/shutdown
 - [ ] Refactor: Forms should have some helpers extracted

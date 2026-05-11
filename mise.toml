@@ -51,10 +51,10 @@ run = "./scripts/generate-env-dev.sh"
 
 [tasks."dev:deps"]
 run = '''
-go install -tags 'pgx5' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
-go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
-go install github.com/riverqueue/river/cmd/river@latest
-go install github.com/a-h/templ/cmd/templ@latest
+go install -tags 'pgx5' github.com/golang-migrate/migrate/v4/cmd/migrate@v4.19.1
+go install github.com/sqlc-dev/sqlc/cmd/sqlc@v1.31.1
+go install github.com/riverqueue/river/cmd/river@v0.35.1
+go install github.com/a-h/templ/cmd/templ@v0.3.1020
 go install golang.org/x/tools/gopls@latest
 curl -sSfL https://golangci-lint.run/install.sh | sh -s -- -b $(go env GOPATH)/bin v2.11.3
 '''
