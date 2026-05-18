@@ -14,7 +14,6 @@ require (
 	github.com/jackc/pgx/v5 v5.9.2
 	github.com/jackc/pgxlisten v0.0.0-20250802141604-12b92425684c
 	github.com/lmittmann/tint v1.1.3
-	github.com/openai/openai-go/v3 v3.35.0
 	github.com/riverqueue/river v0.35.1
 	github.com/riverqueue/river/riverdriver/riverpgxv5 v0.35.1
 	github.com/riverqueue/river/rivertype v0.35.1

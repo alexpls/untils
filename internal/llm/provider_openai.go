@@ -8,8 +8,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/openai/openai-go/v3"
-	"github.com/openai/openai-go/v3/responses"
+	"github.com/alexpls/untils/internal/openai"
 )
 
 type openAIProvider struct {
@@ -21,28 +20,25 @@ func NewOpenAIProvider(client *openai.Client) Provider {
 }
 
 func (p *openAIProvider) Complete(ctx context.Context, req CompletionRequest) (*CompletionResponse, error) {
-	params := responses.ResponseNewParams{
+	params := openai.CreateRequest{
 		Model: req.Model,
-		Input: responses.ResponseNewParamsInputUnion{
-			OfInputItemList: toOpenAIInput(req.Messages),
-		},
+		Input: toOpenAIInput(req.Messages),
 	}
 
 	if req.ResponseSchema != nil {
-		params.Text = responses.ResponseTextConfigParam{
-			Format: responses.ResponseFormatTextConfigUnionParam{
-				OfJSONSchema: &responses.ResponseFormatTextJSONSchemaConfigParam{
-					Name:   req.ResponseName,
-					Strict: openai.Bool(true),
-					Schema: req.ResponseSchema,
-				},
+		params.Text = &openai.TextConfig{
+			Format: &openai.JSONSchemaFormat{
+				Name:   req.ResponseName,
+				Strict: true,
+				Schema: req.ResponseSchema,
 			},
 		}
 	}
 
 	if len(req.Tools) > 0 {
 		params.Tools = toOpenAITools(req.Tools)
-		params.ParallelToolCalls = openai.Bool(req.ParallelToolCalls)
+		parallel := req.ParallelToolCalls
+		params.ParallelToolCalls = &parallel
 	}
 
 	resp, err := p.client.Responses.New(ctx, params)
@@ -54,22 +50,14 @@ func (p *openAIProvider) Complete(ctx context.Context, req CompletionRequest) (*
 		return nil, err
 	}
 
-	toolCalls := make([]ToolCall, 0)
-	for _, item := range resp.Output {
-		switch item.AsAny().(type) {
-		case responses.ResponseFunctionToolCall:
-			call := item.AsFunctionCall()
-			toolCalls = append(toolCalls, ToolCall{
-				ID:        call.CallID,
-				Name:      call.Name,
-				Arguments: call.Arguments,
-			})
-		}
-	}
-
-	extraFields := make(map[string]json.RawMessage, len(resp.Usage.JSON.ExtraFields))
-	for k, v := range resp.Usage.JSON.ExtraFields {
-		extraFields[k] = json.RawMessage(v.Raw())
+	calls := resp.FunctionCalls()
+	toolCalls := make([]ToolCall, 0, len(calls))
+	for _, call := range calls {
+		toolCalls = append(toolCalls, ToolCall{
+			ID:        call.CallID,
+			Name:      call.Name,
+			Arguments: call.Arguments,
+		})
 	}
 
 	return &CompletionResponse{
@@ -77,9 +65,9 @@ func (p *openAIProvider) Complete(ctx context.Context, req CompletionRequest) (*
 		Output:    resp.OutputText(),
 		ToolCalls: toolCalls,
 		Usage: TokenUsage{
-			InputTokens:  int64(resp.Usage.InputTokens),
-			OutputTokens: int64(resp.Usage.OutputTokens),
-			ExtraFields:  extraFields,
+			InputTokens:  resp.Usage.InputTokens,
+			OutputTokens: resp.Usage.OutputTokens,
+			ExtraFields:  resp.Usage.ExtraFields,
 		},
 	}, nil
 }
@@ -143,34 +131,30 @@ func (p *openAIProvider) CalculateCostUSD(model string, usage TokenUsage) (float
 	return cost, nil
 }
 
-func toOpenAIInput(messages []Message) responses.ResponseInputParam {
-	out := make([]responses.ResponseInputItemUnionParam, 0, len(messages))
+func toOpenAIInput(messages []Message) []openai.InputItem {
+	out := make([]openai.InputItem, 0, len(messages))
 	for _, msg := range messages {
 		switch {
 		case msg.ToolCall != nil:
-			out = append(out, responses.ResponseInputItemUnionParam{
-				OfFunctionCall: &responses.ResponseFunctionToolCallParam{
+			out = append(out, openai.InputItem{
+				FunctionCall: &openai.InputFunctionCall{
 					CallID:    msg.ToolCall.ID,
 					Name:      msg.ToolCall.Name,
 					Arguments: msg.ToolCall.Arguments,
 				},
 			})
 		case msg.ToolOutput != nil:
-			out = append(out, responses.ResponseInputItemUnionParam{
-				OfFunctionCallOutput: &responses.ResponseInputItemFunctionCallOutputParam{
+			out = append(out, openai.InputItem{
+				FunctionCallOut: &openai.InputFunctionCallOutput{
 					CallID: msg.ToolOutput.CallID,
-					Output: responses.ResponseInputItemFunctionCallOutputOutputUnionParam{
-						OfString: openai.String(msg.ToolOutput.Output),
-					},
+					Output: msg.ToolOutput.Output,
 				},
 			})
 		default:
-			out = append(out, responses.ResponseInputItemUnionParam{
-				OfMessage: &responses.EasyInputMessageParam{
-					Content: responses.EasyInputMessageContentUnionParam{
-						OfString: openai.String(msg.Content),
-					},
-					Role: responses.EasyInputMessageRole(msg.Role),
+			out = append(out, openai.InputItem{
+				Message: &openai.InputMessage{
+					Role:    openai.MessageRole(msg.Role),
+					Content: msg.Content,
 				},
 			})
 		}
@@ -178,15 +162,13 @@ func toOpenAIInput(messages []Message) responses.ResponseInputParam {
 	return out
 }
 
-func toOpenAITools(tools []ToolDefinition) []responses.ToolUnionParam {
-	out := make([]responses.ToolUnionParam, 0, len(tools))
+func toOpenAITools(tools []ToolDefinition) []openai.Tool {
+	out := make([]openai.Tool, 0, len(tools))
 	for _, tool := range tools {
-		out = append(out, responses.ToolUnionParam{
-			OfFunction: &responses.FunctionToolParam{
-				Name:        tool.Name,
-				Description: openai.String(tool.Description),
-				Parameters:  tool.Parameters,
-			},
+		out = append(out, openai.Tool{
+			Name:        tool.Name,
+			Description: tool.Description,
+			Parameters:  tool.Parameters,
 		})
 	}
 	return out

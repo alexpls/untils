@@ -22,6 +22,7 @@ import (
 	"github.com/alexpls/untils/internal/monitor"
 	"github.com/alexpls/untils/internal/must"
 	"github.com/alexpls/untils/internal/notifications"
+	"github.com/alexpls/untils/internal/openai"
 	"github.com/alexpls/untils/internal/pages"
 	"github.com/alexpls/untils/internal/pushover"
 	"github.com/alexpls/untils/internal/reqcontext"
@@ -36,8 +37,6 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jackc/pgxlisten"
 	"github.com/lmittmann/tint"
-	"github.com/openai/openai-go/v3"
-	"github.com/openai/openai-go/v3/option"
 	"github.com/riverqueue/river"
 	"github.com/riverqueue/river/riverdriver/riverpgxv5"
 	"github.com/riverqueue/river/rivertype"
@@ -169,14 +168,14 @@ func createApp(c *config) (*app, context.Context, context.CancelFunc, func()) {
 
 	a.webSearcher = search.NewBraveClient(c.braveKey, a.logger.With("source", "search.brave"))
 
-	clientOptions := []option.RequestOption{
-		option.WithAPIKey(c.openAIAPIKey),
+	clientOptions := []openai.Option{
+		openai.WithAPIKey(c.openAIAPIKey),
 	}
 	if c.usesXAI() {
-		clientOptions = append(clientOptions, option.WithBaseURL("https://api.x.ai/v1"))
+		clientOptions = append(clientOptions, openai.WithBaseURL("https://api.x.ai/v1"))
 	}
 	llmClient := openai.NewClient(clientOptions...)
-	llmProvider := llm.NewOpenAIProvider(&llmClient)
+	llmProvider := llm.NewOpenAIProvider(llmClient)
 	llmLogger := a.logger.With("source", "llm")
 	browserManager := browser.NewManager(c.chrome.maxConcurrentSessions, browser.BrowserSessionConfig{
 		ChromeDevToolsURL: a.config.chrome.devToolsURL,
