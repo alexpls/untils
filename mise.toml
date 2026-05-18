@@ -160,3 +160,6 @@ pg_dump "$PG_URL" --schema-only --no-owner --no-privileges --restrict-key stable
 [tasks."sqlc:generate"]
 depends = ["db:dump_schema"]
 run = "cd internal/models && sqlc generate"
+
+[tasks."analyze:gobinary"]
+run = "gsa --web untils_linux_amd64.old"
