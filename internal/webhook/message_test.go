@@ -13,7 +13,7 @@ func TestNewMessageMonitorNewResults(t *testing.T) {
 	t.Parallel()
 
 	payload, err := MarshalMessageMonitorNewResults(
-		models.Monitor{ID: 42, Subject: pgtype.Text{String: "Example monitor", Valid: true}},
+		models.Monitor{ID: 42, Status: models.MonitorStatusActive, Subject: pgtype.Text{String: "Example monitor", Valid: true}},
 		[]models.MonitorResult{
 			{
 				ID:        101,
@@ -43,6 +43,7 @@ func TestNewMessageMonitorNewResults(t *testing.T) {
 
 	message := got["message"].(map[string]any)
 	require.Equal(t, "new_results", message["type"])
+	require.Equal(t, "active", message["monitor"].(map[string]any)["status"])
 	require.Equal(t, "Example monitor", message["monitor"].(map[string]any)["subject"])
 	newResults := message["new_results"].([]any)
 	require.Len(t, newResults, 2)

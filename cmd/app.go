@@ -8,11 +8,13 @@ import (
 	"os"
 	"time"
 
+	"github.com/alexpls/untils/internal/api"
 	"github.com/alexpls/untils/internal/auth"
 	"github.com/alexpls/untils/internal/browser"
 	"github.com/alexpls/untils/internal/dashboard"
 	"github.com/alexpls/untils/internal/db"
 	"github.com/alexpls/untils/internal/dev"
+	"github.com/alexpls/untils/internal/docs"
 	"github.com/alexpls/untils/internal/email"
 	"github.com/alexpls/untils/internal/llm"
 	"github.com/alexpls/untils/internal/logging"
@@ -54,7 +56,10 @@ type app struct {
 	monitorHandlers     *monitor.Handlers
 	dashboardHandlers   *dashboard.Handlers
 	pagesHandlers       *pages.Handlers
+	docsHandlers        *docs.Handlers
 	authHandlers        *auth.Handlers
+	apiService          *api.Service
+	apiHandlers         *api.Handlers
 	settingsHandlers    *settings.Handlers
 	llm                 *llm.Service
 	river               *river.Client[pgx.Tx]
@@ -78,10 +83,15 @@ func createApp(c *config) (*app, context.Context, context.CancelFunc, func()) {
 
 	a.validate = validator.New(validator.WithRequiredStructEnabled())
 
-	// Set dev mode for public assets
+	// Set dev mode for public assets and docs.
 	if c.env == appEnvDev {
 		public.SetDevMode()
+		docs.SetDevMode()
 	}
+
+	// Eagerly load docs so any markdown/openapi misconfiguration fails at
+	// startup rather than on the first /docs request.
+	docs.Load()
 
 	var slogHandler slog.Handler
 	var slogRiverHandler slog.Handler
@@ -185,6 +195,7 @@ func createApp(c *config) (*app, context.Context, context.CancelFunc, func()) {
 	)
 
 	a.auth = auth.NewAuth(a.logger.With("source", "auth"), a.db, a.queries, a.validate)
+	a.apiService = api.NewService(a.db, a.queries, a.validate, a.logger.With("source", "api"))
 	must.NoErr(a.bootstrapInitialSelfHostedAdmin(ctx, a.db))
 
 	a.sessionManager = session.NewManager(a.db, a.queries, c.secureCookies, a.logger.With("source", "session"))
@@ -225,10 +236,13 @@ func createApp(c *config) (*app, context.Context, context.CancelFunc, func()) {
 	a.dashboardHandlers = dashboard.NewHandlers(a.queries, a.db, a.monitorEvents, a.logger.With("source", "dashboard.handlers"))
 
 	a.pagesHandlers = pages.NewHandlers(a.queries, a.db, a.logger.With("source", "pages.handlers"))
+	a.docsHandlers = docs.NewHandlers(a.logger.With("source", "docs.handlers"))
 
 	a.authHandlers = auth.NewHandlers(a.auth, a.sessionManager, a.logger.With("source", "auth.handlers"))
 
-	a.settingsHandlers = settings.NewHandlers(a.queries, a.db, notificationCapabilities, a.pushoverStore, a.pushoverClient, a.sessionManager, a.auth, a.webhook, a.logger.With("source", "settings.handlers"))
+	a.apiHandlers = api.NewHandlers(a.apiService, a.monitor, a.logger.With("source", "api.handlers"))
+
+	a.settingsHandlers = settings.NewHandlers(a.queries, a.db, notificationCapabilities, a.pushoverStore, a.pushoverClient, a.sessionManager, a.auth, a.webhook, a.apiService, a.logger.With("source", "settings.handlers"))
 
 	a.devHandlers = dev.NewHandlers(a.logger.With("source", "dev.handlers"), notifications.NewEmailTemplateStore(notificationRenderConfig))
 

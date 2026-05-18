@@ -1,73 +1,13 @@
 package docs
 
 import "github.com/alexpls/untils/internal/components"
-import "github.com/alexpls/untils/internal/components/icons"
 
 templ PageView(page Page, nav []NavSection) {
 	@components.Page(page.Title, page.Description) {
-		<div class="container mx-auto bg-base-200 rounded-lg shadow-lg">
+		<div class="container mx-auto bg-base-200 rounded-lg shadow-lg border border-base-content/10">
 			<div class="h-full grid grid-cols-12 gap-4">
-				<aside class="col-span-12 lg:col-span-3 p-4 border-b lg:border-b-0 lg:border-r border-base-content/10">
-					<div
-						data-signals:_docs_toc.open="false"
-						data-signals:_docs_toc.desktop="false"
-						data-init="const isDesktop = window.innerWidth >= 1024; $_docs_toc.desktop = isDesktop; $_docs_toc.open = isDesktop"
-						data-on:resize__window__debounce.50ms="const isDesktop = window.innerWidth >= 1024; $_docs_toc.desktop = isDesktop; $_docs_toc.open = isDesktop"
-					>
-						<button
-							class="flex w-full uppercase text-xs text-muted font-semibold hover:cursor-pointer items-center justify-between lg:hidden"
-							data-on:click="$_docs_toc.open = !$_docs_toc.open"
-							data-attr:aria-expanded="$_docs_toc.open"
-							type="button"
-						>
-							<div class="text-sm">
-								Table of contents
-							</div>
-							<div class="flex items-center gap-1">
-								<span data-text="$_docs_toc.open ? 'Hide' : 'Show'">Show</span>
-								<span class="transition-transform duration-300 ease-in-out" data-class="{'rotate-180': $_docs_toc.open}">
-									@icons.ChevronDown(icons.IconParams{})
-								</span>
-							</div>
-						</button>
-						<div
-							class="grid grid-rows-[0fr] opacity-0 pt-0 pointer-events-none transition-all duration-300 ease-in-out lg:grid-rows-[1fr] lg:opacity-100 lg:pt-5 lg:pointer-events-auto"
-							data-class="{
-							'grid-rows-[1fr] opacity-100 pt-5 pointer-events-auto': !$_docs_toc.desktop && $_docs_toc.open
-						}"
-						>
-							<div class="min-h-0 overflow-hidden lg:overflow-visible">
-								<nav class="text-xs lg:ml-2 lg:mt-5">
-									for _, section := range nav {
-										<div>
-											<h2 class="uppercase text-sm font-semibold">
-												{ section.Title }
-											</h2>
-											<ul class="menu w-full ml-0 pl-0">
-												for _, navPage := range section.Pages {
-													{{ activePage := page.Path == navPage.Path }}
-													<li
-														class={
-															"border-l",
-															"pl-2",
-															templ.KV("border-base-content/10", !activePage),
-															templ.KV("text-muted", !activePage),
-															templ.KV("border-primary", activePage),
-															templ.KV("text-primary", activePage),
-														}
-													>
-														<a href={ navPage.Path }>{ navPage.SidebarTitle }</a>
-													</li>
-												}
-											</ul>
-										</div>
-									}
-								</nav>
-							</div>
-						</div>
-					</div>
-				</aside>
-				<div class="col-span-12 lg:col-span-9 lg:pt-5 pb-10 px-5">
+				@sidebar(page, nav)
+				<div class="col-span-12 lg:col-span-9 lg:pt-5 pb-10 px-5 lg:pl-6 lg:pr-3 lg:border-l lg:border-base-content/10">
 					<header>
 						<p class="text-muted pb-2 text-sm">Last updated { page.LastUpdated }</p>
 						<h1 class="border-b border-base-content/10 pb-5 text-4xl font-semibold tracking-tight">{ page.Title }</h1>
@@ -75,28 +15,15 @@ templ PageView(page Page, nav []NavSection) {
 					<div class="flex gap-x-8 mt-8">
 						<article
 							class={
-								"prose", "min-w-0", "grow-1",
+								"prose", "min-w-0", "grow",
+								templ.KV("max-w-none", page.HideTableOfContents),
 								"prose-hr:border-base-content/10",
-								"prose-pre:text-sm", "prose-pre:leading-5",
+								"prose-pre:text-xs", "prose-pre:leading-5",
 								"prose-img:rounded", "prose-img:border", "prose-img:border-base-content/10",
 							}
 						>
-							@templ.Raw(page.ContentHTML)
+							@page.Content
 						</article>
-						if len(page.Headings) > 0 {
-							<aside class="hidden lg:block">
-								<nav>
-									<h2 class="text-sm font-semibold uppercase">On this page</h2>
-									<ul class="mt-3 space-y-2 text-sm">
-										for _, heading := range page.Headings {
-											<li>
-												<a class="text-muted transition hover:text-primary" href={ "#" + heading.ID }>{ heading.Title }</a>
-											</li>
-										}
-									</ul>
-								</nav>
-							</aside>
-						}
 					</div>
 				</div>
 			</div>

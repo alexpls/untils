@@ -1,0 +1,164 @@
+package docs
+
+import templpkg "github.com/a-h/templ"
+import "strconv"
+import "strings"
+
+templ tableOfContents(page Page) {
+	if len(page.Headings) > 0 && !page.HideTableOfContents {
+		<aside class="hidden lg:block">
+			<nav>
+				<h2 class="text-sm font-semibold uppercase">On this page</h2>
+				<ul class="mt-3 space-y-2 text-sm">
+					for _, heading := range page.Headings {
+						<li>
+							<a class="text-muted transition hover:text-primary" href={ "#" + heading.ID }>{ heading.Title }</a>
+						</li>
+					}
+				</ul>
+			</nav>
+		</aside>
+	}
+}
+
+templ sidebar(page Page, nav []NavSection) {
+	<aside
+		data-signals:_docs.active-anchor__ifmissing="''"
+		data-init="initDocsSidebarScrollspy(el)"
+		class="col-span-12 lg:col-span-3 p-4 pr-0 lg:sticky lg:top-0 lg:self-start lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto"
+	>
+		<details class="lg:hidden">
+			<summary class="uppercase text-sm text-muted font-semibold cursor-pointer">
+				Table of contents
+			</summary>
+			@sidebarNav(page, nav, "mt-4")
+		</details>
+		<div class="hidden lg:block">
+			@sidebarNav(page, nav, "lg:ml-2 lg:mt-5")
+		</div>
+	</aside>
+}
+
+templ sidebarNav(page Page, nav []NavSection, class string) {
+	<nav class={ "text-xs", class }>
+		for _, section := range nav {
+			<div>
+				<h2 class="uppercase text-sm font-semibold">
+					{ section.Title }
+				</h2>
+				@navTree(section.Pages, page.Path)
+			</div>
+		}
+	</nav>
+}
+
+templ navTree(pages []NavPage, activePath string) {
+	<ul class="menu w-full ml-0 pl-0">
+		for _, navPage := range pages {
+			@navTreeItem(navPage, activePath)
+		}
+	</ul>
+}
+
+templ navTreeItem(navPage NavPage, activePath string) {
+	{{ hasChildren := len(navPage.Children) > 0 }}
+	{{ openByDefault := navPageContainsActive(navPage, activePath) }}
+	<li>
+		if hasChildren {
+			<div class="grid grid-cols-[minmax(0,1fr)_auto] items-stretch gap-0 p-0">
+				<a
+					{ navTreeItemAttrs(navPage, activePath, true, "block min-w-0 truncate rounded-field rounded-r-none px-3 py-1.5 hover:bg-base-content/10")... }
+					href={ navPage.Path }
+				>
+					{ navPage.SidebarTitle }
+				</a>
+				<button
+					type="button"
+					class="flex w-8 items-center justify-center rounded-field rounded-l-none text-muted transition hover:bg-base-content/10 hover:text-base-content cursor-pointer"
+					aria-label={ "Toggle " + navPage.SidebarTitle }
+					aria-expanded={ strconv.FormatBool(openByDefault) }
+					data-on:click="toggleDocsSidebarSection(el)"
+				>
+					<svg
+						class={ "size-3 transition-transform", templ.KV("rotate-90", openByDefault) }
+						viewBox="0 0 16 16"
+						fill="none"
+						aria-hidden="true"
+					>
+						<path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"></path>
+					</svg>
+				</button>
+			</div>
+			<ul class={ "menu-dropdown", templ.KV("menu-dropdown-show", openByDefault) }>
+				for _, child := range navPage.Children {
+					@navTreeItem(child, activePath)
+				}
+			</ul>
+		} else {
+			<a { navTreeItemAttrs(navPage, activePath, true)... } href={ navPage.Path }>
+				{ navPage.SidebarTitle }
+			</a>
+		}
+	</li>
+}
+
+func navTreeItemAttrs(navPage NavPage, activePath string, includeLinkAttrs bool, extraClasses ...string) templpkg.Attributes {
+	className := "text-muted"
+	if activePath == navPage.Path && !navPageContainsCurrentPageAnchor(navPage, activePath) {
+		className = "menu-active"
+	}
+	if len(extraClasses) > 0 {
+		className += " " + strings.Join(extraClasses, " ")
+	}
+
+	attrs := templpkg.Attributes{
+		"class": className,
+	}
+
+	anchorID := navPageActiveAnchorID(navPage, activePath)
+	if anchorID == "" {
+		return attrs
+	}
+
+	activeExpression := "$_docs.activeAnchor === " + strconv.Quote(anchorID)
+	attrs["data-class:menu-active"] = activeExpression
+	attrs["data-class:text-muted"] = "!(" + activeExpression + ")"
+	if includeLinkAttrs {
+		attrs["data-attr:aria-current"] = activeExpression + " ? 'location' : null"
+		attrs["data-on:click"] = "$_docs.activeAnchor = " + strconv.Quote(anchorID)
+	}
+	return attrs
+}
+
+func navPageContainsCurrentPageAnchor(navPage NavPage, activePath string) bool {
+	if navPageActiveAnchorID(navPage, activePath) != "" {
+		return true
+	}
+	for _, child := range navPage.Children {
+		if navPageContainsCurrentPageAnchor(child, activePath) {
+			return true
+		}
+	}
+	return false
+}
+
+func navPageActiveAnchorID(navPage NavPage, activePath string) string {
+	path, anchorID, ok := strings.Cut(navPage.Path, "#")
+	if !ok || path != activePath {
+		return ""
+	}
+	return anchorID
+}
+
+func navPageContainsActive(navPage NavPage, activePath string) bool {
+	path, _, _ := strings.Cut(navPage.Path, "#")
+	if path == activePath {
+		return true
+	}
+	for _, child := range navPage.Children {
+		if navPageContainsActive(child, activePath) {
+			return true
+		}
+	}
+	return false
+}

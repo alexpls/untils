@@ -668,13 +668,13 @@ from monitor_checks mc
 join monitors m on m.id = mc.monitor_id
 where m.user_id = $1
 order by mc.scheduled_for desc
-limit $3 offset $2
+limit $3::bigint offset $2::bigint
 `
 
 type ListChecksWithMonitorParams struct {
 	UserID    int64
-	RowOffset int32
-	PageSize  int32
+	RowOffset int64
+	PageSize  int64
 }
 
 type ListChecksWithMonitorRow struct {
@@ -713,51 +713,57 @@ func (q *Queries) ListChecksWithMonitor(ctx context.Context, db DBTX, arg *ListC
 	return items, nil
 }
 
-const listMonitorActivity = `-- name: ListMonitorActivity :many
+const listLatestVisibleResultsForUser = `-- name: ListLatestVisibleResultsForUser :many
 select
-    mon.id::bigint as monitor_id,
-    res.id::bigint as result_id,
-    mon.subject,
-    res.headline,
-    res.created_at,
-    res.subtitle,
-    res.data
-from monitor_results res
-left join monitors mon on mon.id = res.monitor_id
-where mon.status = 'active'
-and mon.user_id = $1
-and res.hidden = false
-order by res.created_at desc
-limit 7
+    mr.id, mr.monitor_id, mr.citations, mr.created_at, mr.correction, mr.headline, mr.subtitle, mr.data, mr.hidden,
+    m.id, m.user_id, m.status, m.subject, m.rejected_reason, m.updated_at, m.created_at, m.check_frequency_minutes, m.auto_activate
+from monitor_results mr
+join monitors m on m.id = mr.monitor_id
+where m.user_id = $1
+and m.status in ('active', 'paused')
+and mr.hidden = false
+order by mr.created_at desc, mr.id desc
+limit $2
 `
 
-type ListMonitorActivityRow struct {
-	MonitorID int64
-	ResultID  int64
-	Subject   pgtype.Text
-	Headline  string
-	CreatedAt time.Time
-	Subtitle  string
-	Data      MonitorUpdateData
+type ListLatestVisibleResultsForUserParams struct {
+	UserID      int64
+	ResultLimit int32
 }
 
-func (q *Queries) ListMonitorActivity(ctx context.Context, db DBTX, userID int64) ([]*ListMonitorActivityRow, error) {
-	rows, err := db.Query(ctx, listMonitorActivity, userID)
+type ListLatestVisibleResultsForUserRow struct {
+	MonitorResult MonitorResult
+	Monitor       Monitor
+}
+
+func (q *Queries) ListLatestVisibleResultsForUser(ctx context.Context, db DBTX, arg *ListLatestVisibleResultsForUserParams) ([]*ListLatestVisibleResultsForUserRow, error) {
+	rows, err := db.Query(ctx, listLatestVisibleResultsForUser, arg.UserID, arg.ResultLimit)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []*ListMonitorActivityRow
+	var items []*ListLatestVisibleResultsForUserRow
 	for rows.Next() {
-		var i ListMonitorActivityRow
+		var i ListLatestVisibleResultsForUserRow
 		if err := rows.Scan(
-			&i.MonitorID,
-			&i.ResultID,
-			&i.Subject,
-			&i.Headline,
-			&i.CreatedAt,
-			&i.Subtitle,
-			&i.Data,
+			&i.MonitorResult.ID,
+			&i.MonitorResult.MonitorID,
+			&i.MonitorResult.Citations,
+			&i.MonitorResult.CreatedAt,
+			&i.MonitorResult.Correction,
+			&i.MonitorResult.Headline,
+			&i.MonitorResult.Subtitle,
+			&i.MonitorResult.Data,
+			&i.MonitorResult.Hidden,
+			&i.Monitor.ID,
+			&i.Monitor.UserID,
+			&i.Monitor.Status,
+			&i.Monitor.Subject,
+			&i.Monitor.RejectedReason,
+			&i.Monitor.UpdatedAt,
+			&i.Monitor.CreatedAt,
+			&i.Monitor.CheckFrequencyMinutes,
+			&i.Monitor.AutoActivate,
 		); err != nil {
 			return nil, err
 		}
@@ -773,13 +779,13 @@ const listMonitorChecks = `-- name: ListMonitorChecks :many
 select id, monitor_id, status, scheduled_for, failure_reason, done_at, result from monitor_checks
 where monitor_id = $1
 order by scheduled_for desc
-limit $3 offset $2
+limit $3::bigint offset $2::bigint
 `
 
 type ListMonitorChecksParams struct {
 	MonitorID int64
-	RowOffset int32
-	PageSize  int32
+	RowOffset int64
+	PageSize  int64
 }
 
 func (q *Queries) ListMonitorChecks(ctx context.Context, db DBTX, arg *ListMonitorChecksParams) ([]*MonitorCheck, error) {
@@ -917,6 +923,57 @@ func (q *Queries) ListMonitorResultsByCheckID(ctx context.Context, db DBTX, chec
 	return items, nil
 }
 
+const listMonitorResultsPage = `-- name: ListMonitorResultsPage :many
+select mr.id, mr.monitor_id, mr.citations, mr.created_at, mr.correction, mr.headline, mr.subtitle, mr.data, mr.hidden from monitor_results mr
+join monitors m on m.id = mr.monitor_id
+where m.user_id = $1
+and mr.monitor_id = $2
+order by mr.created_at desc, mr.id desc
+limit $4::bigint offset $3::bigint
+`
+
+type ListMonitorResultsPageParams struct {
+	UserID    int64
+	MonitorID int64
+	RowOffset int64
+	PageSize  int64
+}
+
+func (q *Queries) ListMonitorResultsPage(ctx context.Context, db DBTX, arg *ListMonitorResultsPageParams) ([]*MonitorResult, error) {
+	rows, err := db.Query(ctx, listMonitorResultsPage,
+		arg.UserID,
+		arg.MonitorID,
+		arg.RowOffset,
+		arg.PageSize,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []*MonitorResult
+	for rows.Next() {
+		var i MonitorResult
+		if err := rows.Scan(
+			&i.ID,
+			&i.MonitorID,
+			&i.Citations,
+			&i.CreatedAt,
+			&i.Correction,
+			&i.Headline,
+			&i.Subtitle,
+			&i.Data,
+			&i.Hidden,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listMonitorResultsWithLatestCheck = `-- name: ListMonitorResultsWithLatestCheck :many
 select
     mr.id, mr.monitor_id, mr.citations, mr.created_at, mr.correction, mr.headline, mr.subtitle, mr.data, mr.hidden,
@@ -935,13 +992,13 @@ join lateral (
 where mr.monitor_id = $1
 and mr.hidden = false
 order by mr.created_at desc, mr.id desc
-limit $3 offset $2
+limit $3::bigint offset $2::bigint
 `
 
 type ListMonitorResultsWithLatestCheckParams struct {
 	MonitorID int64
-	RowOffset int32
-	PageSize  int32
+	RowOffset int64
+	PageSize  int64
 }
 
 type ListMonitorResultsWithLatestCheckRow struct {
@@ -1018,13 +1075,13 @@ left join next_check mc on mc.monitor_id = m.id
 left join current_check cc on cc.monitor_id = m.id
 where m.user_id = $1
 order by mr.created_at desc
-limit $3 offset $2
+limit $3::bigint offset $2::bigint
 `
 
 type ListMonitorsWithResultsParams struct {
 	UserID    int64
-	RowOffset int32
-	PageSize  int32
+	RowOffset int64
+	PageSize  int64
 }
 
 type ListMonitorsWithResultsRow struct {

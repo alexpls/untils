@@ -1,0 +1,15 @@
+package codehighlight
+
+templ highlightedCodeBlock(preStyle, codeClass, contentHTML string) {
+	<pre style={ preStyle } class="text-xs p-2 rounded overflow-x-auto">
+		if codeClass == "" {
+			<code>
+				@templ.Raw(contentHTML)
+			</code>
+		} else {
+			<code class={ codeClass }>
+				@templ.Raw(contentHTML)
+			</code>
+		}
+	</pre>
+}

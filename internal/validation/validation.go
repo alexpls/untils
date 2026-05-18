@@ -1,7 +1,9 @@
 package validation
 
 import (
+	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -13,15 +15,33 @@ type ValidationError struct {
 
 type ValidationErrors []ValidationError
 
+func (errs ValidationErrors) Error() string {
+	if len(errs) == 0 {
+		return "validation failed"
+	}
+
+	parts := make([]string, 0, len(errs))
+	for _, err := range errs {
+		parts = append(parts, fmt.Sprintf("%s: %s", err.Field, err.Message))
+	}
+	return "validation failed: " + strings.Join(parts, ", ")
+}
+
 type HasValidationErrors interface {
 	GetValidationErrors() ValidationErrors
 }
 
-// MapValidationErrors maps the error passed in to domain ValidationErrors
-// that are ready for display to users.
+// MapValidationErrors maps the error passed in to domain ValidationErrors that
+// are ready for display to users.
 //
-// [nil] is returned if the error is not a [validator.ValidationErrors].
+// [nil] is returned if the error does not contain domain or validator
+// validation errors.
 func MapValidationErrors(err error) ValidationErrors {
+	domainErrs, ok := errors.AsType[ValidationErrors](err)
+	if ok {
+		return domainErrs
+	}
+
 	validationErrs, ok := err.(validator.ValidationErrors)
 	if !ok {
 		return nil

@@ -24,7 +24,9 @@ runs:
         restore-keys: |
           ${{ runner.os }}-bun-
 
-    - run: go mod download
+    - run: |
+        go mod download
+        go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@v2.5.0
       shell: bash
 
     - run: bun install

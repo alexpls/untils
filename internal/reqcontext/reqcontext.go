@@ -20,6 +20,7 @@ const (
 	plausibleSnippetTagKey
 	flashAlertKey
 	baseURLKey
+	apiTokenKey
 )
 
 func ContextWithBuildVersion(ctx context.Context, buildVersion string) context.Context {
@@ -101,4 +102,13 @@ func ContextWithBaseURL(ctx context.Context, baseURL string) context.Context {
 func BaseURLFromContext(ctx context.Context) string {
 	baseURL, _ := ctx.Value(baseURLKey).(string)
 	return baseURL
+}
+
+func ContextWithAPIToken(ctx context.Context, token *models.ApiToken) context.Context {
+	return context.WithValue(ctx, apiTokenKey, token)
+}
+
+func APITokenFromContext(ctx context.Context) (*models.ApiToken, bool) {
+	token, ok := ctx.Value(apiTokenKey).(*models.ApiToken)
+	return token, ok && token != nil
 }

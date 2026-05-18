@@ -1,0 +1,371 @@
+package docs
+
+import (
+	"context"
+	stdhtml "html"
+	"io"
+	"net/url"
+	"strings"
+
+	"github.com/alexpls/untils/internal/codehighlight"
+	"github.com/alexpls/untils/internal/reqcontext"
+)
+
+templ OpenAPIReferenceContent(reference APIReference) {
+	<div class="not-prose space-y-10">
+		<div>
+			<h2 id="methods" class="text-3xl mb-10">Methods</h2>
+			@OpenAPIMethods(reference)
+		</div>
+		<div>
+			<h2 id="webhooks" class="text-3xl mb-10">Webhooks</h2>
+			@OpenAPIWebhooks(reference)
+		</div>
+		<div>
+			<h2 id="types" class="text-3xl mb-8">Types</h2>
+			@OpenAPITypes(reference)
+		</div>
+	</div>
+}
+
+templ OpenAPIMethods(reference APIReference) {
+	for _, method := range reference.Methods {
+		<div class="mb-10">
+			<div class="mb-6">
+				<h3 id={ method.Anchor } class="text-2xl mb-3">
+					<a href={ "#" + method.Anchor } class="link-hover">{ method.Name }</a>
+				</h3>
+				if method.DescriptionHTML != "" {
+					@openAPIDescription(method.DescriptionHTML, "")
+				}
+			</div>
+			<div class="mb-6">
+				<h4 class="font-bold border-b border-base-content/10 pb-3">Request</h4>
+				<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+					<div class="min-w-0">
+						<div class="border-b border-base-content/10 py-3">
+							<div class="flex flex-wrap items-baseline gap-x-3 gap-y-2">
+								<span class="font-mono font-semibold break-all">
+									{ method.HTTPMethod }
+									{ methodSampleEndpoint(method) }
+								</span>
+							</div>
+						</div>
+						if len(method.Parameters) > 0 {
+							@parameterTable(method.Parameters)
+						}
+					</div>
+					<div class="min-w-0">
+						<div class="pt-3 overflow-x-auto">
+							@codehighlight.Block("sh", methodCurlExample(ctx, method))
+						</div>
+					</div>
+				</div>
+			</div>
+			if len(method.Responses) > 0 {
+				<div>
+					<h4 class="font-bold border-b border-base-content/10 pb-3">Responses</h4>
+					for _, response := range method.Responses {
+						if response.ExampleJSON != "" || len(response.SchemaRows) > 0 {
+							<div class="border-b border-base-content/10 py-4">
+								<div class="mb-4">
+									<div class="flex items-baseline gap-x-3">
+										<span class="text-sm font-mono font-semibold">{ response.Status }</span>
+										<span class="text-sm text-muted">response</span>
+									</div>
+									if response.DescriptionHTML != "" {
+										@openAPIDescription(response.DescriptionHTML, "mt-2 text-sm")
+									}
+								</div>
+								if response.ExampleJSON != "" && len(response.SchemaRows) > 0 {
+									<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+										<div class="min-w-0">
+											@schemaTable(response.SchemaRows)
+										</div>
+										<div class="min-w-0">
+											<h5 class="font-bold border-b border-base-content/10 pb-3">Example</h5>
+											<div class="pt-3 overflow-x-auto">
+												@codehighlight.Block("json", response.ExampleJSON)
+											</div>
+										</div>
+									</div>
+								} else {
+									if len(response.SchemaRows) > 0 {
+										@schemaTable(response.SchemaRows)
+									}
+									if response.ExampleJSON != "" {
+										<h5 class="font-bold border-b border-base-content/10 pb-3">Example</h5>
+										<div class="pt-3 overflow-x-auto">
+											@codehighlight.Block("json", response.ExampleJSON)
+										</div>
+									}
+								}
+							</div>
+						}
+					}
+				</div>
+			}
+		</div>
+	}
+}
+
+templ OpenAPIWebhooks(reference APIReference) {
+	for _, webhook := range reference.Webhooks {
+		<div class="mb-10">
+			if webhook.DescriptionHTML != "" {
+				@openAPIDescription(webhook.DescriptionHTML, "mb-8")
+			}
+			if len(webhook.RequestPayloads) > 0 {
+				for _, payload := range webhook.RequestPayloads {
+					<div class="mb-10">
+						<div class="mb-6">
+							<h3 id={ payload.Name } class="text-2xl mb-3">
+								<a href={ "#" + payload.Name } class="link-hover">{ payload.Name }</a>
+							</h3>
+							if payload.DescriptionHTML != "" {
+								@openAPIDescription(payload.DescriptionHTML, "")
+							}
+						</div>
+						if payload.ExampleJSON != "" && len(payload.SchemaRows) > 0 {
+							<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+								<div class="min-w-0">
+									@schemaTable(payload.SchemaRows)
+								</div>
+								<div class="min-w-0">
+									<h4 class="font-bold border-b border-base-content/10 pb-3">Example</h4>
+									<div class="pt-3 overflow-x-auto">
+										@codehighlight.Block("json", payload.ExampleJSON)
+									</div>
+								</div>
+							</div>
+						} else {
+							if len(payload.SchemaRows) > 0 {
+								@schemaTable(payload.SchemaRows)
+							}
+							if payload.ExampleJSON != "" {
+								<h4 class="font-bold border-b border-base-content/10 pb-3">Example</h4>
+								<div class="pt-3 overflow-x-auto">
+									@codehighlight.Block("json", payload.ExampleJSON)
+								</div>
+							}
+						}
+					</div>
+				}
+			}
+		</div>
+	}
+}
+
+templ parameterTable(parameters []APIParameter) {
+	<div class="mt-4">
+		<h5 class="font-bold border-b border-base-content/10 pb-3">Parameters</h5>
+		for _, param := range parameters {
+			<div class="border-b border-base-content/10 py-3">
+				<div class={ "flex", "items-baseline", "gap-x-3", templ.KV("mb-3", parameterHasNotes(param)) }>
+					<span class="text-sm font-mono font-semibold">{ param.Name }</span>
+					<span class="text-xs text-muted *:text-muted">
+						@schemaType(param.Schema)
+					</span>
+					if param.Required {
+						<span class="text-xs text-muted">required</span>
+					}
+					if param.In != "" {
+						<span class="text-xs text-muted">{ param.In }</span>
+					}
+				</div>
+				if parameterHasNotes(param) {
+					<div class="text-sm">
+						@schemaNotes(param.Schema)
+						if param.DescriptionHTML != "" {
+							@openAPIDescription(param.DescriptionHTML, "")
+						}
+					</div>
+				}
+			</div>
+		}
+	</div>
+}
+
+templ OpenAPITypes(reference APIReference) {
+	for _, apiType := range reference.Types {
+		<div class="mb-10">
+			<div class="mb-6">
+				<h3 id={ apiType.Name } class="text-2xl mb-3">
+					<a href={ "#" + apiType.Name } class="link-hover">{ apiType.Name } </a>
+				</h3>
+				if apiType.DescriptionHTML != "" {
+					@openAPIDescription(apiType.DescriptionHTML, "")
+				}
+			</div>
+			if len(apiType.SchemaRows) == 0 {
+				<p>No fields are documented for this type.</p>
+			} else {
+				if apiType.ExampleJSON == "" {
+					@schemaTable(apiType.SchemaRows)
+				} else {
+					<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+						<div class="min-w-0">
+							@schemaTable(apiType.SchemaRows)
+						</div>
+						<div class="min-w-0">
+							<h4 class="font-bold border-b border-base-content/10 pb-3">Example</h4>
+							<div class="pt-3">
+								@codehighlight.Block("json", apiType.ExampleJSON)
+							</div>
+						</div>
+					</div>
+				}
+			}
+		</div>
+	}
+}
+
+templ schemaTable(rows []APISchemaRow) {
+	<div>
+		<h4 class="font-bold border-b border-base-content/10 pb-3">Attributes</h4>
+		for _, row := range rows {
+			<div class="border-b border-base-content/10 py-3">
+				<div class={ "flex", "items-baseline", "gap-x-3", templ.KV("mb-3", schemaHasNotes(row.Schema)) }>
+					<span class="text-sm font-mono font-semibold">{ row.Field }</span>
+					<span class="text-xs text-muted *:text-muted">
+						@schemaType(row.Schema)
+					</span>
+				</div>
+				if schemaHasNotes(row.Schema) {
+					<div class="text-sm">
+						@schemaNotes(row.Schema)
+					</div>
+				}
+			</div>
+		}
+	</div>
+}
+
+templ schemaType(schema APISchema) {
+	if schema.RefName != "" {
+		<a class="font-mono link" href={ schema.RefURL }>{ schema.RefName }</a>
+		if schema.Nullable {
+			<span>or null</span>
+		}
+	} else if schema.AllOf {
+		<span>object</span>
+	} else if schema.Type == "array" && schema.Items != nil {
+		<span>array of </span>
+		@schemaType(*schema.Items)
+	} else if schema.Type != "" {
+		if schema.Nullable {
+			<span>{ schema.Type } or null</span>
+		} else {
+			<span>{ schema.Type }</span>
+		}
+	} else if schema.Nullable {
+		<span>null</span>
+	} else if schema.Object {
+		<span>object</span>
+	} else if schema.ConstType != "" {
+		<span>{ schema.ConstType }</span>
+	} else {
+		<span>any</span>
+	}
+}
+
+templ schemaNotes(schema APISchema) {
+	if schema.DescriptionHTML != "" {
+		@openAPIDescription(schema.DescriptionHTML, "")
+	}
+	if schema.HasConst {
+		<span>Always <span class="font-mono">{ schema.ConstValue }</span>.</span>
+	}
+	if len(schema.EnumValues) > 0 {
+		<span>Possible values: <span class="font-mono">{ strings.Join(schema.EnumValues, ", ") }</span>.</span>
+	}
+	if schema.Format != "" {
+		if schema.Format == "date-time" {
+			<span>Formatted as an RFC 3339 date-time string with timezone offset. Fractional seconds may be included when present.</span>
+		} else {
+			<span>Formatted as <span class="font-mono">{ schema.Format }</span>.</span>
+		}
+	}
+	if schema.MaxItems != nil {
+		<span>Maximum { stringFromInt(*schema.MaxItems) } items.</span>
+	}
+	if schema.MinItems != nil {
+		<span>Minimum { stringFromInt(*schema.MinItems) } items.</span>
+	}
+}
+
+func parameterHasNotes(param APIParameter) bool {
+	return param.DescriptionHTML != "" || schemaHasNotes(param.Schema)
+}
+
+func schemaHasNotes(schema APISchema) bool {
+	return schema.DescriptionHTML != "" || schema.HasConst || len(schema.EnumValues) > 0 || schema.Format != "" || schema.MaxItems != nil || schema.MinItems != nil
+}
+
+func openAPIDescription(descriptionHTML string, class string) templ.Component {
+	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+
+		if descriptionHTML == "" {
+			return nil
+		}
+
+		classes := strings.TrimSpace("max-w-prose space-y-3 " + class)
+		if _, err := io.WriteString(w, `<div class="`+stdhtml.EscapeString(classes)+`">`); err != nil {
+			return err
+		}
+		if _, err := io.WriteString(w, descriptionHTML); err != nil {
+			return err
+		}
+		_, err := io.WriteString(w, "</div>")
+		return err
+	})
+}
+
+func methodSampleEndpoint(method APIMethod) string {
+	values := []string{}
+	for _, param := range method.Parameters {
+		if param.In != "query" || !param.Required {
+			continue
+		}
+		values = append(values, param.Name+"="+strings.ToUpper(param.Name))
+	}
+	if len(values) == 0 {
+		return method.Endpoint
+	}
+	return method.Endpoint + "?" + strings.Join(values, "&")
+}
+
+func methodCurlExample(ctx context.Context, method APIMethod) string {
+	endpoint := methodAbsoluteSampleEndpoint(ctx, method)
+	command := "curl"
+	if method.HTTPMethod != "GET" {
+		command += " -X " + method.HTTPMethod
+	}
+
+	lines := []string{command}
+	if method.Authorization == "Bearer token" {
+		lines = append(lines, "  -H 'Authorization: Bearer YOUR_API_TOKEN'")
+	}
+	lines = append(lines, "  '"+endpoint+"'")
+	return strings.Join(lines, " \\\n")
+}
+
+func methodAbsoluteSampleEndpoint(ctx context.Context, method APIMethod) string {
+	endpoint := methodSampleEndpoint(method)
+	parsed, err := url.Parse(endpoint)
+	if err != nil {
+		panic(err)
+	}
+	if parsed.IsAbs() {
+		return endpoint
+	}
+
+	baseURL := reqcontext.BaseURLFromContext(ctx)
+	if baseURL == "" {
+		return endpoint
+	}
+	return strings.TrimRight(baseURL, "/") + "/" + strings.TrimLeft(endpoint, "/")
+}

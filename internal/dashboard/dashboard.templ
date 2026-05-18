@@ -50,7 +50,7 @@ templ DashboardView(data DashboardViewData) {
 
 type MonitorActivityWidgetData struct {
 	Loading LoadingStatus
-	Items   []*models.ListMonitorActivityRow
+	Items   []*models.ListLatestVisibleResultsForUserRow
 }
 
 templ monitorActivityWidget(data MonitorActivityWidgetData) {
@@ -79,8 +79,8 @@ templ monitorActivityWidget(data MonitorActivityWidgetData) {
 										monitorActivityWidgetTimelineItemSide(item),
 									) {
 										{{
-											headline := item.Data.Fields.MustRenderTemplate(item.Headline, monitorfieldrenderers.TextRenderer{}, renderCtx)
-											subtitle := item.Data.Fields.MustRenderTemplate(item.Subtitle, monitorfieldrenderers.TextRenderer{}, renderCtx)
+											headline := item.MonitorResult.Data.Fields.MustRenderTemplate(item.MonitorResult.Headline, monitorfieldrenderers.TextRenderer{}, renderCtx)
+											subtitle := item.MonitorResult.Data.Fields.MustRenderTemplate(item.MonitorResult.Subtitle, monitorfieldrenderers.TextRenderer{}, renderCtx)
 										}}
 										<div>{ headline }</div>
 										if subtitle != "" {
@@ -96,19 +96,19 @@ templ monitorActivityWidget(data MonitorActivityWidgetData) {
 	}
 }
 
-templ monitorActivityWidgetTimelineItemHeading(item *models.ListMonitorActivityRow) {
+templ monitorActivityWidgetTimelineItemHeading(item *models.ListLatestVisibleResultsForUserRow) {
 	<h3 class="text-sm text-muted">
 		<a
-			href={ fmt.Sprintf("/app/monitors/%d", item.MonitorID) }
+			href={ fmt.Sprintf("/app/monitors/%d", item.Monitor.ID) }
 			class="block max-w-full link link-hover truncate"
 		>
-			{ item.Subject.String }
+			{ item.Monitor.Subject.String }
 		</a>
 	</h3>
 }
 
-templ monitorActivityWidgetTimelineItemSide(item *models.ListMonitorActivityRow) {
-	@components.TimeAgo(fmt.Sprintf("result%d", item.ResultID), item.CreatedAt)
+templ monitorActivityWidgetTimelineItemSide(item *models.ListLatestVisibleResultsForUserRow) {
+	@components.TimeAgo(fmt.Sprintf("result%d", item.MonitorResult.ID), item.MonitorResult.CreatedAt)
 }
 
 type CheckStatsWidgetData struct {

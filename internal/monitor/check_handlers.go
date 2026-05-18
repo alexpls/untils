@@ -26,8 +26,8 @@ func (h *Handlers) ListChecks(w http.ResponseWriter, r *http.Request, user *mode
 				h.service.db,
 				&models.ListChecksWithMonitorParams{
 					UserID:    user.ID,
-					PageSize:  int32(pag.PageSizeWithPeek()),
-					RowOffset: int32(pag.Offset()),
+					PageSize:  int64(pag.PageSizeWithPeek()),
+					RowOffset: pag.Offset64(),
 				},
 			)
 			if err != nil {

@@ -37,7 +37,7 @@ left join next_check mc on mc.monitor_id = m.id
 left join current_check cc on cc.monitor_id = m.id
 where m.user_id = @user_id
 order by mr.created_at desc
-limit @page_size offset @row_offset;
+limit @page_size::bigint offset @row_offset::bigint;
 
 -- name: GetMonitor :one
 select * from monitors
@@ -188,6 +188,14 @@ where monitor_id = @monitor_id
 and hidden = false
 order by created_at desc, id desc;
 
+-- name: ListMonitorResultsPage :many
+select mr.* from monitor_results mr
+join monitors m on m.id = mr.monitor_id
+where m.user_id = @user_id
+and mr.monitor_id = @monitor_id
+order by mr.created_at desc, mr.id desc
+limit @page_size::bigint offset @row_offset::bigint;
+
 -- name: ListMonitorResultsWithLatestCheck :many
 select
     sqlc.embed(mr),
@@ -206,7 +214,19 @@ join lateral (
 where mr.monitor_id = @monitor_id
 and mr.hidden = false
 order by mr.created_at desc, mr.id desc
-limit @page_size offset @row_offset;
+limit @page_size::bigint offset @row_offset::bigint;
+
+-- name: ListLatestVisibleResultsForUser :many
+select
+    sqlc.embed(mr),
+    sqlc.embed(m)
+from monitor_results mr
+join monitors m on m.id = mr.monitor_id
+where m.user_id = @user_id
+and m.status in ('active', 'paused')
+and mr.hidden = false
+order by mr.created_at desc, mr.id desc
+limit @result_limit;
 
 -- name: GetMonitorResult :one
 select * from monitor_results
@@ -264,23 +284,6 @@ update monitor_results
 set hidden = true
 where id = @monitor_result_id;
 
--- name: ListMonitorActivity :many
-select
-    mon.id::bigint as monitor_id,
-    res.id::bigint as result_id,
-    mon.subject,
-    res.headline,
-    res.created_at,
-    res.subtitle,
-    res.data
-from monitor_results res
-left join monitors mon on mon.id = res.monitor_id
-where mon.status = 'active'
-and mon.user_id = @user_id
-and res.hidden = false
-order by res.created_at desc
-limit 7;
-
 -- name: GetMonitorSchema :one
 select * from monitor_schemas
 where monitor_id = @monitor_id;
@@ -322,7 +325,7 @@ and monitor_id in (select id from monitors where user_id = @user_id);
 select * from monitor_checks
 where monitor_id = @monitor_id
 order by scheduled_for desc
-limit @page_size offset @row_offset;
+limit @page_size::bigint offset @row_offset::bigint;
 
 -- name: ListChecksWithMonitor :many
 select
@@ -336,7 +339,7 @@ from monitor_checks mc
 join monitors m on m.id = mc.monitor_id
 where m.user_id = @user_id
 order by mc.scheduled_for desc
-limit @page_size offset @row_offset;
+limit @page_size::bigint offset @row_offset::bigint;
 
 -- name: GetCheckWithMonitor :one
 select

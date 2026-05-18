@@ -21,4 +21,4 @@ working through them.
   and don't try to fix it, instead report it up to the user so the instructions
   can be fixed.
 
-[the instructions]: https://github.com/alexpls/untils/blob/master/docs/public/003-self-hosting/001-quickstart.md
+[the instructions]: https://github.com/alexpls/untils/blob/master/docs/public/004-self-hosting/001-quickstart.md

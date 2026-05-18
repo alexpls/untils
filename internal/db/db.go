@@ -2,10 +2,13 @@ package db
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
+	"slices"
 
 	"github.com/alexpls/untils/internal/must"
+	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -24,6 +27,17 @@ type TxStarter interface {
 type DB interface {
 	Querier
 	TxStarter
+}
+
+func IsUniqueViolation(err error, constraintNames ...string) bool {
+	var pgErr *pgconn.PgError
+	if !errors.As(err, &pgErr) || pgErr.Code != pgerrcode.UniqueViolation {
+		return false
+	}
+	if len(constraintNames) == 0 {
+		return true
+	}
+	return slices.Contains(constraintNames, pgErr.ConstraintName)
 }
 
 func Connect(url string, logger *slog.Logger) (pool *pgxpool.Pool, closer func()) {

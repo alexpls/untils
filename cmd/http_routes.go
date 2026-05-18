@@ -10,6 +10,7 @@ import (
 
 func (a *app) routes() http.Handler {
 	mux := http.NewServeMux()
+	apiMux := http.NewServeMux()
 
 	// assets
 	mux.Handle("/assets/", public.Handler())
@@ -64,6 +65,16 @@ func (a *app) routes() http.Handler {
 	mux.HandleFunc("POST /app/settings/webhook", a.requireAuth(a.settingsHandlers.CreateWebhook))
 	mux.HandleFunc("POST /app/settings/webhook/{webhook_id}/test", a.requireAuth(a.settingsHandlers.TestWebhook))
 	mux.HandleFunc("DELETE /app/settings/webhook/{webhook_id}", a.requireAuth(a.settingsHandlers.DeleteWebhook))
+	mux.HandleFunc("GET /app/settings/api_tokens", a.requireAuth(a.settingsHandlers.ViewAPITokenSettings))
+	mux.HandleFunc("POST /app/settings/api_tokens", a.requireAuth(a.settingsHandlers.CreateAPIToken))
+	mux.HandleFunc("DELETE /app/settings/api_tokens/{token_id}", a.requireAuth(a.settingsHandlers.DeleteAPIToken))
+
+	// api
+	apiMux.HandleFunc("/api/monitor.get", a.apiHandlers.GetMonitor)
+	apiMux.HandleFunc("/api/results.list", a.apiHandlers.ListResults)
+	apiMux.HandleFunc("/api/results.list_latest", a.apiHandlers.ListLatestResults)
+	apiMux.HandleFunc("/api", a.apiHandlers.NotFound)
+	apiMux.HandleFunc("/api/", a.apiHandlers.NotFound)
 
 	// favicon
 	mux.Handle("GET /app/favicon", a.requireAuth2(faviconproxy.Handler(a.logger.With("source", "faviconproxy"))))
@@ -85,19 +96,33 @@ func (a *app) routes() http.Handler {
 	csrf := http.NewCrossOriginProtection()
 	sess := a.sessionManager
 
-	return applyMiddleware(mux,
+	webHandler := applyMiddleware(mux,
 		a.setRequestID, csrf.Handler,
 		a.setTimezoneContext, sess.Handler,
 		a.setFlashContext, a.setContextFromAppConfig,
 		a.setUserContext, a.logRequests,
 	)
+
+	apiHandler := applyMiddleware(apiMux,
+		a.setRequestID,
+		a.setContextFromAppConfig,
+		a.logRequests,
+		a.apiHandlers.RequireToken,
+		a.apiHandlers.RequireMethodGet,
+	)
+
+	rootMux := http.NewServeMux()
+	rootMux.Handle("/api", apiHandler)
+	rootMux.Handle("/api/", apiHandler)
+	rootMux.Handle("/", webHandler)
+	return rootMux
 }
 
 func (a *app) registerPublicRoutes(mux *http.ServeMux) {
 	if a.config.servesPublicPages() {
-		mux.HandleFunc("GET /docs", a.pagesHandlers.DocsHome)
-		mux.HandleFunc("GET /docs/{$}", a.pagesHandlers.DocsHome)
-		mux.HandleFunc("GET /docs/{doc_path...}", a.pagesHandlers.DocsPage)
+		mux.HandleFunc("GET /docs", a.docsHandlers.Home)
+		mux.HandleFunc("GET /docs/{$}", a.docsHandlers.Home)
+		mux.HandleFunc("GET /docs/{doc_path...}", a.docsHandlers.Page)
 		mux.HandleFunc("GET /{$}", a.pagesHandlers.Home)
 		mux.HandleFunc("POST /subscribe", a.pagesHandlers.SubscribeEmail)
 		return

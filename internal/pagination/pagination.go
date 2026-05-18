@@ -1,6 +1,7 @@
 package pagination
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -12,8 +13,39 @@ type Pagination struct {
 	HasMore     bool
 }
 
+func New(pageSize, currentPage int) Pagination {
+	return Pagination{PageSize: pageSize, CurrentPage: currentPage}
+}
+
+func NewOneBased(pageSize, currentPage int) Pagination {
+	return New(pageSize, currentPage-1)
+}
+
+func PaginationFromAPIRequest(r *http.Request, defaultPageSize, maxPageSize int) (Pagination, error) {
+	currentPage := 1
+	pageSize := defaultPageSize
+
+	if pageValue := r.URL.Query().Get("page"); pageValue != "" {
+		page, err := strconv.Atoi(pageValue)
+		if err != nil || page < 1 {
+			return Pagination{}, fmt.Errorf("page must be a positive integer")
+		}
+		currentPage = page
+	}
+
+	if perPageValue := r.URL.Query().Get("per_page"); perPageValue != "" {
+		perPage, err := strconv.Atoi(perPageValue)
+		if err != nil || perPage < 1 || perPage > maxPageSize {
+			return Pagination{}, fmt.Errorf("per_page must be between 1 and %d", maxPageSize)
+		}
+		pageSize = perPage
+	}
+
+	return NewOneBased(pageSize, currentPage), nil
+}
+
 func PaginationFromRequest(r *http.Request, pageSize int) Pagination {
-	p := Pagination{PageSize: pageSize, CurrentPage: 0}
+	p := New(pageSize, 0)
 	if pg := r.URL.Query().Get("page"); pg != "" {
 		num, err := strconv.Atoi(pg)
 		if err == nil {
@@ -41,8 +73,16 @@ func (p Pagination) CurrentPageParams() url.Values {
 	return u
 }
 
+func (p Pagination) CurrentPageOneBased() int {
+	return p.CurrentPage + 1
+}
+
 func (p Pagination) Offset() int {
 	return p.PageSize * p.CurrentPage
+}
+
+func (p Pagination) Offset64() int64 {
+	return int64(p.Offset())
 }
 
 func (p Pagination) HasNext() bool {

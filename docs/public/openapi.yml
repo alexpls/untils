@@ -1,0 +1,811 @@
+openapi: 3.1.0
+info:
+  title: untils API
+  version: 0.1.0
+  description: Public API and webhook payloads for untils.
+servers:
+  - url: /api
+    description: Current untils API origin
+paths:
+  /monitor.get:
+    get:
+      operationId: monitor.get
+      tags:
+        - Monitors
+      summary: Get monitor
+      description: Returns a monitor.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: monitor_id
+          in: query
+          required: true
+          description: The monitor ID.
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Monitor details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetMonitorResponse"
+              examples:
+                monitor:
+                  summary: Monitor
+                  value:
+                    error: null
+                    data:
+                      type: monitor
+                      monitor:
+                        type: monitor
+                        id: 42
+                        created_at: "2026-05-17T10:30:00Z"
+                        status: active
+                        subject: Latest movie by Quentin Tarantino
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /results.list:
+    get:
+      operationId: results.list
+      tags:
+        - Results
+      summary: List monitor results
+      description: |
+        Returns results for a monitor.
+
+        Results are ordered newest first. Hidden results are included.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: monitor_id
+          in: query
+          required: true
+          description: The monitor ID.
+          schema:
+            type: integer
+            format: int64
+        - name: page
+          in: query
+          required: false
+          description: Page number to return. Defaults to 1.
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+        - name: per_page
+          in: query
+          required: false
+          description: Maximum results to return. Defaults to 50.
+          schema:
+            type: integer
+            default: 50
+            minimum: 1
+            maximum: 100
+      responses:
+        "200":
+          description: Monitor results.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListResultsResponse"
+              examples:
+                results:
+                  summary: Results
+                  value:
+                    error: null
+                    data:
+                      type: results
+                      results:
+                        - type: result
+                          id: 101
+                          hidden: false
+                          correction: null
+                          headline: Once Upon a Time in Hollywood
+                          subtitle: "Released: Jul 26, 2019"
+                          fields:
+                            - type: result_field
+                              name: Result
+                              value: Once Upon a Time in Hollywood
+                            - type: result_field
+                              name: Released
+                              value: "2019-07-26"
+                      links:
+                        next: https://untils.com/api/results.list?monitor_id=42&page=2
+                        prev: null
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /results.list_latest:
+    get:
+      operationId: results.list_latest
+      tags:
+        - Results
+      summary: List latest results
+      description: |
+        Returns the 30 latest results across all active and paused monitors.
+
+        Results are ordered newest first, and hidden results are excluded.
+
+        Each item is a result summary with the monitor fields needed to render
+        a cross-monitor activity feed.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Latest monitor results.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListLatestResultsResponse"
+              examples:
+                latestResults:
+                  summary: Latest results
+                  value:
+                    error: null
+                    data:
+                      type: result_summaries
+                      result_summaries:
+                        - type: result_summary
+                          id: 101
+                          monitor_id: 42
+                          monitor_subject: Latest movie by Quentin Tarantino
+                          created_at: "2026-05-17T10:30:00Z"
+                          headline: Once Upon a Time in Hollywood
+                          subtitle: "Released: Jul 26, 2019"
+                          fields:
+                            - type: result_field
+                              name: Result
+                              value: Once Upon a Time in Hollywood
+                            - type: result_field
+                              name: Released
+                              value: "2019-07-26"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+        "500":
+          $ref: "#/components/responses/InternalError"
+webhooks:
+  webhookMessage:
+    post:
+      operationId: webhook.delivery
+      tags:
+        - Webhooks
+      summary: Webhook delivery
+      description: untils sends webhook notifications as JSON POST requests to configured webhook targets.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: "#/components/schemas/WebhookTestPayload"
+                - $ref: "#/components/schemas/WebhookNewResultsPayload"
+            examples:
+              test:
+                summary: Test message
+                value:
+                  type: webhook_message
+                  message:
+                    type: test
+                    hello_world: Glad you're here
+              newResults:
+                summary: Monitor new results
+                value:
+                  type: webhook_message
+                  message:
+                    type: new_results
+                    monitor:
+                      type: monitor
+                      id: 42
+                      created_at: "2026-05-17T10:30:00Z"
+                      status: active
+                      subject: Latest movie by Quentin Tarantino
+                    new_results:
+                      - type: result
+                        id: 101
+                        hidden: false
+                        correction: null
+                        headline: Once Upon a Time in Hollywood
+                        subtitle: "Released: Jul 26, 2019"
+                        fields:
+                          - type: result_field
+                            name: Result
+                            value: Once Upon a Time in Hollywood
+                          - type: result_field
+                            name: Released
+                            value: "2019-07-26"
+                    old_result:
+                      type: result
+                      id: 100
+                      hidden: false
+                      correction: null
+                      headline: The Hateful Eight
+                      subtitle: "Released: Dec 25, 2015"
+                      fields:
+                        - type: result_field
+                          name: Result
+                          value: The Hateful Eight
+                        - type: result_field
+                          name: Released
+                          value: "2015-12-25"
+      responses:
+        "2XX":
+          description: The webhook delivery was accepted.
+        "3XX":
+          description: The webhook delivery was accepted after redirects are followed.
+        "4XX":
+          description: The webhook delivery failed and may be retried.
+        "5XX":
+          description: The webhook delivery failed and may be retried.
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: "API tokens use the `untils.api.` prefix and are sent as `Authorization: Bearer API_TOKEN`."
+  responses:
+    BadRequest:
+      description: The request parameters are invalid.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          examples:
+            badRequest:
+              value:
+                data: null
+                error:
+                  code: bad_request
+                  message: monitor_id is required.
+    Unauthorized:
+      description: A valid API token is required.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          examples:
+            unauthorized:
+              value:
+                data: null
+                error:
+                  code: unauthorized
+                  message: A valid API token is required.
+    NotFound:
+      description: The requested API resource does not exist.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          examples:
+            notFound:
+              value:
+                data: null
+                error:
+                  code: not_found
+                  message: This monitor does not exist.
+    MethodNotAllowed:
+      description: The HTTP method is not supported for this API request.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          examples:
+            methodNotAllowed:
+              value:
+                data: null
+                error:
+                  code: method_not_allowed
+                  message: This API request must use GET.
+    InternalError:
+      description: An internal error occurred.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          examples:
+            internalError:
+              value:
+                data: null
+                error:
+                  code: internal_error
+                  message: An internal error occurred.
+  schemas:
+    GetMonitorResponse:
+      description: Response returned by monitor.get.
+      examples:
+        - error: null
+          data:
+            type: monitor
+            monitor:
+              type: monitor
+              id: 42
+              created_at: "2026-05-17T10:30:00Z"
+              status: active
+              subject: Latest movie by Quentin Tarantino
+      type: object
+      required:
+        - error
+        - data
+      properties:
+        error:
+          allOf:
+            - $ref: "#/components/schemas/APIError"
+          nullable: true
+          x-go-type: "*APIError"
+          description: Always null for successful responses. Error details are returned by non-2xx responses.
+        data:
+          type: object
+          required:
+            - type
+            - monitor
+          properties:
+            type:
+              type: string
+              const: monitor
+            monitor:
+              $ref: "#/components/schemas/Monitor"
+      additionalProperties: false
+    ListResultsResponse:
+      description: Response returned by results.list with results for one monitor.
+      examples:
+        - error: null
+          data:
+            type: results
+            results:
+              - type: result
+                id: 101
+                hidden: false
+                correction: null
+                headline: Once Upon a Time in Hollywood
+                subtitle: "Released: Jul 26, 2019"
+                fields:
+                  - type: result_field
+                    name: Result
+                    value: Once Upon a Time in Hollywood
+                  - type: result_field
+                    name: Released
+                    value: "2019-07-26"
+            links:
+              next: https://untils.com/api/results.list?monitor_id=42&page=2
+              prev: null
+      type: object
+      required:
+        - error
+        - data
+      properties:
+        error:
+          allOf:
+            - $ref: "#/components/schemas/APIError"
+          nullable: true
+          x-go-type: "*APIError"
+          description: Always null for successful responses. Error details are returned by non-2xx responses.
+        data:
+          type: object
+          required:
+            - type
+            - results
+            - links
+          properties:
+            type:
+              type: string
+              const: results
+            results:
+              type: array
+              items:
+                $ref: "#/components/schemas/Result"
+            links:
+              $ref: "#/components/schemas/PaginationLinks"
+      additionalProperties: false
+    ListLatestResultsResponse:
+      description: Response returned by results.list_latest with up to 30 recent monitor results.
+      examples:
+        - error: null
+          data:
+            type: result_summaries
+            result_summaries:
+              - type: result_summary
+                id: 101
+                monitor_id: 42
+                monitor_subject: Latest movie by Quentin Tarantino
+                created_at: "2026-05-17T10:30:00Z"
+                headline: Once Upon a Time in Hollywood
+                subtitle: "Released: Jul 26, 2019"
+                fields:
+                  - type: result_field
+                    name: Result
+                    value: Once Upon a Time in Hollywood
+                  - type: result_field
+                    name: Released
+                    value: "2019-07-26"
+      type: object
+      required:
+        - error
+        - data
+      properties:
+        error:
+          allOf:
+            - $ref: "#/components/schemas/APIError"
+          nullable: true
+          x-go-type: "*APIError"
+          description: Always null for successful responses. Error details are returned by non-2xx responses.
+        data:
+          type: object
+          required:
+            - type
+            - result_summaries
+          properties:
+            type:
+              type: string
+              const: result_summaries
+            result_summaries:
+              type: array
+              maxItems: 30
+              items:
+                $ref: "#/components/schemas/ResultSummary"
+      additionalProperties: false
+    ErrorResponse:
+      description: Standard error response returned when a request cannot be completed.
+      examples:
+        - data: null
+          error:
+            code: unauthorized
+            message: A valid API token is required.
+      type: object
+      required:
+        - data
+        - error
+      properties:
+        data:
+          nullable: true
+          x-go-type: "any"
+          description: Always null for error responses.
+        error:
+          $ref: "#/components/schemas/APIError"
+      additionalProperties: false
+    APIError:
+      description: Error details returned when a request cannot be completed.
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: A stable machine-readable error code.
+          examples:
+            - unauthorized
+            - method_not_allowed
+            - not_found
+            - internal_error
+        message:
+          type: string
+          description: A human-readable explanation of the error.
+      additionalProperties: false
+    Monitor:
+      description: A monitor configured to watch a subject for new results.
+      examples:
+        - type: monitor
+          id: 42
+          created_at: "2026-05-17T10:30:00Z"
+          status: active
+          subject: Latest movie by Quentin Tarantino
+      type: object
+      required:
+        - type
+        - id
+        - created_at
+        - status
+        - subject
+      properties:
+        type:
+          type: string
+          const: monitor
+        id:
+          type: integer
+          format: int64
+          x-go-name: ID
+        created_at:
+          type: string
+          format: date-time
+          description: When this monitor was created.
+        status:
+          type: string
+          enum:
+            - validating
+            - previewing
+            - rejected
+            - ready
+            - active
+            - paused
+          description: The current status of this monitor.
+        subject:
+          type: string
+          description: The user provided query that is being monitored for new results.
+      additionalProperties: false
+    PaginationLinks:
+      description: Pagination links for a list response.
+      examples:
+        - next: https://untils.com/api/results.list?monitor_id=42&page=2
+          prev: null
+      type: object
+      required:
+        - next
+        - prev
+      properties:
+        next:
+          type: string
+          nullable: true
+          description: URL for the next page, or null when no next page exists.
+        prev:
+          type: string
+          nullable: true
+          description: URL for the previous page, or null when no previous page exists.
+      additionalProperties: false
+    Result:
+      description: A result found by a monitor.
+      examples:
+        - type: result
+          id: 101
+          hidden: false
+          correction: null
+          headline: Once Upon a Time in Hollywood
+          subtitle: "Released: Jul 26, 2019"
+          fields:
+            - type: result_field
+              name: Result
+              value: Once Upon a Time in Hollywood
+            - type: result_field
+              name: Released
+              value: "2019-07-26"
+      type: object
+      required:
+        - type
+        - id
+        - hidden
+        - correction
+        - headline
+        - subtitle
+        - fields
+      properties:
+        type:
+          type: string
+          const: result
+          description: The type of this object.
+        id:
+          type: integer
+          format: int64
+          x-go-name: ID
+          description: The ID of this object.
+        hidden:
+          type: boolean
+          description: Whether this result has been hidden.
+        correction:
+          type: string
+          nullable: true
+          description: Correction submitted for this result, if any.
+        headline:
+          type: string
+          description: |
+            Contains the primary information about the result that was found.
+        subtitle:
+          type: string
+          description: |
+            Contains supplementary information about the result that was found.
+            If displaying on a UI, this should appear below the headline.
+        fields:
+          type: array
+          items:
+            $ref: "#/components/schemas/ResultField"
+          description: |
+            Structured data extracted from the result. These fields are stable
+            across all results on the same monitor.
+    ResultSummary:
+      description: |
+        Combines selected fields from Monitor and Result into one object. Useful for rendering
+        feeds or cross-monitor views.
+      examples:
+        - type: result_summary
+          id: 101
+          monitor_id: 42
+          monitor_subject: Latest movie by Quentin Tarantino
+          created_at: "2026-05-17T10:30:00Z"
+          headline: Once Upon a Time in Hollywood
+          subtitle: "Released: Jul 26, 2019"
+          fields:
+            - type: result_field
+              name: Result
+              value: Once Upon a Time in Hollywood
+            - type: result_field
+              name: Released
+              value: "2019-07-26"
+      type: object
+      required:
+        - type
+        - id
+        - monitor_id
+        - monitor_subject
+        - created_at
+        - headline
+        - subtitle
+        - fields
+      properties:
+        type:
+          type: string
+          const: result_summary
+          description: The type of this object.
+        id:
+          type: integer
+          format: int64
+          x-go-name: ID
+          description: The ID of this object.
+        monitor_id:
+          type: integer
+          format: int64
+          x-go-name: MonitorID
+          description: The ID of the monitor that produced this result.
+        monitor_subject:
+          type: string
+          description: The user provided query for the monitor that produced this result.
+        created_at:
+          type: string
+          format: date-time
+          description: When this result was created.
+        headline:
+          type: string
+          description: |
+            Contains the primary information about the result that was found.
+        subtitle:
+          type: string
+          description: |
+            Contains supplementary information about the result that was found.
+            If displaying on a UI, this should appear below the headline.
+        fields:
+          type: array
+          items:
+            $ref: "#/components/schemas/ResultField"
+          description: |
+            Structured data extracted from the result. These fields are stable
+            across all results on the same monitor.
+      additionalProperties: false
+    ResultField:
+      description: A structured name and value extracted from a result.
+      examples:
+        - type: result_field
+          name: Result
+          value: Once Upon a Time in Hollywood
+      type: object
+      required:
+        - type
+        - name
+        - value
+      properties:
+        type:
+          type: string
+          const: result_field
+          description: The type of this object.
+        name:
+          type: string
+          description: The field name.
+        value:
+          type: string
+          description: The field value as text.
+      additionalProperties: false
+    WebhookTestPayload:
+      description: |
+        Payload sent from the webhook settings page to verify that a
+        target can receive messages.
+      examples:
+        - type: webhook_message
+          message:
+            type: test
+            hello_world: Glad you're here
+      type: object
+      required:
+        - type
+        - message
+      properties:
+        type:
+          type: string
+          const: webhook_message
+          description: The type of this object.
+        message:
+          type: object
+          required:
+            - type
+            - hello_world
+          properties:
+            type:
+              type: string
+              const: test
+            hello_world:
+              type: string
+              const: Glad you're here
+      additionalProperties: false
+    WebhookNewResultsPayload:
+      description: Payload sent when a monitor finds new results.
+      examples:
+        - type: webhook_message
+          message:
+            type: new_results
+            monitor:
+              type: monitor
+              id: 42
+              created_at: "2026-05-17T10:30:00Z"
+              status: active
+              subject: Latest movie by Quentin Tarantino
+            new_results:
+              - type: result
+                id: 101
+                hidden: false
+                correction: null
+                headline: Once Upon a Time in Hollywood
+                subtitle: "Released: Jul 26, 2019"
+                fields:
+                  - type: result_field
+                    name: Result
+                    value: Once Upon a Time in Hollywood
+                  - type: result_field
+                    name: Released
+                    value: "2019-07-26"
+            old_result:
+              type: result
+              id: 100
+              hidden: false
+              correction: null
+              headline: The Hateful Eight
+              subtitle: "Released: Dec 25, 2015"
+              fields:
+                - type: result_field
+                  name: Result
+                  value: The Hateful Eight
+                - type: result_field
+                  name: Released
+                  value: "2015-12-25"
+      type: object
+      required:
+        - type
+        - message
+      properties:
+        type:
+          type: string
+          const: webhook_message
+          description: The type of this object.
+        message:
+          type: object
+          required:
+            - type
+            - monitor
+            - new_results
+            - old_result
+          properties:
+            type:
+              type: string
+              const: new_results
+            monitor:
+              $ref: "#/components/schemas/Monitor"
+            new_results:
+              type: array
+              minItems: 1
+              items:
+                $ref: "#/components/schemas/Result"
+            old_result:
+              $ref: "#/components/schemas/Result"
+      additionalProperties: false

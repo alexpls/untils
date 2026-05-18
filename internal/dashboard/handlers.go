@@ -11,6 +11,8 @@ import (
 	"github.com/alexpls/untils/internal/monitor"
 )
 
+const monitorActivityLimit = 7
+
 // Handlers contains the HTTP handlers for dashboard routes
 type Handlers struct {
 	queries       *models.Queries
@@ -62,7 +64,10 @@ func (h *Handlers) dashboardViewData(ctx context.Context, userID int64, loading 
 		}, nil
 	}
 
-	activity, err := h.queries.ListMonitorActivity(ctx, h.db, userID)
+	activity, err := h.queries.ListLatestVisibleResultsForUser(ctx, h.db, &models.ListLatestVisibleResultsForUserParams{
+		UserID:      userID,
+		ResultLimit: monitorActivityLimit,
+	})
 	if err != nil {
 		return DashboardViewData{}, err
 	}

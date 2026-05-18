@@ -189,6 +189,39 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
+-- Name: api_tokens; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.api_tokens (
+    id bigint NOT NULL,
+    key_hash text NOT NULL,
+    user_id bigint NOT NULL,
+    name text NOT NULL,
+    last_used_at timestamp with time zone,
+    created_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: api_tokens_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.api_tokens_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: api_tokens_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.api_tokens_id_seq OWNED BY public.api_tokens.id;
+
+
+--
 -- Name: email_subscribers; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -646,6 +679,13 @@ ALTER SEQUENCE public.webhook_targets_id_seq OWNED BY public.webhook_targets.id;
 
 
 --
+-- Name: api_tokens id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.api_tokens ALTER COLUMN id SET DEFAULT nextval('public.api_tokens_id_seq'::regclass);
+
+
+--
 -- Name: llm_conversations id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -706,6 +746,14 @@ ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_
 --
 
 ALTER TABLE ONLY public.webhook_targets ALTER COLUMN id SET DEFAULT nextval('public.webhook_targets_id_seq'::regclass);
+
+
+--
+-- Name: api_tokens api_tokens_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.api_tokens
+    ADD CONSTRAINT api_tokens_pkey PRIMARY KEY (id);
 
 
 --
@@ -885,6 +933,20 @@ ALTER TABLE ONLY public.webhook_targets
 
 
 --
+-- Name: idx_api_tokens_key_hash; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_api_tokens_key_hash ON public.api_tokens USING btree (key_hash);
+
+
+--
+-- Name: idx_api_tokens_user_id_created_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_api_tokens_user_id_created_at ON public.api_tokens USING btree (user_id, created_at DESC);
+
+
+--
 -- Name: idx_llm_conversations_user_id_source_type_source_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -1015,6 +1077,14 @@ CREATE TRIGGER monitor_results_notify_trigger AFTER INSERT OR DELETE OR UPDATE O
 --
 
 CREATE TRIGGER monitors_notify_trigger AFTER INSERT OR DELETE OR UPDATE ON public.monitors FOR EACH ROW EXECUTE FUNCTION public.monitor_events_notify();
+
+
+--
+-- Name: api_tokens api_tokens_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.api_tokens
+    ADD CONSTRAINT api_tokens_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
 
 
 --

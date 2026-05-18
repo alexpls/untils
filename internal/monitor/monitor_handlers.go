@@ -34,8 +34,8 @@ func (h *Handlers) ListMonitors(w http.ResponseWriter, r *http.Request, user *mo
 				h.service.db,
 				&models.ListMonitorsWithResultsParams{
 					UserID:    user.ID,
-					PageSize:  int32(pag.PageSizeWithPeek()),
-					RowOffset: int32(pag.Offset()),
+					PageSize:  int64(pag.PageSizeWithPeek()),
+					RowOffset: pag.Offset64(),
 				},
 			)
 			if err != nil {
@@ -100,8 +100,8 @@ func (h *Handlers) ViewMonitorChecks(w http.ResponseWriter, r *http.Request, use
 
 			checks, err := h.service.queries.ListMonitorChecks(r.Context(), h.service.db, &models.ListMonitorChecksParams{
 				MonitorID: mon.ID,
-				PageSize:  int32(pag.PageSizeWithPeek()),
-				RowOffset: int32(pag.Offset()),
+				PageSize:  int64(pag.PageSizeWithPeek()),
+				RowOffset: pag.Offset64(),
 			})
 			if err != nil {
 				return nil, err
@@ -678,8 +678,8 @@ func (h *Handlers) monitorViewData(ctx context.Context, r *http.Request, mon *mo
 
 	results, err := h.service.queries.ListMonitorResultsWithLatestCheck(ctx, h.service.db, &models.ListMonitorResultsWithLatestCheckParams{
 		MonitorID: mon.ID,
-		PageSize:  int32(pag.PageSizeWithPeek()),
-		RowOffset: int32(pag.Offset()),
+		PageSize:  int64(pag.PageSizeWithPeek()),
+		RowOffset: pag.Offset64(),
 	})
 	if err != nil {
 		return MonitorViewData{}, err

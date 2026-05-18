@@ -8,12 +8,52 @@ import (
 
 	"github.com/alexpls/untils/internal/db"
 	"github.com/alexpls/untils/internal/models"
+	"github.com/alexpls/untils/internal/pagination"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type CreateMonitorResultCorrectionParams struct {
 	Correction string `json:"correction" validate:"required"`
+}
+
+func (s *Service) ListLatestResults(ctx context.Context, userID int64, limit int32) ([]*models.ListLatestVisibleResultsForUserRow, error) {
+	return s.queries.ListLatestVisibleResultsForUser(ctx, s.db, &models.ListLatestVisibleResultsForUserParams{
+		UserID:      userID,
+		ResultLimit: limit,
+	})
+}
+
+type ListResultsParams struct {
+	UserID     int64
+	MonitorID  int64
+	Pagination pagination.Pagination
+}
+
+type ListResultsPage struct {
+	Results    []*models.MonitorResult
+	Pagination pagination.Pagination
+}
+
+func (s *Service) ListResults(ctx context.Context, params ListResultsParams) (*ListResultsPage, error) {
+	if _, err := s.GetMonitor(ctx, params.UserID, params.MonitorID); err != nil {
+		return nil, err
+	}
+
+	pag := params.Pagination
+	results, err := s.queries.ListMonitorResultsPage(ctx, s.db, &models.ListMonitorResultsPageParams{
+		MonitorID: params.MonitorID,
+		UserID:    params.UserID,
+		RowOffset: pag.Offset64(),
+		PageSize:  int64(pag.PageSizeWithPeek()),
+	})
+	if err != nil {
+		return nil, fmt.Errorf("listing monitor results: %w", err)
+	}
+
+	results, pag = pagination.Peek(results, pag)
+
+	return &ListResultsPage{Results: results, Pagination: pag}, nil
 }
 
 func (s *Service) CreateMonitorResultCorrection(ctx context.Context, userID int64, result *models.MonitorResult, params CreateMonitorResultCorrectionParams) error {

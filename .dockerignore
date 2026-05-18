@@ -1,5 +1,8 @@
 node_modules
 public/css
 public/js
-docs
+docs/*
+!docs/embed.go
+!docs/public
+!docs/public/**
 tmp

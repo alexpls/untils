@@ -14,7 +14,6 @@ export BASE_URL
 export DEMO_USER_ID
 export SMTP_FROM
 
-go generate ./internal/docs
 go build -o ./tmp/serve ./cmd
 
 exec ./tmp/serve serve

@@ -1,7 +1,7 @@
 # build assets
 FROM oven/bun:latest AS bun
 WORKDIR /app
-COPY package.json bun.lock .
+COPY package.json bun.lock ./
 RUN bun install
 COPY . .
 RUN rm -rf public/js/* public/css/*

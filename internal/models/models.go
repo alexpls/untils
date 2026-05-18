@@ -235,6 +235,15 @@ func (ns NullRiverJobState) Value() (driver.Value, error) {
 	return string(ns.RiverJobState), nil
 }
 
+type ApiToken struct {
+	ID         int64
+	KeyHash    string
+	UserID     int64
+	Name       string
+	LastUsedAt *time.Time
+	CreatedAt  time.Time
+}
+
 type EmailSubscriber struct {
 	ID        int64
 	Email     string

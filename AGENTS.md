@@ -70,3 +70,4 @@ For non-default workspaces, use `mise run dev:info` and open the printed templ U
 
 - Fail fast if something is not in an expected state. e.g. if an expected app config value is missing, just panic.
 - Don't manually regenerate templ files if `ps aux | grep 'templ generate'` is already running.
+- Avoid stubbing during tests unless there's a very good reason to. We want tests to touch as much surface area as possible.

@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/alexpls/untils/internal/api"
 	"github.com/alexpls/untils/internal/auth"
 	"github.com/alexpls/untils/internal/db"
 	"github.com/alexpls/untils/internal/errortypes"
@@ -35,6 +36,7 @@ type Handlers struct {
 	pushoverStore  *pushover.Store
 	pushoverClient *pushover.Client
 	webhook        *webhook.Service
+	api            *api.Service
 	sessionManager *session.Manager
 	auth           AuthService
 	logger         *slog.Logger
@@ -68,6 +70,7 @@ func NewHandlers(
 	sessionManager *session.Manager,
 	auth AuthService,
 	webhook *webhook.Service,
+	api *api.Service,
 	logger *slog.Logger,
 ) *Handlers {
 	return &Handlers{
@@ -79,6 +82,7 @@ func NewHandlers(
 		sessionManager: sessionManager,
 		auth:           auth,
 		webhook:        webhook,
+		api:            api,
 		logger:         logger,
 	}
 }

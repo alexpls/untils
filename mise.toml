@@ -6,7 +6,7 @@ bun = "latest"
 _.file = ".env.dev"
 
 [tasks."build:x86"]
-depends = ["docs:generate", "lint", "test:*"]
+depends = ["generate", "lint", "test:*"]
 run = "GOOS=linux GOARCH=amd64 go build -o untils_linux_amd64 ./cmd"
 
 [tasks."format:go"]
@@ -19,11 +19,11 @@ run = "bun run format"
 depends = "format:*"
 
 [tasks.lint]
-depends = ["docs:generate"]
+depends = ["generate"]
 run = "golangci-lint run"
 
-[tasks."docs:generate"]
-run = "go run ./cmd/docsgen"
+[tasks.generate]
+depends = ["openapi:generate"]
 
 [tasks."testsetup:db"]
 env = { _.file = ".env.test" }
@@ -38,12 +38,12 @@ psql "${PG_URL}" --echo-errors --quiet -f ./internal/models/schema.sql
 
 [tasks."test:unit"]
 env = { _.file = ".env.test", TEMPL_DEV_MODE = "false" }
-depends = ["docs:generate", "testsetup:*"]
+depends = ["generate", "testsetup:*"]
 run = "go test ./..."
 
 [tasks."test:integration"]
 env = { _.file = ".env.test" }
-depends = ["docs:generate", "testsetup:*"]
+depends = ["generate", "testsetup:*"]
 run = "go test -tags=integration ./..."
 
 [tasks."dev:env:sync"]
@@ -55,13 +55,18 @@ go install -tags 'pgx5' github.com/golang-migrate/migrate/v4/cmd/migrate@v4.19.1
 go install github.com/sqlc-dev/sqlc/cmd/sqlc@v1.31.1
 go install github.com/riverqueue/river/cmd/river@v0.35.1
 go install github.com/a-h/templ/cmd/templ@v0.3.1020
+go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@v2.5.0
 go install golang.org/x/tools/gopls@latest
 curl -sSfL https://golangci-lint.run/install.sh | sh -s -- -b $(go env GOPATH)/bin v2.11.3
 '''
 
+[tasks."openapi:generate"]
+run = "oapi-codegen -config internal/apimessage/oapi-codegen.yml docs/public/openapi.yml"
+
 [tasks."dev:watch:app"]
 run = '''
-templ generate --watch --proxy="http://localhost:${APP_PORT}" --open-browser=false \
+templ generate --watch --watch-pattern '(.+\.go$)|(.+\.templ$)|(.+\.md)' \
+    --proxy="http://localhost:${APP_PORT}" --open-browser=false \
     --proxyport="${TEMPL_PROXY_PORT}" \
     --ignore-pattern='.*_templ\\.go$' \
     --cmd './scripts/dev-watch-app.sh'
