@@ -4,7 +4,7 @@ sidebar_title: Quickstart
 url: /self-hosting/quickstart
 section: Self hosting
 description: A guide to running untils on your own hardware. Some knowledge of Linux server admin and Docker is required.
-last_updated: 20 April 2026
+last_updated: 31 May 2026
 ---
 
 Self-hosting untils lets you run the full application stack on your own hardware.
@@ -28,7 +28,7 @@ Find untils on Github: [alexpls/untils](https://github.com/alexpls/untils).
 ### External APIs
 
 - Brave Search API ([quickstart](https://api-dashboard.search.brave.com/documentation/quickstart))
-- LLM provider ([OpenAI](https://developers.openai.com/api/docs/quickstart/) or [x.ai](https://docs.x.ai/developers/quickstart) API key)
+- LLM provider (any compatible with [OpenAI](https://developers.openai.com/api/docs/quickstart/)
 - (optional) Pushover app key for delivering push notifications ([quickstart](https://pushover.net/api))
 - (optional) SMTP server for delivering emails
 

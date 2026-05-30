@@ -123,12 +123,21 @@ func (c *Client) do(ctx context.Context, method, path string, body any, out any,
 		// Try to extract a human-readable message from the conventional
 		// { "error": { "message": "..." } } envelope.
 		var env struct {
-			Error struct {
-				Message string `json:"message"`
-			} `json:"error"`
+			Error json.RawMessage `json:"error"`
 		}
 		if jerr := json.Unmarshal(respBody, &env); jerr == nil {
-			apiErr.Message = env.Error.Message
+			var conventional struct {
+				Message string `json:"message"`
+			}
+			if err := json.Unmarshal(env.Error, &conventional); err == nil {
+				apiErr.Message = conventional.Message
+			}
+			if apiErr.Message == "" {
+				var message string
+				if err := json.Unmarshal(env.Error, &message); err == nil {
+					apiErr.Message = message
+				}
+			}
 		}
 		return apiErr
 	}
@@ -167,9 +176,9 @@ const (
 // pointer fields should be set; the matching "type" discriminator is emitted
 // automatically by MarshalJSON.
 type InputItem struct {
-	Message          *InputMessage
-	FunctionCall     *InputFunctionCall
-	FunctionCallOut  *InputFunctionCallOutput
+	Message         *InputMessage
+	FunctionCall    *InputFunctionCall
+	FunctionCallOut *InputFunctionCallOutput
 }
 
 // InputMessage is a plain text message from a role.

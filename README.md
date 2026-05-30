@@ -71,6 +71,7 @@ ADMIN_EMAIL=alex@example.com
 # but checks that call these providers will fail until real keys are configured.
 OPENAI_API_KEY=
 OPENAI_MODEL=gpt-5.4
+OPENAI_BASE_URL=
 BRAVE_KEY=
 
 SMTP_HOST=127.0.0.1

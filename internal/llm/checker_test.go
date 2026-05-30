@@ -33,6 +33,7 @@ func TestCheckerEasySubjectWithoutSchema(t *testing.T) {
 		Schema:         models.MonitorSchemaData{}, // intentionally zero
 	})
 	require.NoError(t, err)
+	assertConversationDoesNotContainXAIToolCallCloseTag(t, deps, models.LlmConversationsSourceCheck, deps.fixtures.Check.ID)
 	assert.Equal(t, string(models.MonitorSchemaFieldTypeText), res.Schema.Fields.GetValue("Title"))
 	assert.Equal(t, string(models.MonitorSchemaFieldTypeDate), res.Schema.Fields.GetValue("Release date"))
 	assert.Equal(t, string(models.MonitorSchemaFieldTypeURL), res.Schema.Fields.GetValue("Link"))
@@ -83,6 +84,7 @@ func TestCheckerEasySubjectWithSchema(t *testing.T) {
 		},
 	})
 	require.NoError(t, err)
+	assertConversationDoesNotContainXAIToolCallCloseTag(t, deps, models.LlmConversationsSourceCheck, deps.fixtures.Check.ID)
 	require.Len(t, res.Updates, 1)
 
 	update := res.Updates[0]

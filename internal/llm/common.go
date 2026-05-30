@@ -54,7 +54,3 @@ func (c CheckParams) PreviousResultsString() string {
 	}
 	return prevs.String()
 }
-
-func sanitizeXAIOutput(in string) string {
-	return strings.ReplaceAll(in, "</xai:function_call>", "")
-}

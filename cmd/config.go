@@ -1,10 +1,6 @@
 package main
 
-import (
-	"strings"
-
-	"github.com/alexpls/untils/internal/constants"
-)
+import "github.com/alexpls/untils/internal/constants"
 
 const (
 	appEnvDev         = constants.EnvDev
@@ -29,6 +25,7 @@ type config struct {
 	demoUserID          int64
 	openAIAPIKey        string
 	openAIModel         string
+	openAIBaseURL       string
 	braveKey            string
 	pushoverKey         string
 	chrome              struct {
@@ -50,10 +47,6 @@ type serveConfig struct {
 
 func (c *config) servesPublicPages() bool {
 	return c.appMode == appModeHosted
-}
-
-func (c *config) usesXAI() bool {
-	return strings.HasPrefix(c.openAIModel, "grok")
 }
 
 func (c *config) pushoverConfigured() bool {

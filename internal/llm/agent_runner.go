@@ -105,10 +105,8 @@ func runAgent[T any](ctx context.Context, service *Service, opts agentRunOptions
 			continue
 		}
 
-		output := sanitizeXAIOutput(resp.Output)
-
 		var out T
-		if err := json.Unmarshal([]byte(output), &out); err != nil {
+		if err := json.Unmarshal([]byte(resp.Output), &out); err != nil {
 			lastErr = err
 			errMsg := fmt.Sprintf(
 				"error: output was not valid JSON: %s. ensure your response follows the correct JSON schema.",

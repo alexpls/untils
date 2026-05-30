@@ -121,6 +121,24 @@ func TestClientErrorResponse(t *testing.T) {
 	}
 }
 
+func TestClientTopLevelStringErrorResponse(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusBadRequest)
+		_, _ = io.WriteString(w, `{"code":"bad_request","error":"provider rejected request"}`)
+	}))
+	defer srv.Close()
+
+	c := NewClient(WithAPIKey("x"), WithBaseURL(srv.URL))
+	_, err := c.Responses.New(context.Background(), CreateRequest{Model: "m"})
+	var apiErr *Error
+	if !errors.As(err, &apiErr) {
+		t.Fatalf("expected *Error, got %T: %v", err, err)
+	}
+	if apiErr.Message != "provider rejected request" {
+		t.Errorf("message = %q", apiErr.Message)
+	}
+}
+
 func TestClientSuccessRequest(t *testing.T) {
 	var gotBody []byte
 	var gotAuth string

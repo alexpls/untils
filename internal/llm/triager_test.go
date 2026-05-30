@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/alexpls/untils/internal/logging"
+	"github.com/alexpls/untils/internal/models"
 	"github.com/stretchr/testify/require"
 )
 
@@ -24,6 +25,7 @@ func TestTriager(t *testing.T) {
 	})
 	res, err := prompt.Run(ctx)
 	require.NoError(t, err)
+	assertConversationDoesNotContainXAIToolCallCloseTag(t, deps, models.LlmConversationsSourceTriage, deps.fixtures.Monitor.ID)
 
 	t.Logf("output: %+v", res)
 }

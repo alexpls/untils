@@ -76,20 +76,21 @@ func TestParseServeArgsLoadsFromEnv(t *testing.T) {
 	globalCfg, serveCfg := parseServeArgs(
 		[]string{"untils", "serve"},
 		envMap(map[string]string{
-			"ENV":            appEnvDev.String(),
-			"APP_PORT":       "3322",
-			"BASE_URL":       "http://localhost:3322/",
-			"PG_URL":         "postgresql://postgres:postgres@db:5432/untils",
-			"ADMIN_EMAIL":    "admin@example.com",
-			"SMTP_FROM":      "notifications@untils.local",
-			"SMTP_HOST":      "mail.local",
-			"SMTP_PORT":      "2025",
-			"APP_MODE":       appModeHosted.String(),
-			"MIGRATE":        "true",
-			"SECURE_COOKIES": "false",
-			"BRAVE_KEY":      "brave",
-			"OPENAI_API_KEY": "openai",
-			"PUSHOVER_KEY":   "pushover",
+			"ENV":             appEnvDev.String(),
+			"APP_PORT":        "3322",
+			"BASE_URL":        "http://localhost:3322/",
+			"PG_URL":          "postgresql://postgres:postgres@db:5432/untils",
+			"ADMIN_EMAIL":     "admin@example.com",
+			"SMTP_FROM":       "notifications@untils.local",
+			"SMTP_HOST":       "mail.local",
+			"SMTP_PORT":       "2025",
+			"APP_MODE":        appModeHosted.String(),
+			"MIGRATE":         "true",
+			"SECURE_COOKIES":  "false",
+			"BRAVE_KEY":       "brave",
+			"OPENAI_API_KEY":  "openai",
+			"OPENAI_BASE_URL": "https://api.x.ai/v1/",
+			"PUSHOVER_KEY":    "pushover",
 		}),
 	)
 
@@ -128,6 +129,7 @@ func TestParseServeArgsLoadsFromEnv(t *testing.T) {
 	}
 	assert.Equal(t, "openai", globalCfg.openAIAPIKey)
 	assert.Equal(t, "gpt-5.4", globalCfg.openAIModel)
+	assert.Equal(t, "https://api.x.ai/v1", globalCfg.openAIBaseURL)
 }
 
 func TestParseServeArgsLoadsBrowserMaxConcurrentSessionsFromEnv(t *testing.T) {

@@ -164,6 +164,22 @@ func globalProperties(c *config) []configProperty {
 			nil,
 		),
 		stringProperty(
+			"OPENAI_BASE_URL",
+			"",
+			func(value string) { c.openAIBaseURL = value },
+			func() error {
+				if c.openAIBaseURL == "" {
+					return nil
+				}
+				normalized, err := normalizeBaseURL(c.openAIBaseURL)
+				if err != nil {
+					return err
+				}
+				c.openAIBaseURL = normalized
+				return nil
+			},
+		),
+		stringProperty(
 			"BRAVE_KEY",
 			"",
 			func(value string) { c.braveKey = value },

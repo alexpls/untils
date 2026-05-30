@@ -171,8 +171,8 @@ func createApp(c *config) (*app, context.Context, context.CancelFunc, func()) {
 	clientOptions := []openai.Option{
 		openai.WithAPIKey(c.openAIAPIKey),
 	}
-	if c.usesXAI() {
-		clientOptions = append(clientOptions, openai.WithBaseURL("https://api.x.ai/v1"))
+	if c.openAIBaseURL != "" {
+		clientOptions = append(clientOptions, openai.WithBaseURL(c.openAIBaseURL))
 	}
 	llmClient := openai.NewClient(clientOptions...)
 	llmProvider := llm.NewOpenAIProvider(llmClient)

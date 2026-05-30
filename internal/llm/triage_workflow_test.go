@@ -5,6 +5,7 @@ package llm
 import (
 	"testing"
 
+	"github.com/alexpls/untils/internal/models"
 	"github.com/stretchr/testify/require"
 )
 
@@ -20,4 +21,5 @@ func TestTriageWorkflow(t *testing.T) {
 		Subject:   "Latest game that IGN has given a 10/10 rating",
 	})
 	require.NoError(t, err)
+	assertConversationDoesNotContainXAIToolCallCloseTag(t, deps, models.LlmConversationsSourceTriage, deps.fixtures.Monitor.ID)
 }
