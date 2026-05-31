@@ -25,7 +25,6 @@
 
 ### AI SDKs
 
-- [ ] Improvement: 25% of the produced binary is OpenAI's bloated SDK. I only use one endpoint, could move away from the SDK and call it directly with HTTP?
 - [ ] Improvement: add pricing for gpt models too
 
 ### Self-hosting
@@ -51,6 +50,7 @@
 
 ## Done
 
+- [x] Improvement: 25% of the produced binary is OpenAI's bloated SDK. I only use one endpoint, could move away from the SDK and call it directly with HTTP?
 - [x] Home page app mobile preview should look better. The monitor is cut off currently.
 - [x] Improvement: Monitor list: prettier empty state
 - [x] Remove my personal email from seeds
